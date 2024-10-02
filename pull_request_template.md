@@ -17,7 +17,8 @@
 
 ### 이슈 번호
 
-> 예)https://github.com/BoostPerformance/fitculator-admin/issues/[이슈번호] > https://github.com/BoostPerformance/fitculator-admin/issues/
+> 예)https://github.com/BoostPerformance/fitculator-admin/issues/[이슈번호]
+> https://github.com/BoostPerformance/fitculator-admin/issues/
 
 ### To Reviewers
 
