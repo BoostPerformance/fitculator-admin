@@ -8,7 +8,7 @@ export default function Login() {
 
   return (
     <div
-      className={`flex flex-col justify-center items-center py-[13rem] dark:bg-blue-4`}
+      className={`flex flex-col justify-center items-center py-[12rem] dark:bg-blue-4`}
     >
       <div className="flex justify-center items-center h-[10rem]">
         <Image
