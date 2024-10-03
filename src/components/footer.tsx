@@ -1,5 +1,3 @@
-'use client';
-import { useTheme } from '@/context/theme-context';
 import Button from '@/components/buttons/button';
 
 interface HeaderProps {
@@ -7,12 +5,10 @@ interface HeaderProps {
 }
 
 export default function Footer({ btnClassName }: HeaderProps) {
-  const { isDark } = useTheme();
   return (
     <div
-      className={`p-[2rem] w-full flex justify-center ${
-        isDark ? 'bg-black' : 'bg-white'
-      }`}
+      className={`p-[2rem] w-full flex justify-center dark:bg-blue-4 bg-white
+      `}
     >
       <Button className={btnClassName} />
     </div>

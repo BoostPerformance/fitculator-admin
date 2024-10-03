@@ -15,6 +15,16 @@ body {
   box-sizing: border-box;
 }
 
+:root {
+  --background: white;
+  --foreground: #181c32;
+}
+
+[data-theme='dark'] {
+  --background: #181c32;
+  --foreground: white;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

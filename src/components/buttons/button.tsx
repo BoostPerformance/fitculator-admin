@@ -1,5 +1,5 @@
 'use client';
-import { useTheme } from '@/context/theme-context';
+import { useTheme } from 'next-themes';
 import Image from 'next/image';
 
 interface ButtonProps {
@@ -7,16 +7,19 @@ interface ButtonProps {
 }
 
 export default function Button({ className }: ButtonProps) {
-  const { isDark, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   return (
     <>
-      <button className={`text-1.25-900 ${className}`} onClick={toggleTheme}>
+      <button
+        className={`text-1.25-900 ${className}`}
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      >
         <Image
           src="svg/dark-mode.svg"
           alt=""
           width={30}
           height={30}
-          className={`${isDark ? 'invert' : ''}`}
+          className={`${theme === 'dark' ? 'invert' : ''}`}
         />
       </button>
     </>

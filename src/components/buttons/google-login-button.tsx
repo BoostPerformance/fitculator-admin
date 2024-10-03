@@ -9,7 +9,9 @@ export default function GoogleLoginButton() {
         width={20}
         height={30}
       />
-      <h1 className="text-0.75-500 dark:text-white">Continue with Google</h1>
+      <h1 className="text-0.75-500 text-black dark:text-gray-9">
+        Continue with Google
+      </h1>
     </div>
   );
 }
