@@ -1,3 +1,9 @@
+import Login from './login/page';
+
 export default function Home() {
-  return <div>Fitculator</div>;
+  return (
+    <>
+      <Login />
+    </>
+  );
 }
