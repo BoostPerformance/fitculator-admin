@@ -3,17 +3,20 @@ import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import GoogleLoginButton from '@/components/buttons/google-login-button';
 import { signIn, signOut, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
+  const router = useRouter();
   const { theme } = useTheme();
   const { data: session } = useSession();
   if (session) {
-    return (
-      <div>
-        <p>Signed in as {session.user?.email}</p>
-        <button onClick={() => signOut()}>Sign out</button>
-      </div>
-    );
+    router.push('/user');
+    // return (
+    //   <div>
+    //     <p>Signed in as {session.user?.email}</p>
+    //     <button onClick={() => signOut()}>Sign out</button>
+    //   </div>
+    // );
   }
 
   return (
