@@ -15,7 +15,7 @@ export default function Button({ className }: ButtonProps) {
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       >
         <Image
-          src="svg/dark-mode.svg"
+          src="/svg/dark-mode.svg"
           alt=""
           width={30}
           height={30}
