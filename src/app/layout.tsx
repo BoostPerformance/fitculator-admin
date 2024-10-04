@@ -30,12 +30,12 @@ export default function RootLayout({
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      <ThemeProvider enableSystem={true} attribute="class">
-        <body className={`${pretendard.variable} font-pretendard`}>
+      <body className={`${pretendard.variable} font-pretendard`}>
+        <ThemeProvider enableSystem={true} attribute="class">
           {children}
           <Footer />
-        </body>
-      </ThemeProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
