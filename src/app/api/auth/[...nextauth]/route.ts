@@ -8,7 +8,6 @@ const handler = NextAuth({
         process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
         'no NEXT_PUBLIC_GOOGLE_CLIENT_ID',
       clientSecret:
-        process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET ||
         'no NEXT_PUBLIC_GOOGLE_CLIENT_SECRET',
     }),
   ],
