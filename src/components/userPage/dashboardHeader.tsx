@@ -19,10 +19,7 @@ const DashboardHeader: React.FC = () => {
         />
       </button>
       <SearchBar />
-      <AccountInfo
-        username="User"
-        avatarUrl="https://randomuser.me/api/portraits/men/32.jpg"
-      />
+      <AccountInfo username="User" avatarUrl="/image/logo-icon.png" />
     </header>
   );
 };

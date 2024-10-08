@@ -1,6 +1,10 @@
 'use client';
 import React, { useState } from 'react';
 import { FaBell, FaFlag } from 'react-icons/fa';
+// import { signOut } from 'next-auth/react';
+import Image from 'next/image';
+// import { redirect } from 'next/navigation';
+import LogoutButton from './buttons/logoutButton';
 
 interface AccountInfoProps {
   username: string;
@@ -25,10 +29,12 @@ const AccountInfo: React.FC<AccountInfoProps> = ({ username, avatarUrl }) => {
           className="flex items-center space-x-2"
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
-          <img
+          <Image
             src={avatarUrl}
             alt="User Avatar"
             className="w-8 h-8 rounded-full"
+            width={20}
+            height={20}
           />
           <span className="text-gray-700">{username}</span>
         </button>
@@ -47,12 +53,8 @@ const AccountInfo: React.FC<AccountInfoProps> = ({ username, avatarUrl }) => {
             >
               Settings
             </a>
-            <a
-              href="#"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-            >
-              Logout
-            </a>
+
+            <LogoutButton />
           </div>
         )}
       </div>
