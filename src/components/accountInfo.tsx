@@ -8,10 +8,10 @@ import LogoutButton from './buttons/logoutButton';
 
 interface AccountInfoProps {
   username: string;
-  avatarUrl?: string;
+  avatarUrl: string;
 }
 
-const AccountInfo: React.FC<AccountInfoProps> = ({ username }) => {
+const AccountInfo: React.FC<AccountInfoProps> = ({ username, avatarUrl }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
@@ -30,7 +30,7 @@ const AccountInfo: React.FC<AccountInfoProps> = ({ username }) => {
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
           <Image
-            src="/image/logo-icon.png"
+            src={avatarUrl}
             alt="User Avatar"
             className="w-8 h-8 rounded-full"
             width={20}
