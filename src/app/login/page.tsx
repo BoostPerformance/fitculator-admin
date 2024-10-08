@@ -1,22 +1,15 @@
 'use client';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
-import GoogleLoginButton from '@/components/buttons/google-login-button';
-import { signIn, signOut, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import GoogleButton from '@/components/buttons/googleButton';
+import { signIn, useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
 
 export default function Login() {
-  const router = useRouter();
   const { theme } = useTheme();
   const { data: session } = useSession();
   if (session) {
-    router.push('/user');
-    // return (
-    //   <div>
-    //     <p>Signed in as {session.user?.email}</p>
-    //     <button onClick={() => signOut()}>Sign out</button>
-    //   </div>
-    // );
+    redirect('/user');
   }
 
   return (
@@ -32,7 +25,7 @@ export default function Login() {
           className="w-[8rem]"
         />
       </div>
-      <GoogleLoginButton onClick={() => signIn('google')} />
+      <GoogleButton onClick={() => signIn('google')} />
     </div>
   );
 }
