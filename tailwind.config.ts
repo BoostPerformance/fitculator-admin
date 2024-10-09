@@ -47,6 +47,10 @@ const config: Config = {
         red: {
           DEFAULT: '#DD204E',
         },
+        white: {
+          DEFAULT: '#FFFFFF',
+          1: '#F9FAFF;',
+        },
       },
     },
     fontSize: {

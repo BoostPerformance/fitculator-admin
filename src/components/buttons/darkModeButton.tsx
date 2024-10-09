@@ -6,7 +6,7 @@ interface ButtonProps {
   className?: string;
 }
 
-export default function Button({ className }: ButtonProps) {
+export default function DarkModeButton({ className }: ButtonProps) {
   const { theme, setTheme } = useTheme();
   return (
     <>
