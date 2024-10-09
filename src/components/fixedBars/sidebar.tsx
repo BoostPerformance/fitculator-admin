@@ -10,7 +10,7 @@ interface SidebarProps {
 export default function Sidebar({ onClick, isOpen }: SidebarProps) {
   return (
     <div
-      className={`flex ${
+      className={`flex bg-white z-50 ${
         isOpen
           ? 'lg:w-[8rem] md:w-[8rem] sm:w-[6rem] drop-shadow-md border-[0.1rem]'
           : 'w-0 '

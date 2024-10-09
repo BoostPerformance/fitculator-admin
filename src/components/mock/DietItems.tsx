@@ -1,0 +1,48 @@
+const DietItems = [
+  {
+    id: 1,
+    discordId: 'Ashy #0220',
+    name: '회원 1',
+    morning: '사과 한개, 오트밀 커피 라떼 1잔',
+    lunch: '샐러드, 오트밀 커피 라떼 1잔',
+    dinner: '저녁 샐러드, 오트밀 커피 라떼 1잔',
+    snack: '사과 한개, 오트밀 커피 라떼 1잔',
+    updateTime: '20:00',
+    feedback: '2회',
+  },
+  {
+    id: 2,
+    discordId: 'Dasha #0221',
+    name: '회원 2',
+    morning: '사과 한개, 오트밀 커피 라떼 1잔',
+    lunch: '샐러드, 오트밀 커피 라떼 1잔',
+    dinner: '저녁 샐러드, 오트밀 커피 라떼 1잔',
+    snack: '사과 한개, 오트밀 커피 라떼 1잔',
+    updateTime: '20:00',
+    feedback: '14회',
+  },
+  {
+    id: 3,
+    discordId: 'Ashy #0222',
+    name: '회원 3',
+    morning: '사과 한개, 오트밀 커피 라떼 1잔',
+    lunch: '샐러드, 오트밀 커피 라떼 1잔',
+    dinner: '저녁 샐러드, 오트밀 커피 라떼 1잔',
+    snack: '사과 한개, 오트밀 커피 라떼 1잔',
+    updateTime: '20:00',
+    feedback: '6회',
+  },
+  {
+    id: 4,
+    discordId: 'Ashy #0223',
+    name: '회원 4',
+    morning: '사과 한개, 오트밀 커피 라떼 1잔',
+    lunch: '샐러드, 오트밀 커피 라떼 1잔',
+    dinner: '저녁 샐러드, 오트밀 커피 라떼 1잔',
+    snack: '사과 한개, 오트밀 커피 라떼 1잔',
+    updateTime: '20:00',
+    feedback: '1회',
+  },
+];
+
+export default DietItems;

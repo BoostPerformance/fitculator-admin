@@ -2,9 +2,9 @@ import localFont from 'next/font/local';
 import './globals.css';
 import React from 'react';
 import Head from 'next/head';
-import Footer from '@/components/footer';
+import Footer from '@/components/layout/footer';
 import { ThemeProvider } from 'next-themes';
-import SessionProviderWrapper from '@/components/auth/session-provider-wrapper';
+import SessionProviderWrapper from '@/components/auth/sessionProviderWrapper';
 
 const pretendard = localFont({
   src: '../fonts/PretendardVariable.woff2',
