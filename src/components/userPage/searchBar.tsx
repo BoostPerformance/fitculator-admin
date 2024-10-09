@@ -10,12 +10,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ placeholder = 'Search' }) => {
       <input
         type="text"
         placeholder={placeholder}
-        className="w-[50rem] pl-10 pr-4 py-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-[30rem] pl-[2.5rem] pr-[1rem] py-[0.5rem] rounded-lg bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-[10rem]"
       />
-      <div className="absolute left-3 top-2">
+      <div className="absolute left-[0.75rem] top-[0.5rem]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 text-gray-500"
+          className="h-[1.25rem] w-[1.25rem] text-gray-500"
           viewBox="0 0 20 20"
           fill="currentColor"
         >

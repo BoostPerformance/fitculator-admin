@@ -1,23 +1,28 @@
 'use client';
-import { useState } from 'react';
+
 import { FaBars } from 'react-icons/fa';
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(true);
+interface SidebarProps {
+  onClick: () => void;
+  isOpen: boolean;
+}
 
+export default function Sidebar({ onClick, isOpen }: SidebarProps) {
   return (
     <div
       className={`flex ${
-        isOpen ? 'w-[13rem]' : 'w-0'
-      } dark:bg-gray-800 border-[0.1rem] text-1.5-500 drop-shadow-md min-h-screen transition-all duration-300 pt-[6rem] fixed`}
+        isOpen
+          ? 'lg:w-[8rem] md:w-[8rem] sm:w-[6rem] drop-shadow-md border-[0.1rem]'
+          : 'w-0 '
+      } sm:w-[0rem] md:w-[13rem] dark:bg-gray-800  min-h-screen transition-all duration-300 pt-[6rem] fixed z-50`}
     >
       <div className="flex flex-col justify-between h-full text-blue-4 dark:text-white">
         <div>
           <button
-            className="p-4 focus:outline-none flex items-center"
-            onClick={() => setIsOpen(!isOpen)}
+            className="p-[1rem] focus:outline-none flex items-center"
+            onClick={onClick}
           >
-            <FaBars />
+            <FaBars className="w-[1rem]" />
           </button>
           <nav
             className={`${
@@ -25,16 +30,16 @@ export default function Sidebar() {
             } transition-all duration-300`}
           >
             <ul>
-              <li className="px-4 py-2 hover:bg-gray-600">
+              <li className="px-[1rem] py-[0.5rem] hover:bg-gray-600 text-1-500 sm:text-0.75-500">
                 <a href="#">Dashboard</a>
               </li>
-              <li className="px-4 py-2 hover:bg-gray-600">
+              <li className="px-[1rem] py-[0.5rem] hover:bg-gray-600 text-1-500 sm:text-0.75-500">
                 <a href="#">Payout</a>
               </li>
-              <li className="px-4 py-2 hover:bg-gray-600">
+              <li className="px-[1rem] py-[0.5rem] hover:bg-gray-600 text-1-500 sm:text-0.75-500">
                 <a href="#">Inbox</a>
               </li>
-              <li className="px-4 py-2 hover:bg-gray-600">
+              <li className="px-[1rem] py-[0.5rem] hover:bg-gray-600 text-1-500 sm:text-0.75-500">
                 <a href="#">Settings</a>
               </li>
             </ul>
