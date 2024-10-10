@@ -1,9 +1,13 @@
+import { useRouter } from 'next/navigation';
+
 const DietTable = ({ data }: { data: any[] }) => {
+  const router = useRouter();
+
   return (
     <div className="mt-6">
       <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
-          <tr className="bg-gray-100 text-left dark:text-gray-5 text-1-500">
+          <tr className="bg-gray-100 text-left text-1-500">
             <th className="p-[1rem]">ID</th>
             <th className="p-[1rem]">이름</th>
             <th className="p-[1rem]">아침</th>
@@ -16,7 +20,7 @@ const DietTable = ({ data }: { data: any[] }) => {
         </thead>
         <tbody>
           {data.map((item) => (
-            <tr key={item.id} className="border-b dark:text-gray-5">
+            <tr key={item.id} className="border-b">
               <td className="p-[1rem]">{item.discordId}</td>
               <td className="p-[1rem]">{item.name}</td>
               <td className="p-[1rem]">{item.morning}</td>
@@ -24,7 +28,16 @@ const DietTable = ({ data }: { data: any[] }) => {
               <td className="p-[1rem]">{item.dinner}</td>
               <td className="p-[1rem]">{item.snack}</td>
               <td className="p-[1rem]">{item.updateTime}</td>
-              <td className="p-[1rem]">{item.feedback}</td>
+              <td className="p-[1rem]">
+                <button
+                  className="bg-[#FF9257] px-[0.625rem] py-[0.5rem] rounded-[0.5rem] w-[5.9375rem] h-[1.8125rem] flex items-center justify-center text-0.875-400"
+                  onClick={() => {
+                    router.push(`/user/diet/${item.id}`);
+                  }}
+                >
+                  {item.feedback}
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
