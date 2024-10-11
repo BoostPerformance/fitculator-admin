@@ -30,7 +30,9 @@ const DietTable = ({ data }: { data: any[] }) => {
               <td className="p-[1rem]">{item.updateTime}</td>
               <td className="p-[1rem]">
                 <button
-                  className="bg-[#FF9257] px-[0.625rem] py-[0.5rem] rounded-[0.5rem] w-[5.9375rem] h-[1.8125rem] flex items-center justify-center text-0.875-400"
+                  className={`"px-[0.625rem] py-[0.5rem] rounded-[0.5rem] w-[5.9375rem] h-[1.8125rem] flex items-center justify-center text-0.875-400" ${
+                    item.feedback === '14/14' ? 'bg-green-500' : 'bg-[#FF9257] '
+                  } `}
                   onClick={() => {
                     router.push(`/user/diet/${item.id}`);
                   }}
