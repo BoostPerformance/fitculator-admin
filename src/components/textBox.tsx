@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 interface TextBoxProps {
   title: string;
@@ -11,6 +11,7 @@ interface TextBoxProps {
   onClick2?: () => void;
   onModalClick?: () => void;
   onModalClose?: () => void;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   className?: string;
   readOnly?: boolean;
   isModal?: boolean;
@@ -25,6 +26,7 @@ const TextBox = ({
   onClick2,
   onModalClick,
   onModalClose,
+  onChange,
   className,
   readOnly = false,
   isModal = false,
@@ -32,16 +34,20 @@ const TextBox = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [copyMessage, setCopyMessage] = useState<boolean>(false); // 복사 메시지 상태
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     if (textareaRef.current) {
-      textareaRef.current.select();
-      document.execCommand('copy');
-      setCopyMessage(true);
-      setTimeout(() => {
-        setCopyMessage(false);
-      }, 5000);
+      try {
+        await navigator.clipboard.writeText(textareaRef.current.value);
+        setCopyMessage(true);
+        setTimeout(() => {
+          setCopyMessage(false);
+        }, 5000);
+      } catch (err) {
+        console.error('복사 실패:', err);
+      }
     }
   };
+
   if (isModal) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -101,6 +107,7 @@ const TextBox = ({
             readOnly ? 'bg-gray-100 cursor-not-allowed' : ''
           }`}
           readOnly={readOnly}
+          onChange={onChange}
         />
         <div className="flex gap-[1rem]">
           <button

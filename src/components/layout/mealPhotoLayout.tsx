@@ -2,8 +2,8 @@ import { FaPlus } from 'react-icons/fa6';
 
 interface MealPhotoLayoutProps {
   title: string;
-  photos: (string | null | undefined)[]; // photos 배열에 null과 undefined 허용
-  descriptions: string;
+  photos: (string | null | undefined)[];
+  descriptions: string | boolean;
   time: string;
   onAddComment?: () => void;
 }
@@ -15,7 +15,6 @@ const MealPhotoLayout = ({
   time,
   onAddComment,
 }: MealPhotoLayoutProps) => {
-  // null과 undefined 제거
   const filteredPhotos = photos.filter((photo): photo is string =>
     Boolean(photo)
   );
