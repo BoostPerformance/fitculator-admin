@@ -2,8 +2,13 @@
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/style.css';
 import { useState } from 'react';
+import Image from 'next/image';
 
-const DateInput = () => {
+interface DateInputProps {
+  onChange: (date: Date | undefined) => void; // 상위 컴포넌트로 선택된 날짜를 전달하는 콜백
+}
+
+const DateInput = ({ onChange }: DateInputProps) => {
   const [selected, setSelected] = useState<Date>();
   const [open, setOpen] = useState(false);
 
@@ -25,18 +30,34 @@ const DateInput = () => {
 
   const handleDateChange = (date: Date | undefined) => {
     setSelected(date);
-    setOpen(false); // 날짜 선택 후 데이트피커 닫기
+    setOpen(false);
+    onChange(date);
+    console.log(date);
   };
 
   return (
     <div className="relative">
+      <Image
+        src="/svg/calender.svg"
+        alt="calender"
+        width={20}
+        height={20}
+        className="absolute left-[0.5rem] top-[0.6rem]"
+      />
       <input
         type="text"
         value={formattedDate}
         onClick={handleDateOpen}
         placeholder={Datetoday}
         readOnly
-        className="border-[0.1rem] py-[0.4rem] px-[1rem] rounded-[0.5rem] w-[15rem]"
+        className="border-[0.1rem] py-[0.4rem] pl-[2.5rem] rounded-[0.5rem] w-[15rem]"
+      />
+      <Image
+        src="/svg/arrow-right.svg"
+        alt="calender"
+        width={20}
+        height={20}
+        className="absolute right-[0.5rem] top-[0.6rem]"
       />
       {open && (
         <div className="absolute z-10 mt-2 bg-white p-[1rem] rounded-[1rem] drop-shadow">

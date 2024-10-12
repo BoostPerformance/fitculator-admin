@@ -9,7 +9,7 @@ export default function Login() {
   const { theme } = useTheme();
   const { data: session } = useSession();
   if (session) {
-    redirect('/user');
+    redirect('/user/diet');
   }
 
   return (

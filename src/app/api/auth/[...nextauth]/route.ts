@@ -9,7 +9,7 @@ const handler = NextAuth({
     }),
   ],
   pages: {
-    signIn: '/',
+    signIn: '/user/diet',
     error: '/auth/error',
   },
 });
