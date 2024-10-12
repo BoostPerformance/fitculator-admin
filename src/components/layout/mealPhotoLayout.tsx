@@ -2,7 +2,7 @@ const MealPhotoLayout = ({ title, photos, descriptions, time }: any) => {
   const renderPhotos = () => {
     if (photos.length === 1) {
       return (
-        <div className="w-full h-[10rem] overflow-hidden rounded-lg">
+        <div className="w-full h-[8rem] overflow-hidden rounded-lg">
           <img
             src={`/image${photos}`}
             alt="meal"
@@ -16,7 +16,7 @@ const MealPhotoLayout = ({ title, photos, descriptions, time }: any) => {
           {photos.map((photo: string, index: number) => (
             <div
               key={index}
-              className="w-full h-[10rem] overflow-hidden rounded-lg"
+              className="w-full h-[8rem] overflow-hidden rounded-lg"
             >
               <img
                 src={`/image${photo}`}
@@ -30,21 +30,21 @@ const MealPhotoLayout = ({ title, photos, descriptions, time }: any) => {
     } else if (photos.length === 3) {
       return (
         <div className="grid grid-cols-3 grid-rows-2 gap-[0.2rem]">
-          <div className="col-span-2 row-span-2 h-full overflow-hidden rounded-lg">
+          <div className="col-span-2 row-span-2 h-[8rem] overflow-hidden rounded-lg">
             <img
               src={`/image${photos[0]}`}
               alt="meal-large"
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="h-[5rem] overflow-hidden rounded-lg">
+          <div className="h-[4rem] overflow-hidden rounded-lg">
             <img
               src={`/image${photos[1]}`}
               alt="meal-small-1"
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="h-[5rem] overflow-hidden rounded-lg">
+          <div className="h-[4rem] overflow-hidden rounded-lg">
             <img
               src={`/image${photos[2]}`}
               alt="meal-small-2"
@@ -55,11 +55,11 @@ const MealPhotoLayout = ({ title, photos, descriptions, time }: any) => {
       );
     } else if (photos.length === 4) {
       return (
-        <div className="grid grid-cols-2 gap-[0.2rem]">
+        <div className="grid grid-cols-2 gap-[0.5rem]">
           {photos.map((photo: string, index: number) => (
             <div
               key={index}
-              className="w-full h-[5rem] overflow-hidden rounded-lg"
+              className="w-full h-[3.8rem] overflow-hidden rounded-lg"
             >
               <img
                 src={`/image${photo}`}

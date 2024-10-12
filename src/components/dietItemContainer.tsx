@@ -22,7 +22,16 @@ export default function DietItemContainer() {
 
   const handleGenerateAnalyse = () => {
     setIsDisable(true);
-    console.log('true');
+  };
+
+  const handleCopy = (textareaId: string) => {
+    const textarea = document.getElementById(textareaId) as HTMLTextAreaElement;
+    console.log(textarea);
+    if (textarea) {
+      textarea.select();
+      document.execCommand('copy');
+      alert('복사되었습니다.');
+    }
   };
 
   useEffect(() => {
@@ -68,19 +77,24 @@ export default function DietItemContainer() {
               time={['16:00']}
             />
           </div>
+
+          {/* AI 분석 결과 박스는 읽기 전용으로 설정 */}
           <TextBox
             title="AI 분석 결과"
             content={item.aiAnalysis}
             inputbox="결과생성 버튼을 눌러주세요."
             button1="결과생성"
-            onClick={handleGenerateAnalyse}
+            onClickAIGenerate={() => console.log('AI 결과 생성')}
+            readOnly={true}
             className={`${isDisable ? 'disabled bg-gray-1' : ''}`}
           />
+
           <TextBox
             title="코치 피드백"
             inputbox="피드백을 작성하세요."
             button1="저장"
             button2="복사"
+            onSendFeedback={() => console.log('피드백 저장')}
           />
         </div>
       ))}
