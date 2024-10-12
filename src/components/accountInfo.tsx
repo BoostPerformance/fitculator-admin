@@ -1,9 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { FaBell, FaFlag } from 'react-icons/fa';
-// import { signOut } from 'next-auth/react';
 import Image from 'next/image';
-// import { redirect } from 'next/navigation';
 import LogoutButton from './buttons/logoutButton';
 
 interface AccountInfoProps {

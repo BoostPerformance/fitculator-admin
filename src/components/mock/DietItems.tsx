@@ -23,7 +23,7 @@ const DietItems = [
       },
     },
     createdAt: '2024-10-08T08:00:00',
-    updatedAt: '2024-10-08T20:00:00',
+    updatedAt: '2024-10-01T18:00:00',
     aiAnalysis:
       'AI 분석 결과: 식단 균형이 매우 좋습니다. 탄수화물과 단백질이 적당히 섭취되었습니다.',
     coachFeedback:
@@ -54,7 +54,7 @@ const DietItems = [
       },
     },
     createdAt: '2024-10-07T08:00:00',
-    updatedAt: '2024-10-07T20:00:00',
+    updatedAt: '2024-10-07T16:54:00',
     aiAnalysis:
       'AI 분석 결과: 단백질 섭취가 약간 부족할 수 있습니다. 추가 섭취를 권장합니다.',
     coachFeedback: '단백질 섭취를 좀 더 늘려보세요.',
@@ -62,7 +62,7 @@ const DietItems = [
   },
   {
     id: 3,
-    discordId: 'Ashy #0222',
+    discordId: '호야 #0222',
     name: '회원 3',
     restingHeartRate: 68,
     meals: {
@@ -91,7 +91,7 @@ const DietItems = [
   },
   {
     id: 4,
-    discordId: 'Ashy #0223',
+    discordId: '에쉬 #0223',
     name: '회원 4',
     restingHeartRate: 75,
     meals: {
