@@ -5,17 +5,18 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 interface DateInputProps {
-  onChange: (date: Date | undefined) => void; // 상위 컴포넌트로 선택된 날짜를 전달하는 콜백
+  onChange: (date: Date) => void;
+  selectedDate: string; // 선택된 날짜를 전달받음
 }
 
-const DateInput = ({ onChange }: DateInputProps) => {
+const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
   const [selected, setSelected] = useState<Date>();
   const [open, setOpen] = useState(false);
 
   const formatDate = (date: Date | undefined) => {
     if (!date) return '';
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+    const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
@@ -29,10 +30,12 @@ const DateInput = ({ onChange }: DateInputProps) => {
   };
 
   const handleDateChange = (date: Date | undefined) => {
-    setSelected(date);
-    setOpen(false);
-    onChange(date);
-    console.log(date);
+    setSelected(date || undefined); // 선택되지 않으면 undefined
+    if (date) {
+      onChange(date);
+      setOpen(false);
+      console.log(date);
+    }
   };
 
   return (
@@ -46,7 +49,7 @@ const DateInput = ({ onChange }: DateInputProps) => {
       />
       <input
         type="text"
-        value={formattedDate}
+        value={formattedDate || selectedDate} // 선택된 날짜가 있으면 표시, 없으면 기본값
         onClick={handleDateOpen}
         placeholder={Datetoday}
         readOnly
@@ -63,8 +66,9 @@ const DateInput = ({ onChange }: DateInputProps) => {
         <div className="absolute z-10 mt-2 bg-white p-[1rem] rounded-[1rem] drop-shadow">
           <DayPicker
             mode="single"
-            selected={selected}
-            onSelect={handleDateChange}
+            required={false} // required 속성 명시
+            selected={selected || new Date(selectedDate)} // 선택된 날짜를 넘김
+            onSelect={handleDateChange} // 선택 핸들러
           />
         </div>
       )}

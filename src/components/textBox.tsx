@@ -7,11 +7,13 @@ interface TextBoxProps {
   content?: string;
   button1: string;
   button2?: string;
-  onClickAIGenerate?: () => void;
-  onClickCopyIcon?: () => void;
-  onSendFeedback?: () => void;
+  onClick1?: () => void;
+  onClick2?: () => void;
+  onModalClick?: () => void;
+  onModalClose?: () => void;
   className?: string;
   readOnly?: boolean;
+  isModal?: boolean;
 }
 
 const TextBox = ({
@@ -19,11 +21,13 @@ const TextBox = ({
   inputbox,
   button1,
   button2,
-  onClickAIGenerate,
-  onSendFeedback,
-  onClickCopyIcon,
+  onClick1,
+  onClick2,
+  onModalClick,
+  onModalClose,
   className,
   readOnly = false,
+  isModal = false,
 }: TextBoxProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [copyMessage, setCopyMessage] = useState<boolean>(false); // 복사 메시지 상태
@@ -32,12 +36,41 @@ const TextBox = ({
     if (textareaRef.current) {
       textareaRef.current.select();
       document.execCommand('copy');
-      setCopyMessage(true); // 메시지를 보여줌
+      setCopyMessage(true);
       setTimeout(() => {
-        setCopyMessage(false); // 5초 후 메시지를 숨김
+        setCopyMessage(false);
       }, 5000);
     }
   };
+  if (isModal) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="bg-white rounded-lg p-6 w-[90%] max-w-[500px] relative">
+          <h4 className="text-xl font-semibold mb-4">{title} 코멘트 달기</h4>
+          <textarea
+            placeholder={inputbox}
+            className={`border p-2 w-full rounded-md text-base h-[8rem]`}
+          />
+          <div className="flex justify-end gap-2 mt-4">
+            <button
+              className="bg-[#FF9257] text-white rounded-md py-2 px-4"
+              onClick={onModalClick}
+            >
+              {button1}
+            </button>
+            {button2 && (
+              <button
+                className="bg-gray-500 text-white rounded-md py-2 px-4"
+                onClick={onModalClose}
+              >
+                {button2}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-[2rem] p-[1rem] border rounded-md relative">
@@ -52,7 +85,6 @@ const TextBox = ({
           />
         </button>
       </h4>
-
       <div
         className={`absolute top-[0.5rem] left-[10rem] bg-green-100 text-green-800 text-1-500 p-[0.5rem] rounded-[0.5rem] 
         transform transition-opacity duration-500 ease-in-out
@@ -73,15 +105,14 @@ const TextBox = ({
         <div className="flex gap-[1rem]">
           <button
             className={`${className} bg-[#FF9257] text-white rounded-md  text-0.875-400 mt-[0.5rem] w-[5.5rem] h-[2rem]`}
-            onClick={onClickAIGenerate}
-            disabled={readOnly}
+            onClick={onClick1}
           >
             {button1}
           </button>
           {button2 && (
             <button
               className="bg-[#48BA5D] text-white rounded-md h-[2rem] w-[5.5rem] text-0.875-400 mt-[0.5rem]"
-              onClick={onSendFeedback}
+              onClick={onClick2}
             >
               {button2}
             </button>

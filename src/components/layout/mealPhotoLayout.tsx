@@ -1,19 +1,40 @@
-const MealPhotoLayout = ({ title, photos, descriptions, time }: any) => {
+import { FaPlus } from 'react-icons/fa6';
+
+interface MealPhotoLayoutProps {
+  title: string;
+  photos: (string | null | undefined)[]; // photos 배열에 null과 undefined 허용
+  descriptions: string;
+  time: string;
+  onAddComment?: () => void;
+}
+
+const MealPhotoLayout = ({
+  title,
+  photos,
+  descriptions,
+  time,
+  onAddComment,
+}: MealPhotoLayoutProps) => {
+  // null과 undefined 제거
+  const filteredPhotos = photos.filter((photo): photo is string =>
+    Boolean(photo)
+  );
+
   const renderPhotos = () => {
-    if (photos.length === 1) {
+    if (filteredPhotos.length === 1) {
       return (
         <div className="w-full h-[8rem] overflow-hidden rounded-lg">
           <img
-            src={`/image${photos}`}
+            src={`/image${filteredPhotos[0]}`}
             alt="meal"
             className="w-full h-full object-cover"
           />
         </div>
       );
-    } else if (photos.length === 2) {
+    } else if (filteredPhotos.length === 2) {
       return (
         <div className="grid grid-cols-2 gap-[0.5rem]">
-          {photos.map((photo: string, index: number) => (
+          {filteredPhotos.map((photo: string, index: number) => (
             <div
               key={index}
               className="w-full h-[8rem] overflow-hidden rounded-lg"
@@ -27,36 +48,36 @@ const MealPhotoLayout = ({ title, photos, descriptions, time }: any) => {
           ))}
         </div>
       );
-    } else if (photos.length === 3) {
+    } else if (filteredPhotos.length === 3) {
       return (
         <div className="grid grid-cols-3 grid-rows-2 gap-[0.2rem]">
           <div className="col-span-2 row-span-2 h-[8rem] overflow-hidden rounded-lg">
             <img
-              src={`/image${photos[0]}`}
+              src={`/image${filteredPhotos[0]}`}
               alt="meal-large"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="h-[4rem] overflow-hidden rounded-lg">
             <img
-              src={`/image${photos[1]}`}
+              src={`/image${filteredPhotos[1]}`}
               alt="meal-small-1"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="h-[4rem] overflow-hidden rounded-lg">
             <img
-              src={`/image${photos[2]}`}
+              src={`/image${filteredPhotos[2]}`}
               alt="meal-small-2"
               className="w-full h-full object-cover"
             />
           </div>
         </div>
       );
-    } else if (photos.length === 4) {
+    } else if (filteredPhotos.length === 4) {
       return (
         <div className="grid grid-cols-2 gap-[0.5rem]">
-          {photos.map((photo: string, index: number) => (
+          {filteredPhotos.map((photo: string, index: number) => (
             <div
               key={index}
               className="w-full h-[3.8rem] overflow-hidden rounded-lg"
@@ -74,11 +95,21 @@ const MealPhotoLayout = ({ title, photos, descriptions, time }: any) => {
   };
 
   return (
-    <div className="meal w-full">
-      <h3 className="text-center mb-4 text-[1rem] font-semibold">{title}</h3>
-      {renderPhotos()}
-      <div className="text-[0.875rem] mt-2 text-gray-600">{time}</div>
-      <div className="text-[0.875rem] mt-1">{descriptions}</div>
+    <div className="w-full flex flex-col justify-between h-full">
+      <div>
+        <h3 className="text-center mb-2 text-base font-semibold">{title}</h3>
+        {renderPhotos()}
+        <div className="mt-2 text-sm text-gray-600">{time}</div>
+        <div className="text-sm mt-1">{descriptions}</div>
+      </div>
+      <div className="flex justify-center mt-4">
+        <button
+          className="text-gray-500 hover:text-gray-700"
+          onClick={onAddComment}
+        >
+          <FaPlus size={20} />
+        </button>
+      </div>
     </div>
   );
 };

@@ -1,6 +1,8 @@
+'use client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Image from 'next/image';
+import { Diet_Feedback, Meals } from '../mock/DietItems';
 
 const sortData = (data: any[], sortBy: string, sortDirection: boolean) => {
   return [...data].sort((a, b) => {
@@ -13,22 +15,21 @@ const sortData = (data: any[], sortBy: string, sortDirection: boolean) => {
         a.updateTime.localeCompare(b.updateTime) * (sortDirection ? 1 : -1)
       );
     }
-    return 0; // 기본적으로 변경 없을 때
+    return 0;
   });
 };
 
 const DietTable = ({ data }: { data: any[] }) => {
   const router = useRouter();
-  const [sortBy, setSortBy] = useState<string>('id'); // 정렬 기준
-  const [sortDirection, setSortDirection] = useState<boolean>(true); // true: 오름차순, false: 내림차순
+  const [sortBy, setSortBy] = useState<string>('id');
+  const [sortDirection, setSortDirection] = useState<boolean>(true);
 
   const handleSort = (key: string) => {
     if (sortBy === key) {
-      // 동일한 기준으로 다시 클릭 시 방향만 변경
       setSortDirection(!sortDirection);
     } else {
       setSortBy(key);
-      setSortDirection(true); // 새 기준으로 정렬할 때는 기본 오름차순으로 설정
+      setSortDirection(true);
     }
   };
 
@@ -57,6 +58,17 @@ const DietTable = ({ data }: { data: any[] }) => {
         />
       </>
     );
+  };
+
+  const calculateFeedback = (userId: string, mealDate: string) => {
+    const totalMealsOnDate = Meals.filter(
+      (meal) => meal.user_id === userId && meal.date === mealDate
+    ).length;
+    const feedbacksOnDate = Diet_Feedback.filter(
+      (feedback) => feedback.user_id === userId && feedback.date === mealDate
+    ).length;
+
+    return `${feedbacksOnDate} /${totalMealsOnDate}`;
   };
 
   return (
@@ -124,7 +136,7 @@ const DietTable = ({ data }: { data: any[] }) => {
             <tr key={item.id} className="border-b">
               <td className="p-[1rem]">{item.discordId}</td>
               <td className="p-[1rem]">{item.name}</td>
-              <td className="p-[1rem]">{item.morning}</td>
+              <td className="p-[1rem]">{item.breakfast}</td>
               <td className="p-[1rem]">{item.lunch}</td>
               <td className="p-[1rem]">{item.dinner}</td>
               <td className="p-[1rem]">{item.snack}</td>
@@ -132,13 +144,13 @@ const DietTable = ({ data }: { data: any[] }) => {
               <td className="p-[1rem]">
                 <button
                   className={`px-[0.625rem] py-[0.5rem] rounded-[0.5rem] w-[5.9375rem] h-[1.8125rem] flex items-center justify-center text-0.875-400 ${
-                    item.feedback === '14/14' ? 'bg-green-500' : 'bg-[#FF9257]'
+                    item.user_id === item.date ? 'bg-green-500' : 'bg-[#FF9257]'
                   }`}
                   onClick={() => {
                     router.push(`/user/diet/${item.id}`);
                   }}
                 >
-                  {item.feedback}
+                  {calculateFeedback(item.user_id, item.date)}
                 </button>
               </td>
             </tr>
