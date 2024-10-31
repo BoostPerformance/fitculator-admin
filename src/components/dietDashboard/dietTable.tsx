@@ -100,10 +100,10 @@ const DietTable: React.FC<DietTableProps> = ({ data }) => {
               className="p-[1rem] w-[6rem]"
               onClick={() => handleSort('name')}
             >
-              <div className="relative flex justify-between items-center ">
+              <div className="relative flex justify-between items-center pr-[1rem]">
                 <div>이름</div>
                 <div>{renderSortArrow('name')}</div>
-                <span className="absolute left-[15rem] h-[100%] w-[1px] bg-gray-300"></span>
+                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300"></span>
               </div>
             </th>
             <th className="p-[1rem]">
