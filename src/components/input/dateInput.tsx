@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 interface DateInputProps {
-  onChange: (date: Date) => void;
+  onChange: (date: string) => void; // 수정: date 타입을 string으로 변경
   selectedDate: string; // 선택된 날짜를 전달받음
 }
 
@@ -30,11 +30,12 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
   };
 
   const handleDateChange = (date: Date | undefined) => {
-    setSelected(date || undefined); // 선택되지 않으면 undefined
+    setSelected(date || undefined);
     if (date) {
-      onChange(date);
+      const formatted = formatDate(date); // 수정: 날짜를 포맷하여 전달
+      onChange(formatted);
       setOpen(false);
-      console.log(date);
+      console.log(formatted); // 포맷된 날짜 확인용
     }
   };
 
@@ -66,8 +67,8 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
         <div className="absolute z-10 mt-2 bg-white p-[1rem] rounded-[1rem] drop-shadow">
           <DayPicker
             mode="single"
-            required={false} // required 속성 명시
-            selected={selected || new Date(selectedDate)} // 선택된 날짜를 넘김
+            required={false}
+            selected={selected || new Date(selectedDate)}
             onSelect={handleDateChange} // 선택 핸들러
           />
         </div>

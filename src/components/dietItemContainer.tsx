@@ -6,6 +6,20 @@ import Title from './layout/title';
 import TotalFeedbackCounts from './dietDashboard/totalFeedbackCount';
 import MealPhotoLayout from './layout/mealPhotoLayout';
 
+interface Meal {
+  meal_id: string;
+  user_id: string;
+  date: string;
+  meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
+  description: string;
+  image_url_1: string;
+  image_url_2: string;
+  image_url_3: string;
+  image_url_4: string;
+  updated_at: string;
+  additional_comments?: string;
+}
+
 const getAIFeedback = (user_id: string, date: string) => {
   return AI_Feedback.find(
     (feedback) => feedback.user_id === user_id && feedback.date === date
@@ -28,8 +42,8 @@ const getMealByTypeAndDate = (
 export default function DietItemContainer() {
   const [visibleItems, setVisibleItems] = useState(2);
   const [isDisable, setIsDisable] = useState(false);
+  const [meals, setMeals] = useState<Meal[]>([]);
 
-  // Meal 타입별로 코멘트 관리
   const [commentVisible, setCommentVisible] = useState<{
     [key: string]: boolean;
   }>({});
@@ -64,7 +78,6 @@ export default function DietItemContainer() {
     });
   };
 
-  // 코멘트 추가 핸들러
   const handleAddComment = (mealType: string, date: string) => {
     setCommentVisible((prev) => {
       const newVisibility = { ...prev };
@@ -94,19 +107,33 @@ export default function DietItemContainer() {
     });
   };
 
+  const fetchMeals = async () => {
+    try {
+      const response = await fetch('/api/dietItem');
+      const data = await response.json();
+      console.log(data);
+
+      // setMeals(data); // meals 데이터 상태 업데이트
+    } catch (error) {
+      console.error('Error fetching meals:', error);
+    }
+  };
+
   useEffect(() => {
+    fetchMeals();
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [meals]);
 
   return (
-    <div className="max-w-[48rem] mx-auto z-50 sm:px-[3rem]">
+    <div className="max-w-[48rem] mx-auto z-50 sm:px-[3rem] mt-[4rem]">
       <div className="flex-1 py-[3rem]">
         <Title title="회원1 님의 식단현황" />
         <TotalFeedbackCounts count="30" total="30" />
       </div>
 
-      {Meals.slice(0, visibleItems).map((item, index) => {
+      {Meals.slice(0, visibleItems).map((item) => {
         const aiFeedback = getAIFeedback(item.user_id, item.date);
 
         return (

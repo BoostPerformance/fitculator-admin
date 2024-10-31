@@ -1,98 +1,118 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Title from '../layout/title';
 import TotalFeedbackCounts from './totalFeedbackCount';
 import DateInput from '../input/dateInput';
-import SearchIput from '../input/searchInput';
+import SearchInput from '../input/searchInput';
 import DietTable from './dietTable';
-import { Meals, AI_Feedback, Diet_Feedback } from '@/components/mock/DietItems';
+import { AI_Feedback, Diet_Feedback } from '@/components/mock/DietItems';
+import { CombinedData, Meal, Feedback } from '@/types/dietTypes';
 
+// 날짜를 'YYYY-MM-DD' 형식으로 변환하는 함수
 const formatDate = (date: Date) => {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // 월을 2자리로 맞춤
-  const day = String(date.getDate()).padStart(2, '0'); // 일을 2자리로 맞춤
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
 
 export default function DietContainer() {
-  const today = formatDate(new Date());
-  const [selectedDate, setSelectedDate] = useState<string>(today); // 기본값을 오늘 날짜로 설정
-  const [combinedData, setCombinedData] = useState<any[]>([]);
+  const today = formatDate(new Date()); // 오늘 날짜
+  const [selectedDate, setSelectedDate] = useState<string>(today); // 선택된 날짜 상태
+  const [combinedData, setCombinedData] = useState<CombinedData[]>([]);
 
-  const groupMealsByUser = (meals: any[]) => {
-    const grouped: any = {};
+  const fetchMeals = useCallback(async () => {
+    try {
+      const response = await fetch('/api/dietList');
+      const meals = await response.json();
+      const groupedMeals = groupMealsByUser(meals);
+      const enrichedMeals = addFeedbackToMeals(groupedMeals);
+      setCombinedData(enrichedMeals);
+    } catch (error) {
+      console.error('Error fetching meals:', error);
+    }
+  }, []);
 
+  useEffect(() => {
+    fetchMeals();
+  }, [fetchMeals]);
+
+  // 식단 데이터를 그룹화하는 함수
+  const groupMealsByUser = (meals: Meal[]): CombinedData[] => {
+    const grouped: Record<string, CombinedData> = {};
     meals.forEach((meal) => {
-      const key = `${meal.user_id}-${meal.date}`; // user_id와 date를 기준으로 그룹화
+      const key = `${meal.user_id}-${meal.date}`;
       if (!grouped[key]) {
         grouped[key] = {
           id: meal.user_id,
-          name: meal.user_id, // 이름을 임의로 넣었으니 실제로는 적절히 변경
+          name: meal.user_id,
           breakfast: '',
           lunch: '',
           dinner: '',
           snack: '',
           date: meal.date,
-          updateTime: meal.updated_at.split('T')[1],
+          updateTime: meal.updated_at.split('T')[1].slice(0, 5),
+          aiFeedbackText: 'no ai_feedback_text',
+          coachFeedbackText: 'no feedback_text',
+          feedback: null,
+          user_id: meal.user_id, // 추가
+          meal_type: meal.meal_type, // 추가
+          description: meal.description || '', // 추가
+          updated_at: meal.updated_at, // 추가
         };
       }
-
       if (meal.meal_type === 'BREAKFAST')
         grouped[key].breakfast = meal.description;
       if (meal.meal_type === 'LUNCH') grouped[key].lunch = meal.description;
       if (meal.meal_type === 'DINNER') grouped[key].dinner = meal.description;
       if (meal.meal_type === 'SNACK') grouped[key].snack = meal.description;
     });
-
     return Object.values(grouped);
   };
 
-  useEffect(() => {
-    const combined = groupMealsByUser(Meals).map((meal: any) => {
+  // 그룹화된 식단 데이터에 피드백을 추가하는 함수
+  const addFeedbackToMeals = (meals: CombinedData[]): CombinedData[] => {
+    return meals.map((meal) => {
       const aiFeedback = AI_Feedback.find(
-        (feedback) =>
+        (feedback: Feedback) =>
           feedback.user_id === meal.id && feedback.date === meal.date
       );
-
       const dietFeedback = Diet_Feedback.find(
-        (feedback) =>
+        (feedback: Feedback) =>
           feedback.user_id === meal.id && feedback.date === meal.date
       );
-
       return {
         ...meal,
         aiFeedbackText: aiFeedback?.ai_feedback_text || 'no ai_feedback_text',
         coachFeedbackText: dietFeedback?.feedback_text || 'no feedback_text',
-        feedback: dietFeedback,
+        feedback: dietFeedback || null,
       };
     });
+  };
 
-    setCombinedData(combined);
-  }, []);
-
-  const filteredData = selectedDate
-    ? combinedData.filter((item) => item.date === selectedDate)
-    : combinedData;
-
-  const totalFeedbackCount = combinedData.reduce(
-    (total, item) => total + (item.feedback ? 1 : 0), // 피드백이 있는 경우만 카운트
-    0
+  // 선택된 날짜와 일치하는 데이터를 필터링
+  const filteredData = combinedData.filter(
+    (item) => item.date === selectedDate
   );
+
+  // 날짜 선택 시 호출되는 함수
+  const handleDateInput = (formattedDate: string) => {
+    setSelectedDate(formattedDate);
+  };
 
   return (
     <div className="flex-1 p-6 bg-gray-100 pt-[7rem] pl-[10rem] bg-white-1">
       <div>
         <Title title="팻다챌 챌린지 식단 현황" />
-        <TotalFeedbackCounts count={totalFeedbackCount.toString()} total="30" />
+        <TotalFeedbackCounts
+          count={filteredData.length.toString()}
+          total="30"
+        />
       </div>
       <div className="flex justify-between items-center mt-[1.5rem]">
-        <DateInput
-          onChange={(date) => setSelectedDate(formatDate(date))}
-          selectedDate={selectedDate}
-        />
-        <SearchIput />
+        <DateInput onChange={handleDateInput} selectedDate={selectedDate} />
+        <SearchInput />
       </div>
-
       <DietTable data={filteredData} />
     </div>
   );

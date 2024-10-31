@@ -1,4 +1,5 @@
 import { FaPlus } from 'react-icons/fa6';
+import Image from 'next/image';
 
 interface MealPhotoLayoutProps {
   title: string;
@@ -23,10 +24,12 @@ const MealPhotoLayout = ({
     if (filteredPhotos.length === 1) {
       return (
         <div className="w-full h-[8rem] overflow-hidden rounded-lg">
-          <img
+          <Image
             src={`/image${filteredPhotos[0]}`}
             alt="meal"
             className="w-full h-full object-cover"
+            width={100}
+            height={100}
           />
         </div>
       );
@@ -38,10 +41,12 @@ const MealPhotoLayout = ({
               key={index}
               className="w-full h-[8rem] overflow-hidden rounded-lg"
             >
-              <img
+              <Image
                 src={`/image${photo}`}
                 alt={`meal-${index}`}
                 className="w-full h-full object-cover"
+                width={100}
+                height={100}
               />
             </div>
           ))}
@@ -51,24 +56,30 @@ const MealPhotoLayout = ({
       return (
         <div className="grid grid-cols-3 grid-rows-2 gap-[0.2rem]">
           <div className="col-span-2 row-span-2 h-[8rem] overflow-hidden rounded-lg">
-            <img
+            <Image
               src={`/image${filteredPhotos[0]}`}
               alt="meal-large"
               className="w-full h-full object-cover"
+              width={100}
+              height={100}
             />
           </div>
           <div className="h-[4rem] overflow-hidden rounded-lg">
-            <img
+            <Image
               src={`/image${filteredPhotos[1]}`}
               alt="meal-small-1"
               className="w-full h-full object-cover"
+              width={100}
+              height={100}
             />
           </div>
           <div className="h-[4rem] overflow-hidden rounded-lg">
-            <img
+            <Image
               src={`/image${filteredPhotos[2]}`}
               alt="meal-small-2"
               className="w-full h-full object-cover"
+              width={100}
+              height={100}
             />
           </div>
         </div>
@@ -81,10 +92,12 @@ const MealPhotoLayout = ({
               key={index}
               className="w-full h-[3.8rem] overflow-hidden rounded-lg"
             >
-              <img
+              <Image
                 src={`/image${photo}`}
                 alt={`meal-${index}`}
                 className="w-full h-full object-cover"
+                width={100}
+                height={100}
               />
             </div>
           ))}
