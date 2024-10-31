@@ -32,7 +32,7 @@ const TextBox = ({
   isModal = false,
 }: TextBoxProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [copyMessage, setCopyMessage] = useState<boolean>(false); // 복사 메시지 상태
+  const [copyMessage, setCopyMessage] = useState<boolean>(false);
 
   const handleCopy = async () => {
     if (textareaRef.current) {
