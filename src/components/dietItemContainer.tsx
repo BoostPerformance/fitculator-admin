@@ -88,16 +88,15 @@ export default function DietItemContainer() {
     });
   };
 
-  const handleAddComment = (mealType: string, date: string) => {
+  const handleAddComment = (mealType: string) => {
     setCommentVisible((prev) => {
       const newVisibility = { ...prev };
-      newVisibility[`${mealType}-${date}`] =
-        !newVisibility[`${mealType}-${date}`];
+      newVisibility[`${mealType}`] = !newVisibility[`${mealType}`];
       return newVisibility;
     });
   };
 
-  const handleCancelComment = (mealType: string, date: string) => {
+  const handleCancelComment = (mealType: string) => {
     setCommentVisible((prev) => {
       const newVisibility = { ...prev };
       newVisibility[`${mealType}-${date}`] = false;
@@ -134,7 +133,12 @@ export default function DietItemContainer() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const mealData = {
+  const mealData: {
+    BREAKFAST: Meal | undefined;
+    LUNCH: Meal | undefined;
+    DINNER: Meal | undefined;
+    SNACK: Meal | undefined;
+  } = {
     BREAKFAST: userMeals.find((meal) => meal.meal_type === 'BREAKFAST'),
     LUNCH: userMeals.find((meal) => meal.meal_type === 'LUNCH'),
     DINNER: userMeals.find((meal) => meal.meal_type === 'DINNER'),
@@ -156,33 +160,35 @@ export default function DietItemContainer() {
             <h2 className="text-[1.5rem] font-bold">{item.date}</h2>
 
             <div className="grid grid-cols-4 gap-[1rem]">
-              {['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'].map((mealType) => (
-                <MealPhotoLayout
-                  key={mealType}
-                  title={
-                    mealType === 'BREAKFAST'
-                      ? '아침'
-                      : mealType === 'LUNCH'
-                      ? '점심'
-                      : mealType === 'DINNER'
-                      ? '저녁'
-                      : '간식'
-                  }
-                  photos={
-                    mealData[mealType]?.image_url_1
-                      ? [
-                          mealData[mealType].image_url_1,
-                          mealData[mealType].image_url_2,
-                          mealData[mealType].image_url_3,
-                          mealData[mealType].image_url_4,
-                        ].filter(Boolean)
-                      : []
-                  }
-                  descriptions={mealData[mealType]?.description || ''}
-                  time={mealData[mealType]?.updated_at.split('T')[1] || ''}
-                  onAddComment={() => handleAddComment(mealType, date)}
-                />
-              ))}
+              {(['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'] as const).map(
+                (mealType) => (
+                  <MealPhotoLayout
+                    key={mealType}
+                    title={
+                      mealType === 'BREAKFAST'
+                        ? '아침'
+                        : mealType === 'LUNCH'
+                        ? '점심'
+                        : mealType === 'DINNER'
+                        ? '저녁'
+                        : '간식'
+                    }
+                    photos={
+                      mealData[mealType]?.image_url_1
+                        ? [
+                            mealData[mealType].image_url_1,
+                            mealData[mealType].image_url_2,
+                            mealData[mealType].image_url_3,
+                            mealData[mealType].image_url_4,
+                          ].filter(Boolean)
+                        : []
+                    }
+                    descriptions={mealData[mealType]?.description || ''}
+                    time={mealData[mealType]?.updated_at.split('T')[1] || ''}
+                    onAddComment={() => handleAddComment(mealType)}
+                  />
+                )
+              )}
             </div>
 
             {['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'].map(
@@ -197,9 +203,7 @@ export default function DietItemContainer() {
                     onModalClick={() =>
                       handleSaveFeedback(mealType, item.user_id, item.date)
                     }
-                    onModalClose={() =>
-                      handleCancelComment(mealType, item.date)
-                    }
+                    onModalClose={() => handleCancelComment(mealType)}
                     isModal
                     onChange={(e) =>
                       handleCommentChange(mealType, item.date, e.target.value)

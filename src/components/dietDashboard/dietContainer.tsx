@@ -69,6 +69,10 @@ export default function DietContainer() {
           meal_type: meal.meal_type,
           description: meal.description || '',
           updated_at: meal.updated_at,
+          image_url_1: '',
+          image_url_2: '',
+          image_url_3: '',
+          image_url_4: '',
         };
       }
       if (meal.meal_type === 'BREAKFAST')
