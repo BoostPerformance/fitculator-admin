@@ -1,9 +1,9 @@
 import DietContainer from '@/components/dietDashboard/dietContainer';
 import FixedBars from '@/components/fixedBars/fixedBars';
-import { getServerSession } from 'next-auth';
+//import { getServerSession } from 'next-auth';
 
 export default async function Diet() {
-  const session = await getServerSession();
+  //const session = await getServerSession();
 
   return (
     <>

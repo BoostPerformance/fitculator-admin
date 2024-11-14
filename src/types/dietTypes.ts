@@ -1,9 +1,19 @@
 export interface Meal {
+  id: number;
   user_id: string;
   date: string;
   meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
   description: string;
   updated_at: string;
+  image_url_1: string;
+  image_url_2: string;
+  image_url_3: string;
+  image_url_4: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
 }
 
 export interface Feedback {

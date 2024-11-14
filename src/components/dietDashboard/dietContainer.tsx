@@ -6,7 +6,7 @@ import DateInput from '../input/dateInput';
 import SearchInput from '../input/searchInput';
 import DietTable from './dietTable';
 import { AI_Feedback, Diet_Feedback } from '@/components/mock/DietItems';
-import { CombinedData, Meal, Feedback } from '@/types/dietTypes';
+import { CombinedData, Meal, Feedback, User } from '@/types/dietTypes';
 
 // 날짜를 'YYYY-MM-DD' 형식으로 변환하는 함수
 const formatDate = (date: Date) => {
@@ -24,8 +24,17 @@ export default function DietContainer() {
   const fetchMeals = useCallback(async () => {
     try {
       const response = await fetch('/api/dietList');
-      const meals = await response.json();
-      const groupedMeals = groupMealsByUser(meals);
+      const { meals, users } = await response.json(); // API에서 meals와 users를 가져옴
+
+      const combinedData = meals.map((meal: Meal) => {
+        const user = users.find((user: User) => user.id === meal.user_id);
+        return {
+          ...meal,
+          name: user ? user.name : 'Unknown',
+        };
+      });
+
+      const groupedMeals = groupMealsByUser(combinedData);
       const enrichedMeals = addFeedbackToMeals(groupedMeals);
       setCombinedData(enrichedMeals);
     } catch (error) {
@@ -38,14 +47,15 @@ export default function DietContainer() {
   }, [fetchMeals]);
 
   // 식단 데이터를 그룹화하는 함수
-  const groupMealsByUser = (meals: Meal[]): CombinedData[] => {
+  const groupMealsByUser = (combinedData: CombinedData[]): CombinedData[] => {
     const grouped: Record<string, CombinedData> = {};
-    meals.forEach((meal) => {
+    combinedData.forEach((meal) => {
       const key = `${meal.user_id}-${meal.date}`;
+
       if (!grouped[key]) {
         grouped[key] = {
           id: meal.user_id,
-          name: meal.user_id,
+          name: meal.name,
           breakfast: '',
           lunch: '',
           dinner: '',
@@ -55,10 +65,10 @@ export default function DietContainer() {
           aiFeedbackText: 'no ai_feedback_text',
           coachFeedbackText: 'no feedback_text',
           feedback: null,
-          user_id: meal.user_id, // 추가
-          meal_type: meal.meal_type, // 추가
-          description: meal.description || '', // 추가
-          updated_at: meal.updated_at, // 추가
+          user_id: meal.user_id,
+          meal_type: meal.meal_type,
+          description: meal.description || '',
+          updated_at: meal.updated_at,
         };
       }
       if (meal.meal_type === 'BREAKFAST')
@@ -70,7 +80,6 @@ export default function DietContainer() {
     return Object.values(grouped);
   };
 
-  // 그룹화된 식단 데이터에 피드백을 추가하는 함수
   const addFeedbackToMeals = (meals: CombinedData[]): CombinedData[] => {
     return meals.map((meal) => {
       const aiFeedback = AI_Feedback.find(

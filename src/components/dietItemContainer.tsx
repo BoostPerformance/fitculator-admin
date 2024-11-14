@@ -1,10 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
 import TextBox from './textBox';
-import { Meals, AI_Feedback } from './mock/DietItems';
+import { AI_Feedback } from './mock/DietItems';
 import Title from './layout/title';
 import TotalFeedbackCounts from './dietDashboard/totalFeedbackCount';
 import MealPhotoLayout from './layout/mealPhotoLayout';
+import { useParams } from 'next/navigation';
 
 interface Meal {
   meal_id: string;
@@ -12,10 +13,10 @@ interface Meal {
   date: string;
   meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
   description: string;
-  image_url_1: string;
-  image_url_2: string;
-  image_url_3: string;
-  image_url_4: string;
+  image_url_1?: string;
+  image_url_2?: string;
+  image_url_3?: string;
+  image_url_4?: string;
   updated_at: string;
   additional_comments?: string;
 }
@@ -26,18 +27,18 @@ const getAIFeedback = (user_id: string, date: string) => {
   );
 };
 
-const getMealByTypeAndDate = (
-  user_id: string,
-  date: string,
-  mealType: string
-) => {
-  return Meals.find(
-    (meal) =>
-      meal.user_id === user_id &&
-      meal.date === date &&
-      meal.meal_type === mealType
-  );
-};
+// const getMealByTypeAndDate = (
+//   user_id: string,
+//   date: string,
+//   mealType: string
+// ) => {
+//   return meals.find(
+//     (meal) =>
+//       meal.user_id === user_id &&
+//       meal.date === date &&
+//       meal.meal_type === mealType
+//   );
+// };
 
 export default function DietItemContainer() {
   const [visibleItems, setVisibleItems] = useState(2);
@@ -48,6 +49,11 @@ export default function DietItemContainer() {
     [key: string]: boolean;
   }>({});
   const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
+  const { userId, date } = useParams();
+
+  const userMeals = meals.filter(
+    (meal) => meal.user_id === userId && meal.date === date
+  );
 
   const handleScroll = () => {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
@@ -65,10 +71,14 @@ export default function DietItemContainer() {
     userId: string,
     date: string
   ) => {
-    const meal = getMealByTypeAndDate(userId, date, mealType);
-
+    const meal = meals.find(
+      (meal) =>
+        meal.user_id === userId &&
+        meal.date === date &&
+        meal.meal_type === mealType
+    );
     if (meal) {
-      meal.additional_comments = commentText[`${mealType}-${date}`] || ''; //
+      meal.additional_comments = commentText[`${mealType}-${date}`] || '';
       console.log('피드백 저장:', meal);
     }
     setCommentVisible((prev) => {
@@ -111,9 +121,7 @@ export default function DietItemContainer() {
     try {
       const response = await fetch('/api/dietItem');
       const data = await response.json();
-      console.log(data);
-
-      // setMeals(data); // meals 데이터 상태 업데이트
+      setMeals(data);
     } catch (error) {
       console.error('Error fetching meals:', error);
     }
@@ -124,16 +132,23 @@ export default function DietItemContainer() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [meals]);
+  }, []);
+
+  const mealData = {
+    BREAKFAST: userMeals.find((meal) => meal.meal_type === 'BREAKFAST'),
+    LUNCH: userMeals.find((meal) => meal.meal_type === 'LUNCH'),
+    DINNER: userMeals.find((meal) => meal.meal_type === 'DINNER'),
+    SNACK: userMeals.find((meal) => meal.meal_type === 'SNACK'),
+  };
 
   return (
     <div className="max-w-[48rem] mx-auto z-50 sm:px-[3rem] mt-[4rem]">
       <div className="flex-1 py-[3rem]">
-        <Title title="회원1 님의 식단현황" />
+        <Title title={`회원 ${userId}님의 ${date} 식단`} />
         <TotalFeedbackCounts count="30" total="30" />
       </div>
 
-      {Meals.slice(0, visibleItems).map((item) => {
+      {userMeals.slice(0, visibleItems).map((item) => {
         const aiFeedback = getAIFeedback(item.user_id, item.date);
 
         return (
@@ -141,59 +156,35 @@ export default function DietItemContainer() {
             <h2 className="text-[1.5rem] font-bold">{item.date}</h2>
 
             <div className="grid grid-cols-4 gap-[1rem]">
-              <MealPhotoLayout
-                title="아침"
-                photos={[
-                  item.image_url_1,
-                  item.image_url_2,
-                  item.image_url_3,
-                  item.image_url_4,
-                ].filter(Boolean)}
-                descriptions={
-                  item.meal_type === 'BREAKFAST' && item.description
-                }
-                time={item.updated_at.split('T')[1]}
-                onAddComment={() => handleAddComment('BREAKFAST', item.date)}
-              />
-              <MealPhotoLayout
-                title="점심"
-                photos={[
-                  item.image_url_1,
-                  item.image_url_2,
-                  item.image_url_3,
-                  item.image_url_4,
-                ]}
-                descriptions={item.meal_type === 'LUNCH' && item.description}
-                time={item.updated_at.split('T')[1]}
-                onAddComment={() => handleAddComment('LUNCH', item.date)}
-              />
-              <MealPhotoLayout
-                title="저녁"
-                photos={[
-                  item.image_url_1,
-                  item.image_url_2,
-                  item.image_url_3,
-                  item.image_url_4,
-                ]}
-                descriptions={item.meal_type === 'DINNER' && item.description}
-                time={item.updated_at.split('T')[1]}
-                onAddComment={() => handleAddComment('DINNER', item.date)}
-              />
-              <MealPhotoLayout
-                title="간식"
-                photos={[
-                  item.image_url_1,
-                  item.image_url_2,
-                  item.image_url_3,
-                  item.image_url_4,
-                ]}
-                descriptions={item.meal_type === 'SNACK' && item.description}
-                time={item.updated_at.split('T')[1]}
-                onAddComment={() => handleAddComment('SNACK', item.date)}
-              />
+              {['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'].map((mealType) => (
+                <MealPhotoLayout
+                  key={mealType}
+                  title={
+                    mealType === 'BREAKFAST'
+                      ? '아침'
+                      : mealType === 'LUNCH'
+                      ? '점심'
+                      : mealType === 'DINNER'
+                      ? '저녁'
+                      : '간식'
+                  }
+                  photos={
+                    mealData[mealType]?.image_url_1
+                      ? [
+                          mealData[mealType].image_url_1,
+                          mealData[mealType].image_url_2,
+                          mealData[mealType].image_url_3,
+                          mealData[mealType].image_url_4,
+                        ].filter(Boolean)
+                      : []
+                  }
+                  descriptions={mealData[mealType]?.description || ''}
+                  time={mealData[mealType]?.updated_at.split('T')[1] || ''}
+                  onAddComment={() => handleAddComment(mealType, date)}
+                />
+              ))}
             </div>
 
-            {/* 코멘트 텍스트 박스 (Meal 타입별로 관리) */}
             {['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'].map(
               (mealType) =>
                 commentVisible[`${mealType}-${item.date}`] && (

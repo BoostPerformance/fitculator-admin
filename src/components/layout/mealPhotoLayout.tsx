@@ -25,8 +25,8 @@ const MealPhotoLayout = ({
       return (
         <div className="w-full h-[8rem] overflow-hidden rounded-lg">
           <Image
-            src={`/image${filteredPhotos[0]}`}
-            alt="meal"
+            src={filteredPhotos[0]}
+            alt="meal image"
             className="w-full h-full object-cover"
             width={100}
             height={100}
@@ -36,13 +36,13 @@ const MealPhotoLayout = ({
     } else if (filteredPhotos.length === 2) {
       return (
         <div className="grid grid-cols-2 gap-[0.5rem]">
-          {filteredPhotos.map((photo: string, index: number) => (
+          {filteredPhotos.map((photo, index) => (
             <div
               key={index}
               className="w-full h-[8rem] overflow-hidden rounded-lg"
             >
               <Image
-                src={`/image${photo}`}
+                src={photo}
                 alt={`meal-${index}`}
                 className="w-full h-full object-cover"
                 width={100}
@@ -57,7 +57,7 @@ const MealPhotoLayout = ({
         <div className="grid grid-cols-3 grid-rows-2 gap-[0.2rem]">
           <div className="col-span-2 row-span-2 h-[8rem] overflow-hidden rounded-lg">
             <Image
-              src={`/image${filteredPhotos[0]}`}
+              src={filteredPhotos[0]}
               alt="meal-large"
               className="w-full h-full object-cover"
               width={100}
@@ -66,7 +66,7 @@ const MealPhotoLayout = ({
           </div>
           <div className="h-[4rem] overflow-hidden rounded-lg">
             <Image
-              src={`/image${filteredPhotos[1]}`}
+              src={filteredPhotos[1]}
               alt="meal-small-1"
               className="w-full h-full object-cover"
               width={100}
@@ -75,7 +75,7 @@ const MealPhotoLayout = ({
           </div>
           <div className="h-[4rem] overflow-hidden rounded-lg">
             <Image
-              src={`/image${filteredPhotos[2]}`}
+              src={filteredPhotos[2]}
               alt="meal-small-2"
               className="w-full h-full object-cover"
               width={100}
@@ -87,13 +87,13 @@ const MealPhotoLayout = ({
     } else if (filteredPhotos.length === 4) {
       return (
         <div className="grid grid-cols-2 gap-[0.5rem]">
-          {filteredPhotos.map((photo: string, index: number) => (
+          {filteredPhotos.map((photo, index) => (
             <div
               key={index}
               className="w-full h-[3.8rem] overflow-hidden rounded-lg"
             >
               <Image
-                src={`/image${photo}`}
+                src={photo}
                 alt={`meal-${index}`}
                 className="w-full h-full object-cover"
                 width={100}

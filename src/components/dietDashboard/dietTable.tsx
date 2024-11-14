@@ -27,8 +27,6 @@ const sortData = (
 };
 
 const DietTable: React.FC<DietTableProps> = ({ data }) => {
-  // const [groupedMeals, setGroupedMeals] = useState<GroupedMeals[]>([]);
-  // const [loadingData, setLoadingData] = useState(true);
   const router = useRouter();
   const [sortBy, setSortBy] = useState<string>('id');
   const [sortDirection, setSortDirection] = useState<boolean>(true);
@@ -67,6 +65,10 @@ const DietTable: React.FC<DietTableProps> = ({ data }) => {
         />
       </>
     );
+  };
+
+  const handleItemClick = (userId: string, date: string) => {
+    router.push(`/user/diet/${userId}/${date}`);
   };
 
   // const calculateFeedback = (userId: string, mealDate: string) => {
@@ -148,7 +150,7 @@ const DietTable: React.FC<DietTableProps> = ({ data }) => {
           {sortedData.map((item) => (
             <tr key={item.user_id} className="border-b">
               <td className="p-[1rem]">{item.user_id}</td>
-              <td className="p-[1rem]">{item.name}</td>
+              <td className="p-[1rem]">{item.name ?? 'unknown'}</td>
               <td className="p-[1rem]">{item.breakfast || '없음'}</td>
               <td className="p-[1rem]">{item.lunch || '없음'}</td>
               <td className="p-[1rem]">{item.dinner || '없음'}</td>
@@ -159,9 +161,7 @@ const DietTable: React.FC<DietTableProps> = ({ data }) => {
                   className={`px-[0.625rem] py-[0.5rem] rounded-[0.5rem] w-[5.9375rem] h-[1.8125rem] flex items-center justify-center text-0.875-400 ${
                     item.user_id === item.date ? 'bg-green-500' : 'bg-[#FF9257]'
                   }`}
-                  onClick={() => {
-                    router.push(`/user/diet/${item.user_id}`);
-                  }}
+                  onClick={() => handleItemClick(item.user_id, item.date)}
                 >
                   {/* {calculateFeedback(item.user_id, item.date)} */}calc
                 </button>
