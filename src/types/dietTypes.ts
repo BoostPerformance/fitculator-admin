@@ -1,5 +1,5 @@
 export interface Meal {
-  id: number;
+  id: string;
   user_id: string;
   date: string;
   meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
