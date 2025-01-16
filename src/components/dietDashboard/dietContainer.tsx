@@ -1,7 +1,5 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import Title from '../layout/title';
-import TotalFeedbackCounts from './totalFeedbackCount';
 import DateInput from '../input/dateInput';
 import SearchInput from '../input/searchInput';
 import DietTable from './dietTable';
@@ -115,13 +113,6 @@ export default function DietContainer() {
 
   return (
     <div className="flex-1 p-6 bg-gray-100 pt-[7rem] pl-[10rem] bg-white-1">
-      <div>
-        <Title title="팻다챌 챌린지 식단 현황" />
-        <TotalFeedbackCounts
-          count={filteredData.length.toString()}
-          total="30"
-        />
-      </div>
       <div className="flex justify-between items-center mt-[1.5rem]">
         <DateInput onChange={handleDateInput} selectedDate={selectedDate} />
         <SearchInput />
