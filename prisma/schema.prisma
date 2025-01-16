@@ -1,15 +1,91 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+model ai_feedback {
+  feedback_id      String    @id @db.VarChar(25)
+  user_id          String?   @db.VarChar(25)
+  date             DateTime  @db.Date
+  ai_feedback_text String
+  created_at       DateTime? @default(now()) @db.Timestamp(6)
+  users            users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model coaches {
+  coach_id       String          @id @db.VarChar(25)
+  name           String          @db.VarChar(100)
+  email          String          @unique @db.VarChar(100)
+  specialization String?         @db.VarChar(100)
+  created_at     DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?       @default(now()) @db.Timestamp(6)
+  diet_feedback  diet_feedback[]
+}
+
+model diet_feedback {
+  feedback_id            String    @id @db.VarChar(25)
+  user_id                String?   @db.VarChar(25)
+  coach_id               String?   @db.VarChar(25)
+  date                   DateTime  @db.Date
+  feedback_text          String
+  nutritional_analysis   String?
+  meal_balance_score     Int?
+  suggested_improvements String?
+  created_at             DateTime? @default(now()) @db.Timestamp(6)
+  updated_at             DateTime? @default(now()) @db.Timestamp(6)
+  coaches                coaches?  @relation(fields: [coach_id], references: [coach_id], onDelete: NoAction, onUpdate: NoAction)
+  users                  users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model meals {
+  meal_id         String    @id @db.VarChar(25)
+  user_id         String?   @db.VarChar(25)
+  meal_type       String    @db.VarChar(20)
+  date            DateTime  @db.Date
+  image_url_1     String?   @db.VarChar(255)
+  image_url_2     String?   @db.VarChar(255)
+  image_url_3     String?   @db.VarChar(255)
+  image_url_4     String?   @db.VarChar(255)
+  description     String?
+  additional_info String?
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+  users           users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model message {
+  message_id String    @id @db.VarChar(25)
+  user_id    String?   @db.VarChar(25)
+  content    String?
+  isfromuser Boolean?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  users      users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  user_id          String          @id @db.VarChar(25)
+  discord_id       String?         @db.VarChar(25)
+  nickname         String?         @db.VarChar(25)
+  name             String?         @db.VarChar(25)
+  birth            DateTime?       @db.Date
+  restingheartrate Int?
+  created_at       DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at       DateTime?       @default(now()) @db.Timestamp(6)
+  ai_feedback      ai_feedback[]
+  diet_feedback    diet_feedback[]
+  meals            meals[]
+  message          message[]
+}
+
+model year {
+  year_id    String    @id @db.VarChar(25)
+  grade      String?   @db.VarChar(25)
+  startdate  DateTime? @default(now()) @db.Timestamp(6)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
 }
