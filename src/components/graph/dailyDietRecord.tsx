@@ -53,8 +53,10 @@ const DailyDietRecord = () => {
   ];
 
   return (
-    <div className="bg-white p-6 rounded-lg">
-      <h2 className="text-lg font-semibold mb-6">일별 신단 기록 현황</h2>
+    <div className="bg-white p-6 rounded-lg dark:bg-gray-8">
+      <h2 className="text-lg font-semibold mb-6 dark:text-gray-5">
+        일별 신단 기록 현황
+      </h2>
       <div className="space-y-4">
         {activities.map((activity, index) => (
           <div key={index} className="flex items-center gap-4">
@@ -62,7 +64,9 @@ const DailyDietRecord = () => {
             <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0" />
 
             {/* Name */}
-            <span className="w-12 text-sm">{activity.name}</span>
+            <span className="w-12 text-sm dark:text-gray-5">
+              {activity.name}
+            </span>
 
             {/* Weekly Activity Grid */}
             <div className="flex gap-1">

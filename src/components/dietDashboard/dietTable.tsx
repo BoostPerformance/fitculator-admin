@@ -117,7 +117,7 @@ const DietTable: React.FC<DietTableProps> = ({ data }) => {
 
   return (
     <div className="mt-[1.4rem]">
-      <table className="table-auto w-full bg-white shadow-md rounded-md">
+      <table className="table-auto w-full bg-white shadow-md rounded-md ">
         <thead>
           <tr className="bg-gray-100 text-left text-1-500 text-gray-6">
             <th className="p-[1rem] ">

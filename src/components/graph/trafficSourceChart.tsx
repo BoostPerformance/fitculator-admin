@@ -37,8 +37,8 @@ export default function TrafficSourceChart() {
   ];
 
   return (
-    <div className="bg-white p-4 shadow rounded-lg">
-      <h2 className="text-lg font-semibold mb-4">인기운동</h2>
+    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8">
+      <h2 className="text-lg font-semibold mb-4 dark:text-gray-5">인기운동</h2>
       <div>
         <div className="flex items-center justify-around">
           <div className="lg:w-[20rem]">

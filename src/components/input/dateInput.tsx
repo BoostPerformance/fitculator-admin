@@ -40,7 +40,7 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative ">
       <Image
         src="/svg/calender.svg"
         alt="calender"
@@ -50,11 +50,11 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
       />
       <input
         type="text"
-        value={formattedDate || selectedDate} // 선택된 날짜가 있으면 표시, 없으면 기본값
+        value={formattedDate || selectedDate}
         onClick={handleDateOpen}
         placeholder={Datetoday}
         readOnly
-        className="border-[0.1rem] py-[0.4rem] pl-[2.5rem] rounded-[0.5rem] w-[15rem]"
+        className="border-[0.1rem] py-[0.4rem] pl-[2.5rem] rounded-[0.5rem] w-[15rem] dark:bg-gray-3 dark:text-black"
       />
       <Image
         src="/svg/arrow-right.svg"
@@ -64,12 +64,12 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
         className="absolute right-[0.5rem] top-[0.6rem]"
       />
       {open && (
-        <div className="absolute z-10 mt-2 bg-white p-[1rem] rounded-[1rem] drop-shadow">
+        <div className="absolute z-10 mt-2 bg-white dark:bg-gray-3 dark:text-black p-[1rem] rounded-[1rem] drop-shadow">
           <DayPicker
             mode="single"
             required={false}
             selected={selected || new Date(selectedDate)}
-            onSelect={handleDateChange} // 선택 핸들러
+            onSelect={handleDateChange}
           />
         </div>
       )}
