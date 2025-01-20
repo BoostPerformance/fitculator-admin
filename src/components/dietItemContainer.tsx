@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import TextBox from './textBox';
 import { AI_Feedback } from './mock/DietItems';
 import Title from './layout/title';
-import TotalFeedbackCounts from './dietDashboard/totalFeedbackCount';
+import TotalFeedbackCounts from './totalCounts/totalFeedbackCount';
 import MealPhotoLayout from './layout/mealPhotoLayout';
 import { useParams } from 'next/navigation';
 

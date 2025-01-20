@@ -12,7 +12,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function TrafficSourceChart() {
   const data: ChartData<'doughnut'> = {
-    labels: ['달리기', '달리기', '달리기', '달리기', '달리기'],
+    labels: ['달리기', '주짓수', '웨이트', '사이클', '테니스'],
     datasets: [
       {
         data: [300, 250, 200, 150, 100],
@@ -30,10 +30,10 @@ export default function TrafficSourceChart() {
 
   const exerciseList = [
     { name: '달리기', percentage: '30%', rank: 1 },
-    { name: '달리기', percentage: '25%', rank: 2 },
-    { name: '달리기', percentage: '20%', rank: 3 },
-    { name: '달리기', percentage: '15%', rank: 4 },
-    { name: '달리기', percentage: '10%', rank: 5 },
+    { name: '주짓수', percentage: '25%', rank: 2 },
+    { name: '사이클', percentage: '20%', rank: 3 },
+    { name: '웨이트', percentage: '15%', rank: 4 },
+    { name: '테니스', percentage: '10%', rank: 5 },
   ];
 
   return (

@@ -14,13 +14,11 @@ export default function DarkModeButton({ className }: ButtonProps) {
         className={`text-1.25-900 ${className}`}
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       >
-        <Image
-          src="/svg/dark-mode.svg"
-          alt=""
-          width={30}
-          height={30}
-          className={`${theme === 'dark' ? 'invert' : ''}`}
-        />
+        {theme === 'light' ? (
+          <Image src="/svg/dark-mode.svg" alt="" width={30} height={30} />
+        ) : (
+          <Image src="/svg/light-mode.svg" alt="" width={30} height={30} />
+        )}
       </button>
     </>
   );

@@ -28,11 +28,18 @@ const config: Config = {
           2: '#00BBF5',
           3: '#EDF4F8',
           4: '#181C32',
+          5: '#219DF6',
+        },
+        green: {
+          DEFAULT: '#48BA5D',
+        },
+        yellow: {
+          DEFAULT: '#FDB810',
         },
         gray: {
           DEFAULT: '#F2F2F2',
           1: '#625C5C',
-          2: '#F9F9F9',
+          2: '#8D8D8D',
           3: '#D9D9D9',
           4: '#A3AAAD;',
           5: '#5E5A5A',
@@ -43,6 +50,7 @@ const config: Config = {
           10: '#BDBDBD',
           11: '#A1A1A1',
           12: '#767676',
+          13: '#E1E1E1',
         },
         red: {
           DEFAULT: '#DD204E',

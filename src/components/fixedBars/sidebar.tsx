@@ -1,50 +1,96 @@
 'use client';
-
+import Image from 'next/image';
 import { FaBars } from 'react-icons/fa';
+import { useState } from 'react';
+import Link from 'next/link';
 
 interface SidebarProps {
   onClick: () => void;
-  isOpen: boolean;
 }
 
-export default function Sidebar({ onClick, isOpen }: SidebarProps) {
+const challengesName = ['F45 을지로 C50챌린지', '핏다챌', '챌린지1', '챌린지2'];
+
+export default function Sidebar({}: SidebarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenDropdown, setIsOpenDropdown] = useState(false);
+  const handleOpen = () => {
+    setIsOpen(!isOpen);
+  };
+  const handleDropdown = () => {
+    return setIsOpenDropdown(!isOpenDropdown);
+  };
+
   return (
-    <div
-      className={`flex bg-white z-50 ${
-        isOpen
-          ? 'lg:w-[8rem] md:w-[8rem] sm:w-[6rem] drop-shadow-md border-[0.1rem]'
-          : 'w-0 '
-      } sm:w-[0rem] md:w-[13rem] dark:bg-gray-800  min-h-screen transition-all duration-300 pt-[6rem] fixed z-50`}
-    >
-      <div className="flex flex-col justify-between h-full text-blue-4 dark:text-white">
-        <div>
-          <button
-            className="p-[1rem] focus:outline-none flex items-center"
-            onClick={onClick}
-          >
-            <FaBars className="w-[1rem]" />
-          </button>
-          <nav
-            className={`${
-              isOpen ? 'block' : 'hidden'
-            } transition-all duration-300`}
-          >
-            <ul>
-              <li className="px-[1rem] py-[0.5rem] hover:bg-gray-600 text-1-500 sm:text-0.75-500">
-                <a href="#">Dashboard</a>
-              </li>
-              <li className="px-[1rem] py-[0.5rem] hover:bg-gray-600 text-1-500 sm:text-0.75-500">
-                <a href="#">Payout</a>
-              </li>
-              <li className="px-[1rem] py-[0.5rem] hover:bg-gray-600 text-1-500 sm:text-0.75-500">
-                <a href="#">Inbox</a>
-              </li>
-              <li className="px-[1rem] py-[0.5rem] hover:bg-gray-600 text-1-500 sm:text-0.75-500">
-                <a href="#">Settings</a>
-              </li>
-            </ul>
-          </nav>
-        </div>
+    <div className="bg-white drop-shadow-sm dark:bg-blue-4 ">
+      <div className="flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[22rem] p-[2.3rem]">
+        <Image
+          src="/svg/fitculator.svg"
+          width={100}
+          height={30}
+          alt="logo"
+          className={` w-[9rem] dark:invert`}
+        />
+
+        <nav className="w-full">
+          <div>
+            <button
+              onClick={handleDropdown}
+              className="w-[17rem] flex items-center justify-between lg:text-1.5-900 border-b-[0.1rem]  border-gray-13 py-[0.8rem]"
+            >
+              챌린지
+              {isOpenDropdown ? (
+                <Image
+                  src="/svg/arrow-down.svg"
+                  width={20}
+                  height={30}
+                  alt="arrow-down "
+                  className="w-[1rem] "
+                />
+              ) : (
+                <Image
+                  src="/svg/arrow-up.svg"
+                  width={20}
+                  height={30}
+                  alt="arrow-up "
+                  className="w-[1rem] "
+                />
+              )}
+            </button>
+            {isOpenDropdown && (
+              <div>
+                {challengesName.map((Challengename) => (
+                  <div className="w-[15rem] p-[1rem] text-gray-2 dark:text-white">
+                    <div className=" lg:text-1.25-700">{Challengename}</div>
+                    <ul className="flex flex-col gap-[0.3rem] py-[0.7rem]">
+                      <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-600 text-1.25-700 sm:text-0.875-700">
+                        <Image
+                          src="/svg/subtitle-icon.svg"
+                          width={20}
+                          height={30}
+                          alt="subtitle-icon "
+                          className="w-[0.75rem]"
+                        />
+                        <Link href={`/user/${Challengename}/diet`}>식단</Link>
+                      </li>
+                      <li className="flex items-center gap-[0.5rem]  px-[1rem] hover:bg-gray-600 text-1.25-700 sm:text-0.875-700">
+                        <Image
+                          src="/svg/subtitle-icon.svg"
+                          width={20}
+                          height={30}
+                          alt="subtitle-icon "
+                          className="w-[0.75rem]"
+                        />
+                        <Link href={`/user/${Challengename}/exercise`}>
+                          운동
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </nav>
       </div>
     </div>
   );

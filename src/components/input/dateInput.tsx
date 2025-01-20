@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 interface DateInputProps {
   onChange: (date: string) => void; // 수정: date 타입을 string으로 변경
-  selectedDate: string; // 선택된 날짜를 전달받음
+  selectedDate: string | undefined; // 선택된 날짜를 전달받음
 }
 
 const DateInput = ({ onChange, selectedDate }: DateInputProps) => {

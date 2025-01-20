@@ -3,49 +3,49 @@ import React from 'react';
 const DailyDietRecord = () => {
   const activities = [
     {
-      name: '대화',
+      name: '다희',
       totalScore: '23/23',
       weeklyActivity: [0, 0, 1, 0, 1, 0, 0],
       progress: 100,
     },
     {
-      name: '대화',
+      name: '희주',
       totalScore: '10/23',
       weeklyActivity: [0, 0, 1, 0, 1, 0, 0],
       progress: 43,
     },
     {
-      name: '대화',
+      name: '은지',
       totalScore: '30/45',
       weeklyActivity: [0, 0, 1, 0, 1, 0, 0],
       progress: 67,
     },
     {
-      name: '대화',
+      name: '에쉬',
       totalScore: '30/45',
       weeklyActivity: [0, 0, 1, 0, 1, 0, 0],
       progress: 67,
     },
     {
-      name: '대화',
+      name: '현지',
       totalScore: '30/45',
       weeklyActivity: [0, 0, 1, 0, 1, 0, 0],
       progress: 67,
     },
     {
-      name: '대화',
+      name: '영진',
       totalScore: '30/45',
       weeklyActivity: [0, 0, 1, 0, 1, 0, 0],
       progress: 67,
     },
     {
-      name: '대화',
+      name: '소희',
       totalScore: '30/45',
       weeklyActivity: [0, 0, 1, 0, 1, 0, 0],
       progress: 67,
     },
     {
-      name: '대화',
+      name: '민재',
       totalScore: '30/45',
       weeklyActivity: [0, 0, 1, 0, 1, 0, 0],
       progress: 67,

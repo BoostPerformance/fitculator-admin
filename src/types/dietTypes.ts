@@ -38,19 +38,28 @@ export interface TableTitleData {
   feedback: Feedback | null;
 }
 
-export interface CombinedData extends Meal {
-  id: string;
+// export interface CombinedData extends Meal {
+//   id: string;
+//   name: string;
+//   discordId?: string;
+//   breakfast: string;
+//   lunch: string;
+//   dinner: string;
+//   snack: string;
+//   date: string;
+//   updateTime: string;
+//   aiFeedbackText: string;
+//   coachFeedbackText: string;
+//   feedback: Feedback | null;
+// }
+export interface CombinedData {
+  nickname: string;
   name: string;
-  discordId?: string;
-  breakfast: string;
-  lunch: string;
-  dinner: string;
-  snack: string;
-  date: string;
-  updateTime: string;
-  aiFeedbackText: string;
-  coachFeedbackText: string;
-  feedback: Feedback | null;
+  meals: number[];
+  exercise_point: string; // 운동포인트
+  exercise_weight: number;
+  coach_memo: string | null; // 코치미팅
+  feedback_counts: string;
 }
 
 export interface GroupedMeals {
@@ -63,3 +72,15 @@ export interface GroupedMeals {
   updateTime: string;
   date: string;
 }
+
+export interface Member {
+  nickname: string;
+  name: string;
+  meals: number[];
+  exercise_point: string; // 운동포인트
+  exercise_weight: number;
+  coach_memo: string | null; // 코치미팅
+  feedback_counts: string;
+}
+
+export type DietTableMockDataType = Member[];
