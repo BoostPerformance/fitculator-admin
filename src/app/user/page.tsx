@@ -79,6 +79,7 @@ export default function User() {
               borderColor="border-yellow"
             />
           </div>
+
           <div className="dark:bg-blue-4 grid grid-cols-3 gap-[1rem] my-6">
             <TrafficSourceChart />
             <DailyDietRecord />
@@ -91,6 +92,7 @@ export default function User() {
               <SearchInput />
             </div>
             <DietTable data={dietData} />
+
           </div>
         </div>
       </div>

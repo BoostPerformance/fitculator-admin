@@ -69,6 +69,7 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
             mode="single"
             required={false}
             selected={selected}
+
             onSelect={handleDateChange}
           />
         </div>

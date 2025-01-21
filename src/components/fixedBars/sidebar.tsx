@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 //import { FaBars } from 'react-icons/fa';
+
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -16,6 +17,7 @@ export default function Sidebar({}: SidebarProps) {
   // const handleOpen = () => {
   //   setIsOpen(!isOpen);
   // };
+
   const handleDropdown = () => {
     return setIsOpenDropdown(!isOpenDropdown);
   };
