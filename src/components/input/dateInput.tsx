@@ -68,7 +68,7 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
           <DayPicker
             mode="single"
             required={false}
-            selected={selected || new Date(selectedDate)}
+            selected={selected}
             onSelect={handleDateChange}
           />
         </div>

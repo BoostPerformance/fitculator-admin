@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { FaBars } from 'react-icons/fa';
+//import { FaBars } from 'react-icons/fa';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -11,11 +11,11 @@ interface SidebarProps {
 const challengesName = ['F45 을지로 C50챌린지', '핏다챌', '챌린지1', '챌린지2'];
 
 export default function Sidebar({}: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
-  const handleOpen = () => {
-    setIsOpen(!isOpen);
-  };
+  // const handleOpen = () => {
+  //   setIsOpen(!isOpen);
+  // };
   const handleDropdown = () => {
     return setIsOpenDropdown(!isOpenDropdown);
   };
@@ -60,8 +60,11 @@ export default function Sidebar({}: SidebarProps) {
             </button>
             {isOpenDropdown && (
               <div>
-                {challengesName.map((Challengename) => (
-                  <div className="w-[15rem] p-[1rem] text-gray-2 dark:text-white">
+                {challengesName.map((Challengename, index) => (
+                  <div
+                    key={`challenge-${index}`}
+                    className="w-[15rem] p-[1rem] text-gray-2 dark:text-white"
+                  >
                     <div className=" lg:text-1.25-700">{Challengename}</div>
                     <ul className="flex flex-col gap-[0.3rem] py-[0.7rem]">
                       <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">

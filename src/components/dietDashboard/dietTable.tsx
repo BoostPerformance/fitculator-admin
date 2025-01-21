@@ -2,11 +2,21 @@
 //import { CombinedData } from '@/types/dietTypes';
 //import { useRouter } from 'next/navigation';
 //import Image from 'next/image';
-import DietTableMockData from '../mock/DietTableMockData';
+//import DietTableMockData from '../mock/DietTableMockData';
 //import { ActivityStatus } from '@/types/dietTypes';
 
+interface DietTableItem {
+  nickname: string;
+  name: string;
+  meals: number[];
+  exercise_point: number;
+  exercise_weight?: number;
+  coach_memo?: string;
+  feedback_counts: number;
+}
+
 interface DietTableProps {
-  data: [];
+  data: DietTableItem[];
 }
 
 // const sortData = (
@@ -157,7 +167,7 @@ const DietTable: React.FC<DietTableProps> = ({ data }) => {
           </tr>
         </thead>
         <tbody>
-          {DietTableMockData.map((item) => (
+          {data.map((item) => (
             <tr key={item.nickname} className="border-b dark:text-gray-5">
               <td className="p-[1rem]">{item.nickname}</td>
               <td className="p-[1rem]">{item.name}</td>
@@ -167,17 +177,6 @@ const DietTable: React.FC<DietTableProps> = ({ data }) => {
               </td>
               <td className="p-[1rem]">{item.coach_memo || '없음'}</td>
               <td className="p-[1rem]">{item.feedback_counts}</td>
-
-              <td>
-                {/* <button
-                  className={`px-[0.625rem] py-[0.5rem] rounded-[0.5rem] w-[5.9375rem] h-[1.8125rem] flex items-center justify-center text-0.875-400 ${
-                    item.user_id === item.date ? 'bg-green-500' : 'bg-[#FF9257]'
-                  }`}
-                  onClick={() => handleItemClick(item.user_id, item.date)}
-                > */}
-                {/* {calculateFeedback(item.user_id, item.date)} calc
-                </button>*/}
-              </td>
             </tr>
           ))}
         </tbody>
