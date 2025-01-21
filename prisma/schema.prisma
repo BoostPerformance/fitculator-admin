@@ -1,15 +1,246 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+model admin_permissions {
+  id               String             @id
+  name             String             @unique
+  description      String?
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  role_permissions role_permissions[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+
+model admin_users {
+  id              String         @id
+  auth_user_id    String?        @db.Uuid
+  email           String         @unique
+  display_name    String
+  organization_id String?
+  admin_role      admin_role
+  is_active       Boolean?       @default(true)
+  created_at      DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?      @default(now()) @db.Timestamptz(6)
+  auth_users      auth_users?    @relation(fields: [auth_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  organizations   organizations? @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  coaches         coaches?
+
+  @@index([organization_id], map: "idx_admin_users_organization")
+}
+
+model auth_users {
+  id          String        @id @db.Uuid
+  email       String?       @unique
+  created_at  DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime?     @default(now()) @db.Timestamptz(6)
+  admin_users admin_users[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+
+model challenge_coaches {
+  id           String     @id
+  challenge_id String
+  coach_id     String
+  created_at   DateTime?  @default(now()) @db.Timestamptz(6)
+  challenges   challenges @relation(fields: [challenge_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  coaches      coaches    @relation(fields: [coach_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([challenge_id, coach_id])
+  @@index([challenge_id], map: "idx_challenge_coaches_challenge")
+  @@index([coach_id], map: "idx_challenge_coaches_coach")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model challenge_participants {
+  id                String          @id
+  service_user_id   String
+  challenge_id      String
+  assigned_coach_id String?
+  join_date         DateTime?       @default(now()) @db.Timestamptz(6)
+  status            String?         @default("active")
+  created_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  coaches           coaches?        @relation(fields: [assigned_coach_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  challenges        challenges      @relation(fields: [challenge_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users             users           @relation(fields: [service_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  daily_records     daily_records[]
+
+  @@unique([service_user_id, challenge_id])
+  @@index([challenge_id], map: "idx_challenge_participants_challenge")
+  @@index([assigned_coach_id], map: "idx_challenge_participants_coach")
+  @@index([service_user_id], map: "idx_challenge_participants_user")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model challenges {
+  id                     String                   @id
+  organization_id        String
+  challenge_type         challenge_type
+  title                  String
+  description            String?
+  start_date             DateTime                 @db.Date
+  end_date               DateTime                 @db.Date
+  created_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  challenge_coaches      challenge_coaches[]
+  challenge_participants challenge_participants[]
+  organizations          organizations            @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([organization_id], map: "idx_challenges_organization")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model coaches {
+  id                     String                   @id
+  admin_user_id          String                   @unique
+  organization_id        String
+  profile_image_url      String?
+  introduction           String?
+  specialization         String[]
+  is_active              Boolean?                 @default(true)
+  created_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  challenge_coaches      challenge_coaches[]
+  challenge_participants challenge_participants[]
+  admin_users            admin_users              @relation(fields: [admin_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  organizations          organizations            @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  feedbacks              feedbacks[]
+
+  @@index([admin_user_id], map: "idx_coaches_admin_user")
+  @@index([organization_id], map: "idx_coaches_organization")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model daily_records {
+  id                     String                 @id
+  participant_id         String
+  record_date            DateTime               @db.Date
+  created_at             DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?              @default(now()) @db.Timestamptz(6)
+  challenge_participants challenge_participants @relation(fields: [participant_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  feedbacks              feedbacks?
+  meals                  meals[]
+
+  @@unique([participant_id, record_date])
+  @@index([record_date], map: "idx_daily_records_date")
+  @@index([participant_id], map: "idx_daily_records_participant")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model feedbacks {
+  id              String        @id
+  daily_record_id String        @unique
+  coach_id        String?
+  ai_feedback     String
+  coach_feedback  String?
+  created_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  coaches         coaches?      @relation(fields: [coach_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  daily_records   daily_records @relation(fields: [daily_record_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([coach_id], map: "idx_feedbacks_coach")
+  @@index([daily_record_id], map: "idx_feedbacks_daily_record")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model meal_photos {
+  id         String    @id
+  meal_id    String
+  photo_url  String
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  meals      meals     @relation(fields: [meal_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([meal_id], map: "idx_meal_photos_meal")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model meals {
+  id              String        @id
+  daily_record_id String
+  meal_type       meal_type
+  description     String
+  created_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  meal_photos     meal_photos[]
+  daily_records   daily_records @relation(fields: [daily_record_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([daily_record_id], map: "idx_meals_daily_record")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model organizations {
+  id          String        @id
+  name        String
+  description String?
+  logo_url    String?
+  created_at  DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime?     @default(now()) @db.Timestamptz(6)
+  admin_users admin_users[]
+  challenges  challenges[]
+  coaches     coaches[]
+}
+
+model role_permissions {
+  id                String            @id
+  admin_role        admin_role
+  permission_id     String
+  created_at        DateTime?         @default(now()) @db.Timestamptz(6)
+  admin_permissions admin_permissions @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([admin_role, permission_id])
+}
+
+model users {
+  id                     String                   @id
+  discord_id             String?                  @unique @db.VarChar(255)
+  display_name           String?                  @db.VarChar(50)
+  name                   String                   @db.VarChar(100)
+  email                  String                   @unique @db.VarChar(255)
+  phone_number           String?                  @unique @db.VarChar(20)
+  gender                 gender
+  birth                  DateTime                 @db.Date
+  resting_heart_rate     Int?
+  created_at             DateTime?                @default(now()) @db.Timestamp(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamp(6)
+  challenge_participants challenge_participants[]
+}
+
+enum admin_role {
+  system_admin
+  developer
+  organization_owner
+  organization_admin
+  coach
+}
+
+enum challenge_type {
+  diet
+  exercise
+  diet_and_exercise
+}
+
+enum gender {
+  male
+  female
+  other
+  undisclosed
+}
+
+enum meal_type {
+  breakfast
+  lunch
+  dinner
+  snack
+  supplement
 }
