@@ -92,7 +92,6 @@ export default function User() {
               <SearchInput />
             </div>
             <DietTable data={dietData} />
-
           </div>
         </div>
       </div>
