@@ -11,7 +11,7 @@ export default function FixedBars() {
   };
   return (
     <>
-      <Sidebar onClick={handleSidebarOpen} isOpen={isOpen} />
+      <Sidebar onClick={handleSidebarOpen} />
       <DashboardHeader isOpen={isOpen} />
     </>
   );

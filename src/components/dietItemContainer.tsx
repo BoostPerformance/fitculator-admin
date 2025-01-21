@@ -149,7 +149,12 @@ export default function DietItemContainer() {
     <div className="max-w-[48rem] mx-auto z-50 sm:px-[3rem] mt-[4rem]">
       <div className="flex-1 py-[3rem]">
         <Title title={`회원 ${userId}님의 ${date} 식단`} />
-        <TotalFeedbackCounts count="30" total="30" />
+        <TotalFeedbackCounts
+          counts="30"
+          total="30"
+          borderColor="border-blue-2"
+          title="식단 등록일수"
+        />
       </div>
 
       {userMeals.slice(0, visibleItems).map((item) => {
