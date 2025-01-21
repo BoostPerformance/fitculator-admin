@@ -64,7 +64,7 @@ export default function Sidebar({}: SidebarProps) {
                   <div className="w-[15rem] p-[1rem] text-gray-2 dark:text-white">
                     <div className=" lg:text-1.25-700">{Challengename}</div>
                     <ul className="flex flex-col gap-[0.3rem] py-[0.7rem]">
-                      <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-600 text-1.25-700 sm:text-0.875-700">
+                      <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
                         <Image
                           src="/svg/subtitle-icon.svg"
                           width={20}
@@ -74,7 +74,7 @@ export default function Sidebar({}: SidebarProps) {
                         />
                         <Link href={`/user/${Challengename}/diet`}>식단</Link>
                       </li>
-                      <li className="flex items-center gap-[0.5rem]  px-[1rem] hover:bg-gray-600 text-1.25-700 sm:text-0.875-700">
+                      <li className="flex items-center gap-[0.5rem]  px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
                         <Image
                           src="/svg/subtitle-icon.svg"
                           width={20}
