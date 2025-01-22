@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 //import Stats from '@/components/graph/stats';
 import SalesChart from '@/components/graph/salesChart';
 import TrafficSourceChart from '@/components/graph/trafficSourceChart';
@@ -12,34 +12,48 @@ import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import Title from '@/components/layout/title';
 import Sidebar from '@/components/fixedBars/sidebar';
 
-// Move this interface to a separate types file
 interface DietTableItem {
-  nickname: string;
+  display_name: string;
   name: string;
   meals: number[];
-  exercise_point: number;
-  exercise_weight?: number;
   coach_memo?: string;
   feedback_counts: number;
 }
 
 export default function User() {
-  const [selectedDate, setSelectedDate] = useState<string>();
+  const [selectedDate, setSelectedDate] = useState<string>('2025-01-13');
   const [isOpen, setIsOpen] = useState(false);
   const [dietData, setDietData] = useState<DietTableItem[]>([]);
+  // const [nameData, setNameData] = useState([]);
 
-  // In a real application, you might fetch this data from an API
-  // based on the selected date or other filters
+  const fetchDietData = async () => {
+    try {
+      const response = await fetch(`/api/diet-table`);
+
+      const data = await response.json();
+      console.log(data);
+      if (data) {
+        console.log(data);
+        setDietData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching diet data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDietData();
+  }, []);
+
   const handleDateInput = (formattedDate: string) => {
     setSelectedDate(formattedDate);
     console.log(selectedDate);
-    // You could fetch new data here based on the date
-    // fetchDietData(formattedDate);
   };
 
   const handleSidebar = () => {
     setIsOpen(!isOpen);
   };
+  console.log(typeof dietData);
 
   return (
     <div className="bg-gray-100 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden">
