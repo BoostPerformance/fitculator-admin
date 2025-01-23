@@ -16,6 +16,14 @@ declare module 'next-auth' {
   }
 }
 
+declare module 'next-auth' {
+  interface JWT {
+    role?: string;
+    organization_id?: string;
+    admin_user_id?: string;
+  }
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -76,25 +84,30 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       if (session.user?.email) {
-        const [{ data: adminUser }, { data: coachUser }] = await Promise.all([
-          supabase
-            .from('admin_users')
-            .select('*')
-            .eq('email', session.user.email)
-            .single(),
-          supabase
-            .from('coaches')
-            .select('*')
-            .eq('admin_user_id', session.user.admin_user_id)
-            .single(),
-        ]);
+        const { data: adminUser } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('email', session.user.email)
+          .single();
+
         if (adminUser) {
           session.user.name = adminUser.admin_role;
           session.user.organization_id = adminUser.organization_id;
-          session.user.admin_user_id = adminUser.admin_user_id;
+          session.user.admin_user_id = adminUser.id;
           session.user.admin_role = adminUser.admin_role;
           session.user.email = adminUser.email;
-          session.user.image = coachUser.profile_image_url;
+        }
+
+        if (adminUser.admin_role === 'coach') {
+          const { data: coachUser } = await supabase
+            .from('coaches')
+            .select('profile_image_url')
+            .eq('admin_user_id', adminUser.id)
+            .single();
+
+          if (coachUser) {
+            session.user.image = coachUser.profile_image_url;
+          }
         }
       }
       return session;
