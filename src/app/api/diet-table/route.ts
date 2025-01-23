@@ -2,6 +2,21 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// interface ParticipantResponse {
+//   id: string;
+//   challenge_id: string;
+//   users: {
+//     display_name: string;
+//     name: string;
+//   };
+//   daily_records: {
+//     record_date: string;
+//   }[];
+//   feedbacks: {
+//     coach_memo: string | null;
+//   }[];
+// }
+
 // Supabase 클라이언트 생성
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,6 +38,8 @@ export async function GET() {
     if (userError || mealError || coachMemoError) {
       throw userError || mealError || coachMemoError;
     }
+
+    console.log(userData);
 
     return NextResponse.json({
       users: userData,

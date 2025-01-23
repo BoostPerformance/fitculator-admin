@@ -1,5 +1,25 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import { createClient } from '@supabase/supabase-js';
+import 'next-auth';
+
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      email: string;
+      name?: string;
+      image?: string;
+      admin_role?: string; // 추가
+      organization_id?: string; // 추가
+      admin_user_id?: string; // 추가
+    };
+  }
+}
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const handler = NextAuth({
   providers: [
@@ -9,8 +29,76 @@ const handler = NextAuth({
     }),
   ],
   pages: {
-    signIn: '/user/diet',
+    signIn: '/user',
     error: '/auth/error',
+  },
+  callbacks: {
+    async signIn({ user }) {
+      if (!user.email) return false;
+
+      // auth_users에 사용자 추가
+      const { data: authUser, error: authError } = await supabase
+        .from('auth_users')
+        .upsert({
+          email: user.email,
+        })
+        .select()
+        .single();
+
+      if (authError) return false;
+      if (!authUser) return false;
+
+      // admin_users 확인
+      const { data: adminUser } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('email', user.email)
+        .single();
+
+      return !!adminUser;
+    },
+    async jwt({ token, user, account }) {
+      if (account && user) {
+        // 구글 로그인 성공 시 토큰에 정보 저장
+        const { data: adminUser } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('email', user.email)
+          .single();
+
+        if (adminUser) {
+          token.role = adminUser.admin_role;
+          token.organization_id = adminUser.organization_id;
+          token.admin_user_id = adminUser.id;
+        }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user?.email) {
+        const [{ data: adminUser }, { data: coachUser }] = await Promise.all([
+          supabase
+            .from('admin_users')
+            .select('*')
+            .eq('email', session.user.email)
+            .single(),
+          supabase
+            .from('coaches')
+            .select('*')
+            .eq('admin_user_id', session.user.admin_user_id)
+            .single(),
+        ]);
+        if (adminUser) {
+          session.user.name = adminUser.admin_role;
+          session.user.organization_id = adminUser.organization_id;
+          session.user.admin_user_id = adminUser.admin_user_id;
+          session.user.admin_role = adminUser.admin_role;
+          session.user.email = adminUser.email;
+          session.user.image = coachUser.profile_image_url;
+        }
+      }
+      return session;
+    },
   },
 });
 
