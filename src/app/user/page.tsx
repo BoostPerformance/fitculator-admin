@@ -6,6 +6,7 @@ import TrafficSourceChart from '@/components/graph/trafficSourceChart';
 import DailyDietRecord from '@/components/graph/dailyDietRecord';
 import WorkoutLeaderboeard from '@/components/graph/workoutLeaderboeard';
 //import DietTable from '@/components/dietDashboard/dietTable';
+import { useSession } from 'next-auth/react';
 import DateInput from '@/components/input/dateInput';
 import SearchInput from '@/components/input/searchInput';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
@@ -20,10 +21,20 @@ import Sidebar from '@/components/fixedBars/sidebar';
 //   feedback_counts: number;
 // }
 
+interface CoachData {
+  display_name: string;
+  organization_id: string;
+  admin_role: string;
+}
+
 export default function User() {
   const [selectedDate, setSelectedDate] = useState<string>('2025-01-13');
   const [isOpen, setIsOpen] = useState(false);
-  const [organizationName, SetOrganizationName] = useState('');
+  const [coachData, setCoachData] = useState<CoachData>({
+    display_name: '',
+    organization_id: '',
+    admin_role: '',
+  });
 
   //const [dietData, setDietData] = useState<DietTableItem[]>([]);
   // const [nameData, setNameData] = useState([]);
@@ -42,19 +53,32 @@ export default function User() {
   //     console.error('Error fetching diet data:', error);
   //   }
   // };
-  // const fetchCoachData = async () => {
-  //   try {
-  //     const response = await fetch('/api/coach-info');
-  //     const data = await response.json();
-  //     console.log(data);
 
-  //     return SetOrganizationName(data);
-  //   } catch (error) {
-  //     console.error('failed!!!', error);
-  //   }
-  // };
+  // 테스트 후 사용하삼
+  /*  const { data: session } = useSession();
+  if (!session) return <div>Loading...</div>;
+  const { display_name, organization_id, admin_role } = session.user;
+  */
 
-  useEffect(() => {}, []);
+  //개발시에 코치 1의 데이터로 연습하려고
+  const fetchCoachData = async () => {
+    try {
+      const response = await fetch('/api/coach-info');
+      const coachData = response.json();
+
+      return coachData;
+    } catch (error) {
+      console.error('failed!!!', error);
+    }
+  };
+
+  useEffect(() => {
+    const gotCoachData = async () => {
+      const data = await fetchCoachData();
+      setCoachData(data);
+    };
+    gotCoachData();
+  }, []);
 
   const handleDateInput = (formattedDate: string) => {
     setSelectedDate(formattedDate);
@@ -70,7 +94,13 @@ export default function User() {
       <Sidebar onClick={handleSidebar} />
       <div className="flex-1 overflow-auto">
         <div className="pt-[2rem]">
-          <Title title={organizationName} />
+          <Title
+            title={
+              coachData
+                ? `${coachData.organization_id} ${coachData.display_name} ${coachData.admin_role}`
+                : 'Loading...'
+            }
+          />
           <div className="flex gap-[0.625rem] overflow-x-auto">
             <TotalFeedbackCounts
               counts={'10'}
@@ -115,7 +145,7 @@ export default function User() {
               <DateInput onChange={handleDateInput} selectedDate="2025-01-19" />
               <SearchInput />
             </div>
-            <DietTable data={dietData} />
+
             {/* <DietTable data={dietData} /> */}
           </div>
         </div>

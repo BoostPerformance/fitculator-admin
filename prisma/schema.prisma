@@ -5,8 +5,6 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -30,6 +28,7 @@ model admin_users {
   updated_at      DateTime?      @default(now()) @db.Timestamptz(6)
   auth_users      auth_users?    @relation(fields: [auth_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   organizations   organizations? @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  challenges      challenges[]
   coaches         coaches?
 
   @@index([organization_id], map: "idx_admin_users_organization")
@@ -89,8 +88,10 @@ model challenges {
   end_date               DateTime                 @db.Date
   created_at             DateTime?                @default(now()) @db.Timestamptz(6)
   updated_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  admin_user_id          String?
   challenge_coaches      challenge_coaches[]
   challenge_participants challenge_participants[]
+  admin_users            admin_users?             @relation(fields: [admin_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   organizations          organizations            @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([organization_id], map: "idx_challenges_organization")
