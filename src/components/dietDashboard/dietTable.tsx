@@ -6,18 +6,15 @@
 //import { ActivityStatus } from '@/types/dietTypes';
 
 interface DietTableItem {
-  nickname: string;
+  display_name: string;
   name: string;
   meals: number[];
-  exercise_point: number;
-  exercise_weight?: number;
   coach_memo?: string;
   feedback_counts: number;
 }
 
 interface DietTableProps {
   data: DietTableItem[];
-
 }
 
 // const sortData = (
@@ -100,7 +97,7 @@ const DietTable: React.FC<DietTableProps> = ({ data }) => {
   //   return <div>Loading...</div>;
   // }
 
-  const mealsDots = (data: number[]) => {
+  const renderMealsDots = (data: number[]) => {
     return (
       <div className="flex gap-1">
         {data.map((dot, index) => (
@@ -168,17 +165,13 @@ const DietTable: React.FC<DietTableProps> = ({ data }) => {
           </tr>
         </thead>
         <tbody>
-
-          {data.map((item) => (
-            <tr key={item.nickname} className="border-b dark:text-gray-5">
-              <td className="p-[1rem]">{item.nickname}</td>
+          {data.map((item, index) => (
+            <tr key={index} className="border-b dark:text-gray-5">
+              <td className="p-[1rem]">{item.display_name}</td>
               <td className="p-[1rem]">{item.name}</td>
-              <td className="p-[1rem]">{mealsDots(item.meals)}</td>
-              <td className="p-[1rem]">
-                {item.exercise_point}/{item.exercise_weight || null}회
-
-              </td>
-              <td className="p-[1rem]">{item.coach_memo || '없음'}</td>
+              <td className="p-[1rem]">{renderMealsDots(item.meals)}</td>
+              <td className="p-[1rem]">200% /2회</td>
+              <td className="p-[1rem]">{item.coach_memo}</td>
               <td className="p-[1rem]">{item.feedback_counts}</td>
             </tr>
           ))}

@@ -5,6 +5,7 @@ import Head from 'next/head';
 import Footer from '@/components/layout/footer';
 import { ThemeProvider } from 'next-themes';
 import SessionProviderWrapper from '@/components/auth/sessionProviderWrapper';
+import { Providers } from './providers';
 
 const pretendard = localFont({
   src: '../fonts/PretendardVariable.woff2',
@@ -34,7 +35,7 @@ export default function RootLayout({
       <body className={`${pretendard.variable} font-pretendard`}>
         <SessionProviderWrapper>
           <ThemeProvider enableSystem={true} attribute="class">
-            {children}
+            <Providers>{children}</Providers>
             <Footer />
           </ThemeProvider>
         </SessionProviderWrapper>

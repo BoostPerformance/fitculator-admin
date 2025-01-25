@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 //import { FaBars } from 'react-icons/fa';
-
+import LogoutButton from '../buttons/logoutButton';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -25,15 +25,18 @@ export default function Sidebar({}: SidebarProps) {
   return (
     <div className="bg-white drop-shadow-sm dark:bg-blue-4">
       <div className="flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[22rem] md:w-[18rem] p-[2.3rem]">
-        <a href="./user">
-          <Image
-            src="/svg/fitculator.svg"
-            width={100}
-            height={30}
-            alt="logo"
-            className={` w-[9rem] dark:invert`}
-          />
-        </a>
+        <div className="flex items-center justify-around gap-[1rem]">
+          <a href="./user">
+            <Image
+              src="/svg/fitculator.svg"
+              width={100}
+              height={30}
+              alt="logo"
+              className={` w-[9rem] dark:invert`}
+            />
+          </a>
+          <LogoutButton />
+        </div>
 
         <nav className="w-full">
           <div>

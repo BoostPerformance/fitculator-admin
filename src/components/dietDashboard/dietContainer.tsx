@@ -1,4 +1,3 @@
-
 // 'use client';
 // import React, { useState } from 'react';
 // import DateInput from '../input/dateInput';
@@ -34,4 +33,3 @@
 //     </div>
 //   );
 // }
-

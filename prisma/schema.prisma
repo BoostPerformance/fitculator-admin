@@ -16,8 +16,6 @@ model admin_permissions {
   role_permissions role_permissions[]
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-
 model admin_users {
   id              String         @id
   auth_user_id    String?        @db.Uuid
@@ -42,8 +40,6 @@ model auth_users {
   updated_at  DateTime?     @default(now()) @db.Timestamptz(6)
   admin_users admin_users[]
 }
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 
 model challenge_coaches {
   id           String     @id
@@ -145,6 +141,7 @@ model feedbacks {
   coach_feedback  String?
   created_at      DateTime?     @default(now()) @db.Timestamptz(6)
   updated_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  coach_memo      String?
   coaches         coaches?      @relation(fields: [coach_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   daily_records   daily_records @relation(fields: [daily_record_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
