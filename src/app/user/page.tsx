@@ -115,7 +115,7 @@ export default function User() {
               <DateInput onChange={handleDateInput} selectedDate="2025-01-19" />
               <SearchInput />
             </div>
-            <DietTable data={dietData} />
+
             {/* <DietTable data={dietData} /> */}
           </div>
         </div>

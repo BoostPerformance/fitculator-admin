@@ -69,10 +69,11 @@ const handler = NextAuth({
         .select('email')
         .eq('email', user.email);
 
-      // console.log('adminUser', adminUser, user.email);
       return !!adminUser;
     },
     async jwt({ token, user, account }) {
+      // console.log(token);
+
       if (account && user) {
         // 구글 로그인 성공 시 토큰에 정보 저장
         const { data: adminUser } = await supabase
@@ -82,31 +83,46 @@ const handler = NextAuth({
           .single();
 
         if (adminUser) {
+          token.name = adminUser.display_name;
           token.role = adminUser.admin_role;
           token.organization_id = adminUser.organization_id;
           token.admin_user_id = adminUser.id;
+
+          // console.log(adminUser, token);
         }
       }
+
+      console.log('token');
       return token;
     },
     async session({ session, token }) {
+      console.log(session);
+
       if (session.user?.email) {
-        const { data: adminUser } = await supabase
+        const adminClient = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ROLE_KEY!
+        );
+
+        const { data: adminUser, error } = await adminClient
           .from('admin_users')
           .select('*')
           .eq('email', session.user.email)
           .single();
 
-        if (adminUser) {
+        if (adminUser && !error) {
           session.user.name = adminUser.admin_role;
           session.user.organization_id = adminUser.organization_id;
           session.user.admin_user_id = adminUser.id;
           session.user.admin_role = adminUser.admin_role;
           session.user.email = adminUser.email;
         }
+        if (error) {
+          console.log(error);
+        }
 
         if (adminUser.admin_role === 'coach') {
-          const { data: coachUser, error } = await supabase
+          const { data: coachUser, error } = await adminClient
             .from('coaches')
             .select('profile_image_url')
             .eq('admin_user_id', adminUser.id)
