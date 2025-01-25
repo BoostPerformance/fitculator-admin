@@ -53,6 +53,8 @@ const handler = NextAuth({
         .select()
         .single();
 
+      console.log('authUser', authUser);
+
       if (authError) return false;
       if (!authUser) return false;
 
@@ -63,6 +65,7 @@ const handler = NextAuth({
         .eq('email', user.email)
         .single();
 
+      console.log('user.email', user.email);
       return !!adminUser;
     },
     async jwt({ token, user, account }) {
@@ -99,13 +102,13 @@ const handler = NextAuth({
         }
 
         if (adminUser.admin_role === 'coach') {
-          const { data: coachUser } = await supabase
+          const { data: coachUser, error } = await supabase
             .from('coaches')
             .select('profile_image_url')
             .eq('admin_user_id', adminUser.id)
             .single();
 
-          if (coachUser) {
+          if (coachUser && !error) {
             session.user.image = coachUser.profile_image_url;
           }
         }

@@ -24,6 +24,7 @@ export default function User() {
   const [selectedDate, setSelectedDate] = useState<string>('2025-01-13');
   const [isOpen, setIsOpen] = useState(false);
   const [organizationName, SetOrganizationName] = useState('');
+
   //const [dietData, setDietData] = useState<DietTableItem[]>([]);
   // const [nameData, setNameData] = useState([]);
 
@@ -41,20 +42,19 @@ export default function User() {
   //     console.error('Error fetching diet data:', error);
   //   }
   // };
-  const fetchCoachData = async () => {
-    try {
-      const response = await fetch('/api/coach-info');
-      const data = await response.json();
-      console.log(data);
+  // const fetchCoachData = async () => {
+  //   try {
+  //     const response = await fetch('/api/coach-info');
+  //     const data = await response.json();
+  //     console.log(data);
 
-      return SetOrganizationName(data);
-    } catch (error) {
-      console.error('failed!!!', error);
-    }
-  };
-  useEffect(() => {
-    fetchCoachData();
-  }, []);
+  //     return SetOrganizationName(data);
+  //   } catch (error) {
+  //     console.error('failed!!!', error);
+  //   }
+  // };
+
+  useEffect(() => {}, []);
 
   const handleDateInput = (formattedDate: string) => {
     setSelectedDate(formattedDate);

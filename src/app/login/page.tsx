@@ -4,13 +4,23 @@ import { useTheme } from 'next-themes';
 import GoogleButton from '@/components/buttons/googleButton';
 import { signIn, useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Login() {
-  const { theme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const { data: session } = useSession();
   if (session) {
-    redirect('/user/diet');
+    redirect('/user');
   }
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const logoTheme = localStorage.getItem('theme') || 'light';
+    setTheme(logoTheme);
+  }, [setTheme]);
+
+  if (!mounted) return null;
 
   return (
     <div
@@ -18,7 +28,7 @@ export default function Login() {
     >
       <div className="flex justify-center items-center h-[10rem]">
         <Image
-          src={`/image/${theme === 'dark' ? 'logo-dark' : 'logo'}.png`}
+          src={`/image/${resolvedTheme === 'light' ? 'logo' : 'logo-dark'}.png`}
           alt="logo"
           width={100}
           height={100}
