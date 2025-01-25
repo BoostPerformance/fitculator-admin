@@ -9,9 +9,10 @@ declare module 'next-auth' {
       email: string;
       name?: string;
       image?: string;
-      admin_role?: string; // 추가
-      organization_id?: string; // 추가
-      admin_user_id?: string; // 추가
+      admin_role?: string;
+      organization_id?: string;
+      admin_user_id?: string;
+      display_name?: string;
     };
   }
 }
@@ -116,6 +117,7 @@ const handler = NextAuth({
           session.user.admin_user_id = adminUser.id;
           session.user.admin_role = adminUser.admin_role;
           session.user.email = adminUser.email;
+          session.user.display_name = adminUser.display_name;
         }
         if (error) {
           console.log(error);
@@ -133,6 +135,7 @@ const handler = NextAuth({
           }
         }
       }
+      //console.log(session);
       return session;
     },
   },

@@ -3,18 +3,24 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ROLE_KEY!
 );
 
 export async function GET() {
   try {
-    const { data, error } = await supabase.from('organizations').select('name');
+    const { data: CoachData, error: CoachDataError } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('id', 'admin_002')
+      .single();
 
-    if (error) {
-      throw error;
+    console.log(CoachData);
+
+    if (CoachDataError) {
+      throw CoachDataError;
     }
-    console.log(data);
-    return NextResponse.json(data);
+
+    return NextResponse.json(CoachData);
   } catch (error) {
     console.error('Error fetching Data', error);
     return NextResponse.json(
