@@ -42,30 +42,34 @@ const handler = NextAuth({
   },
   callbacks: {
     async signIn({ user }) {
-      if (!user.email) return false;
+      if (!user.email) {
+        console.log('No email provided');
+        return false;
+      }
 
-      // auth_users에 사용자 추가
       const { data: authUser, error: authError } = await supabase
         .from('auth_users')
-        .upsert({
-          email: user.email,
-        })
-        .select()
-        .single();
+        .select('email')
+        .eq('email', user.email);
 
-      console.log('authUser', authUser);
+      // console.log('user.email', user.email, authUser);
 
-      if (authError) return false;
-      if (!authUser) return false;
+      if (authError) {
+        console.log(authError);
+        return false;
+      }
+      if (authUser.length === 0) {
+        console.log('authUser', authUser);
+        return false;
+      }
 
       // admin_users 확인
       const { data: adminUser } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('email', user.email)
-        .single();
+        .from('auth_users')
+        .select('email')
+        .eq('email', user.email);
 
-      console.log('user.email', user.email);
+      // console.log('adminUser', adminUser, user.email);
       return !!adminUser;
     },
     async jwt({ token, user, account }) {
