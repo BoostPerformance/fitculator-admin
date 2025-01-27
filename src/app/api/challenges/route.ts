@@ -8,26 +8,20 @@ const supabase = createClient(
 export async function GET() {
   try {
     // 먼저 코치 기본 정보 조회
-    const { data: adminUser, error: error } = await supabase
-      .from('admin_users')
-      .select('*')
-      .eq('id', 'admin_002')
-      .single();
+    const { data: challengeName, error: error } = await supabase
+      .from('challenge_coaches')
+      .select(
+        `*, challenges!challenge_id (id,title,
+        start_date, end_date
+        ))`
+      )
+      .eq('coach_id', 'coach_002');
 
-    // 받아온 데이터 구조 변환
-
-    // console.log(adminUser);
-
-    // console.log(formattedData);
-    const coachInfo = {
-      admin_role: adminUser?.admin_role,
-      display_name: adminUser?.display_name,
-    };
     if (error) {
       throw error;
     }
 
-    return NextResponse.json(coachInfo);
+    return NextResponse.json(challengeName);
   } catch (error) {
     console.error('Error fetching Data', error);
     return NextResponse.json(

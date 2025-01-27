@@ -25,6 +25,7 @@ export async function GET() {
         display_name,
         name
       ),challenges!challenge_id(
+      id,
       title,
       challenge_type,
       start_date,

@@ -2,24 +2,35 @@
 import Image from 'next/image';
 //import { FaBars } from 'react-icons/fa';
 import LogoutButton from '../buttons/logoutButton';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-interface SidebarProps {
-  onClick: () => void;
+interface Challenge {
+  id: string;
+  challenges: {
+    id: string;
+    title: string;
+    start_date: string;
+    end_date: string;
+  };
 }
 
-const challengesName = ['F45 을지로 C50챌린지', '핏다챌', '챌린지1', '챌린지2'];
+interface SidebarProps {
+  data: Challenge[];
+  onSelectChallenge: (challengeId: string) => void;
+}
 
-export default function Sidebar({}: SidebarProps) {
-  // const [isOpen, setIsOpen] = useState(false);
+export default function Sidebar({ data, onSelectChallenge }: any) {
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
-  // const handleOpen = () => {
-  //   setIsOpen(!isOpen);
-  // };
+  const [selectedTitle, setSelectedTitle] = useState<string>('');
 
   const handleDropdown = () => {
     return setIsOpenDropdown(!isOpenDropdown);
+  };
+
+  const handleChallengeClick = (challenge: Challenge) => {
+    setSelectedTitle(challenge.challenges.title);
+    onSelectChallenge(challenge.challenges.id);
   };
 
   return (
@@ -65,12 +76,21 @@ export default function Sidebar({}: SidebarProps) {
             </button>
             {isOpenDropdown && (
               <div>
-                {challengesName.map((Challengename, index) => (
+                {data.map((item: any, index: any) => (
                   <div
                     key={`challenge-${index}`}
-                    className="w-[15rem] p-[1rem] text-gray-2 dark:text-white"
+                    className={`w-[15rem] p-[1rem] text-gray-2 dark:text-white ${
+                      selectedTitle === item.challenges.title
+                        ? 'bg-gray-100'
+                        : ''
+                    }`}
                   >
-                    <div className=" lg:text-1.25-700">{Challengename}</div>
+                    <button
+                      className=" lg:text-1.25-700"
+                      onClick={() => handleChallengeClick(item)}
+                    >
+                      {item.challenges.title}
+                    </button>
                     <ul className="flex flex-col gap-[0.3rem] py-[0.7rem]">
                       <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
                         <Image
@@ -80,7 +100,9 @@ export default function Sidebar({}: SidebarProps) {
                           alt="subtitle-icon "
                           className="w-[0.75rem]"
                         />
-                        <Link href={`/user/${Challengename}/diet`}>식단</Link>
+                        <Link href={`/user/${item.challenges.title}/diet`}>
+                          식단
+                        </Link>
                       </li>
                       <li className="flex items-center gap-[0.5rem]  px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
                         <Image
@@ -90,7 +112,7 @@ export default function Sidebar({}: SidebarProps) {
                           alt="subtitle-icon "
                           className="w-[0.75rem]"
                         />
-                        <Link href={`/user/${Challengename}/exercise`}>
+                        <Link href={`/user/${item.challenges.title}/exercise`}>
                           운동
                         </Link>
                       </li>
