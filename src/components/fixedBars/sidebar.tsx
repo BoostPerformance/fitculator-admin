@@ -52,8 +52,8 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
   };
 
   return (
-    <div className="">
-      <div className="sm:relative flex justify-between py-[1.25rem] px-[1.5rem]">
+    <div className="sm:relative  top-0 z-40">
+      <div className="sticky flex justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[22rem]">
         <button onClick={handleSidebarOpen}>
           <Image
             src="/svg/hamburger.svg"
@@ -63,7 +63,7 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
             className={` w-[1.5rem] dark:invert`}
           />
         </button>
-        <div className="flex gap-[0.5rem]">
+        <div className="flex sm:gap-[0.5rem] lg:gap-[1rem]">
           <div>안녕하세요, {coach}님 </div>
           <button onClick={handleUserDropdown}>
             <Image
@@ -77,14 +77,14 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
         </div>
       </div>
       {userDropdown && (
-        <div className="z-50 sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1">
+        <div className="z-50 sm:top-full  sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1">
           <LogoutButton />
         </div>
       )}
 
       {isSidebarOpen && (
         <div
-          className={`sm:absolute bg-white drop-shadow-sm dark:bg-blue-4 sm:w-full sm:flex sm:items-center sm:justify-center
+          className={`sm:absolute bg-white drop-shadow-sm dark:bg-blue-4  sm:w-full sm:flex sm:items-center sm:justify-center
           } z-50`}
         >
           <div className=" flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[22rem] md:w-[18rem] p-[2.3rem] sm:items-center">
