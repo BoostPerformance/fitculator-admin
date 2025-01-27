@@ -82,7 +82,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
     const chunkedArray = chunkArray(recordArray, 10);
 
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 sm:w-full">
         {chunkedArray.map((week, weekIndex) => (
           <div key={weekIndex} className="flex gap-1">
             {week.map((value, dayIndex) => (
