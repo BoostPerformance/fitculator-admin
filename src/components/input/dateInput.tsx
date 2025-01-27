@@ -54,7 +54,7 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
         onClick={handleDateOpen}
         placeholder={Datetoday}
         readOnly
-        className="border-[0.1rem] py-[0.4rem] pl-[2.5rem] rounded-[0.5rem] w-[15rem] dark:bg-gray-3 dark:text-black"
+        className="border-[0.1rem] py-[0.4rem] pl-[2.5rem] rounded-[0.5rem] w-[15rem] sm:w-[10rem] dark:bg-gray-3 dark:text-black"
       />
       <Image
         src="/svg/arrow-right.svg"
@@ -69,7 +69,6 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
             mode="single"
             required={false}
             selected={selected}
-
             onSelect={handleDateChange}
           />
         </div>

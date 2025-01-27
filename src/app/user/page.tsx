@@ -69,6 +69,7 @@ export default function User() {
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<DailyRecord[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
   const [adminData, setAdminData] = useState({
     admin_role: '',
     display_name: '',
@@ -91,6 +92,16 @@ export default function User() {
   });
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    // 초기 설정
+    handleResize();
+
+    // 리사이즈 이벤트 리스너 추가
+    window.addEventListener('resize', handleResize);
+
     const fetchData = async () => {
       try {
         // 챌린지 데이터 가져오기
@@ -130,6 +141,9 @@ export default function User() {
     };
 
     fetchData();
+    const mobileSize = () => window.removeEventListener('resize', handleResize);
+    console.log(mobileSize);
+    return mobileSize;
   }, []);
 
   const handleChallengeSelect = (challengeId: string) => {
@@ -157,64 +171,77 @@ export default function User() {
   };
 
   return (
-    <div className="bg-gray-100 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden">
-      <Sidebar data={challenges} onSelectChallenge={handleChallengeSelect} />
+    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col">
+      <Sidebar
+        data={challenges}
+        onSelectChallenge={handleChallengeSelect}
+        coach={adminData.display_name}
+      />
       <div className="flex-1 overflow-auto">
         <div className="pt-[2rem]">
           <Title
             title={
-              coachData
-                ? `${coachData.organization_id} ${adminData.display_name} ${adminData.admin_role}`
-                : 'Loading...'
+              coachData &&
+              `${coachData.organization_id} ${adminData.display_name} ${adminData.admin_role}`
             }
           />
-          <div className="flex gap-[0.625rem] overflow-x-auto">
+          <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
             <TotalFeedbackCounts
-              counts={'10'}
-              total={'30'}
-              title={'진행현황'}
+              counts="10"
+              total="30"
+              title="진행현황"
               borderColor="border-green"
+              textColor="text-green"
+              grids="col-span-2"
             />
             <TotalFeedbackCounts
               counts={'10'}
               total={'30'}
               title={'오늘 운동 업로드 멤버'}
               borderColor="border-blue-5"
+              textColor="text-blue-5"
             />
             <TotalFeedbackCounts
               counts={'10'}
               total={'30'}
               title={'오늘 식단 업로드 멤버'}
               borderColor="border-yellow"
+              textColor="text-yellow"
             />
             <TotalFeedbackCounts
               counts={'10'}
               total={'30'}
               title={'전체 운동 업로드 수'}
               borderColor="border-blue-5"
+              textColor="text-blue-5"
             />
             <TotalFeedbackCounts
               counts={'10'}
               total={'30'}
               title={'전체 식단 업로드 수'}
               borderColor="border-yellow"
+              textColor="text-yellow"
             />
           </div>
 
-          <div className="dark:bg-blue-4 grid grid-cols-3 gap-[1rem] my-6">
+          <div className="dark:bg-blue-4 grid grid-cols-3 gap-[1rem] my-6 sm:flex sm:flex-col">
             <TrafficSourceChart />
             <DailyDietRecord />
             <WorkoutLeaderboeard />
             <Image
-              src="/image/graph-example.png"
+              src={
+                isMobile
+                  ? '/image/graph-example2.png'
+                  : '/image/graph-example.png'
+              }
               width={4000}
               height={4000}
-              alt="graph-example"
-              className="w-full col-span-3"
+              alt={isMobile ? 'graph-example1.png' : 'graph-example.png'}
+              className="w-full lg:col-span-3"
             />
           </div>
           <div className="dark:bg-blue-4 flex-1 p-6 bg-gray-100 pt-[7rem] bg-white-1">
-            <div className="flex justify-between items-center mt-[1.5rem]">
+            <div className="flex justify-between items-center mt-[1.5rem] w-[16rem] sm:gap-[1.5rem]">
               <DateInput onChange={handleDateInput} selectedDate="2025-01-19" />
               <SearchInput />
             </div>

@@ -41,20 +41,22 @@ export default function TrafficSourceChart() {
       <h2 className="text-lg font-semibold mb-4 dark:text-gray-5">인기운동</h2>
       <div>
         <div className="flex items-center justify-around">
-          <div className="lg:w-[20rem]">
+          <div className="lg:w-[20rem] sm:w-[15rem] sm:py-[2rem]">
             <Doughnut data={data} />
           </div>
           <div>
             <ul className="space-y-2">
               {exerciseList.slice(0, 3).map((exercise, index) => (
-                <li
-                  key={index}
-                  className="flex items-center text-[1rem] text-black"
-                >
-                  <span className="w-6">{exercise.rank}</span>
-                  <span className="flex-1 ">{exercise.name}</span>
-                  <span className="text-gray-500">{exercise.percentage}</span>
-                </li>
+                <div>
+                  <li
+                    key={index}
+                    className="flex items-center text-[1rem] text-black"
+                  >
+                    <span className="w-6">{exercise.rank}</span>
+                    <span className="flex-1 ">{exercise.name}</span>
+                    <span className="text-gray-500">{exercise.percentage}</span>
+                  </li>
+                </div>
               ))}
             </ul>
           </div>
@@ -70,6 +72,10 @@ export default function TrafficSourceChart() {
             <path d="M0 1H302" stroke="#E1E1E1" />
           </svg>
           <div className="border-t border-gray-200 pt-4">
+            <div className="flex justify-between text-gray-7 sm:py-[1rem]">
+              <div className="sm:px-[1rem]">운동종목</div>
+              <div>퍼센트</div>
+            </div>
             <ul className="space-y-2">
               {exerciseList.map((exercise, index) => (
                 <li
