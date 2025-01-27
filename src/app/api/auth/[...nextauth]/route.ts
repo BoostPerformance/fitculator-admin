@@ -56,11 +56,9 @@ const handler = NextAuth({
       // console.log('user.email', user.email, authUser);
 
       if (authError) {
-        console.log(authError);
         return false;
       }
       if (authUser.length === 0) {
-        console.log('authUser', authUser);
         return false;
       }
 
@@ -93,12 +91,9 @@ const handler = NextAuth({
         }
       }
 
-      console.log('token');
       return token;
     },
     async session({ session, token }) {
-      console.log(session);
-
       if (session.user?.email) {
         const adminClient = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,

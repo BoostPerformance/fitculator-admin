@@ -8,19 +8,53 @@ const supabase = createClient(
 
 export async function GET() {
   try {
-    const { data: CoachData, error: CoachDataError } = await supabase
-      .from('admin_users')
-      .select('*')
-      .eq('id', 'admin_002')
+    // 먼저 코치 기본 정보 조회
+    const { data: coach, error: error } = await supabase
+      .from('coaches')
+      .select(
+        `
+       *,
+       admin_users (
+         display_name,
+         email
+       ),
+       challenge_coaches (
+         challenge:challenges (
+           *,
+           participants:challenge_participants (
+             *,
+             user:users (*)
+           )
+         )
+       )
+     `
+      )
+      .eq('admin_user_id', 'admin_002')
       .single();
 
-    console.log(CoachData);
+    // 받아온 데이터 구조 변환
+    const formattedData = {
+      id: coach.id,
+      admin_user_id: coach.admin_user_id,
+      organization_id: coach.organization_id,
+      profile_image_url: coach.profile_image_url,
+      challenges: coach.challenge_coaches.map((cc: any) => ({
+        id: cc.challenge.id,
+        title: cc.challenge.title,
+        participants: cc.challenge.participants.map((p: any) => ({
+          id: p.id,
+          status: p.status,
+        })),
+      })),
+    };
+    // console.log(coach);
+    // console.log(formattedData);
 
-    if (CoachDataError) {
-      throw CoachDataError;
+    if (error) {
+      throw error;
     }
 
-    return NextResponse.json(CoachData);
+    return NextResponse.json(formattedData);
   } catch (error) {
     console.error('Error fetching Data', error);
     return NextResponse.json(

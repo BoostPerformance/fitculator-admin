@@ -1,20 +1,49 @@
-//import { useState } from 'react';
+import { useState, useEffect } from 'react';
 //import { CombinedData } from '@/types/dietTypes';
 //import { useRouter } from 'next/navigation';
 //import Image from 'next/image';
 //import DietTableMockData from '../mock/DietTableMockData';
 //import { ActivityStatus } from '@/types/dietTypes';
 
-interface DietTableItem {
-  display_name: string;
-  name: string;
-  meals: number[];
-  coach_memo?: string;
-  feedback_counts: number;
-}
+// interface ChallengeParticipants {
+//   challenge_participants: {
+//     users: {
+//       display_name: string;
+//       name: string;
+//     };
+//     challenges: {
+//       start_date: string;
+//       end_date: string;
+//     };
+//   };
+// }
 
-interface DietTableProps {
-  data: DietTableItem[];
+// interface DietTableItems {
+//   record_date: string;
+//   challenge_participants: ChallengeParticipants;
+//   coach_memo?: string;
+//   feedback_counts?: number | null;
+// }
+
+// interface DietTableProps {
+//   data?: DietTableItems[];
+// }
+interface DailyRecord {
+  record_date: string;
+  challenge_participants: {
+    id: string;
+    users: {
+      id: string;
+      display_name: string;
+      name: string;
+    };
+    challenges: {
+      start_date: string;
+      end_date: string;
+    };
+  };
+  coach_memo?: string;
+  feedback_counts?: number;
 }
 
 // const sortData = (
@@ -37,126 +66,105 @@ interface DietTableProps {
 //   });
 // };
 
-const DietTable: React.FC<DietTableProps> = ({ data }) => {
-  //const router = useRouter();
-  // const [sortBy, setSortBy] = useState<string>('id');
-  // const [sortDirection, setSortDirection] = useState<boolean>(true);
+const DietTable: React.FC = () => {
+  const [dailyRecords, setDailyRecords] = useState<DailyRecord[]>([]);
 
-  // const handleSort = (key: string) => {
-  //   if (sortBy === key) {
-  //     setSortDirection(!sortDirection);
-  //   } else {
-  //     setSortBy(key);
-  //     setSortDirection(true);
-  //   }
-  // };
+  useEffect(() => {
+    const fetchDailyRecords = async () => {
+      const response = await fetch('/api/challenge-participants');
+      const data = await response.json();
+      setDailyRecords(data);
+    };
+    fetchDailyRecords();
+  }, []);
 
-  //const sortedData = sortData(data, sortBy, sortDirection);
+  const renderMealsDots = (start: string, end: string, records: string[]) => {
+    const days = getDaysArray(new Date(start), new Date(end));
 
-  // const renderSortArrow = (key: string) => {
-  //   if (sortBy === key) {
-  //     return sortDirection ? (
-  //       <Image src="/svg/arrow-up.svg" alt="Ascending" width={12} height={10} />
-  //     ) : (
-  //       <Image
-  //         src="/svg/arrow-down.svg"
-  //         alt="Ascending"
-  //         width={12}
-  //         height={10}
-  //       />
-  //     );
-  //   }
-  //   return (
-  //     <>
-  //       <Image
-  //         src="/svg/arrow-down.svg"
-  //         alt="Descending"
-  //         width={10}
-  //         height={10}
-  //       />
-  //     </>
-  //   );
-  // };
-
-  // const handleItemClick = (userId: string, date: string) => {
-  //   router.push(`/user/diet/${userId}/${date}`);
-  // };
-
-  // const calculateFeedback = (userId: string, mealDate: string) => {
-  //   const totalMealsOnDate = data.filter(
-  //     (meal) => meal.user_id === userId && meal.date === mealDate
-  //   ).length;
-  //   const feedbacksOnDate = data.filter(
-  //     (feedback) => feedback.user_id === userId && feedback.date === mealDate
-  //   ).length;
-
-  //   return `${feedbacksOnDate} /${totalMealsOnDate}`;
-  // };
-
-  // if (loadingData) {
-  //   return <div>Loading...</div>;
-  // }
-
-  const renderMealsDots = (data: number[]) => {
     return (
       <div className="flex gap-1">
-        {data.map((dot, index) => (
-          <div key={index}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 21 20"
-              fill="none"
-            >
-              <circle
-                cx="10"
-                cy="10"
-                r="10"
-                transform="matrix(-1 0 0 1 20.334 0)"
-                fill={dot === 1 ? '#26CBFF' : '#D9D9D9'}
-              />
-            </svg>
-          </div>
-        ))}
+        {days.map((day, index) => {
+          const hasRecord = records.includes(day);
+          return (
+            <div key={index}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 21 20"
+                fill="none"
+              >
+                <circle
+                  cx="10"
+                  cy="10"
+                  r="10"
+                  transform="matrix(-1 0 0 1 20.334 0)"
+                  fill={hasRecord ? '#26CBFF' : '#D9D9D9'}
+                />
+              </svg>
+            </div>
+          );
+        })}
       </div>
     );
   };
 
+  const getDaysArray = (start: Date, end: Date) => {
+    const arr = [];
+    for (let dt = start; dt <= end; dt.setDate(dt.getDate() + 1)) {
+      arr.push(new Date(dt).toISOString().split('T')[0]);
+    }
+    return arr;
+  };
+
+  const participants = (records: DailyRecord[]) => {
+    const groupedData = new Map();
+
+    records.forEach((record) => {
+      // console.log('Processing record:', record);
+      const participantId = record.challenge_participants.users.id;
+
+      if (!groupedData.has(participantId)) {
+        groupedData.set(participantId, {
+          participant: record.challenge_participants,
+          recordDates: [],
+        });
+      }
+
+      const result = groupedData
+        .get(participantId)
+        .recordDates.push(record.record_date);
+    });
+
+    return Array.from(groupedData.values());
+  };
+
   return (
     <div className="mt-[1.4rem]">
-      <table className="table-auto w-full bg-white shadow-md rounded-md ">
+      <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
           <tr className="bg-gray-100 text-left text-1-500 text-gray-6">
-            <th className="p-[1rem] ">
-              <div className="relative flex items-center justify-between ">
+            <th className="p-[1rem]">
+              <div className="relative flex items-center justify-between">
                 <div>닉네임</div>
-                {/* <div>{renderSortArrow('id')}</div> */}
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300"></span>
+                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
               </div>
             </th>
             <th className="p-[1rem]">
               <div className="relative flex justify-between items-center pr-[1rem]">
                 <div>이름</div>
-                {/* <div>{renderSortArrow('name')}</div> */}
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300"></span>
+                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
               </div>
             </th>
             <th className="p-[1rem]">
               <div className="relative flex justify-between items-center pr-[1rem]">
                 <div>식단</div>
-                {/* <div>{renderSortArrow('name')}</div> */}
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300"></span>
+                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
               </div>
             </th>
-
-            <th
-              className="p-[1rem] w-[9rem]"
-              // onClick={() => handleSort('updateTime')}
-            >
+            <th className="p-[1rem] w-[9rem]">
               <div className="relative flex justify-between items-center">
                 <div>운동</div>
-                {/* <div>{renderSortArrow('updateTime')}</div> */}
                 <span className="absolute left-[7.9rem] h-[100%] w-[1px] bg-gray-300" />
               </div>
             </th>
@@ -165,14 +173,20 @@ const DietTable: React.FC<DietTableProps> = ({ data }) => {
           </tr>
         </thead>
         <tbody>
-          {data.map((item, index) => (
-            <tr key={index} className="border-b dark:text-gray-5">
-              <td className="p-[1rem]">{item.display_name}</td>
-              <td className="p-[1rem]">{item.name}</td>
-              <td className="p-[1rem]">{renderMealsDots(item.meals)}</td>
+          {participants(dailyRecords).map((data, index) => (
+            <tr key={index}>
+              <td>{data.participant.users.display_name}</td>
+              <td>{data.participant.users.name}</td>
+              <td>
+                {renderMealsDots(
+                  data.participant.challenges.start_date,
+                  data.participant.challenges.end_date,
+                  data.recordDates
+                )}
+              </td>
               <td className="p-[1rem]">200% /2회</td>
-              <td className="p-[1rem]">{item.coach_memo}</td>
-              <td className="p-[1rem]">{item.feedback_counts}</td>
+              <td className="p-[1rem]">코치메모</td>
+              {/* <td className="p-[1rem]">{record.feedback_counts}</td> */}
             </tr>
           ))}
         </tbody>
