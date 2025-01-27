@@ -46,94 +46,101 @@ interface DailyRecord {
   feedback_counts?: number;
 }
 
-// const sortData = (
-//   data: CombinedData[],
-//   sortBy: string,
-//   sortDirection: boolean
-// ) => {
-//   return [...data].sort((a, b) => {
-//     if (sortBy === 'name') {
-//       return a.name.localeCompare(b.name, 'ko') * (sortDirection ? 1 : -1);
-//     }
-//      else if (sortBy === 'id') {
-//       return (parseInt(a.id) - parseInt(b.id)) * (sortDirection ? 1 : -1);
-//     } else if (sortBy === 'updateTime') {
-//       return (
-//         a.updateTime.localeCompare(b.updateTime) * (sortDirection ? 1 : -1)
-//       );
-//     }
-//     return 0;
-//   });
-// };
+interface DietTableProps {
+  dailyRecordsData: DailyRecord[];
+}
 
-const DietTable: React.FC = () => {
-  const [dailyRecords, setDailyRecords] = useState<DailyRecord[]>([]);
-
-  useEffect(() => {
-    const fetchDailyRecords = async () => {
-      const response = await fetch('/api/challenge-participants');
-      const data = await response.json();
-      setDailyRecords(data);
-    };
-    fetchDailyRecords();
-  }, []);
-
-  const renderMealsDots = (start: string, end: string, records: string[]) => {
-    const days = getDaysArray(new Date(start), new Date(end));
-
-    return (
-      <div className="flex gap-1">
-        {days.map((day, index) => {
-          const hasRecord = records.includes(day);
-          return (
-            <div key={index}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 21 20"
-                fill="none"
-              >
-                <circle
-                  cx="10"
-                  cy="10"
-                  r="10"
-                  transform="matrix(-1 0 0 1 20.334 0)"
-                  fill={hasRecord ? '#26CBFF' : '#D9D9D9'}
-                />
-              </svg>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
+const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   const getDaysArray = (start: Date, end: Date) => {
     const arr = [];
-    for (let dt = start; dt <= end; dt.setDate(dt.getDate() + 1)) {
-      arr.push(new Date(dt).toISOString().split('T')[0]);
+    const currentDate = new Date(start);
+    const endDate = new Date(end);
+
+    while (currentDate <= endDate) {
+      arr.push(new Date(currentDate).toISOString().split('T')[0]);
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     return arr;
   };
 
+  const getRecordArray = (start: string, end: string, records: string[]) => {
+    const days = getDaysArray(new Date(start), new Date(end));
+    return days.map((day) => (records.includes(day) ? 1 : 0));
+  };
+
+  // 배열을 7개씩 그룹화하는 함수
+  const chunkArray = (array: number[], size: number) => {
+    const chunked = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunked.push(array.slice(i, i + size));
+    }
+    return chunked;
+  };
+
+  const renderDotsFromArray = (recordArray: number[]) => {
+    // 7개씩 그룹화
+    const chunkedArray = chunkArray(recordArray, 10);
+
+    return (
+      <div className="flex flex-col gap-1">
+        {chunkedArray.map((week, weekIndex) => (
+          <div key={weekIndex} className="flex gap-1">
+            {week.map((value, dayIndex) => (
+              <div key={`${weekIndex}-${dayIndex}`}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  className="min-w-[12px]"
+                >
+                  <circle
+                    cx="6"
+                    cy="6"
+                    r="6"
+                    fill={value === 1 ? '#26CBFF' : '#D9D9D9'}
+                  />
+                </svg>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const participants = (records: DailyRecord[]) => {
+    if (!records || !Array.isArray(records)) {
+      return [];
+    }
+
     const groupedData = new Map();
 
     records.forEach((record) => {
-      // console.log('Processing record:', record);
+      if (!record?.challenge_participants?.users?.id) {
+        return;
+      }
+
       const participantId = record.challenge_participants.users.id;
 
       if (!groupedData.has(participantId)) {
         groupedData.set(participantId, {
           participant: record.challenge_participants,
           recordDates: [],
+          recordArray: [],
         });
       }
 
-      const result = groupedData
-        .get(participantId)
-        .recordDates.push(record.record_date);
+      groupedData.get(participantId).recordDates.push(record.record_date);
+    });
+
+    // recordArray 계산 추가
+    groupedData.forEach((value) => {
+      value.recordArray = getRecordArray(
+        value.participant.challenges.start_date,
+        value.participant.challenges.end_date,
+        value.recordDates
+      );
     });
 
     return Array.from(groupedData.values());
@@ -144,49 +151,50 @@ const DietTable: React.FC = () => {
       <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
           <tr className="bg-gray-100 text-left text-1-500 text-gray-6">
-            <th className="p-[1rem]">
+            <th className="p-[1rem] w-[10%]">
               <div className="relative flex items-center justify-between">
                 <div>닉네임</div>
                 <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
               </div>
             </th>
-            <th className="p-[1rem]">
+            <th className="p-[1rem] w-[10%]">
               <div className="relative flex justify-between items-center pr-[1rem]">
                 <div>이름</div>
                 <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
               </div>
             </th>
-            <th className="p-[1rem]">
+            <th className="p-[1rem] w-[40%]">
               <div className="relative flex justify-between items-center pr-[1rem]">
                 <div>식단</div>
                 <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
               </div>
             </th>
-            <th className="p-[1rem] w-[9rem]">
+            <th className="p-[1rem] w-[15%]">
               <div className="relative flex justify-between items-center">
                 <div>운동</div>
-                <span className="absolute left-[7.9rem] h-[100%] w-[1px] bg-gray-300" />
+                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
               </div>
             </th>
-            <th className="p-[1rem]">코치메모</th>
-            <th className="p-[1rem]">피드백 수</th>
+            <th className="p-[1rem] w-[15%]">코치메모</th>
+            <th className="p-[1rem] w-[10%]">피드백 수</th>
           </tr>
         </thead>
         <tbody>
-          {participants(dailyRecords).map((data, index) => (
+          {participants(dailyRecordsData).map((data, index) => (
             <tr key={index}>
-              <td>{data.participant.users.display_name}</td>
-              <td>{data.participant.users.name}</td>
-              <td>
-                {renderMealsDots(
-                  data.participant.challenges.start_date,
-                  data.participant.challenges.end_date,
-                  data.recordDates
-                )}
+              <td className="p-[1rem]">
+                {data.participant.users.display_name}
+              </td>
+              <td className="p-[1rem]">{data.participant.users.name}</td>
+              <td className="p-[1rem]">
+                <div className="flex flex-col gap-2">
+                  <div className="font-mono text-sm"></div>
+                  {renderDotsFromArray(data.recordArray)}
+                </div>
               </td>
               <td className="p-[1rem]">200% /2회</td>
               <td className="p-[1rem]">코치메모</td>
-              {/* <td className="p-[1rem]">{record.feedback_counts}</td> */}
+              <td className="p-[1rem]">feedback_counts</td>
             </tr>
           ))}
         </tbody>

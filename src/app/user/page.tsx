@@ -1,25 +1,16 @@
 'use client';
 import { useEffect, useState } from 'react';
-//import Stats from '@/components/graph/stats';
 import SalesChart from '@/components/graph/salesChart';
+import Image from 'next/image';
 import TrafficSourceChart from '@/components/graph/trafficSourceChart';
 import DailyDietRecord from '@/components/graph/dailyDietRecord';
 import WorkoutLeaderboeard from '@/components/graph/workoutLeaderboeard';
 import DietTable from '@/components/dietDashboard/dietTable';
-import { useSession } from 'next-auth/react';
 import DateInput from '@/components/input/dateInput';
 import SearchInput from '@/components/input/searchInput';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import Title from '@/components/layout/title';
 import Sidebar from '@/components/fixedBars/sidebar';
-
-// interface DietTableItem {
-//   display_name: string;
-//   name: string;
-//   meals: number[];
-//   coach_memo?: string;
-//   feedback_counts: number;
-// }
 
 interface AdminUser {
   email: string;
@@ -29,7 +20,7 @@ interface AdminUser {
 interface Challenge {
   id: string;
   title: string;
-  participants: Array<any>; // 필요한 participant 타입 정의
+  participants: Array<any>;
 }
 
 interface CoachData {
@@ -46,9 +37,38 @@ interface CoachData {
   challenge_coaches: Array<{ challenge: Challenge }>;
 }
 
+interface Challenges {
+  challenges: {
+    id: string;
+    title: string;
+    start_date: string;
+    end_date: string;
+  };
+}
+interface DailyRecord {
+  record_date: string;
+  challenge_participants: {
+    id: string;
+    users: {
+      id: string;
+      display_name: string;
+      name: string;
+    };
+    challenges: {
+      id: string;
+      start_date: string;
+      end_date: string;
+    };
+  };
+  coach_memo?: string;
+  feedback_counts?: number;
+}
+
 export default function User() {
   const [selectedDate, setSelectedDate] = useState<string>('2025-01-13');
-  const [isOpen, setIsOpen] = useState(false);
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
+  const [challenges, setChallenges] = useState<Challenges[]>([]);
+  const [dailyRecords, setDailyRecords] = useState<DailyRecord[]>([]);
   const [adminData, setAdminData] = useState({
     admin_role: '',
     display_name: '',
@@ -70,77 +90,75 @@ export default function User() {
     challenge_coaches: [],
   });
 
-  //const [dietData, setDietData] = useState<DietTableItem[]>([]);
-  // const [nameData, setNameData] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 챌린지 데이터 가져오기
+        const challengesResponse = await fetch('/api/challenges');
+        if (!challengesResponse.ok) {
+          throw new Error('Failed to fetch challenges');
+        }
+        const challengesData = await challengesResponse.json();
+        setChallenges(challengesData);
 
-  // const fetchDietData = async () => {
-  //   try {
-  //     const response = await fetch(`/api/diet-table`);
+        // 코치 데이터 가져오기
+        const coachResponse = await fetch('/api/coach-info');
+        if (!coachResponse.ok) {
+          throw new Error('Failed to fetch coach data');
+        }
+        const coachData = await coachResponse.json();
+        setCoachData(coachData);
 
-  //     const data = await response.json();
-  //     console.log(data);
-  //     if (data) {
-  //       console.log(data);
-  //       setDietData(data);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching diet data:', error);
-  //   }
-  // };
+        // 어드민 데이터 가져오기
+        const adminResponse = await fetch('/api/admin-users');
+        if (!adminResponse.ok) {
+          throw new Error('Failed to fetch admin data');
+        }
+        const adminData = await adminResponse.json();
+        setAdminData(adminData);
 
-  // 테스트 후 사용하삼
-  /*  const { data: session } = useSession();
-  if (!session) return <div>Loading...</div>;
-  const { display_name, organization_id, admin_role } = session.user;
-  */
+        // 데일리레코드(테이블 정보) 가져오기
+        const dailyRecordsresponse = await fetch('/api/challenge-participants');
+        if (!dailyRecordsresponse.ok) {
+          throw new Error('Failed to fetch daily-records data');
+        }
+        const dailyRecordsdata = await dailyRecordsresponse.json();
+        setDailyRecords(dailyRecordsdata);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
 
-  //개발시에 코치 1의 데이터로 연습하려고
-  const fetchCoachData = async () => {
-    try {
-      const response = await fetch('/api/coach-info');
-      const coachData = await response.json();
+    fetchData();
+  }, []);
 
-      return coachData;
-    } catch (error) {
-      console.error('failed!!!', error);
+  const handleChallengeSelect = (challengeId: string) => {
+    // console.log('Selected Challenge ID:', challengeId);
+
+    // 선택된 챌린지 찾기
+    const selectedChallenge = challenges.find(
+      (challenge) => challenge.challenges.id === challengeId
+    );
+
+    if (selectedChallenge) {
+      // console.log('Selected Challenge:', selectedChallenge.challenges.title);
+      setSelectedChallengeId(challengeId);
     }
   };
 
-  const fetchAdminUserData = async () => {
-    const response = await fetch('/api/admin-users');
-    const data = await response.json();
-    // console.log(data);
-    return data;
-  };
-
-  useEffect(() => {
-    const gotCoachData = async () => {
-      const Coachdata = await fetchCoachData();
-      // console.log(data);
-      setCoachData(Coachdata);
-    };
-
-    const gotAdminInfo = async () => {
-      const Admindata = await fetchAdminUserData();
-      setAdminData(Admindata);
-    };
-
-    gotCoachData();
-    gotAdminInfo();
-  }, []);
+  const filteredDailyRecordsbyId = dailyRecords.filter(
+    (record) =>
+      record.challenge_participants.challenges.id === selectedChallengeId
+  );
 
   const handleDateInput = (formattedDate: string) => {
     setSelectedDate(formattedDate);
     console.log(selectedDate);
   };
 
-  const handleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
-
   return (
     <div className="bg-gray-100 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden">
-      <Sidebar onClick={handleSidebar} />
+      <Sidebar data={challenges} onSelectChallenge={handleChallengeSelect} />
       <div className="flex-1 overflow-auto">
         <div className="pt-[2rem]">
           <Title
@@ -187,15 +205,20 @@ export default function User() {
             <TrafficSourceChart />
             <DailyDietRecord />
             <WorkoutLeaderboeard />
-            <SalesChart />
+            <Image
+              src="/image/graph-example.png"
+              width={4000}
+              height={4000}
+              alt="graph-example"
+              className="w-full col-span-3"
+            />
           </div>
           <div className="dark:bg-blue-4 flex-1 p-6 bg-gray-100 pt-[7rem] bg-white-1">
             <div className="flex justify-between items-center mt-[1.5rem]">
               <DateInput onChange={handleDateInput} selectedDate="2025-01-19" />
               <SearchInput />
             </div>
-
-            <DietTable />
+            <DietTable dailyRecordsData={filteredDailyRecordsbyId} />
           </div>
         </div>
       </div>
