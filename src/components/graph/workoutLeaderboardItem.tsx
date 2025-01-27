@@ -11,26 +11,39 @@ const WorkoutLeaderboardItem = ({
   rank,
   name,
   score,
-}: LeaderboardItemProps) => (
-  <div className="flex items-center gap-3 mb-3">
-    <span className="text-gray-600 w-4">{rank}</span>
-    <div className="w-8 h-8 rounded-full bg-gray-200" />
-    <span className="text-sm w-12">{name}</span>
-    <div className="flex-1 relative h-2 bg-gray-100 rounded-full">
-      <div className="absolute left-0 top-0 h-full w-full bg-gradient-to-r from-pink-500 to-pink-300 rounded-full" />
-    </div>
+}: LeaderboardItemProps) => {
+  const scoreValue = parseFloat(score.replace(/[^0-9.]/g, ''));
 
-    <div className="relative flex items-center gap-1">
-      <Image
-        src="/svg/fire.svg"
-        width={10}
-        height={10}
-        alt="fire"
-        className="absolute"
-      />
-      <span className="text-sm text-gray-600">{score}</span>
+  // 1000을 기준으로 퍼센트 계산
+  const progressWidth = (scoreValue / 1000) * 100;
+
+  return (
+    <div className="flex items-center gap-4 mb-4">
+      <div className="w-6">{rank}</div>
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-full bg-gray-200" />
+        <span>{name}</span>
+      </div>
+
+      <div className="flex-1 relative">
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-pink-500 to-pink-300 rounded-full"
+            style={{ width: `${progressWidth}%` }}
+          />
+        </div>
+        <Image
+          src="/svg/fire.svg"
+          width={20}
+          height={20}
+          alt="fire"
+          className="absolute -right-2 -top-2"
+        />
+      </div>
+
+      <div className="w-20 text-right">{score}</div>
     </div>
-  </div>
-);
+  );
+};
 
 export default WorkoutLeaderboardItem;
