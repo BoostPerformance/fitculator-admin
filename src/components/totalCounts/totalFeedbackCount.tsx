@@ -11,7 +11,7 @@ const TotalFeedbackCounts = ({
   total: string;
   borderColor: string;
   grids?: string;
-  textColor: string;
+  textColor?: string;
 }) => {
   return (
     <div
