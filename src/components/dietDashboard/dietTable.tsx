@@ -3,54 +3,53 @@ import { useState, useEffect } from 'react';
 //import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 //import DietTableMockData from '../mock/DietTableMockData';
-//import { ActivityStatus } from '@/types/dietTypes';
 
-// interface ChallengeParticipants {
-//   challenge_participants: {
-//     users: {
-//       display_name: string;
-//       name: string;
-//     };
-//     challenges: {
-//       start_date: string;
-//       end_date: string;
-//     };
-//   };
-// }
-
-// interface DietTableItems {
-//   record_date: string;
-//   challenge_participants: ChallengeParticipants;
-//   coach_memo?: string;
-//   feedback_counts?: number | null;
-// }
-
-// interface DietTableProps {
-//   data?: DietTableItems[];
-// }
 interface DailyRecord {
+  id: string;
   record_date: string;
-  challenge_participants: {
+  feedbacks: {
+    coach_feedback: string;
+    created_at: string;
     id: string;
-    users: {
-      id: string;
-      display_name: string;
-      name: string;
-    };
-    challenges: {
-      start_date: string;
-      end_date: string;
-    };
+  }[];
+}
+
+interface ChallengeParticipant {
+  id: string;
+  users: {
+    id: string;
+    name: string;
+    display_name: string;
   };
-  coach_memo?: string;
-  feedback_counts?: number;
+  challenges: {
+    id: string;
+    title: string;
+    end_date: string;
+    start_date: string;
+    challenge_type: string;
+  };
+  daily_records: DailyRecord[];
+}
+
+interface FeedbackCount {
+  participantId: string;
+  challengeId: string;
+  feedbackRatio: {
+    completed: number;
+    total: number;
+    formatted: string;
+  };
 }
 
 interface DietTableProps {
-  dailyRecordsData: DailyRecord[];
+  dailyRecordsData: ChallengeParticipant[];
+  feedbackCounts?: FeedbackCount[];
 }
 
-const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
+const DietTable: React.FC<DietTableProps> = ({
+  dailyRecordsData,
+  feedbackCounts = [],
+}) => {
   const getDaysArray = (start: Date, end: Date) => {
     const arr = [];
     const currentDate = new Date(start);
@@ -68,48 +67,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
     return days.map((day) => (records.includes(day) ? 1 : 0));
   };
 
-  // 배열을 7개씩 그룹화하는 함수
-  const chunkArray = (array: number[], size: number) => {
-    const chunked = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunked.push(array.slice(i, i + size));
-    }
-    return chunked;
-  };
-
-  const renderDotsFromArray = (recordArray: number[]) => {
-    // 7개씩 그룹화
-    const chunkedArray = chunkArray(recordArray, 10);
-
-    return (
-      <div className="flex flex-col gap-1 sm:w-full">
-        {chunkedArray.map((week, weekIndex) => (
-          <div key={weekIndex} className="flex gap-1">
-            {week.map((value, dayIndex) => (
-              <div key={`${weekIndex}-${dayIndex}`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  className="min-w-[12px]"
-                >
-                  <circle
-                    cx="6"
-                    cy="6"
-                    r="6"
-                    fill={value === 1 ? '#26CBFF' : '#D9D9D9'}
-                  />
-                </svg>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const participants = (records: DailyRecord[]) => {
+  const participants = (records: ChallengeParticipant[]) => {
     if (!records || !Array.isArray(records)) {
       return [];
     }
@@ -117,21 +75,25 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
     const groupedData = new Map();
 
     records.forEach((record) => {
-      if (!record?.challenge_participants?.users?.id) {
-        return;
-      }
+      const participantId = record.id;
+      const challengeId = record.challenges.id;
 
-      const participantId = record.challenge_participants.users.id;
+      console.log('records', records);
+      // 해당 참가자의 피드백 찾기
+      const feedback = feedbackCounts.find(
+        (count) =>
+          count.participantId === participantId &&
+          count.challengeId === challengeId
+      );
 
       if (!groupedData.has(participantId)) {
         groupedData.set(participantId, {
-          participant: record.challenge_participants,
-          recordDates: [],
+          participant: record,
+          recordDates: record.daily_records.map((dr) => dr.record_date),
           recordArray: [],
+          feedbackRatio: feedback?.feedbackRatio || null,
         });
       }
-
-      groupedData.get(participantId).recordDates.push(record.record_date);
     });
 
     // recordArray 계산 추가
@@ -197,13 +159,22 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
         <tbody>
           {participants(dailyRecordsData).map((data, index) => (
             <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
-              <td className="p-[1rem] ">
+              <td className="p-[1rem]">
                 {data.participant.users.display_name}
               </td>
               <td className="p-[1rem]">{data.participant.users.name}</td>
-
-              <td className="p-[1rem]">코치메모</td>
-              <td className="p-[1rem]">feedback_counts</td>
+              <td className="p-[1rem]">
+                <input type="text" placeholder="코치메모" />
+              </td>
+              <td className="p-[1rem]">
+                {data.feedbackRatio ? (
+                  <span className="font-medium">
+                    {data.feedbackRatio.formatted}
+                  </span>
+                ) : (
+                  '0/0'
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

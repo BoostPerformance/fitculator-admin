@@ -46,29 +46,36 @@ interface Challenges {
   };
 }
 interface DailyRecord {
+  id: string;
   record_date: string;
-  challenge_participants: {
+  feedbacks: {
+    coach_feedback: string;
+    created_at: string;
     id: string;
-    users: {
-      id: string;
-      display_name: string;
-      name: string;
-    };
-    challenges: {
-      id: string;
-      start_date: string;
-      end_date: string;
-    };
-  };
-  coach_memo?: string;
-  feedback_counts?: number;
+  }[];
 }
 
+interface ChallengeParticipant {
+  id: string;
+  users: {
+    id: string;
+    name: string;
+    display_name: string;
+  };
+  challenges: {
+    id: string;
+    title: string;
+    end_date: string;
+    start_date: string;
+    challenge_type: string;
+  };
+  daily_records: DailyRecord[];
+}
 export default function User() {
   const [selectedDate, setSelectedDate] = useState<string>('2025-01-13');
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
-  const [dailyRecords, setDailyRecords] = useState<DailyRecord[]>([]);
+  const [dailyRecords, setDailyRecords] = useState<ChallengeParticipant[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [adminData, setAdminData] = useState({
     admin_role: '',
@@ -161,9 +168,9 @@ export default function User() {
   };
 
   const filteredDailyRecordsbyId = dailyRecords.filter(
-    (record) =>
-      record.challenge_participants.challenges.id === selectedChallengeId
+    (record) => record.challenges.id === selectedChallengeId
   );
+  console.log('dailyRecords', dailyRecords);
 
   const handleDateInput = (formattedDate: string) => {
     setSelectedDate(formattedDate);

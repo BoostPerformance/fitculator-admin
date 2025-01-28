@@ -17,19 +17,29 @@ export async function GET() {
     //   name,
     //   )`);
 
-    const { data: dailyRecords } = await supabase.from('daily_records').select(`
-    *,
-    challenge_participants!participant_id (
-      users!service_user_id (
-        id,
-        display_name,
-        name
-      ),challenges!challenge_id(
+    const { data: dailyRecords } = await supabase.from('challenge_participants')
+      .select(`
+    id,
+    users!service_user_id (
+      id,
+      display_name,
+      name
+    ),
+    challenges!challenge_id (
       id,
       title,
       challenge_type,
       start_date,
-      end_date)
+      end_date
+    ),
+    daily_records!participant_id (
+      id,
+      record_date,
+      feedbacks!daily_record_id (
+        id,
+        coach_feedback,
+        created_at
+      )
     )
   `);
     // console.log(dailyRecords);
