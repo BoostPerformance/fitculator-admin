@@ -232,13 +232,22 @@ export default function User() {
               src={
                 isMobile
                   ? '/image/graph-example2.png'
-                  : '/image/graph-example.png'
+                  : '/image/cardio-graph.png'
               }
               width={4000}
               height={4000}
-              alt={isMobile ? 'graph-example1.png' : 'graph-example.png'}
+              alt={isMobile ? 'graph-example1.png' : 'cardio-graph.png'}
               className="w-full lg:col-span-3"
             />
+            {!isMobile && (
+              <Image
+                src="/image/weight-graph.png"
+                width={4000}
+                height={4000}
+                alt=""
+                className="w-full lg:col-span-3"
+              />
+            )}
           </div>
           <div className="dark:bg-blue-4 flex-1 p-6 bg-gray-100 pt-[7rem] bg-white-1">
             <div className="flex justify-between items-center mt-[1.5rem] w-[16rem] sm:gap-[1.5rem]">

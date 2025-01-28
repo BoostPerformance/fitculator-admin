@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 //import { CombinedData } from '@/types/dietTypes';
 //import { useRouter } from 'next/navigation';
-//import Image from 'next/image';
+import Image from 'next/image';
 //import DietTableMockData from '../mock/DietTableMockData';
 //import { ActivityStatus } from '@/types/dietTypes';
 
@@ -150,49 +150,58 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
     <div className="mt-[1.4rem]">
       <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
-          <tr className="bg-gray-100 text-left text-1-500 text-gray-6">
+          <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
             <th className="p-[1rem] w-[10%]">
               <div className="relative flex items-center justify-between">
                 <div>닉네임</div>
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
+                <button>
+                  <Image
+                    src="/svg/arrow-down.svg"
+                    width={10}
+                    height={10}
+                    alt="arrow-down"
+                  />
+                </button>
+                {/* <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" /> */}
               </div>
             </th>
             <th className="p-[1rem] w-[10%]">
               <div className="relative flex justify-between items-center pr-[1rem]">
                 <div>이름</div>
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
+                <button>
+                  <Image
+                    src="/svg/arrow-down.svg"
+                    width={10}
+                    height={10}
+                    alt="arrow-down"
+                  />
+                </button>
+                {/* <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" /> */}
               </div>
             </th>
-            <th className="p-[1rem] w-[40%]">
-              <div className="relative flex justify-between items-center pr-[1rem]">
-                <div>식단</div>
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
-              </div>
+
+            <th className="p-[1rem] w-[20%] flex justify-between items-center">
+              <div>코치메모</div>
+              <button>
+                <Image
+                  src="/svg/arrow-down.svg"
+                  width={10}
+                  height={10}
+                  alt="arrow-down"
+                />
+              </button>
             </th>
-            <th className="p-[1rem] w-[15%]">
-              <div className="relative flex justify-between items-center">
-                <div>운동</div>
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
-              </div>
-            </th>
-            <th className="p-[1rem] w-[15%]">코치메모</th>
             <th className="p-[1rem] w-[10%]">피드백 수</th>
           </tr>
         </thead>
         <tbody>
           {participants(dailyRecordsData).map((data, index) => (
-            <tr key={index}>
-              <td className="p-[1rem]">
+            <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
+              <td className="p-[1rem] ">
                 {data.participant.users.display_name}
               </td>
               <td className="p-[1rem]">{data.participant.users.name}</td>
-              <td className="p-[1rem]">
-                <div className="flex flex-col gap-2">
-                  <div className="font-mono text-sm"></div>
-                  {renderDotsFromArray(data.recordArray)}
-                </div>
-              </td>
-              <td className="p-[1rem]">200% /2회</td>
+
               <td className="p-[1rem]">코치메모</td>
               <td className="p-[1rem]">feedback_counts</td>
             </tr>
