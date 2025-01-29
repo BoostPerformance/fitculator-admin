@@ -43,13 +43,9 @@ interface FeedbackCount {
 
 interface DietTableProps {
   dailyRecordsData: ChallengeParticipant[];
-  feedbackCounts?: FeedbackCount[];
 }
 
-const DietTable: React.FC<DietTableProps> = ({
-  dailyRecordsData,
-  feedbackCounts = [],
-}) => {
+const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
     const today = new Date();
     const startDate = new Date(participant.challenges.start_date);
@@ -74,19 +70,13 @@ const DietTable: React.FC<DietTableProps> = ({
     const feedbackCount = participant.daily_records
       .map((record) => {
         const recordDate = new Date(record.record_date);
-        console.log('record', record);
+
         if (recordDate <= today && record.feedbacks! !== null) {
           return 1;
         }
         return 0;
       })
       .reduce<number>((sum, current) => sum + current, 0);
-
-    console.log({
-      completed: feedbackCount,
-      total: effectiveDays,
-      formatted: `${feedbackCount}/${effectiveDays}`,
-    });
 
     return {
       completed: feedbackCount,
@@ -153,7 +143,6 @@ const DietTable: React.FC<DietTableProps> = ({
                     alt="arrow-down"
                   />
                 </button>
-                {/* <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" /> */}
               </div>
             </th>
             <th className="p-[1rem] w-[10%] sm:p-0 sm:pt-[1.4rem]">
@@ -169,7 +158,6 @@ const DietTable: React.FC<DietTableProps> = ({
                     alt="arrow-down"
                   />
                 </button>
-                {/* <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" /> */}
               </div>
             </th>
 
