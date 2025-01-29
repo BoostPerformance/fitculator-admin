@@ -50,22 +50,67 @@ const DietTable: React.FC<DietTableProps> = ({
   dailyRecordsData,
   feedbackCounts = [],
 }) => {
-  const getDaysArray = (start: Date, end: Date) => {
-    const arr = [];
-    const currentDate = new Date(start);
-    const endDate = new Date(end);
+  const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
+    const today = new Date();
+    const startDate = new Date(participant.challenges.start_date);
+    const endDate = new Date(participant.challenges.end_date);
 
-    while (currentDate <= endDate) {
-      arr.push(new Date(currentDate).toISOString().split('T')[0]);
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    return arr;
+    // 챌린지 전체 기간 계산
+    const totalChallengeDays =
+      Math.floor(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    // 오늘까지의 기간 계산
+    const daysUntilToday =
+      Math.floor(
+        (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    // 챌린지가 이미 끝났다면 전체 기간을, 아니면 오늘까지의 기간을 사용
+    const effectiveDays = today > endDate ? totalChallengeDays : daysUntilToday;
+
+    // 피드백 갯수 계산 (각 record의 모든 feedback 확인)
+    const feedbackCount = participant.daily_records
+      .map((record) => {
+        const recordDate = new Date(record.record_date);
+        console.log('record', record);
+        if (recordDate <= today && record.feedbacks! !== null) {
+          return 1;
+        }
+        return 0;
+      })
+      .reduce<number>((sum, current) => sum + current, 0);
+
+    console.log({
+      completed: feedbackCount,
+      total: effectiveDays,
+      formatted: `${feedbackCount}/${effectiveDays}`,
+    });
+
+    return {
+      completed: feedbackCount,
+      total: effectiveDays,
+      formatted: `${feedbackCount}/${effectiveDays}`,
+    };
   };
 
-  const getRecordArray = (start: string, end: string, records: string[]) => {
-    const days = getDaysArray(new Date(start), new Date(end));
-    return days.map((day) => (records.includes(day) ? 1 : 0));
-  };
+  // const getDaysArray = (start: Date, end: Date) => {
+  //   const arr = [];
+  //   const currentDate = new Date(start);
+  //   const endDate = new Date(end);
+
+  //   while (currentDate <= endDate) {
+  //     arr.push(new Date(currentDate).toISOString().split('T')[0]);
+  //     currentDate.setDate(currentDate.getDate() + 1);
+  //   }
+  //   return arr;
+  // };
+
+  // const getRecordArray = (start: string, end: string, records: string[]) => {
+  //   const days = getDaysArray(new Date(start), new Date(end));
+  //   return days.map((day) => (records.includes(day) ? 1 : 0));
+  // };
 
   const participants = (records: ChallengeParticipant[]) => {
     if (!records || !Array.isArray(records)) {
@@ -76,33 +121,15 @@ const DietTable: React.FC<DietTableProps> = ({
 
     records.forEach((record) => {
       const participantId = record.id;
-      const challengeId = record.challenges.id;
-
-      console.log('records', records);
-      // 해당 참가자의 피드백 찾기
-      const feedback = feedbackCounts.find(
-        (count) =>
-          count.participantId === participantId &&
-          count.challengeId === challengeId
-      );
-
       if (!groupedData.has(participantId)) {
         groupedData.set(participantId, {
           participant: record,
-          recordDates: record.daily_records.map((dr) => dr.record_date),
-          recordArray: [],
-          feedbackRatio: feedback?.feedbackRatio || null,
+          feedbackRatio: calculateFeedbackRatio(record),
         });
       }
-    });
 
-    // recordArray 계산 추가
-    groupedData.forEach((value) => {
-      value.recordArray = getRecordArray(
-        value.participant.challenges.start_date,
-        value.participant.challenges.end_date,
-        value.recordDates
-      );
+      //console.log('records', records);
+      // 해당 참가자의 피드백 찾기
     });
 
     return Array.from(groupedData.values());
@@ -160,21 +187,13 @@ const DietTable: React.FC<DietTableProps> = ({
           {participants(dailyRecordsData).map((data, index) => (
             <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
               <td className="p-[1rem]">
-                {data.participant.users.display_name}
+                {data.participant.users?.display_name}
               </td>
-              <td className="p-[1rem]">{data.participant.users.name}</td>
+              <td className="p-[1rem]">{data.participant.users?.name}</td>
               <td className="p-[1rem]">
                 <input type="text" placeholder="코치메모" />
               </td>
-              <td className="p-[1rem]">
-                {data.feedbackRatio ? (
-                  <span className="font-medium">
-                    {data.feedbackRatio.formatted}
-                  </span>
-                ) : (
-                  '0/0'
-                )}
-              </td>
+              <td className="p-[1rem]">{data.feedbackRatio.formatted}</td>
             </tr>
           ))}
         </tbody>
