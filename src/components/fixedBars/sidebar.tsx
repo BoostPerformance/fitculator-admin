@@ -77,15 +77,33 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
         </div>
       </div>
       {userDropdown && (
-        <div className="z-50 sm:top-full  sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1">
+        <div className="z-50 sm:top-full  sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1 items-start flex-col text-gray-10 text-1-700 gap-[0.5rem] bg-white drop-shadow">
+          <div className="hover:bg-gray-3 ">전체회원 정보보기</div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="122"
+            height="2"
+            viewBox="0 0 122 2"
+            fill="none"
+          >
+            <path d="M0 1H122" stroke="#E1E1E1" />
+          </svg>
           <LogoutButton />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="122"
+            height="2"
+            viewBox="0 0 122 2"
+            fill="none"
+          >
+            <path d="M0 1H122" stroke="#E1E1E1" />
+          </svg>
         </div>
       )}
 
       {isSidebarOpen && (
         <div
-          className={`sm:absolute bg-white drop-shadow-sm dark:bg-blue-4  sm:w-full sm:flex sm:items-center sm:justify-center
-          } z-50`}
+          className={`sm:absolute bg-white drop-shadow-sm dark:bg-blue-4  sm:w-full sm:flex sm:items-center sm:justify-center lg:h-full z-50 sm:pb-[50rem]`}
         >
           <div className=" flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[22rem] md:w-[18rem] p-[2.3rem] sm:items-center">
             <div className="flex items-center justify-around gap-[1rem]">

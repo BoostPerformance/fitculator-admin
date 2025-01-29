@@ -46,29 +46,36 @@ interface Challenges {
   };
 }
 interface DailyRecord {
+  id: string;
   record_date: string;
-  challenge_participants: {
+  feedbacks: {
+    coach_feedback: string;
+    created_at: string;
     id: string;
-    users: {
-      id: string;
-      display_name: string;
-      name: string;
-    };
-    challenges: {
-      id: string;
-      start_date: string;
-      end_date: string;
-    };
-  };
-  coach_memo?: string;
-  feedback_counts?: number;
+  }[];
 }
 
+interface ChallengeParticipant {
+  id: string;
+  users: {
+    id: string;
+    name: string;
+    display_name: string;
+  };
+  challenges: {
+    id: string;
+    title: string;
+    end_date: string;
+    start_date: string;
+    challenge_type: string;
+  };
+  daily_records: DailyRecord[];
+}
 export default function User() {
   const [selectedDate, setSelectedDate] = useState<string>('2025-01-13');
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
-  const [dailyRecords, setDailyRecords] = useState<DailyRecord[]>([]);
+  const [dailyRecords, setDailyRecords] = useState<ChallengeParticipant[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [adminData, setAdminData] = useState({
     admin_role: '',
@@ -142,7 +149,6 @@ export default function User() {
 
     fetchData();
     const mobileSize = () => window.removeEventListener('resize', handleResize);
-    console.log(mobileSize);
     return mobileSize;
   }, []);
 
@@ -159,15 +165,31 @@ export default function User() {
       setSelectedChallengeId(challengeId);
     }
   };
-
+  //console.log(selectedChallengeId);
+  //console.log('dailyRecords', dailyRecords);
   const filteredDailyRecordsbyId = dailyRecords.filter(
-    (record) =>
-      record.challenge_participants.challenges.id === selectedChallengeId
+    (record) => record.challenges.id === selectedChallengeId
   );
+  console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
+
+  /*
+selectedChallengeId 있다.
+
+오늘까지 몇개의 피드백이 있는지. 
+오늘이 챌린지 몇일째인지.
+
+filteredDailyRecordsbyId[0].challenge.end_date - filteredDailyRecordsbyId[0].challenge.start_date 기간과 오늘 비교
+
+첼린지 참여자 filteredDailyRecordsbyId[0].id
+
+피드백 filteredDailyRecordsbyId[0].daily_records.feedback.coach_feedback
+피드백이 null 이면 카운트 안함. 피드백 객체가 있을 때 +1
+
+*/
 
   const handleDateInput = (formattedDate: string) => {
     setSelectedDate(formattedDate);
-    console.log(selectedDate);
+    // console.log(selectedDate);
   };
 
   return (
@@ -232,19 +254,24 @@ export default function User() {
               src={
                 isMobile
                   ? '/image/graph-example2.png'
-                  : '/image/graph-example.png'
+                  : '/image/cardio-graph.png'
               }
               width={4000}
               height={4000}
-              alt={isMobile ? 'graph-example1.png' : 'graph-example.png'}
+              alt={isMobile ? 'graph-example1.png' : 'cardio-graph.png'}
               className="w-full lg:col-span-3"
             />
+            {!isMobile && (
+              <Image
+                src="/image/weight-graph.png"
+                width={4000}
+                height={4000}
+                alt=""
+                className="w-full lg:col-span-3"
+              />
+            )}
           </div>
-          <div className="dark:bg-blue-4 flex-1 p-6 bg-gray-100 pt-[7rem] bg-white-1">
-            <div className="flex justify-between items-center mt-[1.5rem] w-[16rem] sm:gap-[1.5rem]">
-              <DateInput onChange={handleDateInput} selectedDate="2025-01-19" />
-              <SearchInput />
-            </div>
+          <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1">
             <DietTable dailyRecordsData={filteredDailyRecordsbyId} />
           </div>
         </div>

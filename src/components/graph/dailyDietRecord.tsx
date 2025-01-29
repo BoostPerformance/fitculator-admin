@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const days = ['월', '화', '수', '목', '금', '토', '일'];
 
 const DailyDietRecord = () => {
   const activities = [
@@ -55,71 +55,58 @@ const DailyDietRecord = () => {
   ];
 
   return (
-    <div className="bg-white p-6 rounded-lg dark:bg-gray-8">
-      <div className="flex items-center gap-2 mb-4">
-        <h2 className="text-lg font-semibold  text-gray-5 px-3 py-1 rounded">
-          일별 식단 기록 현황
-        </h2>
-      </div>
+    <div className="bg-white sm:p-6 rounded-lg p-3 lg:py-[1.7rem]">
+      <h2 className="text-xl font-medium mb-6 text-[#6F6F6F]">
+        일별 식단 기록 현황
+      </h2>
 
-      <div className="space-y-6 ">
-        {activities.map((activity, index) => (
-          <div key={index} className="flex items-center gap-4 flex-col w-full ">
-            <div className="flex items-center lg:gap-[2rem] sm:gap-[4rem] justify-between">
-              {/* Profile and Name */}
-              <div className="flex items-center gap-2 w-20">
-                <Image
-                  width={20}
-                  height={30}
-                  src="/image/logo-icon.png"
-                  alt={activity.name}
-                  className="w-[1rem] h-[1rem] rounded-full bg-gray-200"
-                />
-                <span className="text-sm">{activity.name}</span>
+      <div className="sm:space-y-4 lg:space-y-6">
+        {/* Days of week header */}
+        <div className="flex items-center sm:pl-[4rem] pl-[3.2rem]">
+          <div className="flex sm:gap-[0.5rem] gap-[0.6rem]">
+            {days.map((day, idx) => (
+              <div key={idx} className="w-6 text-center text-gray-500">
+                {day}
               </div>
+            ))}
+          </div>
+        </div>
 
-              {/* Weekly Activity Boxes */}
+        {/* Activity rows */}
+        {activities.map((activity, index) => (
+          <div key={index} className="flex items-center">
+            <div className="sm:w-[4rem] w-[2.4rem]">
+              <span className="text-gray-700">{activity.name}</span>
+            </div>
 
-              <div className="flex gap-[0.5rem] ">
+            <div className="flex items-center">
+              <div className="flex gap-2 mr-4">
                 {activity.weeklyActivity.map((isActive, idx) => (
                   <div
                     key={idx}
-                    className={`w-[1.5rem] h-[1.5rem] rounded flex items-center justify-center
-                    ${
-                      isActive
-                        ? 'text-gray-1'
-                        : idx === 5
-                        ? ' text-white'
-                        : idx === 6
-                        ? 'text-white bg-[#FF979D]'
-                        : 'text-gray-1'
-                    }
-                    ${
-                      isActive
-                        ? 'bg-orange-400 text-white'
-                        : idx === 5
-                        ? 'border-[0.1rem] border-[#FF979D] text-[#FF979D] '
-                        : idx === 6
-                        ? 'border-[0.1rem] border-[#FF979D] text-white bg-orange-400'
-                        : 'bg-white border border-gray-200'
-                    }`}
-                  >
-                    {days[idx]}
-                  </div>
+                    className={`w-6 h-6 rounded flex items-center justify-center
+                      ${isActive ? 'bg-orange-400' : 'bg-gray-100'}`}
+                  />
                 ))}
               </div>
-            </div>
-            <div className="flex justify-end w-full">
-              <div className="flex items-center gap-2  sm:w-[13rem] w-full">
-                <div className="flex-1 h-2 bg-gray-100 rounded-full">
-                  <div
-                    className="bg-orange-400 rounded-full border-[0.3rem] border-orange-400"
-                    style={{ width: `${activity.progress}%` }}
-                  />
+
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center p-1">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="w-full h-full text-white"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
                 </div>
-                <span className="text-sm font-medium">
-                  {activity.totalScore}
-                </span>
+                <span className="text-gray-600">23일</span>
               </div>
             </div>
           </div>

@@ -1,115 +1,118 @@
 import { useState, useEffect } from 'react';
 //import { CombinedData } from '@/types/dietTypes';
 //import { useRouter } from 'next/navigation';
-//import Image from 'next/image';
+import Image from 'next/image';
 //import DietTableMockData from '../mock/DietTableMockData';
-//import { ActivityStatus } from '@/types/dietTypes';
 
-// interface ChallengeParticipants {
-//   challenge_participants: {
-//     users: {
-//       display_name: string;
-//       name: string;
-//     };
-//     challenges: {
-//       start_date: string;
-//       end_date: string;
-//     };
-//   };
-// }
-
-// interface DietTableItems {
-//   record_date: string;
-//   challenge_participants: ChallengeParticipants;
-//   coach_memo?: string;
-//   feedback_counts?: number | null;
-// }
-
-// interface DietTableProps {
-//   data?: DietTableItems[];
-// }
 interface DailyRecord {
+  id: string;
   record_date: string;
-  challenge_participants: {
+  feedbacks: {
+    coach_feedback: string;
+    created_at: string;
     id: string;
-    users: {
-      id: string;
-      display_name: string;
-      name: string;
-    };
-    challenges: {
-      start_date: string;
-      end_date: string;
-    };
+  }[];
+}
+
+interface ChallengeParticipant {
+  id: string;
+  users: {
+    id: string;
+    name: string;
+    display_name: string;
   };
-  coach_memo?: string;
-  feedback_counts?: number;
+  challenges: {
+    id: string;
+    title: string;
+    end_date: string;
+    start_date: string;
+    challenge_type: string;
+  };
+  daily_records: DailyRecord[];
+}
+
+interface FeedbackCount {
+  participantId: string;
+  challengeId: string;
+  feedbackRatio: {
+    completed: number;
+    total: number;
+    formatted: string;
+  };
 }
 
 interface DietTableProps {
-  dailyRecordsData: DailyRecord[];
+  dailyRecordsData: ChallengeParticipant[];
+  feedbackCounts?: FeedbackCount[];
 }
 
-const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
-  const getDaysArray = (start: Date, end: Date) => {
-    const arr = [];
-    const currentDate = new Date(start);
-    const endDate = new Date(end);
+const DietTable: React.FC<DietTableProps> = ({
+  dailyRecordsData,
+  feedbackCounts = [],
+}) => {
+  const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
+    const today = new Date();
+    const startDate = new Date(participant.challenges.start_date);
+    const endDate = new Date(participant.challenges.end_date);
 
-    while (currentDate <= endDate) {
-      arr.push(new Date(currentDate).toISOString().split('T')[0]);
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    return arr;
+    // 챌린지 전체 기간 계산
+    const totalChallengeDays =
+      Math.floor(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    // 오늘까지의 기간 계산
+    const daysUntilToday =
+      Math.floor(
+        (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    // 챌린지가 이미 끝났다면 전체 기간을, 아니면 오늘까지의 기간을 사용
+    const effectiveDays = today > endDate ? totalChallengeDays : daysUntilToday;
+
+    // 피드백 갯수 계산 (각 record의 모든 feedback 확인)
+    const feedbackCount = participant.daily_records
+      .map((record) => {
+        const recordDate = new Date(record.record_date);
+        console.log('record', record);
+        if (recordDate <= today && record.feedbacks! !== null) {
+          return 1;
+        }
+        return 0;
+      })
+      .reduce<number>((sum, current) => sum + current, 0);
+
+    console.log({
+      completed: feedbackCount,
+      total: effectiveDays,
+      formatted: `${feedbackCount}/${effectiveDays}`,
+    });
+
+    return {
+      completed: feedbackCount,
+      total: effectiveDays,
+      formatted: `${feedbackCount}/${effectiveDays}`,
+    };
   };
 
-  const getRecordArray = (start: string, end: string, records: string[]) => {
-    const days = getDaysArray(new Date(start), new Date(end));
-    return days.map((day) => (records.includes(day) ? 1 : 0));
-  };
+  // const getDaysArray = (start: Date, end: Date) => {
+  //   const arr = [];
+  //   const currentDate = new Date(start);
+  //   const endDate = new Date(end);
 
-  // 배열을 7개씩 그룹화하는 함수
-  const chunkArray = (array: number[], size: number) => {
-    const chunked = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunked.push(array.slice(i, i + size));
-    }
-    return chunked;
-  };
+  //   while (currentDate <= endDate) {
+  //     arr.push(new Date(currentDate).toISOString().split('T')[0]);
+  //     currentDate.setDate(currentDate.getDate() + 1);
+  //   }
+  //   return arr;
+  // };
 
-  const renderDotsFromArray = (recordArray: number[]) => {
-    // 7개씩 그룹화
-    const chunkedArray = chunkArray(recordArray, 10);
+  // const getRecordArray = (start: string, end: string, records: string[]) => {
+  //   const days = getDaysArray(new Date(start), new Date(end));
+  //   return days.map((day) => (records.includes(day) ? 1 : 0));
+  // };
 
-    return (
-      <div className="flex flex-col gap-1 sm:w-full">
-        {chunkedArray.map((week, weekIndex) => (
-          <div key={weekIndex} className="flex gap-1">
-            {week.map((value, dayIndex) => (
-              <div key={`${weekIndex}-${dayIndex}`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  className="min-w-[12px]"
-                >
-                  <circle
-                    cx="6"
-                    cy="6"
-                    r="6"
-                    fill={value === 1 ? '#26CBFF' : '#D9D9D9'}
-                  />
-                </svg>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const participants = (records: DailyRecord[]) => {
+  const participants = (records: ChallengeParticipant[]) => {
     if (!records || !Array.isArray(records)) {
       return [];
     }
@@ -117,30 +120,16 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
     const groupedData = new Map();
 
     records.forEach((record) => {
-      if (!record?.challenge_participants?.users?.id) {
-        return;
-      }
-
-      const participantId = record.challenge_participants.users.id;
-
+      const participantId = record.id;
       if (!groupedData.has(participantId)) {
         groupedData.set(participantId, {
-          participant: record.challenge_participants,
-          recordDates: [],
-          recordArray: [],
+          participant: record,
+          feedbackRatio: calculateFeedbackRatio(record),
         });
       }
 
-      groupedData.get(participantId).recordDates.push(record.record_date);
-    });
-
-    // recordArray 계산 추가
-    groupedData.forEach((value) => {
-      value.recordArray = getRecordArray(
-        value.participant.challenges.start_date,
-        value.participant.challenges.end_date,
-        value.recordDates
-      );
+      //console.log('records', records);
+      // 해당 참가자의 피드백 찾기
     });
 
     return Array.from(groupedData.values());
@@ -150,51 +139,79 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
     <div className="mt-[1.4rem]">
       <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
-          <tr className="bg-gray-100 text-left text-1-500 text-gray-6">
-            <th className="p-[1rem] w-[10%]">
-              <div className="relative flex items-center justify-between">
-                <div>닉네임</div>
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
+          <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
+            <th className="p-[1rem] w-[10%] sm:p-0 sm:pt-[1.4rem]">
+              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
+                <div className="lg:pl-[2.5rem] sm:text-0.75-500 sm:p-0">
+                  닉네임
+                </div>
+                <button>
+                  <Image
+                    src="/svg/arrow-down.svg"
+                    width={10}
+                    height={10}
+                    alt="arrow-down"
+                  />
+                </button>
+                {/* <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" /> */}
               </div>
             </th>
-            <th className="p-[1rem] w-[10%]">
-              <div className="relative flex justify-between items-center pr-[1rem]">
-                <div>이름</div>
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
+            <th className="p-[1rem] w-[10%] sm:p-0 sm:pt-[1.4rem]">
+              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
+                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+                  이름
+                </div>
+                <button>
+                  <Image
+                    src="/svg/arrow-down.svg"
+                    width={10}
+                    height={10}
+                    alt="arrow-down"
+                  />
+                </button>
+                {/* <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" /> */}
               </div>
             </th>
-            <th className="p-[1rem] w-[40%]">
-              <div className="relative flex justify-between items-center pr-[1rem]">
-                <div>식단</div>
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
+
+            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
+              <div className=" flex justify-center  items-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem] lg:pr-[9rem] sm:p-0">
+                <div className="lg:pl-[10.3rem] sm:text-0.75-500 sm:p-0">
+                  코치메모
+                </div>
+                <button>
+                  <Image
+                    src="/svg/arrow-down.svg"
+                    width={10}
+                    height={10}
+                    alt="arrow-down"
+                  />
+                </button>
               </div>
             </th>
-            <th className="p-[1rem] w-[15%]">
-              <div className="relative flex justify-between items-center">
-                <div>운동</div>
-                <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" />
-              </div>
+            <th className="p-[1rem] w-[20%] lg:pl-[1rem] sm:p-0 sm:text-0.75-500 text-center">
+              피드백 수
             </th>
-            <th className="p-[1rem] w-[15%]">코치메모</th>
-            <th className="p-[1rem] w-[10%]">피드백 수</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text-center ">
           {participants(dailyRecordsData).map((data, index) => (
-            <tr key={index}>
-              <td className="p-[1rem]">
-                {data.participant.users.display_name}
+            <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC] ">
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
+                {data.participant.users?.display_name}
               </td>
-              <td className="p-[1rem]">{data.participant.users.name}</td>
-              <td className="p-[1rem]">
-                <div className="flex flex-col gap-2">
-                  <div className="font-mono text-sm"></div>
-                  {renderDotsFromArray(data.recordArray)}
-                </div>
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                {data.participant.users?.name}
               </td>
-              <td className="p-[1rem]">200% /2회</td>
-              <td className="p-[1rem]">코치메모</td>
-              <td className="p-[1rem]">feedback_counts</td>
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 ">
+                <input
+                  type="text"
+                  placeholder="코치메모"
+                  className="sm:text-center placeholder:text-center"
+                />
+              </td>
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                {data.feedbackRatio.formatted}
+              </td>
             </tr>
           ))}
         </tbody>
