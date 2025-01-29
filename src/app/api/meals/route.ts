@@ -9,29 +9,29 @@ const supabase = createClient(
 export async function GET() {
   try {
     // 현재 진행 중인 챌린지와 코치들의 피드백 현황 조회
-    const { data: feedbackStats, error: feedbackError } = await supabase.from(
-      'feedbacks'
-    ).select(`
+    const { data: meals, error: mealsError } = await supabase.from('meals')
+      .select(`
           *,
-          daily_records!daily_record_id (
-          participant_id,
+         daily_records!daily_record_id (
+         *,
           challenge_participants!participant_id (
-            challenge_id,
             challenges!challenge_id (
+              id,
+              title,
               start_date,
-              end_date
+              end_date 
+              )
             )
-          )
-        )
+         )
         `);
 
-    if (feedbackError) throw feedbackError;
-
-    return NextResponse.json(feedbackStats);
+    if (mealsError) throw mealsError;
+    console.log(meals);
+    return NextResponse.json(meals);
   } catch (error) {
-    console.error('Error fetching feedback stats:', error);
+    console.error('Error fetching meals:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch feedback stats' },
+      { error: 'Failed to fetch meals' },
       { status: 500 }
     );
   }
