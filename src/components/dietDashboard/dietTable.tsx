@@ -140,9 +140,11 @@ const DietTable: React.FC<DietTableProps> = ({
       <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
           <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
-            <th className="p-[1rem] w-[10%]">
-              <div className="relative flex items-center justify-between">
-                <div>닉네임</div>
+            <th className="p-[1rem] w-[10%] sm:p-0 sm:pt-[1.4rem]">
+              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
+                <div className="lg:pl-[2.5rem] sm:text-0.75-500 sm:p-0">
+                  닉네임
+                </div>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -154,9 +156,11 @@ const DietTable: React.FC<DietTableProps> = ({
                 {/* <span className="absolute right-[0rem] h-[100%] w-[1px] bg-gray-300" /> */}
               </div>
             </th>
-            <th className="p-[1rem] w-[10%]">
-              <div className="relative flex justify-between items-center pr-[1rem]">
-                <div>이름</div>
+            <th className="p-[1rem] w-[10%] sm:p-0 sm:pt-[1.4rem]">
+              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
+                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+                  이름
+                </div>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -169,31 +173,45 @@ const DietTable: React.FC<DietTableProps> = ({
               </div>
             </th>
 
-            <th className="p-[1rem] w-[20%] flex justify-between items-center">
-              <div>코치메모</div>
-              <button>
-                <Image
-                  src="/svg/arrow-down.svg"
-                  width={10}
-                  height={10}
-                  alt="arrow-down"
-                />
-              </button>
+            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
+              <div className=" flex justify-center  items-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem] lg:pr-[9rem] sm:p-0">
+                <div className="lg:pl-[10.3rem] sm:text-0.75-500 sm:p-0">
+                  코치메모
+                </div>
+                <button>
+                  <Image
+                    src="/svg/arrow-down.svg"
+                    width={10}
+                    height={10}
+                    alt="arrow-down"
+                  />
+                </button>
+              </div>
             </th>
-            <th className="p-[1rem] w-[10%]">피드백 수</th>
+            <th className="p-[1rem] w-[20%] lg:pl-[1rem] sm:p-0 sm:text-0.75-500 text-center">
+              피드백 수
+            </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text-center ">
           {participants(dailyRecordsData).map((data, index) => (
-            <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
-              <td className="p-[1rem]">
+            <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC] ">
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
                 {data.participant.users?.display_name}
               </td>
-              <td className="p-[1rem]">{data.participant.users?.name}</td>
-              <td className="p-[1rem]">
-                <input type="text" placeholder="코치메모" />
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                {data.participant.users?.name}
               </td>
-              <td className="p-[1rem]">{data.feedbackRatio.formatted}</td>
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 ">
+                <input
+                  type="text"
+                  placeholder="코치메모"
+                  className="sm:text-center placeholder:text-center"
+                />
+              </td>
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                {data.feedbackRatio.formatted}
+              </td>
             </tr>
           ))}
         </tbody>

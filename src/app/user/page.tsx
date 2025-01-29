@@ -271,11 +271,7 @@ filteredDailyRecordsbyId[0].challenge.end_date - filteredDailyRecordsbyId[0].cha
               />
             )}
           </div>
-          <div className="dark:bg-blue-4 flex-1 p-6 bg-gray-100 pt-[7rem] bg-white-1">
-            <div className="flex justify-between items-center mt-[1.5rem] w-[16rem] sm:gap-[1.5rem]">
-              <DateInput onChange={handleDateInput} selectedDate="2025-01-19" />
-              <SearchInput />
-            </div>
+          <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1">
             <DietTable dailyRecordsData={filteredDailyRecordsbyId} />
           </div>
         </div>
