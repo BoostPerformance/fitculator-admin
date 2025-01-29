@@ -153,44 +153,20 @@ export default function User() {
   }, []);
 
   const handleChallengeSelect = (challengeId: string) => {
-    // console.log('Selected Challenge ID:', challengeId);
-
     // 선택된 챌린지 찾기
     const selectedChallenge = challenges.find(
       (challenge) => challenge.challenges.id === challengeId
     );
 
     if (selectedChallenge) {
-      // console.log('Selected Challenge:', selectedChallenge.challenges.title);
       setSelectedChallengeId(challengeId);
     }
   };
-  //console.log(selectedChallengeId);
-  //console.log('dailyRecords', dailyRecords);
+
   const filteredDailyRecordsbyId = dailyRecords.filter(
     (record) => record.challenges.id === selectedChallengeId
   );
   console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
-
-  /*
-selectedChallengeId 있다.
-
-오늘까지 몇개의 피드백이 있는지. 
-오늘이 챌린지 몇일째인지.
-
-filteredDailyRecordsbyId[0].challenge.end_date - filteredDailyRecordsbyId[0].challenge.start_date 기간과 오늘 비교
-
-첼린지 참여자 filteredDailyRecordsbyId[0].id
-
-피드백 filteredDailyRecordsbyId[0].daily_records.feedback.coach_feedback
-피드백이 null 이면 카운트 안함. 피드백 객체가 있을 때 +1
-
-*/
-
-  const handleDateInput = (formattedDate: string) => {
-    setSelectedDate(formattedDate);
-    // console.log(selectedDate);
-  };
 
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col">
@@ -246,9 +222,9 @@ filteredDailyRecordsbyId[0].challenge.end_date - filteredDailyRecordsbyId[0].cha
             />
           </div>
 
-          <div className="dark:bg-blue-4 grid grid-cols-3 gap-[1rem] my-6 sm:flex sm:flex-col">
+          <div className="dark:bg-blue-4 grid grid-cols-7 gap-[1rem] my-6 sm:flex sm:flex-col">
             <TrafficSourceChart />
-            <DailyDietRecord />
+            <DailyDietRecord activities={filteredDailyRecordsbyId} />
             <WorkoutLeaderboeard />
             <Image
               src={
