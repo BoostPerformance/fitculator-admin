@@ -11,18 +11,23 @@ export async function GET() {
     // 현재 진행 중인 챌린지와 코치들의 피드백 현황 조회
     const { data: meals, error: mealsError } = await supabase.from('meals')
       .select(`
-          *,
-         daily_records!daily_record_id (
          *,
-          challenge_participants!participant_id (
-            challenges!challenge_id (
-              id,
-              title,
-              start_date,
-              end_date 
-              )
-            )
-         )
+      daily_records!daily_record_id (
+        *,
+        feedbacks (*),
+        challenge_participants!participant_id (
+          challenges!challenge_id (
+            id,
+            title,
+            start_date,
+            end_date
+          ),
+          users!service_user_id (
+            display_name,
+            name
+          )
+        )
+      )
         `);
 
     if (mealsError) throw mealsError;

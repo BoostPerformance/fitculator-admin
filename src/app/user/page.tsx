@@ -45,6 +45,7 @@ interface Challenges {
     end_date: string;
   };
 }
+
 interface DailyRecord {
   id: string;
   record_date: string;
@@ -72,7 +73,6 @@ interface ChallengeParticipant {
   daily_records: DailyRecord[];
 }
 export default function User() {
-  const [selectedDate, setSelectedDate] = useState<string>('2025-01-13');
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<ChallengeParticipant[]>([]);
@@ -166,7 +166,7 @@ export default function User() {
   const filteredDailyRecordsbyId = dailyRecords.filter(
     (record) => record.challenges.id === selectedChallengeId
   );
-  console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
+  //console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
 
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col">
