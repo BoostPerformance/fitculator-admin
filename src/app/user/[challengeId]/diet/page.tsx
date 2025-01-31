@@ -38,8 +38,7 @@ export default function DietItem() {
         setChallenges(challengeData);
 
         const currentChallenge = challengeData.find(
-          (challenge: any) =>
-            challenge.challenges.challengeId === params.challengeId
+          (challenge: any) => challenge.challenge_id === params.challengeId
         );
         if (currentChallenge) {
           setSelectedChallengeId(currentChallenge.challenges.id);
@@ -68,7 +67,6 @@ export default function DietItem() {
     const selectedChallenge = challenges.find(
       (challenge) => challenge.challenges.id === challengeId
     );
-    console.log('challenges', challenges);
 
     if (selectedChallenge) {
       setSelectedChallengeId(challengeId);
@@ -85,7 +83,6 @@ export default function DietItem() {
     Record<string, ProcessedMeal>
   >((acc, meal) => {
     const userId = meal.daily_records.challenge_participants.users.display_name;
-    console.log(userId);
 
     if (!acc[userId]) {
       acc[userId] = {
