@@ -4,74 +4,19 @@ import DietDetaileTable from '@/components/dietDashboard/dietDetailTable';
 import Sidebar from '@/components/fixedBars/sidebar';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import DateInput from '@/components/input/dateInput';
+import {
+  ProcessedMeal,
+  MealData,
+  Challenges,
+} from '@/types/dietDetaileTableTypes';
+import { useParams } from 'next/navigation';
 
-interface Challenges {
-  challenges: {
-    id: string;
-    title: string;
-    start_date: string;
-    end_date: string;
-  };
-}
-
-interface MealData {
-  updated_at: string;
-  daily_record_id: string;
-  daily_records: DailyRecord;
-  description: string;
-  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'suppliment';
-}
-interface User {
-  display_name: string;
-  name: string;
-}
-
-interface Challenge {
-  id: string;
-  title: string;
-  start_date: string;
-  end_date: string;
-}
-
-interface ChallengeParticipant {
-  challenges: Challenge;
-  users: User;
-}
-
-interface Feedback {
-  id: string;
-  ai_feedback?: string;
-  coach_feedback?: string;
-  coach_id: string;
-  coach_memo?: string;
-  daily_record_id: string;
-  updated_at: string;
-}
-
-interface DailyRecord {
-  id: string;
-  participant_id: string;
-  updated_at: string;
-  challenge_participants: ChallengeParticipant;
-  feedbacks: Feedback;
-}
-type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'suppliment';
-
-interface ProcessedMeal {
-  user: {
-    display_name: string;
-    name: string;
-  };
-  daily_record: DailyRecord;
-  meals: Record<MealType, string>;
-  updated_at: string;
-}
-
-interface DietDetailTableProps {
-  dietDetailItems: ProcessedMeal[];
-}
+type PageParams = {
+  challengeId: string;
+};
 
 export default function DietItem() {
+  const params = useParams();
   const [meals, setMeals] = useState<MealData[]>([]);
   const [challenges, setChallenges] = useState<{ challenges: Challenges }[]>(
     []
@@ -83,12 +28,6 @@ export default function DietItem() {
   });
 
   useEffect(() => {
-    const mealResponse = async () => {
-      const response = await fetch('/api/meals');
-      const data = await response.json();
-      setMeals(data);
-    };
-
     const fetchData = async () => {
       try {
         const challengesResponse = await fetch('/api/challenges');
@@ -98,19 +37,30 @@ export default function DietItem() {
         const challengeData = await challengesResponse.json();
         setChallenges(challengeData);
 
+        const currentChallenge = challengeData.find(
+          (challenge: any) =>
+            challenge.challenges.challengeId === params.challengeId
+        );
+        if (currentChallenge) {
+          setSelectedChallengeId(currentChallenge.challenges.id);
+        }
+
         const adminResponse = await fetch('/api/admin-users');
         if (!adminResponse.ok) {
           throw new Error('Failed to fetch admin data');
         }
         const adminData = await adminResponse.json();
         setAdminData(adminData);
+
+        const mealsResponse = await fetch('/api/meals');
+        const mealsData = await mealsResponse.json();
+        setMeals(mealsData);
       } catch (error) {
         console.log('Error fetching data:', error);
       }
     };
 
     fetchData();
-    mealResponse();
   }, []);
 
   const handleChallengeSelect = (challengeId: string) => {
@@ -150,7 +100,7 @@ export default function DietItem() {
           lunch: '',
           dinner: '',
           snack: '',
-          suppliment: '',
+          supplement: '',
         },
         updated_at: meal.updated_at,
       };
@@ -158,14 +108,15 @@ export default function DietItem() {
 
     // 각 meal_type에 해당하는 description 할당
     acc[userId].meals[meal.meal_type] = meal.description;
-    console.log(acc);
+    // console.log(acc);
     return acc;
   }, {});
 
   // console.log(filteredByChallengeId);
   const organizedMeals = Object.values(filteredMeals);
-  console.log('organizedMeals', organizedMeals);
+  //console.log('organizedMeals', organizedMeals);
   // console.log(filteredMeals);
+
   return (
     <div className="bg-white-1 flex ">
       <Sidebar
@@ -176,9 +127,16 @@ export default function DietItem() {
       <div className="flex flex-col gap-[2rem]">
         <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
           <TotalFeedbackCounts
+            counts="100개"
+            title="전체식단 업로드 수"
+            borderColor="border-blue-500"
+            textColor="text-blue-500"
+            grids="col-span-2"
+          />
+          <TotalFeedbackCounts
             counts="10"
             total="30명"
-            title="진행현황"
+            title="오늘 업로드 식단 멤버"
             borderColor="border-green"
             textColor="text-green"
             grids="col-span-2"
@@ -186,17 +144,9 @@ export default function DietItem() {
           <TotalFeedbackCounts
             counts="10"
             total="30명"
-            title="진행현황"
-            borderColor="border-green"
-            textColor="text-green"
-            grids="col-span-2"
-          />
-          <TotalFeedbackCounts
-            counts="10"
-            total="30명"
-            title="진행현황"
-            borderColor="border-green"
-            textColor="text-green"
+            title="피드백 미작성"
+            borderColor="border-[#FDB810]"
+            textColor="text-[#FDB810]"
             grids="col-span-2"
           />
         </div>

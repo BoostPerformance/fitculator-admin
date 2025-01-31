@@ -169,7 +169,8 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
                               alt="subtitle-icon "
                               className="w-[0.75rem]"
                             />
-                            <Link href={`/user/${item.challenges.title}/diet`}>
+
+                            <Link href={`/user/${item.challenges.id}/diet`}>
                               식단
                             </Link>
                           </li>

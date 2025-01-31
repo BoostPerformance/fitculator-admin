@@ -1,60 +1,9 @@
 'use client';
 import Image from 'next/image';
-
-interface UserProps {
-  name: string;
-  display_name: string;
-}
-
-interface ChallengesProps {
-  title: string;
-  start_date: string;
-  end_date: string;
-}
-interface ChallengeParticipantsProps {
-  challenge: ChallengesProps;
-  users: UserProps;
-}
-interface FeedbacksProps {
-  id: string;
-  ai_feedback?: string;
-  coach_feedback?: string;
-  coach_id: string;
-  coach_memo?: string;
-  daily_record_id: string;
-  updated_at: string;
-}
-interface DailyRecord {
-  id: string;
-  participant_id: string;
-  updated_at: string;
-  challenge_participants: ChallengeParticipantsProps;
-  feedbacks: FeedbacksProps;
-}
-
-// interface DietDetailTableProps {
-//   dietDetailItems: {
-//     updated_at: string;
-//     daily_record_id: string;
-//     daily_records: DailyRecord;
-//     description: string;
-//     meal_type: string;
-//   }[];
-// }
-
-type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'supplement';
-interface ProcessedMeal {
-  user: {
-    display_name: string;
-    name: string;
-  };
-  daily_record: DailyRecord;
-  meals: Record<MealType, string>;
-  updated_at: string;
-}
-interface DietDetailTableProps {
-  dietDetailItems: ProcessedMeal[];
-}
+import {
+  DietDetailTableProps,
+  ProcessedMeal,
+} from '@/types/dietDetaileTableTypes';
 
 const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
   const isfeedback = (feedback: any) => {
