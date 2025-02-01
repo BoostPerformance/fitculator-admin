@@ -61,7 +61,7 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
         alt="calender"
         width={20}
         height={20}
-        className="absolute right-[0.5rem] top-[0.6rem]"
+        className="absolute left-[13rem] top-[0.6rem]"
       />
       {open && (
         <div className="absolute z-10 mt-2 bg-white dark:bg-gray-3 dark:text-black p-[1rem] rounded-[1rem] drop-shadow">
