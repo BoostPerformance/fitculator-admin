@@ -6,8 +6,8 @@ import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import DateInput from '@/components/input/dateInput';
 import {
   ProcessedMeal,
-  MealData,
-  Challenges,
+  Meals,
+  DailyRecords,
 } from '@/types/dietDetaileTableTypes';
 import { useParams } from 'next/navigation';
 
@@ -17,10 +17,8 @@ type PageParams = {
 
 export default function DietItem() {
   const params = useParams();
-  const [meals, setMeals] = useState<MealData[]>([]);
-  const [challenges, setChallenges] = useState<{ challenges: Challenges }[]>(
-    []
-  );
+  //const [meals, setMeals] = useState<MealData[]>([]);
+  const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [adminData, setAdminData] = useState({
     admin_role: '',
@@ -51,9 +49,9 @@ export default function DietItem() {
         const adminData = await adminResponse.json();
         setAdminData(adminData);
 
-        const mealsResponse = await fetch('/api/meals');
-        const mealsData = await mealsResponse.json();
-        setMeals(mealsData);
+        // const mealsResponse = await fetch('/api/meals');
+        // const mealsData = await mealsResponse.json();
+        // setMeals(mealsData);
       } catch (error) {
         console.log('Error fetching data:', error);
       }
@@ -73,46 +71,64 @@ export default function DietItem() {
     }
   };
 
-  const filteredByChallengeId = meals.filter(
-    (meal: MealData) =>
-      meal.daily_records.challenge_participants.challenges.id ===
-      selectedChallengeId
+  const filteredByChallengeId = challenges.filter(
+    (item) => item.challenge_id === selectedChallengeId
   );
 
-  const filteredMeals = filteredByChallengeId.reduce<
-    Record<string, ProcessedMeal>
-  >((acc, meal) => {
-    const userId = meal.daily_records.challenge_participants.users.display_name;
+  const allParticipants = filteredByChallengeId.flatMap(
+    (challenge) => challenge.challenges.challenge_participants || []
+  );
+  console.log('challenges', challenges);
+  //console.log('filteredByChallengeId', filteredByChallengeId);
+  //console.log('allParticipants', allParticipants);
 
-    if (!acc[userId]) {
-      acc[userId] = {
-        user: {
-          display_name:
-            meal.daily_records.challenge_participants.users.display_name,
-          name: meal.daily_records.challenge_participants.users.name,
-        },
-        daily_record: meal.daily_records,
-        meals: {
-          breakfast: '',
-          lunch: '',
-          dinner: '',
-          snack: '',
-          supplement: '',
-        },
-        updated_at: meal.updated_at,
-      };
-    }
+  const filteredMeals = allParticipants.reduce(
+    (acc: Record<string, ProcessedMeal>, participant) => {
+      participant.daily_records.forEach(
+        (record: DailyRecords, index: number) => {
+          const uniqueId = `${participant.users.id}_${record.record_date}_${index}`;
 
-    // 각 meal_type에 해당하는 description 할당
-    acc[userId].meals[meal.meal_type] = meal.description;
-    // console.log(acc);
-    return acc;
-  }, {});
+          acc[uniqueId] = {
+            challenge_id: selectedChallengeId,
+            challenges: participant.challenges,
+            user: {
+              id: participant.users.id,
+              display_name: participant.users.display_name,
+              name: participant.users.name,
+            },
+            daily_record: record,
+            meals: {
+              breakfast: '',
+              lunch: '',
+              dinner: '',
+              snack: '',
+              supplement: '',
+            },
+            record_date: record.record_date,
+          };
+          console.log('record', record);
+          // 해당 record에 meals 배열이 있는 경우
+          if (record.meals && record.meals.length > 0) {
+            record.meals.forEach((meal: Meals) => {
+              if (meal.meal_type && meal.description) {
+                acc[uniqueId].meals[meal.meal_type] = meal.description;
+              }
+            });
+          }
+        }
+      );
 
-  // console.log(filteredByChallengeId);
-  const organizedMeals = Object.values(filteredMeals);
+      return acc;
+    },
+    {}
+  );
+
+  //console.log('filteredMeals:', filteredMeals);
+
+  const organizedMeals = Object.values(filteredMeals).sort((a: any, b: any) =>
+    a.daily_record.record_date.localeCompare(b.daily_record.record_date)
+  );
   //console.log('organizedMeals', organizedMeals);
-  // console.log(filteredMeals);
 
   return (
     <div className="bg-white-1 flex ">

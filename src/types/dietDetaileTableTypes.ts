@@ -6,6 +6,7 @@ export type MealType =
   | 'supplement';
 
 export interface User {
+  id: string;
   name: string;
   display_name: string;
 }
@@ -15,14 +16,18 @@ export interface Challenges {
   title: string;
   start_date: string;
   end_date: string;
+  challenge_participants: ChallengeParticipant[];
 }
 
 export interface ChallengeParticipant {
+  id: string;
+  service_user_id: string;
   challenges: Challenges;
   users: User;
+  daily_records: DailyRecords[];
 }
 
-export interface Feedback {
+export interface Feedbacks {
   id: string;
   ai_feedback?: string;
   coach_feedback?: string;
@@ -32,30 +37,32 @@ export interface Feedback {
   updated_at: string;
 }
 
-export interface DailyRecord {
+export interface DailyRecords {
   id: string;
-  participant_id: string;
+  record_date: string;
+  meals: Meals[];
+  feedbacks: Feedbacks;
   updated_at: string;
-  challenge_participants: ChallengeParticipant;
-  feedbacks: Feedback;
 }
 
-export interface MealData {
+export interface Meals {
+  id: string;
   updated_at: string;
-  daily_record_id: string;
-  daily_records: DailyRecord;
   description: string;
   meal_type: MealType;
 }
 
 export interface ProcessedMeal {
+  challenge_id: string;
+  challenges: Challenges;
   user: {
+    id: string;
     display_name: string;
     name: string;
   };
-  daily_record: DailyRecord;
+  daily_record: DailyRecords;
   meals: Record<MealType, string>;
-  updated_at: string;
+  record_date: string;
 }
 
 export interface DietDetailTableProps {
