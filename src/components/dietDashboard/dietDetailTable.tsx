@@ -10,13 +10,13 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
     if (feedback) {
       return (
         <div className="py-[0.375rem] px-[0.625rem] bg-[#13BE6E] text-white  rounded-[0.3rem] text-0.875-500">
-          <button>완료</button>
+          <div>완료</div>
         </div>
       );
     } else {
       return (
         <div className="py-[0.375rem] px-[0.625rem] bg-[#FF5757] text-white rounded-[0.3rem] text-0.875-500">
-          <button>미작성</button>
+          <div>미작성</div>
         </div>
       );
     }
@@ -130,7 +130,7 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
         </thead>
         <tbody className="text-center ">
           {dietDetailItems.map((dietDetailTableItem: ProcessedMeal) => (
-            <tr key={1} className="text-[#6F6F6F] hover:bg-[#F4F6FC] ">
+            <tr key={1} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
                 {dietDetailTableItem.user.display_name}
               </td>
