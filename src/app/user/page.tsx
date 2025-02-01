@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import SalesChart from '@/components/graph/salesChart';
 import Image from 'next/image';
 import TrafficSourceChart from '@/components/graph/trafficSourceChart';
@@ -73,6 +74,7 @@ interface ChallengeParticipant {
   daily_records: DailyRecord[];
 }
 export default function User() {
+  const searchParams = useSearchParams();
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<ChallengeParticipant[]>([]);
@@ -142,6 +144,15 @@ export default function User() {
         }
         const dailyRecordsdata = await dailyRecordsresponse.json();
         setDailyRecords(dailyRecordsdata);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const challengeFromUrl = urlParams.get('challenge');
+
+        if (challengesData.length > 0) {
+          const initialChallengeId =
+            challengeFromUrl || challengesData[0].challenges.id;
+          setSelectedChallengeId(initialChallengeId);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -150,7 +161,7 @@ export default function User() {
     fetchData();
     const mobileSize = () => window.removeEventListener('resize', handleResize);
     return mobileSize;
-  }, []);
+  }, [searchParams]);
 
   const handleChallengeSelect = (challengeId: string) => {
     // 선택된 챌린지 찾기
@@ -160,6 +171,7 @@ export default function User() {
 
     if (selectedChallenge) {
       setSelectedChallengeId(challengeId);
+      console.log(selectedChallenge);
     }
   };
 

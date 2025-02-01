@@ -4,6 +4,7 @@ import Image from 'next/image';
 import LogoutButton from '../buttons/logoutButton';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Challenge {
   id: string;
@@ -25,6 +26,26 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState<string>('');
   const [userDropdown, setUserDropdown] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 640;
+      setIsMobile(mobile);
+      setIsSidebarOpen(!mobile); // 모바일이 아닐 때는 열려있게
+    };
+
+    // 초기 실행
+    handleResize();
+
+    // 리사이즈 이벤트 리스너
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   const handleDropdown = () => {
     return setIsOpenDropdown(!isOpenDropdown);
@@ -49,12 +70,16 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
   const handleChallengeClick = (challenge: Challenge) => {
     setSelectedTitle(challenge.challenges.title);
     onSelectChallenge(challenge.challenges.id);
+    router.push(`/user?challenge=${challenge.challenges.id}`);
   };
 
   return (
     <div className="sm:relative  top-0 z-40">
-      <div className="sticky flex justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[22rem]">
-        <button onClick={handleSidebarOpen}>
+      <div className="sticky flex justify-end sm:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[22rem] ">
+        <button
+          onClick={handleSidebarOpen}
+          className={`${isMobile ? '' : 'hidden'}`}
+        >
           <Image
             src="/svg/hamburger.svg"
             width={30}
@@ -101,23 +126,15 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
         </div>
       )}
 
-      {isSidebarOpen && (
+      {(isSidebarOpen || !isMobile) && (
         <div
-          className={`sm:absolute bg-white drop-shadow-sm dark:bg-blue-4  sm:w-full sm:flex sm:items-center sm:justify-center lg:h-full z-50 sm:pb-[50rem]`}
+          className={`${
+            isMobile ? 'sm:absolute' : ''
+          } bg-white drop-shadow-sm dark:bg-blue-4 sm:w-full sm:flex sm:items-center sm:justify-center lg:h-full z-50 ${
+            isMobile ? 'sm:pb-[50rem]' : ''
+          }`}
         >
           <div className=" flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[22rem] md:w-[18rem] p-[2.3rem] sm:items-center">
-            <div className="flex items-center justify-around gap-[1rem]">
-              <a href="./user">
-                <Image
-                  src="/svg/fitculator.svg"
-                  width={100}
-                  height={30}
-                  alt="logo"
-                  className={` w-[9rem] dark:invert`}
-                />
-              </a>
-            </div>
-
             <nav className="w-full">
               <div>
                 <button
@@ -154,37 +171,36 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
                             : ''
                         }`}
                       >
-                        <button
-                          className=" lg:text-1.25-700"
-                          onClick={() => handleChallengeClick(item)}
-                        >
-                          {item.challenges.title}
-                        </button>
+                        <div className="flex flex-col gap-2">
+                          <button
+                            className="lg:text-1.25-700 text-left"
+                            onClick={() => handleChallengeClick(item)}
+                          >
+                            {item.challenges.title}
+                          </button>
+                        </div>
                         <ul className="flex flex-col gap-[0.3rem] py-[0.7rem]">
                           <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
                             <Image
                               src="/svg/subtitle-icon.svg"
                               width={20}
                               height={30}
-                              alt="subtitle-icon "
+                              alt="subtitle-icon"
                               className="w-[0.75rem]"
                             />
-
                             <Link href={`/user/${item.challenges.id}/diet`}>
                               식단
                             </Link>
                           </li>
-                          <li className="flex items-center gap-[0.5rem]  px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
+                          <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
                             <Image
                               src="/svg/subtitle-icon.svg"
                               width={20}
                               height={30}
-                              alt="subtitle-icon "
+                              alt="subtitle-icon"
                               className="w-[0.75rem]"
                             />
-                            <Link
-                              href={`/user/${item.challenges.title}/exercise`}
-                            >
+                            <Link href={`/user/${item.challenges.id}/exercise`}>
                               운동
                             </Link>
                           </li>
