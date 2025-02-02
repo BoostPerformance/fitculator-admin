@@ -77,13 +77,29 @@ export default function DietItem() {
     (item) => item.challenge_id === selectedChallengeId
   );
 
+  const currentChallengeIndex = challenges.find(
+    (challenge) => challenge.challenge_id === selectedChallengeId
+  );
+  // console.log('selectedChallengeId', selectedChallengeId);
+
+  // 해당 인덱스의 챌린지 날짜 가져오기
+  const challengeDates = {
+    startDate: currentChallengeIndex?.challenges?.start_date || '',
+    endDate: currentChallengeIndex?.challenges?.end_date || '',
+  };
+  console.log(
+    'challengeDates, challengeID:',
+    selectedChallengeId,
+    challengeDates
+  );
+
   const allParticipants = filteredByChallengeId.flatMap(
     (challenge) => challenge.challenges.challenge_participants || []
   );
-  //console.log('challenges', challenges);
+
+  console.log('challenges', challenges);
   //console.log('filteredByChallengeId', filteredByChallengeId);
   //console.log('allParticipants', allParticipants);
-
   const filteredMeals = allParticipants.reduce(
     (acc: Record<string, ProcessedMeal>, participant) => {
       participant.daily_records.forEach(
@@ -136,7 +152,7 @@ export default function DietItem() {
     const mealDate = meal.daily_record.record_date;
     return mealDate === selectedDate;
   });
-  // console.log('organizedMeals', organizedMeals);
+  //console.log('organizedMeals', organizedMeals);
   // 전체 끼니 업로드 수 계산 (각 끼니를 따로 카운트)
   const getTotalMealUploads = (processedMeals: ProcessedMeal[]) => {
     return processedMeals.reduce((total, meal) => {
@@ -198,14 +214,19 @@ export default function DietItem() {
   const feedbackStats = getFeedbackStats(organizedMeals);
 
   return (
-    <div className="bg-white-1 flex ">
+    <div className="bg-white-1 flex sm:flex-col">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         coach={adminData.display_name}
       />
-      <div className="flex flex-col gap-[2rem]">
-        <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
+      <div className="flex flex-col gap-[1rem]">
+        <div className="px-[2rem] pt-[2rem]">
+          <div className="text-gray-2 text-1.25-700">F45 을지로 C20 챌린지</div>
+          <div className="text-black-4 text-1.75-700">식단 현황</div>
+        </div>
+
+        <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-2 px-[2rem] pb-[3rem]">
           <TotalFeedbackCounts
             counts={`${totalMealUploads}개`}
             title="전체식단 업로드 수"
@@ -216,10 +237,10 @@ export default function DietItem() {
           <TotalFeedbackCounts
             counts={todayStats.uploadCount.toString()}
             total={`${todayStats.totalMembers}명`}
-            title="오늘 업로드 식단 멤버"
+            title="오늘 식단 업로드"
             borderColor="border-green"
             textColor="text-green"
-            grids="col-span-2"
+            grids="col-span-1"
           />
           <TotalFeedbackCounts
             counts={feedbackStats.completed.toString()}
@@ -227,15 +248,18 @@ export default function DietItem() {
             title="피드백 미작성"
             borderColor="border-[#FDB810]"
             textColor="text-[#FDB810]"
-            grids="col-span-2"
+            grids="col-span-1"
           />
         </div>
-        <div>
+        <div className="px-[2rem]">
           <DateInput
             onChange={(newDate: string) => {
               setSelectedDate(newDate);
             }}
             selectedDate={selectedDate}
+            challengeStartDate={challengeDates.startDate}
+            challengeEndDate={challengeDates.endDate}
+            defaultCurrentDate="2025-02-01"
           />
           <DietDetaileTable dietDetailItems={filteredByDate} />
         </div>
