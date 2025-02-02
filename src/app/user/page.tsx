@@ -77,7 +77,7 @@ export default function User() {
   const searchParams = useSearchParams();
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
-  const [dailyRecords, setDailyRecords] = useState<ChallengeParticipant[]>([]);
+  const [dailyRecords, setDailyRecords] = useState<any[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [adminData, setAdminData] = useState({
     admin_role: '',
@@ -119,6 +119,7 @@ export default function User() {
           throw new Error('Failed to fetch challenges');
         }
         const challengesData = await challengesResponse.json();
+
         setChallenges(challengesData);
 
         // 코치 데이터 가져오기
@@ -171,15 +172,15 @@ export default function User() {
 
     if (selectedChallenge) {
       setSelectedChallengeId(challengeId);
-      console.log(selectedChallenge);
+      // console.log(selectedChallenge);
     }
   };
 
   const filteredDailyRecordsbyId = dailyRecords.filter(
     (record) => record.challenges.id === selectedChallengeId
   );
-  //console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
-
+  // console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
+  console.log('challenges', challenges);
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col">
       <Sidebar

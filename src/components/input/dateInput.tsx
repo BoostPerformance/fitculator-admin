@@ -5,8 +5,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 interface DateInputProps {
-  onChange: (date: string) => void; // 수정: date 타입을 string으로 변경
-  selectedDate: string | undefined; // 선택된 날짜를 전달받음
+  onChange: (date: string) => void;
+  selectedDate: string | undefined;
 }
 
 const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
@@ -32,10 +32,9 @@ const DateInput = ({ onChange, selectedDate }: DateInputProps) => {
   const handleDateChange = (date: Date | undefined) => {
     setSelected(date || undefined);
     if (date) {
-      const formatted = formatDate(date); // 수정: 날짜를 포맷하여 전달
+      const formatted = formatDate(date);
       onChange(formatted);
       setOpen(false);
-      console.log(formatted); // 포맷된 날짜 확인용
     }
   };
 

@@ -1,33 +1,42 @@
 'use client';
 import Image from 'next/image';
-import {
-  DietDetailTableProps,
-  ProcessedMeal,
-} from '@/types/dietDetaileTableTypes';
+import { DietDetailTableProps } from '@/types/dietDetaileTableTypes';
 
 const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
-  const isfeedback = (feedback: any) => {
-    if (feedback) {
-      return (
-        <div className="py-[0.375rem] px-[0.625rem] bg-[#13BE6E] text-white  rounded-[0.3rem] text-0.875-500">
-          <div>완료</div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="py-[0.375rem] px-[0.625rem] bg-[#FF5757] text-white rounded-[0.3rem] text-0.875-500">
-          <div>미작성</div>
-        </div>
-      );
-    }
+  const isfeedback = (feedback: string | null) => {
+    return (
+      <div
+        className={`py-[0.375rem] px-[0.625rem] ${
+          feedback ? 'bg-[#13BE6E]' : 'bg-red-500'
+        } text-white  rounded-[0.3rem] text-0.875-500`}
+      >
+        <div>{feedback ? '완료' : '미완성'}</div>
+      </div>
+    );
   };
 
-  const updatedAt = (time: any) => {
-    const date = new Date(time);
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+  const formatDateTime = (
+    record_date: string,
+    updated_date: string,
+    updated_time: string
+  ) => {
+    // 날짜 포맷팅 (YYYY-MM-DD)
+    const recordDate = new Date(record_date).toISOString().split('T')[0];
 
-    return `${hours}:${minutes}`;
+    // 시간 포맷팅 (HH:MM)
+    const upatedDate = new Date(updated_date).toISOString().split('T')[0];
+    const updateTime = new Date(updated_time);
+    const hours = String(updateTime.getHours()).padStart(2, '0');
+    const minutes = String(updateTime.getMinutes()).padStart(2, '0');
+
+    return (
+      <>
+        기록일: {recordDate} <br />
+        업데이트시간:
+        <br /> {upatedDate} &nbsp;
+        {hours}:{minutes}
+      </>
+    );
   };
 
   return (
@@ -129,8 +138,8 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
           </tr>
         </thead>
         <tbody className="text-center ">
-          {dietDetailItems.map((dietDetailTableItem: ProcessedMeal) => (
-            <tr key={1} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
+          {dietDetailItems.map((dietDetailTableItem: any, index: number) => (
+            <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
                 {dietDetailTableItem.user.display_name}
               </td>
@@ -152,13 +161,17 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
                 {dietDetailTableItem.meals.supplement}
               </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {updatedAt(dietDetailTableItem.updated_at)}
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 w-[13rem]">
+                {formatDateTime(
+                  dietDetailTableItem.daily_record.record_date,
+                  dietDetailTableItem.daily_record.updated_at,
+                  dietDetailTableItem.daily_record.updated_at
+                )}
               </td>
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
                 {isfeedback(
                   dietDetailTableItem.daily_record.feedbacks?.coach_feedback
-                ) || ''}
+                )}
               </td>
             </tr>
           ))}
