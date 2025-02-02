@@ -6,8 +6,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-interface Challenge {
-  id: string;
+interface Challenges {
   challenges: {
     id: string;
     title: string;
@@ -17,11 +16,18 @@ interface Challenge {
 }
 
 interface SidebarProps {
-  data: Challenge[];
+  data: Challenges[];
   onSelectChallenge: (challengeId: string) => void;
+  onSelectChallengeTitle?: (challengeId: string) => void;
+  coach: string;
 }
 
-export default function Sidebar({ data, onSelectChallenge, coach }: any) {
+export default function Sidebar({
+  data,
+  onSelectChallenge,
+  onSelectChallengeTitle,
+  coach,
+}: SidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState<string>('');
@@ -67,9 +73,10 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
     }
   };
 
-  const handleChallengeClick = (challenge: Challenge) => {
+  const handleChallengeClick = (challenge: Challenges) => {
     setSelectedTitle(challenge.challenges.title);
     onSelectChallenge(challenge.challenges.id);
+    // console.log('challenge.challenges.id', challenge.challenges.id);
     router.push(`/user?challenge=${challenge.challenges.id}`);
   };
 
@@ -162,7 +169,7 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
                 </button>
                 {isOpenDropdown && (
                   <div>
-                    {data.map((item: any, index: any) => (
+                    {data.map((item: any, index: number) => (
                       <div
                         key={`challenge-${index}`}
                         className={`w-[15rem] p-[1rem] text-gray-2 dark:text-white ${
@@ -189,7 +196,11 @@ export default function Sidebar({ data, onSelectChallenge, coach }: any) {
                               className="w-[0.75rem]"
                             />
                             <Link href={`/user/${item.challenges.id}/diet`}>
-                              식단
+                              <button
+                                onClick={() => handleChallengeClick(item)}
+                              >
+                                식단
+                              </button>
                             </Link>
                           </li>
                           <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">

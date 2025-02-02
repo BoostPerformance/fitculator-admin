@@ -44,9 +44,9 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
       <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
           <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
-            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
+            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem] w-[10%]">
               <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.5rem] sm:text-0.75-500 sm:p-0">
+                <div className="lg:pl-[2rem] sm:text-0.75-500 sm:p-0">
                   닉네임
                 </div>
                 <button>
@@ -59,7 +59,7 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
                 </button>
               </div>
             </th>
-            <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem]">
+            <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem] w-[10%]">
               <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
                 <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
                   이름
@@ -99,14 +99,14 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
               </div>
             </th>
 
-            <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem]">
+            <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem] w-[10%]">
               <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
                 <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
                   간식
                 </div>
               </div>
             </th>
-            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
+            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem] w-[10%]">
               <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
                 <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
                   영양제
@@ -128,7 +128,7 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
                 </button>
               </div>
             </th>
-            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
+            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]  w-[13%]">
               <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
                 <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
                   피드백 현황

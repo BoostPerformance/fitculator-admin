@@ -1,6 +1,6 @@
 'use client';
 import DashboardHeader from './dashboardHeader';
-import Sidebar from './sidebar';
+//import Sidebar from './sidebar';
 import { useState } from 'react';
 
 export default function FixedBars() {
@@ -11,7 +11,6 @@ export default function FixedBars() {
   };
   return (
     <>
-      <Sidebar onClick={handleSidebarOpen} />
       <DashboardHeader isOpen={isOpen} />
     </>
   );
