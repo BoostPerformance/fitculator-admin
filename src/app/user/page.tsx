@@ -12,73 +12,15 @@ import SearchInput from '@/components/input/searchInput';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import Title from '@/components/layout/title';
 import Sidebar from '@/components/fixedBars/sidebar';
+import { CoachData, Challenges } from '@/types/userPageTypes';
 
-interface AdminUser {
-  email: string;
-  display_name: string;
-}
-
-interface Challenge {
-  id: string;
-  title: string;
-  participants: Array<any>;
-}
-
-interface CoachData {
-  id: string;
-  admin_user_id: string;
-  organization_id: string;
-  profile_image_url: string | null;
-  introduction: string;
-  specialization: string[];
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  admin_users: AdminUser;
-  challenge_coaches: Array<{ challenge: Challenge }>;
-}
-
-interface Challenges {
-  challenges: {
-    id: string;
-    title: string;
-    start_date: string;
-    end_date: string;
-  };
-}
-
-interface DailyRecord {
-  id: string;
-  record_date: string;
-  feedbacks: {
-    coach_feedback: string;
-    created_at: string;
-    id: string;
-  }[];
-}
-
-interface ChallengeParticipant {
-  id: string;
-  users: {
-    id: string;
-    name: string;
-    display_name: string;
-  };
-  challenges: {
-    id: string;
-    title: string;
-    end_date: string;
-    start_date: string;
-    challenge_type: string;
-  };
-  daily_records: DailyRecord[];
-}
 export default function User() {
   const searchParams = useSearchParams();
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<any[]>([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [challengeTitle, setChallengeTitle] = useState('');
   const [adminData, setAdminData] = useState({
     admin_role: '',
     display_name: '',
@@ -172,6 +114,7 @@ export default function User() {
 
     if (selectedChallenge) {
       setSelectedChallengeId(challengeId);
+      setChallengeTitle(selectedChallenge.challenges.title);
       // console.log(selectedChallenge);
     }
   };
@@ -180,22 +123,19 @@ export default function User() {
     (record) => record.challenges.id === selectedChallengeId
   );
   // console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
-  console.log('challenges', challenges);
+  console.log('coachData', coachData);
+
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         coach={adminData.display_name}
+        onSelectChallengeTitle={handleChallengeSelect}
       />
       <div className="flex-1 overflow-auto">
         <div className="pt-[2rem]">
-          <Title
-            title={
-              coachData &&
-              `${coachData.organization_id} ${adminData.display_name} ${adminData.admin_role}`
-            }
-          />
+          <Title title={challengeTitle} />
           <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
             <TotalFeedbackCounts
               counts="10"

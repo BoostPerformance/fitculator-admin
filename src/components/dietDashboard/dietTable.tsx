@@ -1,49 +1,5 @@
-import { useState, useEffect } from 'react';
-//import { CombinedData } from '@/types/dietTypes';
-//import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-//import DietTableMockData from '../mock/DietTableMockData';
-
-interface DailyRecord {
-  id: string;
-  record_date: string;
-  feedbacks: {
-    coach_feedback: string;
-    created_at: string;
-    id: string;
-  }[];
-}
-
-interface ChallengeParticipant {
-  id: string;
-  users: {
-    id: string;
-    name: string;
-    display_name: string;
-  };
-  challenges: {
-    id: string;
-    title: string;
-    end_date: string;
-    start_date: string;
-    challenge_type: string;
-  };
-  daily_records: DailyRecord[];
-}
-
-interface FeedbackCount {
-  participantId: string;
-  challengeId: string;
-  feedbackRatio: {
-    completed: number;
-    total: number;
-    formatted: string;
-  };
-}
-
-interface DietTableProps {
-  dailyRecordsData: ChallengeParticipant[];
-}
+import { DietTableProps, ChallengeParticipant } from '@/types/userPageTypes';
 
 const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
@@ -85,23 +41,6 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
     };
   };
 
-  // const getDaysArray = (start: Date, end: Date) => {
-  //   const arr = [];
-  //   const currentDate = new Date(start);
-  //   const endDate = new Date(end);
-
-  //   while (currentDate <= endDate) {
-  //     arr.push(new Date(currentDate).toISOString().split('T')[0]);
-  //     currentDate.setDate(currentDate.getDate() + 1);
-  //   }
-  //   return arr;
-  // };
-
-  // const getRecordArray = (start: string, end: string, records: string[]) => {
-  //   const days = getDaysArray(new Date(start), new Date(end));
-  //   return days.map((day) => (records.includes(day) ? 1 : 0));
-  // };
-
   const participants = (records: ChallengeParticipant[]) => {
     if (!records || !Array.isArray(records)) {
       return [];
@@ -119,7 +58,6 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
       }
 
       //console.log('records', records);
-      // 해당 참가자의 피드백 찾기
     });
 
     return Array.from(groupedData.values());

@@ -4,16 +4,13 @@ import DietDetaileTable from '@/components/dietDashboard/dietDetailTable';
 import Sidebar from '@/components/fixedBars/sidebar';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import DateInput from '@/components/input/dateInput';
+import SearchIput from '@/components/input/searchInput';
 import {
   ProcessedMeal,
   Meals,
   DailyRecords,
 } from '@/types/dietDetaileTableTypes';
 import { useParams } from 'next/navigation';
-
-type PageParams = {
-  challengeId: string;
-};
 
 export default function DietItem() {
   const params = useParams();
@@ -22,6 +19,7 @@ export default function DietItem() {
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('2025-1-13');
 
+  const [challengeTitle, setChallengeTitle] = useState('');
   const [adminData, setAdminData] = useState({
     admin_role: '',
     display_name: '',
@@ -42,6 +40,7 @@ export default function DietItem() {
         );
         if (currentChallenge) {
           setSelectedChallengeId(currentChallenge.challenges.id);
+          //setChallengeTitle(currentChallenge.challenges.title);
         }
 
         const adminResponse = await fetch('/api/admin-users');
@@ -63,13 +62,18 @@ export default function DietItem() {
   }, []);
 
   const handleChallengeSelect = (challengeId: string) => {
-    // 선택된 챌린지 찾기
+    //console.log('Selected ID:', challengeId);
+
     const selectedChallenge = challenges.find(
       (challenge) => challenge.challenges.id === challengeId
     );
 
+    // console.log('Found Challenge:', selectedChallenge);
+
     if (selectedChallenge) {
       setSelectedChallengeId(challengeId);
+      setChallengeTitle(selectedChallenge.challenges.title);
+      //console.log('Setting title to:', selectedChallenge.challenges.title);
     }
   };
 
@@ -80,26 +84,28 @@ export default function DietItem() {
   const currentChallengeIndex = challenges.find(
     (challenge) => challenge.challenge_id === selectedChallengeId
   );
-  // console.log('selectedChallengeId', selectedChallengeId);
 
+  // console.log('selectedChallengeId', selectedChallengeId);
+  //console.log(challenges);
   // 해당 인덱스의 챌린지 날짜 가져오기
   const challengeDates = {
     startDate: currentChallengeIndex?.challenges?.start_date || '',
     endDate: currentChallengeIndex?.challenges?.end_date || '',
   };
-  console.log(
-    'challengeDates, challengeID:',
-    selectedChallengeId,
-    challengeDates
-  );
+  // console.log(
+  //   'challengeDates, challengeID:',
+  //   selectedChallengeId,
+  //   challengeDates
+  // );
 
   const allParticipants = filteredByChallengeId.flatMap(
     (challenge) => challenge.challenges.challenge_participants || []
   );
 
-  console.log('challenges', challenges);
+  //console.log('challenges', challenges);
   //console.log('filteredByChallengeId', filteredByChallengeId);
   //console.log('allParticipants', allParticipants);
+
   const filteredMeals = allParticipants.reduce(
     (acc: Record<string, ProcessedMeal>, participant) => {
       participant.daily_records.forEach(
@@ -153,6 +159,7 @@ export default function DietItem() {
     return mealDate === selectedDate;
   });
   //console.log('organizedMeals', organizedMeals);
+
   // 전체 끼니 업로드 수 계산 (각 끼니를 따로 카운트)
   const getTotalMealUploads = (processedMeals: ProcessedMeal[]) => {
     return processedMeals.reduce((total, meal) => {
@@ -219,10 +226,11 @@ export default function DietItem() {
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         coach={adminData.display_name}
+        onSelectChallengeTitle={handleChallengeSelect}
       />
       <div className="flex flex-col gap-[1rem]">
         <div className="px-[2rem] pt-[2rem]">
-          <div className="text-gray-2 text-1.25-700">F45 을지로 C20 챌린지</div>
+          <div className="text-gray-2 text-1.25-700">{challengeTitle}</div>
           <div className="text-black-4 text-1.75-700">식단 현황</div>
         </div>
 
@@ -252,15 +260,18 @@ export default function DietItem() {
           />
         </div>
         <div className="px-[2rem]">
-          <DateInput
-            onChange={(newDate: string) => {
-              setSelectedDate(newDate);
-            }}
-            selectedDate={selectedDate}
-            challengeStartDate={challengeDates.startDate}
-            challengeEndDate={challengeDates.endDate}
-            defaultCurrentDate="2025-02-01"
-          />
+          <div className="flex justify-between items-center">
+            <DateInput
+              onChange={(newDate: string) => {
+                setSelectedDate(newDate);
+              }}
+              selectedDate={selectedDate}
+              challengeStartDate={challengeDates.startDate}
+              challengeEndDate={challengeDates.endDate}
+              defaultCurrentDate="2025-02-01"
+            />
+            <SearchIput />
+          </div>
           <DietDetaileTable dietDetailItems={filteredByDate} />
         </div>
       </div>
