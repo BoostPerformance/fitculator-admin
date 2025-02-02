@@ -56,7 +56,7 @@ export async function GET() {
       throw error;
     }
 
-    console.log(challengeData);
+    //console.log(challengeData);
 
     return NextResponse.json(challengeData);
   } catch (error) {

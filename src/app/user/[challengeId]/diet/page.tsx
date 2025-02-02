@@ -20,6 +20,8 @@ export default function DietItem() {
   //const [meals, setMeals] = useState<MealData[]>([]);
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>('2025-1-13');
+
   const [adminData, setAdminData] = useState({
     admin_role: '',
     display_name: '',
@@ -78,7 +80,7 @@ export default function DietItem() {
   const allParticipants = filteredByChallengeId.flatMap(
     (challenge) => challenge.challenges.challenge_participants || []
   );
-  console.log('challenges', challenges);
+  //console.log('challenges', challenges);
   //console.log('filteredByChallengeId', filteredByChallengeId);
   //console.log('allParticipants', allParticipants);
 
@@ -106,7 +108,7 @@ export default function DietItem() {
             },
             record_date: record.record_date,
           };
-          console.log('record', record);
+          // console.log('record', record);
           // 해당 record에 meals 배열이 있는 경우
           if (record.meals && record.meals.length > 0) {
             record.meals.forEach((meal: Meals) => {
@@ -128,7 +130,72 @@ export default function DietItem() {
   const organizedMeals = Object.values(filteredMeals).sort((a: any, b: any) =>
     a.daily_record.record_date.localeCompare(b.daily_record.record_date)
   );
-  //console.log('organizedMeals', organizedMeals);
+
+  // organizedMeals를 선택된 날짜로 필터링
+  const filteredByDate = organizedMeals.filter((meal) => {
+    const mealDate = meal.daily_record.record_date;
+    return mealDate === selectedDate;
+  });
+  // console.log('organizedMeals', organizedMeals);
+  // 전체 끼니 업로드 수 계산 (각 끼니를 따로 카운트)
+  const getTotalMealUploads = (processedMeals: ProcessedMeal[]) => {
+    return processedMeals.reduce((total, meal) => {
+      // 각 끼니별로 카운트
+      const mealCount = Object.values(meal.meals).filter(
+        (value) => value !== ''
+      ).length;
+      return total + mealCount;
+    }, 0);
+  };
+  const getTodayMemberUploads = (processedMeals: ProcessedMeal[]) => {
+    const today = new Date().toISOString().split('T')[0];
+    const todayMembers = new Set();
+
+    processedMeals.forEach((meal) => {
+      if (meal.record_date === today) {
+        // 하나라도 끼니가 있으면 해당 멤버 카운트
+        const hasMeal = Object.values(meal.meals).some((value) => value !== '');
+        if (hasMeal) {
+          todayMembers.add(meal.user.id);
+        }
+      }
+    });
+
+    return {
+      uploadCount: todayMembers.size,
+      totalMembers: new Set(processedMeals.map((meal) => meal.user.id)).size,
+    };
+  };
+
+  const getFeedbackStats = (processedMeals: ProcessedMeal[]) => {
+    let completedFeedbacks = 0; // 피드백 완료 수
+    let totalRecords = processedMeals.length; // 식단 기록이 있는 전체 레코드 수
+
+    processedMeals.forEach((meal) => {
+      // 하나라도 식단이 입력된 경우만 카운트
+      if (meal.daily_record.feedbacks?.coach_feedback) {
+        completedFeedbacks++;
+      }
+    });
+
+    // console.log(processedMeals);
+
+    // console.log('Feedback Stats:', {
+    //   total: totalRecords,
+    //   completed: completedFeedbacks,
+    //   pending: totalRecords - completedFeedbacks,
+    // });
+
+    return {
+      completed: completedFeedbacks,
+      pending: totalRecords - completedFeedbacks,
+      total: totalRecords,
+    };
+  };
+
+  const totalMealUploads = getTotalMealUploads(organizedMeals);
+  const todayStats = getTodayMemberUploads(organizedMeals);
+  const feedbackStats = getFeedbackStats(organizedMeals);
 
   return (
     <div className="bg-white-1 flex ">
@@ -140,23 +207,23 @@ export default function DietItem() {
       <div className="flex flex-col gap-[2rem]">
         <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
           <TotalFeedbackCounts
-            counts="100개"
+            counts={`${totalMealUploads}개`}
             title="전체식단 업로드 수"
             borderColor="border-blue-500"
             textColor="text-blue-500"
             grids="col-span-2"
           />
           <TotalFeedbackCounts
-            counts="10"
-            total="30명"
+            counts={todayStats.uploadCount.toString()}
+            total={`${todayStats.totalMembers}명`}
             title="오늘 업로드 식단 멤버"
             borderColor="border-green"
             textColor="text-green"
             grids="col-span-2"
           />
           <TotalFeedbackCounts
-            counts="10"
-            total="30명"
+            counts={feedbackStats.completed.toString()}
+            total={`${feedbackStats.total}명`}
             title="피드백 미작성"
             borderColor="border-[#FDB810]"
             textColor="text-[#FDB810]"
@@ -165,12 +232,12 @@ export default function DietItem() {
         </div>
         <div>
           <DateInput
-            onChange={() => {
-              console.log('click');
+            onChange={(newDate: string) => {
+              setSelectedDate(newDate);
             }}
-            selectedDate="2025-1-29"
+            selectedDate={selectedDate}
           />
-          <DietDetaileTable dietDetailItems={organizedMeals} />
+          <DietDetaileTable dietDetailItems={filteredByDate} />
         </div>
       </div>
     </div>
