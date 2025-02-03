@@ -16,7 +16,10 @@ export async function GET() {
        *,
        admin_users (
          display_name,
-         email
+         email,
+         organization:organization_id(
+         id,
+         name)
        ),
        challenge_coaches (
          challenge:challenges (
@@ -37,6 +40,8 @@ export async function GET() {
       id: coach.id,
       admin_user_id: coach.admin_user_id,
       organization_id: coach.organization_id,
+      organization_name: coach.admin_users.organization.name,
+      display_name: coach.admin_users.display_name,
       profile_image_url: coach.profile_image_url,
       challenges: coach.challenge_coaches.map((cc: any) => ({
         id: cc.challenge.id,
@@ -48,7 +53,7 @@ export async function GET() {
       })),
     };
     // console.log(coach);
-    // console.log(formattedData);
+    console.log(formattedData);
 
     if (error) {
       throw error;

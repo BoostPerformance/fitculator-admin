@@ -79,7 +79,7 @@ const TextBox = ({
   }
 
   return (
-    <div className="mt-[2rem] p-[1rem] border rounded-md relative">
+    <div className="mt-[2rem] p-[1rem] border rounded-md relative lg:w-[48rem] lg:h-[30rem]">
       <h4 className="text-1.375-700 font-semibold mb-2 flex items-center">
         {title}
         <button className="ml-2 text-[1rem]" onClick={handleCopy}>
@@ -103,7 +103,7 @@ const TextBox = ({
         <textarea
           ref={textareaRef}
           placeholder={inputbox}
-          className={`border p-2 w-full rounded-md text-0.875-400 h-[8rem] ${
+          className={`border p-2 w-full rounded-md text-0.875-400 h-[20rem] ${
             readOnly ? 'bg-gray-100 cursor-not-allowed' : ''
           }`}
           readOnly={readOnly}

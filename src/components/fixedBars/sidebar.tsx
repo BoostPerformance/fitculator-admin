@@ -19,7 +19,7 @@ interface SidebarProps {
   data: Challenges[];
   onSelectChallenge: (challengeId: string) => void;
   onSelectChallengeTitle?: (challengeId: string) => void;
-  coach: string;
+  coach?: string;
 }
 
 export default function Sidebar({
