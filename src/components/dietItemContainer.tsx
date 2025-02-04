@@ -88,12 +88,13 @@ const getAIFeedback = (user_id: string, date: string) => {
 // };
 
 export default function DietItemContainer() {
-  const searchParams = useSearchParams();
   const params = useParams();
   const [visibleItems, setVisibleItems] = useState(2);
   const [isDisable, setIsDisable] = useState(false);
-  const [meals, setMeals] = useState<any>([]);
+  const [meals, setMeals] = useState<Meals>();
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
+  const [coachFeedback, setCoachFeedback] = useState('');
+  const [aiFeedback, setAiFeedback] = useState('');
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challengeTitle, setChallengeTitle] = useState('');
   const [recordDate, setRecordDate] = useState('');
@@ -141,10 +142,10 @@ export default function DietItemContainer() {
   //   }
   // };
 
-  // const handleGenerateAnalyse = () => {
-  //   setIsDisable(true);
-  //   console.log('AI 결과 생성 중...');
-  // };
+  const handleGenerateAnalyse = () => {
+    setIsDisable(true);
+    console.log('AI 결과 생성 중...');
+  };
 
   // const handleSaveFeedback = (
   //   mealType: string,
@@ -231,8 +232,16 @@ export default function DietItemContainer() {
             params.dailyRecordId
         );
 
+        //  console.log('Found userMeal:', userMeal);
+
         if (userMeal) {
           setRecordDate(userMeal.daily_records.record_date);
+          if (userMeal.daily_records.feedbacks.coach_feedback) {
+            setCoachFeedback(userMeal.daily_records.feedbacks.coach_feedback);
+          }
+          if (userMeal.daily_records.feedbacks.ai_feedback) {
+            setAiFeedback(userMeal.daily_records.feedbacks.ai_feedback);
+          }
         }
 
         const challengesResponse = await fetch('/api/challenges');
@@ -274,9 +283,6 @@ export default function DietItemContainer() {
         const orgDataResponse = await fetch('/api/coach-info');
         const orgData = await orgDataResponse.json();
         setOrgName(orgData);
-        // const mealsResponse = await fetch('/api/meals');
-        // const mealsData = await mealsResponse.json();
-        // setMeals(mealsData);
       } catch (error) {
         console.log('Error fetching data:', error);
       }
@@ -293,17 +299,10 @@ export default function DietItemContainer() {
   //console.log('userMeals', userMeals);
   //console.log('recordDate', recordDate);
   //console.log(params.dailyRecordId);
-  // const mealData: {
-  //   BREAKFAST: Meal | undefined;
-  //   LUNCH: Meal | undefined;
-  //   DINNER: Meal | undefined;
-  //   SNACK: Meal | undefined;
-  // } = {
-  //   BREAKFAST: userMeals.find((meal) => meal.meal_type === 'BREAKFAST'),
-  //   LUNCH: userMeals.find((meal) => meal.meal_type === 'LUNCH'),
-  //   DINNER: userMeals.find((meal) => meal.meal_type === 'DINNER'),
-  //   SNACK: userMeals.find((meal) => meal.meal_type === 'SNACK'),
-  // };
+
+  const handleFeedbackChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCoachFeedback(e.target.value);
+  };
 
   return (
     <div className=" flex gap-[1rem]">
@@ -366,43 +365,31 @@ export default function DietItemContainer() {
             )}
           </div>
           <div className="flex items-center justify-around ">
-            {/* {['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'].map(
-          (mealType) =>
-            commentVisible[`${mealType}-${item.date}`] && ( */}
             <TextBox
-              title={`코멘트`}
-              inputbox="코멘트를 입력하세요."
-              button1="저장"
-              button2="취소"
-              onModalClick={
-                () => console.log('click')
-                // handleSaveFeedback(mealType, item.user_id, item.date)
-              }
-              className=""
+              title="AI 분석 결과"
+              content={aiFeedback}
+              placeholder="결과생성 버튼을 눌러주세요."
+              button1="생성"
+              button2="복사"
+              onClick1={handleGenerateAnalyse}
+              readOnly={true}
+              svg1="/image/createIcon.png"
+              svg2="/svg/copyIcon.svg"
+              Btn1className={`${
+                isDisable ? 'disabled bg-gray-1' : ''
+              } bg-[#F89A1B] text-white`}
+              Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
             />
-            {/* )
-        )} */}
-
-            {/* AI 분석 결과 */}
-            {/* {aiFeedback && (
-              <TextBox
-                title="AI 분석 결과"
-                content={aiFeedback.ai_feedback_text}
-                inputbox="결과생성 버튼을 눌러주세요."
-                button1="결과생성"
-                onClick1={handleGenerateAnalyse}
-                readOnly={true}
-                className={`${isDisable ? 'disabled bg-gray-1' : ''}`}
-              />
-            )} */}
-
             {/* 코치 피드백 */}
             <TextBox
               title="코치 피드백"
-              inputbox="피드백을 작성하세요."
-              button1="저장"
-              button2="복사"
+              value={coachFeedback}
+              placeholder="피드백을 작성하세요."
+              button1="남기기"
+              Btn1className="bg-[#48BA5D] text-white"
+              svg1="/svg/send.svg"
               onClick2={() => console.log('피드백 전송')}
+              onChange={handleFeedbackChange} // onChange 핸들러 추가
             />
           </div>
         </div>
