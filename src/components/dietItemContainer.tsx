@@ -5,7 +5,7 @@ import { AI_Feedback } from './mock/DietItems';
 import Title from './layout/title';
 import TotalFeedbackCounts from './totalCounts/totalFeedbackCount';
 import MealPhotoLayout from './layout/mealPhotoLayout';
-import { useParams } from 'next/navigation';
+import { useSearchParams, useParams } from 'next/navigation';
 import Sidebar from './fixedBars/sidebar';
 import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
 
@@ -33,18 +33,39 @@ interface UserData {
     name: string;
   };
 }
-interface Meal {
-  meal_id: string;
-  user_id: string;
-  date: string;
+interface Meals {
+  id: string;
+  daily_record_id: string;
   meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
   description: string;
-  image_url_1?: string;
-  image_url_2?: string;
-  image_url_3?: string;
-  image_url_4?: string;
+  meal_photos: [string];
   updated_at: string;
-  additional_comments?: string;
+  daily_records: {
+    id: string;
+    description: string;
+    updated_at: string;
+    record_date: string;
+    participant_id: string;
+    challenge_participants: {
+      challenges: {
+        end_date: string;
+        id: string;
+        start_date: string;
+        title: string;
+      };
+      users: { id: string; name: string; display_name: string };
+    };
+    feedbacks: {
+      ai_feedback: string;
+      coach_feedback: string;
+      coach_id: string;
+      coach_memo: string;
+      created_at: string;
+      daily_record_id: string;
+      id: string;
+      updated_at: string;
+    };
+  };
 }
 
 const getAIFeedback = (user_id: string, date: string) => {
@@ -67,15 +88,18 @@ const getAIFeedback = (user_id: string, date: string) => {
 // };
 
 export default function DietItemContainer() {
+  const searchParams = useSearchParams();
   const params = useParams();
   const [visibleItems, setVisibleItems] = useState(2);
   const [isDisable, setIsDisable] = useState(false);
-  const [meals, setMeals] = useState<Meal[]>([]);
+  const [meals, setMeals] = useState<any>([]);
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challengeTitle, setChallengeTitle] = useState('');
+  const [recordDate, setRecordDate] = useState('');
 
   const [userData, setUserData] = useState({
+    id: '',
     name: '',
     display_name: '',
   });
@@ -87,7 +111,7 @@ export default function DietItemContainer() {
     [key: string]: boolean;
   }>({});
   const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
-  const { userId, date } = useParams();
+  // const { userId, date } = useParams();
 
   const handleChallengeSelect = (challengeId: string) => {
     //console.log('Selected ID:', challengeId);
@@ -105,9 +129,11 @@ export default function DietItemContainer() {
     }
   };
 
-  const userMeals = meals.filter(
-    (meal) => meal.user_id === userId && meal.date === date
-  );
+  // const userMeals = meals.filter(
+  //   (meal: Meals) =>
+  //     meal.daily_records.challenge_participants.users.id === userData.id &&
+  //     meal.daily_records.record_date === recordDate
+  // );
 
   // const handleScroll = () => {
   //   if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
@@ -183,6 +209,32 @@ export default function DietItemContainer() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const mealsResponse = await fetch('/api/meals');
+        const mealsData = await mealsResponse.json();
+        //console.log('mealsData', mealsData);
+        setMeals(mealsData);
+
+        // mealsData.forEach((meal: Meals) => {
+        //   console.log('Checking meal:', {
+        //     mealId: meal.id,
+        //     userId: meal.daily_records?.challenge_participants?.users?.id,
+        //     paramsId: params.dailyRecordId,
+        //     match:
+        //       meal.daily_records?.challenge_participants?.users?.id ===
+        //       params.dailyRecordId,
+        //   });
+        // });
+
+        const userMeal = mealsData.find(
+          (meal: Meals) =>
+            meal.daily_records?.challenge_participants?.users?.id ===
+            params.dailyRecordId
+        );
+
+        if (userMeal) {
+          setRecordDate(userMeal.daily_records.record_date);
+        }
+
         const challengesResponse = await fetch('/api/challenges');
         if (!challengesResponse.ok) {
           throw new Error('Failed to fetch challenges');
@@ -213,6 +265,7 @@ export default function DietItemContainer() {
 
         if (currentUser) {
           setUserData({
+            id: currentUser.users.id,
             name: currentUser.users.name,
             display_name: currentUser.users.display_name,
           });
@@ -236,6 +289,10 @@ export default function DietItemContainer() {
     // return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  //console.log('meals', meals);
+  //console.log('userMeals', userMeals);
+  //console.log('recordDate', recordDate);
+  //console.log(params.dailyRecordId);
   // const mealData: {
   //   BREAKFAST: Meal | undefined;
   //   LUNCH: Meal | undefined;
@@ -279,7 +336,7 @@ export default function DietItemContainer() {
 
         return ( */}
         <div className="relative mb-[2rem]">
-          <h2 className="text-[1.5rem] font-bold">YYYY-MM-DD</h2>
+          <h2 className="text-[1.5rem] font-bold">{recordDate}</h2>
 
           <div className="grid grid-cols-4 gap-[1rem]">
             {(['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'] as const).map(

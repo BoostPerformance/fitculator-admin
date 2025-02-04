@@ -53,7 +53,7 @@ export async function GET() {
       })),
     };
     // console.log(coach);
-    console.log(formattedData);
+    //console.log(formattedData);
 
     if (error) {
       throw error;
