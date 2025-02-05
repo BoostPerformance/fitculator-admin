@@ -123,10 +123,10 @@ export default function User() {
     (record) => record.challenges.id === selectedChallengeId
   );
   // console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
-  console.log('coachData', coachData);
+  //console.log('coachData', coachData);
 
   return (
-    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col">
+    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col md:flex-col">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
@@ -134,16 +134,16 @@ export default function User() {
         onSelectChallengeTitle={handleChallengeSelect}
       />
       <div className="flex-1 overflow-auto">
-        <div className="pt-[2rem]">
+        <div className="pt-[2rem] md:pt-0">
           <Title title={challengeTitle} />
-          <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
+          <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3 sm:px-[0.3rem] md:grid md:grid-cols-5 md:grid-rows-1 md:pb-[1rem] md:gap-[-.3rem]">
             <TotalFeedbackCounts
               counts="10"
               total="30"
               title="진행현황"
               borderColor="border-green"
               textColor="text-green"
-              grids="col-span-2"
+              grids="sm:col-span-2 "
             />
             <TotalFeedbackCounts
               counts={'10'}

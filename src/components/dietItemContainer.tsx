@@ -79,9 +79,9 @@ export default function DietItemContainer() {
   // 달력 날짜가 변경될 때마다 해당 월의 기록만 필터링하는 함수
   const filterMealsByMonth = (date: Date) => {
     if (!challengePeriods.start_date || !challengePeriods.end_date) return;
-    console.log('Filtering for date:', date);
-    console.log('Challenge periods:', challengePeriods);
-    console.log('All meals:', allDailyMeals);
+    //console.log('Filtering for date:', date);
+    //console.log('Challenge periods:', challengePeriods);
+    //console.log('All meals:', allDailyMeals);
 
     const year = date.getFullYear();
     const month = date.getMonth();

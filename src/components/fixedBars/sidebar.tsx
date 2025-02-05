@@ -37,7 +37,7 @@ export default function Sidebar({
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 640;
+      const mobile = window.innerWidth < 1025;
       setIsMobile(mobile);
       setIsSidebarOpen(!mobile); // 모바일이 아닐 때는 열려있게
     };
@@ -82,7 +82,7 @@ export default function Sidebar({
 
   return (
     <div className="sm:relative top-0 z-40">
-      <div className="sticky flex justify-end sm:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[22rem] ">
+      <div className="sticky flex justify-end sm:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[22rem]">
         <button
           onClick={handleSidebarOpen}
           className={`${isMobile ? '' : 'hidden'}`}
@@ -135,18 +135,14 @@ export default function Sidebar({
 
       {(isSidebarOpen || !isMobile) && (
         <div
-          className={`${
-            isMobile ? 'sm:absolute' : ''
-          } bg-white drop-shadow-sm dark:bg-blue-4 sm:w-full sm:flex sm:items-center sm:justify-center lg:h-full z-50 ${
-            isMobile ? 'sm:pb-[50rem]' : ''
-          }`}
+          className={` bg-white drop-shadow-sm dark:bg-blue-4 sm:w-full sm:flex sm:items-center sm:justify-center lg:h-full z-50 md:w-full md:items-center md:flex  md:justify-center  md:border `}
         >
-          <div className=" flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[22rem] md:w-[18rem] p-[2.3rem] sm:items-center">
+          <div className=" flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[22rem] md:w-[18rem] p-[2.3rem] sm:items-center md:py-[1rem] md:pb-[2rem]">
             <nav className="w-full">
-              <div>
+              <div className="relative">
                 <button
                   onClick={handleDropdown}
-                  className="w-[17rem] flex items-center justify-between lg:text-1.5-900 border-b-[0.1rem]  border-gray-13 py-[0.8rem] sm:w-full"
+                  className="w-[17rem] flex items-center justify-between lg:text-1.5-900 border-b-[0.1rem] border-gray-13 py-[0.8rem] sm:w-full"
                 >
                   챌린지
                   {isOpenDropdown ? (
@@ -168,56 +164,60 @@ export default function Sidebar({
                   )}
                 </button>
                 {isOpenDropdown && (
-                  <div>
-                    {data.map((item: any, index: number) => (
-                      <div
-                        key={`challenge-${index}`}
-                        className={`w-[15rem] p-[1rem] text-gray-2 dark:text-white ${
-                          selectedTitle === item.challenges.title
-                            ? 'bg-gray-100'
-                            : ''
-                        }`}
-                      >
-                        <div className="flex flex-col gap-2">
-                          <button
-                            className="lg:text-1.25-700 text-left"
-                            onClick={() => handleChallengeClick(item)}
-                          >
-                            {item.challenges.title}
-                          </button>
-                        </div>
-                        <ul className="flex flex-col gap-[0.3rem] py-[0.7rem]">
-                          <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
-                            <Image
-                              src="/svg/subtitle-icon.svg"
-                              width={20}
-                              height={30}
-                              alt="subtitle-icon"
-                              className="w-[0.75rem]"
-                            />
-                            <Link href={`/user/${item.challenges.id}/diet`}>
-                              <button
-                                onClick={() => handleChallengeClick(item)}
+                  <div className="relative lg:relative md:fixed md:left-0 md:right-0 md:bg-white md:w-full md:z-50 md:mt-0 sm:h-screen">
+                    <div className="md:flex md:flex-col md:items-center">
+                      {data.map((item: any, index: number) => (
+                        <div
+                          key={`challenge-${index}`}
+                          className={`w-[15rem] p-[1rem] text-gray-2 dark:text-white ${
+                            selectedTitle === item.challenges.title
+                              ? 'bg-gray-100'
+                              : ''
+                          }`}
+                        >
+                          <div className="flex flex-col gap-2">
+                            <button
+                              className="lg:text-1.25-700 text-left"
+                              onClick={() => handleChallengeClick(item)}
+                            >
+                              {item.challenges.title}
+                            </button>
+                          </div>
+                          <ul className="flex flex-col gap-[0.3rem] py-[0.7rem]">
+                            <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
+                              <Image
+                                src="/svg/subtitle-icon.svg"
+                                width={20}
+                                height={30}
+                                alt="subtitle-icon"
+                                className="w-[0.75rem]"
+                              />
+                              <Link href={`/user/${item.challenges.id}/diet`}>
+                                <button
+                                  onClick={() => handleChallengeClick(item)}
+                                >
+                                  식단
+                                </button>
+                              </Link>
+                            </li>
+                            <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
+                              <Image
+                                src="/svg/subtitle-icon.svg"
+                                width={20}
+                                height={30}
+                                alt="subtitle-icon"
+                                className="w-[0.75rem]"
+                              />
+                              <Link
+                                href={`/user/${item.challenges.id}/exercise`}
                               >
-                                식단
-                              </button>
-                            </Link>
-                          </li>
-                          <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
-                            <Image
-                              src="/svg/subtitle-icon.svg"
-                              width={20}
-                              height={30}
-                              alt="subtitle-icon"
-                              className="w-[0.75rem]"
-                            />
-                            <Link href={`/user/${item.challenges.id}/exercise`}>
-                              운동
-                            </Link>
-                          </li>
-                        </ul>
-                      </div>
-                    ))}
+                                운동
+                              </Link>
+                            </li>
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
