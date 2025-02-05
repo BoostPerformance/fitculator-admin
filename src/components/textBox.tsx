@@ -3,31 +3,39 @@ import React, { useRef, useState } from 'react';
 
 interface TextBoxProps {
   title: string;
-  inputbox: string;
+  value?: string;
+  placeholder?: string;
   content?: string;
-  button1: string;
+  button1?: string;
   button2?: string;
+  svg1: string;
+  svg2?: string;
   onClick1?: () => void;
   onClick2?: () => void;
   onModalClick?: () => void;
   onModalClose?: () => void;
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  className?: string;
+  Btn1className?: string;
+  Btn2className?: string;
   readOnly?: boolean;
   isModal?: boolean;
 }
 
 const TextBox = ({
   title,
-  inputbox,
+  placeholder,
+  value,
   button1,
   button2,
+  svg1,
+  svg2,
   onClick1,
   onClick2,
   onModalClick,
   onModalClose,
   onChange,
-  className,
+  Btn1className,
+  Btn2className,
   readOnly = false,
   isModal = false,
 }: TextBoxProps) => {
@@ -54,7 +62,7 @@ const TextBox = ({
         <div className="bg-white rounded-lg p-6 w-[90%] max-w-[500px] relative">
           <h4 className="text-xl font-semibold mb-4">{title} 코멘트 달기</h4>
           <textarea
-            placeholder={inputbox}
+            placeholder={placeholder}
             className={`border p-2 w-full rounded-md text-base h-[8rem]`}
           />
           <div className="flex justify-end gap-2 mt-4">
@@ -66,7 +74,7 @@ const TextBox = ({
             </button>
             {button2 && (
               <button
-                className="bg-gray-500 text-white rounded-md py-2 px-4"
+                className={`bg-gray-500 text-white rounded-md py-2 px-4`}
                 onClick={onModalClose}
               >
                 {button2}
@@ -79,7 +87,7 @@ const TextBox = ({
   }
 
   return (
-    <div className="mt-[2rem] p-[1rem] border rounded-md relative">
+    <div className="mt-[2rem] p-[1rem] border rounded-md relative lg:w-[48rem] lg:h-[30rem]">
       <h4 className="text-1.375-700 font-semibold mb-2 flex items-center">
         {title}
         <button className="ml-2 text-[1rem]" onClick={handleCopy}>
@@ -102,27 +110,48 @@ const TextBox = ({
       <div className="flex flex-col items-end">
         <textarea
           ref={textareaRef}
-          placeholder={inputbox}
-          className={`border p-2 w-full rounded-md text-0.875-400 h-[8rem] ${
+          placeholder={placeholder}
+          value={value}
+          className={`border p-2 w-full rounded-md text-0.875-400 h-[20rem] ${
             readOnly ? 'bg-gray-100 cursor-not-allowed' : ''
           }`}
           readOnly={readOnly}
           onChange={onChange}
         />
         <div className="flex gap-[1rem]">
-          <button
-            className={`${className} bg-[#FF9257] text-white rounded-md  text-0.875-400 mt-[0.5rem] w-[5.5rem] h-[2rem]`}
-            onClick={onClick1}
-          >
-            {button1}
-          </button>
-          {button2 && (
+          <div className="flex relative justify-center">
             <button
-              className="bg-[#48BA5D] text-white rounded-md h-[2rem] w-[5.5rem] text-0.875-400 mt-[0.5rem]"
-              onClick={onClick2}
+              className={`${Btn1className} rounded-md  text-0.875-400 mt-[0.5rem] w-[9.3125rem] h-[2.5rem]`}
+              onClick={onClick1}
             >
-              {button2}
+              {button1}
             </button>
+            <Image
+              src={svg1}
+              alt="copy icon"
+              width={17}
+              height={17}
+              className="absolute top-[1.2rem] left-[2.4rem]"
+            />
+          </div>
+          {button2 && (
+            <div className="flex relative justify-center">
+              <button
+                className={`${Btn2className} rounded-md  text-0.875-400 mt-[0.5rem] w-[9.3125rem] h-[2.5rem]`}
+                onClick={onClick2}
+              >
+                {button2}
+              </button>
+              {svg2 && (
+                <Image
+                  src={svg2}
+                  alt="copy icon"
+                  width={17}
+                  height={17}
+                  className="absolute top-[1.2rem] left-[2.4rem]"
+                />
+              )}
+            </div>
           )}
         </div>
       </div>

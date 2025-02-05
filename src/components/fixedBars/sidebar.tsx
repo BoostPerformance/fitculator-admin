@@ -19,7 +19,7 @@ interface SidebarProps {
   data: Challenges[];
   onSelectChallenge: (challengeId: string) => void;
   onSelectChallengeTitle?: (challengeId: string) => void;
-  coach: string;
+  coach?: string;
 }
 
 export default function Sidebar({
@@ -81,7 +81,7 @@ export default function Sidebar({
   };
 
   return (
-    <div className="sm:relative  top-0 z-40">
+    <div className="sm:relative top-0 z-40">
       <div className="sticky flex justify-end sm:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[22rem] ">
         <button
           onClick={handleSidebarOpen}

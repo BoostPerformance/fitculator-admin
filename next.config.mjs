@@ -11,7 +11,15 @@ const nextConfig = {
     DATABASE_URL: process.env.DATABASE_URL,
   },
   images: {
-    domains: ['www.yutongdaily.com', 'cdn.discordapp.com'],
+    domains: ['www.yutongdaily.com', 'cdn.discordapp.com', 'takethemameal.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'takethemameal.com',
+        port: '',
+        pathname: '/files_images_v2/**',
+      },
+    ],
   },
 };
 

@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import SalesChart from '@/components/graph/salesChart';
 import Image from 'next/image';
 import TrafficSourceChart from '@/components/graph/trafficSourceChart';
@@ -12,15 +11,73 @@ import SearchInput from '@/components/input/searchInput';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import Title from '@/components/layout/title';
 import Sidebar from '@/components/fixedBars/sidebar';
-import { CoachData, Challenges } from '@/types/userPageTypes';
 
+interface AdminUser {
+  email: string;
+  display_name: string;
+}
+
+interface Challenge {
+  id: string;
+  title: string;
+  participants: Array<any>;
+}
+
+interface CoachData {
+  id: string;
+  admin_user_id: string;
+  organization_id: string;
+  organization_name: string;
+  profile_image_url: string | null;
+  introduction: string;
+  specialization: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  admin_users: AdminUser;
+  challenge_coaches: Array<{ challenge: Challenge }>;
+}
+
+interface Challenges {
+  challenges: {
+    id: string;
+    title: string;
+    start_date: string;
+    end_date: string;
+  };
+}
+
+interface DailyRecord {
+  id: string;
+  record_date: string;
+  feedbacks: {
+    coach_feedback: string;
+    created_at: string;
+    id: string;
+  }[];
+}
+
+interface ChallengeParticipant {
+  id: string;
+  users: {
+    id: string;
+    name: string;
+    display_name: string;
+  };
+  challenges: {
+    id: string;
+    title: string;
+    end_date: string;
+    start_date: string;
+    challenge_type: string;
+  };
+  daily_records: DailyRecord[];
+}
 export default function User() {
-  const searchParams = useSearchParams();
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
-  const [dailyRecords, setDailyRecords] = useState<any[]>([]);
+  const [dailyRecords, setDailyRecords] = useState<ChallengeParticipant[]>([]);
   const [isMobile, setIsMobile] = useState(false);
-  const [challengeTitle, setChallengeTitle] = useState('');
   const [adminData, setAdminData] = useState({
     admin_role: '',
     display_name: '',
@@ -29,6 +86,7 @@ export default function User() {
     id: '',
     admin_user_id: '',
     organization_id: '',
+    organization_name: '',
     profile_image_url: '',
     introduction: '',
     specialization: [],
@@ -61,7 +119,6 @@ export default function User() {
           throw new Error('Failed to fetch challenges');
         }
         const challengesData = await challengesResponse.json();
-
         setChallenges(challengesData);
 
         // 코치 데이터 가져오기
@@ -87,15 +144,6 @@ export default function User() {
         }
         const dailyRecordsdata = await dailyRecordsresponse.json();
         setDailyRecords(dailyRecordsdata);
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const challengeFromUrl = urlParams.get('challenge');
-
-        if (challengesData.length > 0) {
-          const initialChallengeId =
-            challengeFromUrl || challengesData[0].challenges.id;
-          setSelectedChallengeId(initialChallengeId);
-        }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -104,8 +152,9 @@ export default function User() {
     fetchData();
     const mobileSize = () => window.removeEventListener('resize', handleResize);
     return mobileSize;
-  }, [searchParams]);
+  }, []);
 
+  //console.log('coachData', coachData);
   const handleChallengeSelect = (challengeId: string) => {
     // 선택된 챌린지 찾기
     const selectedChallenge = challenges.find(
@@ -114,16 +163,13 @@ export default function User() {
 
     if (selectedChallenge) {
       setSelectedChallengeId(challengeId);
-      setChallengeTitle(selectedChallenge.challenges.title);
-      // console.log(selectedChallenge);
     }
   };
 
   const filteredDailyRecordsbyId = dailyRecords.filter(
     (record) => record.challenges.id === selectedChallengeId
   );
-  // console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
-  console.log('coachData', coachData);
+  //console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
 
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col">
@@ -131,11 +177,15 @@ export default function User() {
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         coach={adminData.display_name}
-        onSelectChallengeTitle={handleChallengeSelect}
       />
       <div className="flex-1 overflow-auto">
         <div className="pt-[2rem]">
-          <Title title={challengeTitle} />
+          <Title
+            title={
+              coachData &&
+              `${coachData.organization_name} ${adminData.display_name} ${adminData.admin_role}`
+            }
+          />
           <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
             <TotalFeedbackCounts
               counts="10"
@@ -179,9 +229,6 @@ export default function User() {
             <TrafficSourceChart />
             <DailyDietRecord activities={filteredDailyRecordsbyId} />
             <WorkoutLeaderboeard />
-          </div>
-
-          <div>
             <Image
               src={
                 isMobile

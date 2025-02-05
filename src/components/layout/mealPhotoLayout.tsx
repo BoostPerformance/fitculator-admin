@@ -1,9 +1,16 @@
 import { FaPlus } from 'react-icons/fa6';
 import Image from 'next/image';
 
+interface PhotoData {
+  id: string;
+  meal_id: string;
+  photo_url: string;
+  created_at: string;
+}
+
 interface MealPhotoLayoutProps {
   title: string;
-  photos: (string | null | undefined)[];
+  src: PhotoData[];
   descriptions: string | boolean;
   time: string;
   onAddComment?: () => void;
@@ -11,21 +18,23 @@ interface MealPhotoLayoutProps {
 
 const MealPhotoLayout = ({
   title,
-  photos,
+  src,
   descriptions,
   time,
   onAddComment,
 }: MealPhotoLayoutProps) => {
-  const filteredPhotos = photos.filter((photo): photo is string =>
-    Boolean(photo)
-  );
+  const filteredPhotos = src.filter((photo) => {
+    //console.log(photo);
+    return photo;
+  });
 
+  // console.log(src);
   const renderPhotos = () => {
     if (filteredPhotos.length === 1) {
       return (
         <div className="w-full h-[8rem] overflow-hidden rounded-lg">
           <Image
-            src={filteredPhotos[0]}
+            src={filteredPhotos[0].photo_url}
             alt="meal image"
             className="w-full h-full object-cover"
             width={100}
@@ -42,7 +51,7 @@ const MealPhotoLayout = ({
               className="w-full h-[8rem] overflow-hidden rounded-lg"
             >
               <Image
-                src={photo}
+                src={photo.photo_url}
                 alt={`meal-${index}`}
                 className="w-full h-full object-cover"
                 width={100}
@@ -55,33 +64,40 @@ const MealPhotoLayout = ({
     } else if (filteredPhotos.length === 3) {
       return (
         <div className="grid grid-cols-3 grid-rows-2 gap-[0.2rem]">
-          <div className="col-span-2 row-span-2 h-[8rem] overflow-hidden rounded-lg">
-            <Image
-              src={filteredPhotos[0]}
-              alt="meal-large"
-              className="w-full h-full object-cover"
-              width={100}
-              height={100}
-            />
-          </div>
-          <div className="h-[4rem] overflow-hidden rounded-lg">
-            <Image
-              src={filteredPhotos[1]}
-              alt="meal-small-1"
-              className="w-full h-full object-cover"
-              width={100}
-              height={100}
-            />
-          </div>
-          <div className="h-[4rem] overflow-hidden rounded-lg">
-            <Image
-              src={filteredPhotos[2]}
-              alt="meal-small-2"
-              className="w-full h-full object-cover"
-              width={100}
-              height={100}
-            />
-          </div>
+          {filteredPhotos.map((photo, index) => (
+            <>
+              <div
+                className="col-span-2 row-span-2 h-[8rem] overflow-hidden rounded-lg"
+                key={index}
+              >
+                <Image
+                  src={filteredPhotos[0].photo_url}
+                  alt="meal-large"
+                  className="w-full h-full object-cover"
+                  width={100}
+                  height={100}
+                />
+              </div>
+              <div className="h-[4rem] overflow-hidden rounded-lg">
+                <Image
+                  src={filteredPhotos[1].photo_url}
+                  alt="meal-small-1"
+                  className="w-full h-full object-cover"
+                  width={100}
+                  height={100}
+                />
+              </div>
+              <div className="h-[4rem] overflow-hidden rounded-lg">
+                <Image
+                  src={filteredPhotos[2].photo_url}
+                  alt="meal-small-2"
+                  className="w-full h-full object-cover"
+                  width={100}
+                  height={100}
+                />
+              </div>
+            </>
+          ))}
         </div>
       );
     } else if (filteredPhotos.length === 4) {
@@ -93,7 +109,7 @@ const MealPhotoLayout = ({
               className="w-full h-[3.8rem] overflow-hidden rounded-lg"
             >
               <Image
-                src={photo}
+                src={photo.photo_url}
                 alt={`meal-${index}`}
                 className="w-full h-full object-cover"
                 width={100}
@@ -104,6 +120,12 @@ const MealPhotoLayout = ({
         </div>
       );
     }
+
+    return (
+      <div className="w-full h-[8rem] overflow-hidden rounded-lg flex items-center  justify-center border-gray-9 border-[0.5rem] text-gray-2">
+        식단이미지 없음
+      </div>
+    );
   };
 
   return (

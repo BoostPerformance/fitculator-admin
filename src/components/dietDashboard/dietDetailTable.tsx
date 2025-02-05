@@ -1,8 +1,10 @@
 'use client';
 import Image from 'next/image';
 import { DietDetailTableProps } from '@/types/dietDetaileTableTypes';
+import { useRouter } from 'next/navigation';
 
 const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
+  const router = useRouter();
   const isfeedback = (feedback: string | null) => {
     return (
       <div
@@ -38,7 +40,7 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
       </>
     );
   };
-
+  console.log('dietDetailItems', dietDetailItems);
   return (
     <div className="mt-[1.4rem]">
       <table className="table-auto w-full bg-white shadow-md rounded-md">
@@ -139,7 +141,15 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
         </thead>
         <tbody className="text-center ">
           {dietDetailItems.map((dietDetailTableItem: any, index: number) => (
-            <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
+            <tr
+              key={index}
+              className="text-[#6F6F6F] hover:bg-[#F4F6FC]"
+              onClick={() =>
+                router.push(
+                  `/user/${dietDetailTableItem.challenge_id}/diet/${dietDetailTableItem.user.id}`
+                )
+              }
+            >
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
                 {dietDetailTableItem.user.display_name}
               </td>
