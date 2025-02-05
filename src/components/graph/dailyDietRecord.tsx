@@ -56,13 +56,13 @@ const DailyDietRecord = ({ activities }: any) => {
   };
 
   return (
-    <div className="bg-white sm:p-6 md:p-6 rounded-lg p-3 lg:py-7 col-span-3 pl-8">
+    <div className="bg-white sm:p-6 md:p-6 rounded-lg p-3 lg:py-7 col-span-3 pl-8 md:flex md:flex-col md:items-center">
       <h2 className="text-xl font-medium mb-6 text-gray-600 text-left">
         일별 식단 기록 현황
       </h2>
 
-      <div className="lg:min-w-[48rem] sm:min-w-full md:min-w-full ">
-        <div className="flex flex-col gap-1">
+      <div className="lg:min-w-[48rem] sm:min-w-full md:min-w-[38rem]">
+        <div className="flex flex-col gap-1 ">
           {/* Days header and Upload status */}
           <div className="flex items-center w-full mb-4 ">
             <div className="lg:w-[5rem] sm:w-16 md:w-[2rem] shrink-0 sm:hidden inline" />
@@ -74,9 +74,7 @@ const DailyDietRecord = ({ activities }: any) => {
                   </div>
                 ))}
               </div>
-              <div className="text-gray-500 sm:hidden md:hidden">
-                총 업로드 현황
-              </div>
+              <div className="text-gray-500 sm:hidden">총 업로드 현황</div>
             </div>
           </div>
 
@@ -87,18 +85,18 @@ const DailyDietRecord = ({ activities }: any) => {
             return (
               <div
                 key={index}
-                className="flex lg:justify-start sm:justify-center w-full pb-8 sm:items-start md:items-start md:w-[3rem] sm:gap-2 "
+                className="flex lg:justify-start sm:justify-center w-full pb-8 sm:items-start   sm:gap-2 "
               >
                 <div className="w-[5rem] sm:w-[3rem]">
-                  <span className="text-gray-700 sm:text-0.75-500">
+                  <span className="text-gray-700 sm:text-0.75-500 md:text-0.75-500">
                     {activity.users.name}
                   </span>
                 </div>
 
-                <div className="flex items-start gap-[2rem] sm:gap-3 sm:w-[17rem]">
+                <div className="flex items-start gap-[2rem] sm:gap-3 sm:w-[17rem] md:gap-2">
                   <div>
-                    <div className="md:flex-col lg:items-center sm:flex-col lg:gap-[3rem] md:gap-[2rem] lg:flex">
-                      <div className="flex gap-1 sm:gap-2">
+                    <div className="flex lg:items-center sm:flex-col lg:gap-[3rem] md:gap-[2rem]">
+                      <div className="flex gap-1 sm:gap-2 md:gap-[1rem]">
                         {weekDates.map((date, idx) => {
                           const hasRecord = hasRecordForDate(
                             activity.daily_records,
@@ -107,19 +105,19 @@ const DailyDietRecord = ({ activities }: any) => {
                           return (
                             <div
                               key={idx}
-                              className={`w-6 h-6 rounded flex items-center justify-center
+                              className={`w-[1.25rem] h-[1.25rem] rounded flex items-center justify-center
                           ${hasRecord ? 'bg-[#FAAA16]' : 'bg-gray-100'}`}
                             />
                           );
                         })}
                       </div>
 
-                      <div className="flex flex-1 items-center gap-2 md:gap-[2rem]">
-                        <div className="h-3 bg-orange-500 rounded-full w-[25rem] sm:w-[13.5rem] md:w-[8rem] sm:mt-[1rem]" />
+                      <div className="flex flex-1 items-center gap-2">
+                        <div className="h-3 mt-[1rem] bg-orange-500 rounded-full w-[20rem] sm:w-[13.5rem] sm:mt-[1rem] md:mt-[1rem] md:w-[16.5rem]" />
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-[1rem] items-center sm:gap-2">
+                  <div className="flex gap-[1rem] items-center sm:gap-2 ">
                     <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                       <svg
                         viewBox="0 0 24 24"

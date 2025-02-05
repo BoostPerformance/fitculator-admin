@@ -175,7 +175,7 @@ export default function User() {
             />
           </div>
 
-          <div className="dark:bg-blue-4 grid grid-cols-7 gap-[1rem] my-6 sm:flex sm:flex-col">
+          <div className="dark:bg-blue-4 grid grid-cols-7 gap-[1rem] my-6 sm:flex sm:flex-col md:flex-col md:flex md:px-[2rem]">
             <TrafficSourceChart />
             <DailyDietRecord activities={filteredDailyRecordsbyId} />
             <WorkoutLeaderboeard />
