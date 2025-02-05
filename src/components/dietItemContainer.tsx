@@ -8,65 +8,9 @@ import MealPhotoLayout from './layout/mealPhotoLayout';
 import { useSearchParams, useParams } from 'next/navigation';
 import Sidebar from './fixedBars/sidebar';
 import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
-
-interface DailyRecords {
-  id: string;
-  feedbacks: {
-    coach_feedback: string;
-    ai_feedback?: string;
-  };
-  record_date: string;
-}
-
-interface UserData {
-  challenge: {
-    id: string;
-    title: string;
-    start_date: string;
-    end_date: string;
-  };
-  daily_records: DailyRecords[];
-  id: string;
-  users: {
-    display_name: string;
-    id: string;
-    name: string;
-  };
-}
-interface Meals {
-  id: string;
-  daily_record_id: string;
-  meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
-  description: string;
-  meal_photos: [string];
-  updated_at: string;
-  daily_records: {
-    id: string;
-    description: string;
-    updated_at: string;
-    record_date: string;
-    participant_id: string;
-    challenge_participants: {
-      challenges: {
-        end_date: string;
-        id: string;
-        start_date: string;
-        title: string;
-      };
-      users: { id: string; name: string; display_name: string };
-    };
-    feedbacks: {
-      ai_feedback: string;
-      coach_feedback: string;
-      coach_id: string;
-      coach_memo: string;
-      created_at: string;
-      daily_record_id: string;
-      id: string;
-      updated_at: string;
-    };
-  };
-}
+import Calendar from './input/calendar';
+import { DailyMealData, UserData } from '@/types/dietItemContainerTypes';
+import calendarUtils from './utils/calendarUtils';
 
 const getAIFeedback = (user_id: string, date: string) => {
   return AI_Feedback.find(
@@ -91,13 +35,14 @@ export default function DietItemContainer() {
   const params = useParams();
   const [visibleItems, setVisibleItems] = useState(2);
   const [isDisable, setIsDisable] = useState(false);
-  const [meals, setMeals] = useState<Meals>();
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
-  const [coachFeedback, setCoachFeedback] = useState('');
-  const [aiFeedback, setAiFeedback] = useState('');
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
+
+  const [coachFeedback, setCoachFeedback] = useState('');
+
   const [challengeTitle, setChallengeTitle] = useState('');
   const [recordDate, setRecordDate] = useState('');
+  const [dailyMeals, setDailyMeals] = useState<DailyMealData[]>([]);
 
   const [userData, setUserData] = useState({
     id: '',
@@ -112,11 +57,96 @@ export default function DietItemContainer() {
     [key: string]: boolean;
   }>({});
   const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
-  // const { userId, date } = useParams();
+  const [isMobile, setIsMobile] = useState(true);
+  const [descriptions, setDescriptions] = useState({
+    breakfast: '',
+    lunch: '',
+    dinner: '',
+    snack: '',
+    supplement: '',
+  });
+  const [challengePeriods, setChallengePeriods] = useState({
+    start_date: '',
+    end_date: '',
+  });
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const [allDailyMeals, setAllDailyMeals] = useState<DailyMealData[]>([]); // 전체 기록
+  const [filteredDailyMeals, setFilteredDailyMeals] = useState<DailyMealData[]>(
+    []
+  ); // 필터링된 기록
+
+  // 달력 날짜가 변경될 때마다 해당 월의 기록만 필터링하는 함수
+  const filterMealsByMonth = (date: Date) => {
+    if (!challengePeriods.start_date || !challengePeriods.end_date) return;
+    console.log('Filtering for date:', date);
+    console.log('Challenge periods:', challengePeriods);
+    console.log('All meals:', allDailyMeals);
+
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    const filtered = allDailyMeals.filter((meal) => {
+      const mealDate = new Date(meal.recordDate);
+
+      // 챌린지 기간 내의 기록인지 확인
+      const isInChallengeRange =
+        new Date(meal.recordDate) >= new Date(challengePeriods.start_date) &&
+        new Date(meal.recordDate) <= new Date(challengePeriods.end_date);
+
+      // 선택된 월의 기록인지 확인
+      const isInSelectedMonth =
+        mealDate.getFullYear() === year && mealDate.getMonth() === month;
+
+      const shouldInclude = isInChallengeRange && isInSelectedMonth;
+      console.log('Meal date:', meal.recordDate, 'Include?:', shouldInclude);
+
+      return shouldInclude;
+    });
+
+    console.log('Filtered meals:', filtered);
+    setFilteredDailyMeals(filtered);
+  };
+
+  const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+
+  const handleDateClick = (date: Date) => {
+    const formattedDate = calendarUtils.formatDate(date);
+    setRecordDate(formattedDate);
+
+    // 선택된 날짜에 해당하는 기록만 필터링
+    const filtered = allDailyMeals.filter((meal) => {
+      return (
+        meal.recordDate === formattedDate &&
+        new Date(meal.recordDate) >= new Date(challengePeriods.start_date) &&
+        new Date(meal.recordDate) <= new Date(challengePeriods.end_date)
+      );
+    });
+
+    setFilteredDailyMeals(filtered);
+  };
+
+  const {
+    handlePrevMonth: origHandlePrevMonth,
+    handleNextMonth: origHandleNextMonth,
+  } = calendarUtils.getNavigationHandlers(currentDate, setCurrentDate);
+
+  const handlePrevMonth = () => {
+    origHandlePrevMonth();
+    filterMealsByMonth(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+    );
+  };
+
+  const handleNextMonth = () => {
+    origHandleNextMonth();
+    filterMealsByMonth(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+    );
+  };
 
   const handleChallengeSelect = (challengeId: string) => {
-    //console.log('Selected ID:', challengeId);
-
+    setSelectedChallengeId(challengeId);
     const selectedChallenge = challenges.find(
       (challenge) => challenge.challenges.id === challengeId
     );
@@ -124,9 +154,7 @@ export default function DietItemContainer() {
     // console.log('Found Challenge:', selectedChallenge);
 
     if (selectedChallenge) {
-      setSelectedChallengeId(challengeId);
       setChallengeTitle(selectedChallenge.challenges.title);
-      //console.log('Setting title to:', selectedChallenge.challenges.title);
     }
   };
 
@@ -212,37 +240,53 @@ export default function DietItemContainer() {
       try {
         const mealsResponse = await fetch('/api/meals');
         const mealsData = await mealsResponse.json();
-        //console.log('mealsData', mealsData);
-        setMeals(mealsData);
 
-        // mealsData.forEach((meal: Meals) => {
-        //   console.log('Checking meal:', {
-        //     mealId: meal.id,
-        //     userId: meal.daily_records?.challenge_participants?.users?.id,
-        //     paramsId: params.dailyRecordId,
-        //     match:
-        //       meal.daily_records?.challenge_participants?.users?.id ===
-        //       params.dailyRecordId,
-        //   });
-        // });
-
-        const userMeal = mealsData.find(
-          (meal: Meals) =>
+        const userMeals = mealsData.filter(
+          (meal: any) =>
             meal.daily_records?.challenge_participants?.users?.id ===
             params.dailyRecordId
         );
 
-        //  console.log('Found userMeal:', userMeal);
+        const mealsByDate = userMeals.reduce(
+          (acc: { [key: string]: DailyMealData }, meal: any) => {
+            const date = meal.daily_records.record_date;
 
-        if (userMeal) {
-          setRecordDate(userMeal.daily_records.record_date);
-          if (userMeal.daily_records.feedbacks.coach_feedback) {
-            setCoachFeedback(userMeal.daily_records.feedbacks.coach_feedback);
-          }
-          if (userMeal.daily_records.feedbacks.ai_feedback) {
-            setAiFeedback(userMeal.daily_records.feedbacks.ai_feedback);
-          }
-        }
+            if (!acc[date]) {
+              acc[date] = {
+                recordDate: date,
+                meals: {},
+                feedbacks: {
+                  coachFeedback:
+                    meal.daily_records.feedbacks.coach_feedback || '',
+                  aiFeedback: meal.daily_records.feedbacks.ai_feedback || '',
+                },
+              };
+            }
+
+            const mealType = meal.meal_type.toLowerCase();
+            acc[date].meals[mealType] = {
+              description: meal.description || '',
+              mealPhotos: Array.isArray(meal.meal_photos)
+                ? meal.meal_photos
+                : meal.meal_photos
+                ? [meal.meal_photos]
+                : [],
+              updatedAt: meal.updated_at || '',
+            };
+
+            return acc;
+          },
+          {}
+        );
+
+        const sortedMeals = Object.values(mealsByDate).sort(
+          (a: any, b: any) =>
+            new Date(b.recordDate).getTime() - new Date(a.recordDate).getTime()
+        ) as DailyMealData[];
+
+        setAllDailyMeals(sortedMeals); // 전체 기록 저장
+
+        // 현재 월의 기록으로 필터링
 
         const challengesResponse = await fetch('/api/challenges');
         if (!challengesResponse.ok) {
@@ -255,10 +299,15 @@ export default function DietItemContainer() {
           (challenge: any) => challenge.challenge_id === params.challengeId
         );
         if (currentChallenge) {
-          setSelectedChallengeId(currentChallenge.challenges.id);
           setChallengeTitle(currentChallenge.challenges.title);
+          setSelectedChallengeId(currentChallenge.challenges.id);
+          setChallengePeriods({
+            start_date: currentChallenge.challenges.start_date,
+            end_date: currentChallenge.challenges.end_date,
+          });
+          // 데이터 로드 후 바로 필터링 실행
+          filterMealsByMonth(currentDate);
         }
-
         const challengeParticipantsResponse = await fetch(
           '/api/challenge-participants'
         );
@@ -282,6 +331,7 @@ export default function DietItemContainer() {
 
         const orgDataResponse = await fetch('/api/coach-info');
         const orgData = await orgDataResponse.json();
+
         setOrgName(orgData);
       } catch (error) {
         console.log('Error fetching data:', error);
@@ -289,112 +339,130 @@ export default function DietItemContainer() {
     };
 
     fetchData();
-    // fetchMeals();
 
     // window.addEventListener('scroll', handleScroll);
     // return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  //console.log('meals', meals);
-  //console.log('userMeals', userMeals);
-  //console.log('recordDate', recordDate);
-  //console.log(params.dailyRecordId);
+  useEffect(() => {
+    filterMealsByMonth(currentDate);
+  }, [challengePeriods, currentDate, allDailyMeals]);
+
+  console.log('challengePeriods', challengePeriods);
 
   const handleFeedbackChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCoachFeedback(e.target.value);
   };
 
   return (
-    <div className=" flex gap-[1rem]">
+    <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         onSelectChallengeTitle={handleChallengeSelect}
         coach={orgName.display_name}
       />
+
       <div>
         <div className="flex-1 py-[3rem]">
-          <div className=" flex">
-            <div className="text-gray-2 text-1.25-700">
-              {orgName.organization_name}&nbsp;
+          <div className="sm:px-[1rem]">
+            <div className=" flex">
+              <div className="text-gray-2 text-1.25-700">
+                {orgName.organization_name}&nbsp;
+              </div>
+              <div className="text-gray-2 text-1.25-700">{challengeTitle}</div>
             </div>
-            <div className="text-gray-2 text-1.25-700">{challengeTitle}</div>
+
+            <Title title={`${userData.name}님의 식단현황`} />
+            <TotalFeedbackCounts
+              counts="tody"
+              total="chal"
+              borderColor="border-[#FDB810]"
+              textColor="text-[#FDB810]"
+              title="총 식단 업로드"
+            />
           </div>
-          <Title title={`${userData.name}님의 식단현황`} />
-          <TotalFeedbackCounts
-            counts="tody"
-            total="chal"
-            borderColor="border-[#FDB810]"
-            textColor="text-[#FDB810]"
-            title="총 식단 업로드"
-          />
+          {isMobile ? (
+            <div className="flex items-center justify-center">
+              <Calendar
+                handlePrevMonth={handlePrevMonth}
+                handleNextMonth={handleNextMonth}
+                currentDate={currentDate}
+                weekdays={weekdays}
+                handleDateClick={handleDateClick}
+                isInChallengeRange={(date) => {
+                  return calendarUtils.isInChallengeRange(
+                    date,
+                    challenges,
+                    selectedChallengeId
+                  );
+                }}
+                CalenderclassName="sm:w-[90%]"
+                selectedDate={recordDate}
+              />
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
+        {filteredDailyMeals.map((dailyMeal) => (
+          <div key={dailyMeal.recordDate} className="relative mb-[2rem]">
+            <h2 className="text-[1.5rem] font-bold">{dailyMeal.recordDate}</h2>
 
-        {/* {userMeals.slice(0, visibleItems).map((item) => {
-        const aiFeedback = getAIFeedback(item.user_id, item.date);
-
-        return ( */}
-        <div className="relative mb-[2rem]">
-          <h2 className="text-[1.5rem] font-bold">{recordDate}</h2>
-
-          <div className="grid grid-cols-4 gap-[1rem]">
-            {(['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'] as const).map(
-              (mealType) => (
+            <div className="grid grid-cols-5 gap-[1rem] sm:grid-cols-1 sm:px-[1rem]">
+              {(
+                ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
+              ).map((mealType) => (
                 <MealPhotoLayout
                   key={mealType}
                   title={
-                    mealType === 'BREAKFAST'
+                    mealType === 'breakfast'
                       ? '아침'
-                      : mealType === 'LUNCH'
+                      : mealType === 'lunch'
                       ? '점심'
-                      : mealType === 'DINNER'
+                      : mealType === 'dinner'
                       ? '저녁'
-                      : '간식'
+                      : mealType === 'snack'
+                      ? '간식'
+                      : '영양제'
                   }
-                  photos={[
-                    '/image/food.png',
-                    '/image/food.png',
-                    '/image/food.png',
-                    '/image/food.png',
-                  ]}
-                  descriptions={''}
-                  time={''}
+                  src={dailyMeal.meals[mealType]?.mealPhotos || []}
+                  descriptions={dailyMeal.meals[mealType]?.description || ''}
+                  time={dailyMeal.meals[mealType]?.updatedAt || ''}
                   onAddComment={() => console.log('comment area')}
                 />
-              )
-            )}
+              ))}
+            </div>
+
+            <div className="flex items-center justify-around sm:flex-col">
+              <TextBox
+                title="AI 분석 결과"
+                content={dailyMeal.feedbacks.aiFeedback}
+                placeholder="결과생성 버튼을 눌러주세요."
+                button1="생성"
+                button2="복사"
+                onClick1={handleGenerateAnalyse}
+                readOnly={true}
+                svg1="/image/createIcon.png"
+                svg2="/svg/copyIcon.svg"
+                Btn1className={`${
+                  isDisable ? 'disabled bg-gray-1' : ''
+                } bg-[#F89A1B] text-white`}
+                Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
+              />
+              <TextBox
+                title="코치 피드백"
+                value={dailyMeal.feedbacks.coachFeedback}
+                placeholder="피드백을 작성하세요."
+                button1="남기기"
+                Btn1className="bg-[#48BA5D] text-white"
+                svg1="/svg/send.svg"
+                onClick2={() => console.log('피드백 전송')}
+                onChange={handleFeedbackChange}
+              />
+            </div>
           </div>
-          <div className="flex items-center justify-around ">
-            <TextBox
-              title="AI 분석 결과"
-              content={aiFeedback}
-              placeholder="결과생성 버튼을 눌러주세요."
-              button1="생성"
-              button2="복사"
-              onClick1={handleGenerateAnalyse}
-              readOnly={true}
-              svg1="/image/createIcon.png"
-              svg2="/svg/copyIcon.svg"
-              Btn1className={`${
-                isDisable ? 'disabled bg-gray-1' : ''
-              } bg-[#F89A1B] text-white`}
-              Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
-            />
-            {/* 코치 피드백 */}
-            <TextBox
-              title="코치 피드백"
-              value={coachFeedback}
-              placeholder="피드백을 작성하세요."
-              button1="남기기"
-              Btn1className="bg-[#48BA5D] text-white"
-              svg1="/svg/send.svg"
-              onClick2={() => console.log('피드백 전송')}
-              onChange={handleFeedbackChange} // onChange 핸들러 추가
-            />
-          </div>
-        </div>
-        {/* );
-      })} */}
+        ))}
       </div>
     </div>
   );
