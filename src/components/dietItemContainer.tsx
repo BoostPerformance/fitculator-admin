@@ -11,6 +11,7 @@ import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
 import Calendar from './input/calendar';
 import { DailyMealData, UserData } from '@/types/dietItemContainerTypes';
 import calendarUtils from './utils/calendarUtils';
+import DateInput from './input/dateInput';
 
 const getAIFeedback = (user_id: string, date: string) => {
   return AI_Feedback.find(
@@ -57,7 +58,8 @@ export default function DietItemContainer() {
     [key: string]: boolean;
   }>({});
   const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
-  const [isMobile, setIsMobile] = useState(true);
+  const [mobileSize, setMobileSize] = useState(true);
+
   const [descriptions, setDescriptions] = useState({
     breakfast: '',
     lunch: '',
@@ -69,6 +71,7 @@ export default function DietItemContainer() {
     start_date: '',
     end_date: '',
   });
+  const [selectedDate, setSelectedDate] = useState<string>('2025-1-13');
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const [allDailyMeals, setAllDailyMeals] = useState<DailyMealData[]>([]); // 전체 기록
@@ -346,12 +349,36 @@ export default function DietItemContainer() {
 
   useEffect(() => {
     filterMealsByMonth(currentDate);
+
+    const handleResize = () => {
+      setMobileSize(window.innerWidth <= 640); // sm 브레이크포인트 (640px)
+    };
+
+    // 초기 화면 크기 설정
+    handleResize();
+
+    // 리사이즈 이벤트 리스너 등록
+    window.addEventListener('resize', handleResize);
+
+    // 클린업 함수
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, [challengePeriods, currentDate, allDailyMeals]);
 
   console.log('challengePeriods', challengePeriods);
 
   const handleFeedbackChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCoachFeedback(e.target.value);
+  };
+
+  const currentChallengeIndex = challenges.find(
+    (challenge) => challenge.challenge_id === selectedChallengeId
+  );
+
+  const challengeDates = {
+    startDate: currentChallengeIndex?.challenges?.start_date || '',
+    endDate: currentChallengeIndex?.challenges?.end_date || '',
   };
 
   return (
@@ -382,8 +409,8 @@ export default function DietItemContainer() {
               title="총 식단 업로드"
             />
           </div>
-          {isMobile ? (
-            <div className="flex items-center justify-center">
+          {mobileSize ? (
+            <div className="flex items-center justify-center ">
               <Calendar
                 handlePrevMonth={handlePrevMonth}
                 handleNextMonth={handleNextMonth}
@@ -402,7 +429,30 @@ export default function DietItemContainer() {
               />
             </div>
           ) : (
-            <></>
+            <div className="flex sm:justify-center sm:items-center pt-[1rem]">
+              <DateInput
+                onChange={(newDate: string) => {
+                  setRecordDate(newDate); // selectedDate 대신 recordDate를 업데이트
+
+                  // 선택된 날짜에 해당하는 기록만 필터링 (Calendar와 동일한 로직 적용)
+                  const filtered = allDailyMeals.filter((meal) => {
+                    return (
+                      meal.recordDate === newDate &&
+                      new Date(meal.recordDate) >=
+                        new Date(challengePeriods.start_date) &&
+                      new Date(meal.recordDate) <=
+                        new Date(challengePeriods.end_date)
+                    );
+                  });
+
+                  setFilteredDailyMeals(filtered);
+                }}
+                selectedDate={recordDate}
+                challengeStartDate={challengeDates.startDate}
+                challengeEndDate={challengeDates.endDate}
+                defaultCurrentDate="2025-01-13"
+              />
+            </div>
           )}
         </div>
         {filteredDailyMeals.map((dailyMeal) => (
@@ -434,7 +484,7 @@ export default function DietItemContainer() {
               ))}
             </div>
 
-            <div className="flex items-center justify-around sm:flex-col">
+            <div className="flex items-center justify-around sm:flex-col w-full">
               <TextBox
                 title="AI 분석 결과"
                 content={dailyMeal.feedbacks.aiFeedback}
@@ -455,10 +505,11 @@ export default function DietItemContainer() {
                 value={dailyMeal.feedbacks.coachFeedback}
                 placeholder="피드백을 작성하세요."
                 button1="남기기"
-                Btn1className="bg-[#48BA5D] text-white"
+                Btn1className="bg-[#48BA5D] text-white "
                 svg1="/svg/send.svg"
                 onClick2={() => console.log('피드백 전송')}
                 onChange={handleFeedbackChange}
+                copyIcon
               />
             </div>
           </div>

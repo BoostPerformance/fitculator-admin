@@ -42,7 +42,7 @@ const DateInput = ({
   return (
     <div className="relative sm:flex sm:justify-center">
       <div className="relative inline-block">
-        <div className="flex items-center justify-center relative bg-white rounded-[2rem] border drop-shadow-sm h-[3.5rem] w-[14rem]">
+        <div className="flex items-center justify-center relative bg-white rounded-[2rem] border drop-shadow-sm h-[3.5rem] w-[14rem] ">
           <input
             type="text"
             value={selectedDate || ''}
@@ -50,7 +50,7 @@ const DateInput = ({
             placeholder={calendarUtils.formatDate(new Date())}
             readOnly
             className="border px-[1.375rem] py-[0.75rem] rounded-[2rem] h-[3.5rem] drop-shadow-sm dark:bg-gray-300 dark:text-black
-            text-center pr-8 w-full focus:outline-none "
+            text-center pr-8 w-full focus:outline-none"
           />
           <Image
             src="/svg/calender.svg"

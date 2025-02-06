@@ -278,7 +278,7 @@ export default function DietItem() {
           />
         </div>
         <div className="px-[2rem]">
-          <div className="flex justify-between items-center">
+          <div className="flex sm:justify-center sm:items-center">
             <DateInput
               onChange={(newDate: string) => {
                 setSelectedDate(newDate);
@@ -286,7 +286,7 @@ export default function DietItem() {
               selectedDate={selectedDate}
               challengeStartDate={challengeDates.startDate}
               challengeEndDate={challengeDates.endDate}
-              defaultCurrentDate="2025-02-01"
+              defaultCurrentDate="2025-01-13"
             />
           </div>
           {mobileSize ? (

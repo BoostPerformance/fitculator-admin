@@ -1,9 +1,11 @@
 import Image from 'next/image';
 import { MobildDieDetailTableProps } from '@/types/dietDetaileTableTypes';
+import { useRouter } from 'next/navigation';
 
 export default function MobileChart({
   dietDetailItems,
 }: MobildDieDetailTableProps) {
+  const router = useRouter();
   const isMealUploaded = (mealName: string) => {
     console.log('mealName', mealName !== '');
 
@@ -61,6 +63,11 @@ export default function MobileChart({
                   <tr
                     key={index}
                     className="flex gap-[2rem] items-center justify-center"
+                    onClick={() =>
+                      router.push(
+                        `/user/${meal.challenge_id}/diet/${meal.user.id}`
+                      )
+                    }
                   >
                     <td>{isMealUploaded(meal.meals.breakfast)}</td>
                     <td>{isMealUploaded(meal.meals.lunch)}</td>
