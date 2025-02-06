@@ -238,6 +238,7 @@ export default function DietItem() {
   const todayStats = getTodayMemberUploads(organizedMeals);
   const feedbackStats = getFeedbackStats(organizedMeals);
   console.log('filteredByDate', filteredByDate);
+
   return (
     <div className="bg-white-1 flex sm:flex-col">
       <Sidebar

@@ -32,7 +32,7 @@ export interface Challenges {
   };
 }
 
-export interface DailyRecord {
+export interface DailyRecord extends Challenges {
   id: string;
   record_date: string;
   feedbacks: {
