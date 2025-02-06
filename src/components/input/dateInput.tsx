@@ -7,7 +7,7 @@ import { DateInputProps } from '@/types/calendar';
 const DateInput = ({
   onChange,
   selectedDate,
-  challengeStartDate = '', // 기본값 설정
+  challengeStartDate = '',
   challengeEndDate = '',
   defaultCurrentDate = '',
 }: DateInputProps) => {
@@ -15,11 +15,17 @@ const DateInput = ({
   const [currentDate, setCurrentDate] = useState(new Date(defaultCurrentDate));
 
   const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-  const challengeStart = new Date(challengeStartDate);
-  const challengeEnd = new Date(challengeEndDate);
+
+  const formatDateForComparison = (dateStr: string) => {
+    return dateStr.split('T')[0]; // Remove any time component
+  };
 
   const isInChallengeRange = (date: Date) => {
-    return date >= challengeStart && date <= challengeEnd;
+    const dateStr = calendarUtils.formatDate(date);
+    const startStr = formatDateForComparison(challengeStartDate);
+    const endStr = formatDateForComparison(challengeEndDate);
+
+    return dateStr >= startStr && dateStr <= endStr;
   };
 
   const handleDateClick = (date: Date) => {

@@ -15,7 +15,7 @@ export interface DailyMealData {
     };
   };
   feedbacks: {
-    coachFeedback: string;
+    coachFeedback?: string;
     aiFeedback: string;
   };
 }

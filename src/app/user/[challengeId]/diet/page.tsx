@@ -110,6 +110,7 @@ export default function DietItem() {
     startDate: currentChallengeIndex?.challenges?.start_date || '',
     endDate: currentChallengeIndex?.challenges?.end_date || '',
   };
+
   // console.log(
   //   'challengeDates, challengeID:',
   //   selectedChallengeId,
@@ -237,7 +238,7 @@ export default function DietItem() {
   const totalMealUploads = getTotalMealUploads(organizedMeals);
   const todayStats = getTodayMemberUploads(organizedMeals);
   const feedbackStats = getFeedbackStats(organizedMeals);
-  console.log('filteredByDate', filteredByDate);
+  //console.log('filteredByDate', filteredByDate);
 
   return (
     <div className="bg-white-1 flex sm:flex-col">

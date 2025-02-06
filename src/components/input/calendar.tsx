@@ -19,12 +19,15 @@ export default function Calendar({
   }) => {
     if (!dayInfo.isCurrentMonth) return 'bg-gray-9 text-white';
 
-    if (selectedDate === calendarUtils.formatDate(dayInfo.date)) {
+    const currentDateStr = calendarUtils.formatDate(dayInfo.date);
+    const selectedDateStr = selectedDate;
+
+    if (selectedDateStr === currentDateStr) {
       return 'bg-[#FAAA16] text-white hover:bg-amber-500';
     }
 
     if (isInChallengeRange(dayInfo.date)) {
-      return 'bg-[#FAAA16] text-white ';
+      return 'bg-[#FAAA16] text-white';
     }
 
     return 'bg-white text-gray-4 hover:bg-gray-3';

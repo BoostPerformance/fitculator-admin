@@ -1,7 +1,7 @@
 import Title from './layout/title';
-import ChallengeStatistics from './statistics/ChallengeStatistics';
+import ChallengeStatistics from './statistics/challengeStatistics';
 import { ChallengeParticipant, Challenges } from '@/types/userPageTypes';
-import GraphSection from './graph/GraphSection';
+import GraphSection from './graph/graphSection';
 import ResponsiveImages from './responsiveImages';
 import DietTable from './dietDashboard/dietTable';
 

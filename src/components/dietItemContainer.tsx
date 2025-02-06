@@ -47,26 +47,26 @@ export default function DietItemContainer() {
 
   const [userData, setUserData] = useState({
     id: '',
-    name: '',
+    name: '사용자',
     display_name: '',
   });
   const [orgName, setOrgName] = useState({
-    display_name: '',
-    organization_name: '',
+    display_name: '코치님',
+    organization_name: '조직명',
   });
-  const [commentVisible, setCommentVisible] = useState<{
-    [key: string]: boolean;
-  }>({});
-  const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
+  // const [commentVisible, setCommentVisible] = useState<{
+  //   [key: string]: boolean;
+  // }>({});
+  // const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
   const [mobileSize, setMobileSize] = useState(true);
 
-  const [descriptions, setDescriptions] = useState({
-    breakfast: '',
-    lunch: '',
-    dinner: '',
-    snack: '',
-    supplement: '',
-  });
+  // const [descriptions, setDescriptions] = useState({
+  //   breakfast: '',
+  //   lunch: '',
+  //   dinner: '',
+  //   snack: '',
+  //   supplement: '',
+  // });
   const [challengePeriods, setChallengePeriods] = useState({
     start_date: '',
     end_date: '',
@@ -78,7 +78,20 @@ export default function DietItemContainer() {
   const [filteredDailyMeals, setFilteredDailyMeals] = useState<DailyMealData[]>(
     []
   ); // 필터링된 기록
-
+  const emptyDailyMeal = {
+    recordDate: recordDate,
+    meals: {
+      breakfast: { description: '', mealPhotos: [], updatedAt: '' },
+      lunch: { description: '', mealPhotos: [], updatedAt: '' },
+      dinner: { description: '', mealPhotos: [], updatedAt: '' },
+      snack: { description: '', mealPhotos: [], updatedAt: '' },
+      supplement: { description: '', mealPhotos: [], updatedAt: '' },
+    },
+    feedbacks: {
+      coachFeedback: '',
+      aiFeedback: '',
+    },
+  };
   // 달력 날짜가 변경될 때마다 해당 월의 기록만 필터링하는 함수
   const filterMealsByMonth = (date: Date) => {
     if (!challengePeriods.start_date || !challengePeriods.end_date) return;
@@ -102,12 +115,12 @@ export default function DietItemContainer() {
         mealDate.getFullYear() === year && mealDate.getMonth() === month;
 
       const shouldInclude = isInChallengeRange && isInSelectedMonth;
-      console.log('Meal date:', meal.recordDate, 'Include?:', shouldInclude);
+      // console.log('Meal date:', meal.recordDate, 'Include?:', shouldInclude);
 
       return shouldInclude;
     });
 
-    console.log('Filtered meals:', filtered);
+    //console.log('Filtered meals:', filtered);
     setFilteredDailyMeals(filtered);
   };
 
@@ -260,8 +273,8 @@ export default function DietItemContainer() {
                 meals: {},
                 feedbacks: {
                   coachFeedback:
-                    meal.daily_records.feedbacks.coach_feedback || '',
-                  aiFeedback: meal.daily_records.feedbacks.ai_feedback || '',
+                    meal.daily_records.feedbacks?.coach_feedback || '',
+                  aiFeedback: meal.daily_records.feedbacks?.ai_feedback || '',
                 },
               };
             }
@@ -366,7 +379,7 @@ export default function DietItemContainer() {
     };
   }, [challengePeriods, currentDate, allDailyMeals]);
 
-  console.log('challengePeriods', challengePeriods);
+  //console.log('challengePeriods', challengePeriods);
 
   const handleFeedbackChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCoachFeedback(e.target.value);
@@ -380,6 +393,10 @@ export default function DietItemContainer() {
     startDate: currentChallengeIndex?.challenges?.start_date || '',
     endDate: currentChallengeIndex?.challenges?.end_date || '',
   };
+
+  const displayMeals = filteredDailyMeals.length
+    ? filteredDailyMeals
+    : [emptyDailyMeal];
 
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
@@ -455,7 +472,7 @@ export default function DietItemContainer() {
             </div>
           )}
         </div>
-        {filteredDailyMeals.map((dailyMeal) => (
+        {displayMeals.map((dailyMeal) => (
           <div key={dailyMeal.recordDate} className="relative mb-[2rem]">
             <h2 className="text-[1.5rem] font-bold">{dailyMeal.recordDate}</h2>
 

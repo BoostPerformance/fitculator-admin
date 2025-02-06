@@ -1,7 +1,6 @@
 'use client';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Sidebar from '@/components/fixedBars/sidebar';
-
 import { useChallenge } from '@/components/hooks/useChallenges';
 import MainContent from '@/components/mainContent';
 import { useAdminData } from '@/components/hooks/useAdminData';

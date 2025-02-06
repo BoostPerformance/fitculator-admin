@@ -39,7 +39,7 @@ export async function GET() {
       throw userError || mealError || coachMemoError;
     }
 
-    console.log(userData);
+    //console.log(userData);
 
     return NextResponse.json({
       users: userData,

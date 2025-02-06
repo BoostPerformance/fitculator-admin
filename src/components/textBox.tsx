@@ -98,6 +98,7 @@ const TextBox = ({
             alt="copy icon"
             width={17}
             height={17}
+            className="w-4 h-4"
           />
         </button>
       </h4>
@@ -122,10 +123,10 @@ const TextBox = ({
           readOnly={readOnly}
           onChange={onChange}
         />
-        <div className="flex gap-[1rem]  w-[19.625rem]">
-          <div className="flex relative justify-center w-full">
+        <div className="flex gap-[1rem] w-[19.625rem]">
+          <div className="flex relative sm:justify-center w-full justify-end">
             <button
-              className={`${Btn1className} rounded-md  text-0.875-400 mt-[0.5rem] w-full h-[2.5rem]`}
+              className={`${Btn1className} rounded-md  text-0.875-400 mt-[0.5rem] lg:w-[9.3125rem] sm:w-full h-[2.5rem]`}
               onClick={onClick1}
             >
               {button1}
@@ -135,7 +136,7 @@ const TextBox = ({
               alt="copy icon"
               width={17}
               height={17}
-              className="absolute top-[1.2rem] left-[2.4rem]"
+              className="absolute top-[1.2rem] right-[6rem] sm:left-[2.4rem] w-4 h-4"
             />
           </div>
           {button2 && (
@@ -152,7 +153,7 @@ const TextBox = ({
                   alt="copy icon"
                   width={17}
                   height={17}
-                  className="absolute top-[1.2rem] left-[2.4rem]"
+                  className="absolute top-[1.2rem] left-[2.4rem] w-4 h-4"
                 />
               )}
             </div>
