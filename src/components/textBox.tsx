@@ -19,6 +19,7 @@ interface TextBoxProps {
   Btn2className?: string;
   readOnly?: boolean;
   isModal?: boolean;
+  copyIcon?: boolean;
 }
 
 const TextBox = ({
@@ -38,6 +39,7 @@ const TextBox = ({
   Btn2className,
   readOnly = false,
   isModal = false,
+  copyIcon,
 }: TextBoxProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [copyMessage, setCopyMessage] = useState<boolean>(false);
@@ -99,13 +101,15 @@ const TextBox = ({
           />
         </button>
       </h4>
-      <div
-        className={`absolute top-[0.5rem] left-[10rem] bg-green-100 text-green-800 text-1-500 p-[0.5rem] rounded-[0.5rem] 
+      {copyIcon && (
+        <div
+          className={`absolute top-[0.5rem] left-[10rem] bg-green-100 text-green-800 text-1-500 p-[0.5rem] rounded-[0.5rem] 
         transform transition-opacity duration-500 ease-in-out
         ${copyMessage ? 'opacity-100' : 'opacity-0'}`}
-      >
-        텍스트가 복사되었습니다.
-      </div>
+        >
+          텍스트가 복사되었습니다.
+        </div>
+      )}
 
       <div className="flex flex-col items-end">
         <textarea
@@ -118,10 +122,10 @@ const TextBox = ({
           readOnly={readOnly}
           onChange={onChange}
         />
-        <div className="flex gap-[1rem]">
-          <div className="flex relative justify-center">
+        <div className="flex gap-[1rem]  w-[19.625rem]">
+          <div className="flex relative justify-center w-full">
             <button
-              className={`${Btn1className} rounded-md  text-0.875-400 mt-[0.5rem] w-[9.3125rem] h-[2.5rem]`}
+              className={`${Btn1className} rounded-md  text-0.875-400 mt-[0.5rem] w-full h-[2.5rem]`}
               onClick={onClick1}
             >
               {button1}
@@ -135,7 +139,7 @@ const TextBox = ({
             />
           </div>
           {button2 && (
-            <div className="flex relative justify-center">
+            <div className="flex relative justify-center w-full">
               <button
                 className={`${Btn2className} rounded-md  text-0.875-400 mt-[0.5rem] w-[9.3125rem] h-[2.5rem]`}
                 onClick={onClick2}

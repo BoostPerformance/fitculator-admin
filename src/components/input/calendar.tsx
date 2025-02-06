@@ -33,7 +33,7 @@ export default function Calendar({
   return (
     <>
       <div
-        className={`${CalenderclassName}  z-10 mt-2 bg-white rounded-lg shadow-lg p-[1.375rem] h-[21.9375rem] w-[19.25rem] sm:top-[4rem] sm:h-[24.5rem]`}
+        className={`${CalenderclassName}  z-10 mt-2 bg-white rounded-lg shadow-lg p-[1.375rem] h-[21.9375rem] w-[19.25rem] sm:top-[4rem] sm:h-[24.5rem] sm:w-[22rem]`}
       >
         {/* 월 네비게이션 */}
         <div className="flex items-center justify-between mb-4">
