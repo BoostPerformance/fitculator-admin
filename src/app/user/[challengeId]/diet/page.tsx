@@ -4,13 +4,13 @@ import DietDetaileTable from '@/components/dietDashboard/dietDetailTable';
 import Sidebar from '@/components/fixedBars/sidebar';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import DateInput from '@/components/input/dateInput';
-import SearchIput from '@/components/input/searchInput';
 import {
   ProcessedMeal,
   Meals,
   DailyRecords,
 } from '@/types/dietDetaileTableTypes';
 import { useParams } from 'next/navigation';
+import MobileChart from '@/components/mobileChart';
 
 export default function DietItem() {
   const params = useParams();
@@ -18,12 +18,30 @@ export default function DietItem() {
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('2025-1-13');
-
+  const [mobileSize, setMobileSize] = useState(false);
   const [challengeTitle, setChallengeTitle] = useState('');
   const [adminData, setAdminData] = useState({
     admin_role: '',
     display_name: '',
   });
+
+  useEffect(() => {
+    // 화면 크기 변경 감지
+    const handleResize = () => {
+      setMobileSize(window.innerWidth <= 640); // sm 브레이크포인트 (640px)
+    };
+
+    // 초기 화면 크기 설정
+    handleResize();
+
+    // 리사이즈 이벤트 리스너 등록
+    window.addEventListener('resize', handleResize);
+
+    // 클린업 함수
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -219,7 +237,7 @@ export default function DietItem() {
   const totalMealUploads = getTotalMealUploads(organizedMeals);
   const todayStats = getTodayMemberUploads(organizedMeals);
   const feedbackStats = getFeedbackStats(organizedMeals);
-
+  console.log('filteredByDate', filteredByDate);
   return (
     <div className="bg-white-1 flex sm:flex-col">
       <Sidebar
@@ -270,9 +288,12 @@ export default function DietItem() {
               challengeEndDate={challengeDates.endDate}
               defaultCurrentDate="2025-02-01"
             />
-            <SearchIput />
           </div>
-          <DietDetaileTable dietDetailItems={filteredByDate} />
+          {mobileSize ? (
+            <MobileChart dietDetailItems={filteredByDate} />
+          ) : (
+            <DietDetaileTable dietDetailItems={filteredByDate} />
+          )}
         </div>
       </div>
     </div>

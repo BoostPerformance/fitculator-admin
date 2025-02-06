@@ -101,8 +101,8 @@ const config: Config = {
     },
     screens: {
       lg: { min: '1026px' },
-      md: { min: '768px', max: '1025px' },
-      sm: { max: '767px' },
+      md: { min: '641px', max: '1024px' },
+      sm: { max: '640px' },
     },
   },
 };
