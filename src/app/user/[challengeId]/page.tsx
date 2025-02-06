@@ -1,13 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
-import SalesChart from '@/components/graph/salesChart';
 import Image from 'next/image';
 import TrafficSourceChart from '@/components/graph/trafficSourceChart';
 import DailyDietRecord from '@/components/graph/dailyDietRecord';
 import WorkoutLeaderboeard from '@/components/graph/workoutLeaderboeard';
 import DietTable from '@/components/dietDashboard/dietTable';
-import DateInput from '@/components/input/dateInput';
-import SearchInput from '@/components/input/searchInput';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import Title from '@/components/layout/title';
 import Sidebar from '@/components/fixedBars/sidebar';
@@ -76,7 +73,7 @@ interface ChallengeParticipant {
 export default function User() {
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
-  const [dailyRecords, setDailyRecords] = useState<ChallengeParticipant[]>([]);
+  const [dailyRecords, setDailyRecords] = useState<any[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [adminData, setAdminData] = useState({
     admin_role: '',

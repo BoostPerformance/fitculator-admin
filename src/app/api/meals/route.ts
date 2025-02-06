@@ -33,7 +33,7 @@ export async function GET() {
         `);
 
     if (mealsError) throw mealsError;
-    console.log(meals);
+    //console.log(meals);
     return NextResponse.json(meals);
   } catch (error) {
     console.error('Error fetching meals:', error);
