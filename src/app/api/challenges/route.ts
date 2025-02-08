@@ -50,7 +50,7 @@ export async function GET() {
         )
       `
       )
-      .eq('coach_id', 'coach_002');
+      .eq('coach_id', 'coach_heeju');
 
     if (error) {
       throw error;
