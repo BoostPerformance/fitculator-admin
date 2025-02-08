@@ -479,26 +479,47 @@ export default function DietItemContainer() {
             <div className="grid grid-cols-5 gap-[1rem] sm:grid-cols-1 sm:px-[1rem]">
               {(
                 ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
-              ).map((mealType) => (
-                <MealPhotoLayout
-                  key={mealType}
-                  title={
-                    mealType === 'breakfast'
-                      ? '아침'
-                      : mealType === 'lunch'
-                      ? '점심'
-                      : mealType === 'dinner'
-                      ? '저녁'
-                      : mealType === 'snack'
-                      ? '간식'
-                      : '영양제'
-                  }
-                  src={dailyMeal.meals[mealType]?.mealPhotos || []}
-                  descriptions={dailyMeal.meals[mealType]?.description || ''}
-                  time={dailyMeal.meals[mealType]?.updatedAt || ''}
-                  onAddComment={() => console.log('comment area')}
-                />
-              ))}
+              ).map((mealType) => {
+                const formatRecordDate = dailyMeal.meals[mealType]?.updatedAt
+                  ? (() => {
+                      const date = new Date(
+                        dailyMeal.meals[mealType]?.updatedAt || ''
+                      );
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(
+                        2,
+                        '0'
+                      );
+                      const day = String(date.getDate()).padStart(2, '0');
+                      const hours = String(date.getHours()).padStart(2, '0');
+                      const minutes = String(date.getMinutes()).padStart(
+                        2,
+                        '0'
+                      );
+                      return `최근 수정일: ${year}-${month}-${day} ${hours}:${minutes}`;
+                    })()
+                  : '';
+                return (
+                  <MealPhotoLayout
+                    key={mealType}
+                    title={
+                      mealType === 'breakfast'
+                        ? '아침'
+                        : mealType === 'lunch'
+                        ? '점심'
+                        : mealType === 'dinner'
+                        ? '저녁'
+                        : mealType === 'snack'
+                        ? '간식'
+                        : '영양제'
+                    }
+                    src={dailyMeal.meals[mealType]?.mealPhotos || []}
+                    descriptions={dailyMeal.meals[mealType]?.description || ''}
+                    time={formatRecordDate}
+                    onAddComment={() => console.log('comment area')}
+                  />
+                );
+              })}
             </div>
 
             <div className="flex items-center justify-around sm:flex-col w-full">
