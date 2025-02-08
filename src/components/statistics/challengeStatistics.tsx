@@ -42,7 +42,7 @@ const ChallengeStatistics: React.FC<ChallengeStatisticsProps> = ({
   };
 
   const getTodayDietUploads = () => {
-    const today = '2025-01-13'; // YYYY-MM-DD 형식으로 오늘 날짜 가져오기
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식으로 오늘 날짜 가져오기
 
     // 선택된 챌린지에 대해서만 필터링
     const todayUploads = dailyRecords.filter((record) => {

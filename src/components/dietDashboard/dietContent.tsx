@@ -29,13 +29,15 @@ export const DietContent = ({
           selectedDate={selectedDate}
           challengeStartDate={challengeDates.startDate}
           challengeEndDate={challengeDates.endDate}
-          defaultCurrentDate="2025-01-13"
         />
       </div>
       {mobileSize ? (
         <MobileChart dietDetailItems={filteredByDate} />
       ) : (
-        <DietDetaileTable dietDetailItems={filteredByDate} />
+        <DietDetaileTable
+          dietDetailItems={filteredByDate}
+          selectedDate={selectedDate}
+        />
       )}
     </div>
   );

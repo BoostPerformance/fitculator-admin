@@ -9,10 +9,9 @@ const DateInput = ({
   selectedDate,
   challengeStartDate = '',
   challengeEndDate = '',
-  defaultCurrentDate = '',
 }: DateInputProps) => {
   const [open, setOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date(defaultCurrentDate));
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
