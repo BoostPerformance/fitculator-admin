@@ -5,18 +5,24 @@ import {
 } from '@/types/dietDetaileTableTypes';
 
 export const processMeals = (filteredByChallengeId: ProcessedMeal[]) => {
-  const allParticipants = filteredByChallengeId.flatMap(
-    (challenge) => challenge.challenges.challenge_participants || []
+  const allParticipants = filteredByChallengeId.flatMap((challenge) =>
+    (challenge.challenges.challenge_participants || []).map((participant) => ({
+      ...participant,
+      challenge_id: challenge.challenge_id, // 원래의 challenge_id를 보존
+    }))
   );
 
+  // console.log('filteredByChallengeId', filteredByChallengeId);
   const filteredMeals = allParticipants.reduce(
     (acc: Record<string, ProcessedMeal>, participant) => {
+      console.log('allParticipants', allParticipants);
+
       participant.daily_records.forEach(
         (record: DailyRecords, index: number) => {
           const uniqueId = `${participant.users.id}_${record.record_date}_${index}`;
 
           acc[uniqueId] = {
-            challenge_id: participant.id,
+            challenge_id: participant.challenge_id,
             challenges: participant.challenges,
             user: {
               id: participant.users.id,

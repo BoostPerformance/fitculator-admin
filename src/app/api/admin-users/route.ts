@@ -12,7 +12,7 @@ export async function GET() {
     const { data: adminUser, error: error } = await supabase
       .from('admin_users')
       .select('*')
-      .eq('id', 'admin_002')
+      .eq('id', 'admin_heeju')
       .single();
 
     // 받아온 데이터 구조 변환

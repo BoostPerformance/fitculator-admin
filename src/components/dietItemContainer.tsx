@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import TextBox from './textBox';
 import { AI_Feedback } from './mock/DietItems';
 import Title from './layout/title';
@@ -97,7 +97,7 @@ export default function DietItemContainer() {
     if (!challengePeriods.start_date || !challengePeriods.end_date) return;
     //console.log('Filtering for date:', date);
     //console.log('Challenge periods:', challengePeriods);
-    //console.log('All meals:', allDailyMeals);
+    console.log('All meals:', allDailyMeals);
 
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -398,6 +398,51 @@ export default function DietItemContainer() {
     ? filteredDailyMeals
     : [emptyDailyMeal];
 
+  const calculateChallengeMetrics = () => {
+    // 챌린지 전체 일수 계산
+    const startDate = new Date(challengePeriods.start_date);
+    const endDate = new Date(challengePeriods.end_date);
+    const totalDays =
+      Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    // 현재 날짜 기준으로 계산
+    const today = new Date();
+    const isAfterChallenge = today > endDate;
+
+    let uploadCount = 0;
+
+    allDailyMeals.forEach((dailyMeal) => {
+      const recordDate = new Date(dailyMeal.recordDate);
+
+      // 챌린지 기간 내의 기록인지 확인
+      const isInRange =
+        recordDate >= startDate &&
+        (isAfterChallenge ? recordDate <= endDate : recordDate <= today);
+
+      if (isInRange) {
+        // 각 식사 타입별로 확인
+        Object.values(dailyMeal.meals).forEach((meal) => {
+          // 설명이나 사진이 있는 경우에만 카운트
+          if (meal.description.trim() !== '' || meal.mealPhotos.length > 0) {
+            uploadCount++;
+          }
+        });
+      }
+    });
+
+    return {
+      total: totalDays,
+      count: uploadCount,
+    };
+  };
+
+  const metrics = useMemo(
+    () => calculateChallengeMetrics(),
+    [allDailyMeals, challengePeriods]
+  );
+
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
       <Sidebar
@@ -419,8 +464,8 @@ export default function DietItemContainer() {
 
             <Title title={`${userData.name}님의 식단현황`} />
             <TotalFeedbackCounts
-              counts="tody"
-              total="chal"
+              counts={metrics.count.toString()}
+              total={metrics.total.toString()}
               borderColor="border-[#FDB810]"
               textColor="text-[#FDB810]"
               title="총 식단 업로드"
@@ -479,26 +524,47 @@ export default function DietItemContainer() {
             <div className="grid grid-cols-5 gap-[1rem] sm:grid-cols-1 sm:px-[1rem]">
               {(
                 ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
-              ).map((mealType) => (
-                <MealPhotoLayout
-                  key={mealType}
-                  title={
-                    mealType === 'breakfast'
-                      ? '아침'
-                      : mealType === 'lunch'
-                      ? '점심'
-                      : mealType === 'dinner'
-                      ? '저녁'
-                      : mealType === 'snack'
-                      ? '간식'
-                      : '영양제'
-                  }
-                  src={dailyMeal.meals[mealType]?.mealPhotos || []}
-                  descriptions={dailyMeal.meals[mealType]?.description || ''}
-                  time={dailyMeal.meals[mealType]?.updatedAt || ''}
-                  onAddComment={() => console.log('comment area')}
-                />
-              ))}
+              ).map((mealType) => {
+                const formatRecordDate = dailyMeal.meals[mealType]?.updatedAt
+                  ? (() => {
+                      const date = new Date(
+                        dailyMeal.meals[mealType]?.updatedAt || ''
+                      );
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(
+                        2,
+                        '0'
+                      );
+                      const day = String(date.getDate()).padStart(2, '0');
+                      const hours = String(date.getHours()).padStart(2, '0');
+                      const minutes = String(date.getMinutes()).padStart(
+                        2,
+                        '0'
+                      );
+                      return `최근 수정일: ${year}-${month}-${day} ${hours}:${minutes}`;
+                    })()
+                  : '';
+                return (
+                  <MealPhotoLayout
+                    key={mealType}
+                    title={
+                      mealType === 'breakfast'
+                        ? '아침'
+                        : mealType === 'lunch'
+                        ? '점심'
+                        : mealType === 'dinner'
+                        ? '저녁'
+                        : mealType === 'snack'
+                        ? '간식'
+                        : '영양제'
+                    }
+                    src={dailyMeal.meals[mealType]?.mealPhotos || []}
+                    descriptions={dailyMeal.meals[mealType]?.description || ''}
+                    time={formatRecordDate}
+                    onAddComment={() => console.log('comment area')}
+                  />
+                );
+              })}
             </div>
 
             <div className="flex items-center justify-around sm:flex-col w-full">

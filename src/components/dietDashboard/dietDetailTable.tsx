@@ -40,7 +40,9 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
       </>
     );
   };
-  //console.log('dietDetailItems', dietDetailItems);
+
+  console.log('dietDetailItems', dietDetailItems);
+
   return (
     <div className="mt-[1.4rem]">
       <table className="table-auto w-full bg-white shadow-md rounded-md">

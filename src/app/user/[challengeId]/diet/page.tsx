@@ -59,6 +59,7 @@ export default function DietItem() {
   const filteredByDate = processedMeals.filter(
     (meal) => meal.record_date === selectedDate
   );
+  // console.log('processedMeals', processedMeals);
 
   return (
     <div className="bg-white-1 flex sm:flex-col">

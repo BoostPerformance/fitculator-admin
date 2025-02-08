@@ -30,9 +30,6 @@ const MealPhotoLayout = ({
   const renderPlaceholder = () => (
     <div className="w-full h-32 overflow-hidden rounded-lg flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300">
       <div className="text-gray-400 text-sm">식단이미지 없음</div>
-      <button className="mt-2 text-gray-400 hover:text-gray-600 transition-colors">
-        <FaPlus size={20} />
-      </button>
     </div>
   );
 
