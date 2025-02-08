@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import TextBox from './textBox';
 import { AI_Feedback } from './mock/DietItems';
 import Title from './layout/title';
@@ -97,7 +97,7 @@ export default function DietItemContainer() {
     if (!challengePeriods.start_date || !challengePeriods.end_date) return;
     //console.log('Filtering for date:', date);
     //console.log('Challenge periods:', challengePeriods);
-    //console.log('All meals:', allDailyMeals);
+    console.log('All meals:', allDailyMeals);
 
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -398,6 +398,51 @@ export default function DietItemContainer() {
     ? filteredDailyMeals
     : [emptyDailyMeal];
 
+  const calculateChallengeMetrics = () => {
+    // 챌린지 전체 일수 계산
+    const startDate = new Date(challengePeriods.start_date);
+    const endDate = new Date(challengePeriods.end_date);
+    const totalDays =
+      Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    // 현재 날짜 기준으로 계산
+    const today = new Date();
+    const isAfterChallenge = today > endDate;
+
+    let uploadCount = 0;
+
+    allDailyMeals.forEach((dailyMeal) => {
+      const recordDate = new Date(dailyMeal.recordDate);
+
+      // 챌린지 기간 내의 기록인지 확인
+      const isInRange =
+        recordDate >= startDate &&
+        (isAfterChallenge ? recordDate <= endDate : recordDate <= today);
+
+      if (isInRange) {
+        // 각 식사 타입별로 확인
+        Object.values(dailyMeal.meals).forEach((meal) => {
+          // 설명이나 사진이 있는 경우에만 카운트
+          if (meal.description.trim() !== '' || meal.mealPhotos.length > 0) {
+            uploadCount++;
+          }
+        });
+      }
+    });
+
+    return {
+      total: totalDays,
+      count: uploadCount,
+    };
+  };
+
+  const metrics = useMemo(
+    () => calculateChallengeMetrics(),
+    [allDailyMeals, challengePeriods]
+  );
+
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
       <Sidebar
@@ -419,8 +464,8 @@ export default function DietItemContainer() {
 
             <Title title={`${userData.name}님의 식단현황`} />
             <TotalFeedbackCounts
-              counts="tody"
-              total="chal"
+              counts={metrics.count.toString()}
+              total={metrics.total.toString()}
               borderColor="border-[#FDB810]"
               textColor="text-[#FDB810]"
               title="총 식단 업로드"
