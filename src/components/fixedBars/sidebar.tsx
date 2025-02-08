@@ -20,12 +20,14 @@ interface SidebarProps {
   onSelectChallenge: (challengeId: string) => void;
   onSelectChallengeTitle?: (challengeId: string) => void;
   coach?: string;
+  selectedChallengeId: string;
 }
 
 export default function Sidebar({
   data,
   onSelectChallenge,
   onSelectChallengeTitle,
+  selectedChallengeId,
   coach,
 }: SidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -36,6 +38,13 @@ export default function Sidebar({
   const router = useRouter();
 
   useEffect(() => {
+    const selectedChallenge = data.find(
+      (item) => item.challenges.id === selectedChallengeId
+    );
+    if (selectedChallenge) {
+      setSelectedTitle(selectedChallenge.challenges.title);
+    }
+
     const handleResize = () => {
       const mobile = window.innerWidth < 1025;
       setIsMobile(mobile);
@@ -51,7 +60,7 @@ export default function Sidebar({
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [selectedChallengeId, data]);
 
   const handleDropdown = () => {
     return setIsOpenDropdown(!isOpenDropdown);
@@ -77,7 +86,7 @@ export default function Sidebar({
     setSelectedTitle(challenge.challenges.title);
     onSelectChallenge(challenge.challenges.id);
     // console.log('challenge.challenges.id', challenge.challenges.id);
-    router.push(`/user?challenge=${challenge.challenges.id}`);
+    router.push(`/user/${challenge.challenges.id}`);
   };
 
   return (
@@ -177,7 +186,7 @@ export default function Sidebar({
                         >
                           <div className="flex flex-col gap-2">
                             <button
-                              className="lg:text-1.25-700 text-left"
+                              className="lg:text-1.25-700 text-left hover:bg-gray-3"
                               onClick={() => handleChallengeClick(item)}
                             >
                               {item.challenges.title}

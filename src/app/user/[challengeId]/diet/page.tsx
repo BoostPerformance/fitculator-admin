@@ -69,6 +69,7 @@ export default function DietItem() {
         onSelectChallenge={handleChallengeSelect}
         coach={adminData.display_name}
         onSelectChallengeTitle={handleChallengeSelect}
+        selectedChallengeId={selectedChallengeId}
       />
       <div className="flex flex-col gap-[1rem]">
         <div className="px-[2rem] pt-[2rem]">

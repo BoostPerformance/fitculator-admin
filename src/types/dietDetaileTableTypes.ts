@@ -72,4 +72,5 @@ export interface DietDetailTableProps {
 
 export interface MobildDieDetailTableProps {
   dietDetailItems: ProcessedMeal[];
+  selectedDate: string;
 }

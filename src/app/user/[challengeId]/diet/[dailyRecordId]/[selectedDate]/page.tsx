@@ -40,18 +40,12 @@ type PageParams = {
 
 export default function SelectedDate() {
   const params = useParams() as PageParams;
-  console.log(params);
-  const [visibleItems, setVisibleItems] = useState(2);
   const [isDisable, setIsDisable] = useState(false);
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
-
   const [coachFeedback, setCoachFeedback] = useState('');
-
   const [challengeTitle, setChallengeTitle] = useState('');
   const [recordDate, setRecordDate] = useState('');
-  const [dailyMeals, setDailyMeals] = useState<DailyMealData[]>([]);
-
   const [userData, setUserData] = useState({
     id: '',
     name: '사용자',

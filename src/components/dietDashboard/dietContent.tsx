@@ -32,7 +32,10 @@ export const DietContent = ({
         />
       </div>
       {mobileSize ? (
-        <MobileChart dietDetailItems={filteredByDate} />
+        <MobileChart
+          dietDetailItems={filteredByDate}
+          selectedDate={selectedDate}
+        />
       ) : (
         <DietDetaileTable
           dietDetailItems={filteredByDate}

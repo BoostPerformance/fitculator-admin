@@ -4,10 +4,11 @@ import { useRouter } from 'next/navigation';
 
 export default function MobileChart({
   dietDetailItems,
+  selectedDate,
 }: MobildDieDetailTableProps) {
   const router = useRouter();
   const isMealUploaded = (mealName: string) => {
-    console.log('mealName', mealName !== '');
+    //console.log('mealName', mealName !== '');
 
     return mealName !== '' ? (
       <>
@@ -65,7 +66,7 @@ export default function MobileChart({
                     className="flex gap-[2rem] items-center justify-center"
                     onClick={() =>
                       router.push(
-                        `/user/${meal.challenge_id}/diet/${meal.user.id}`
+                        `/user/${meal.challenge_id}/diet/${meal.user.id}/${selectedDate}`
                       )
                     }
                   >
