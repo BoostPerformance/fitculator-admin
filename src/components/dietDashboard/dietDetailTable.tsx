@@ -3,7 +3,10 @@ import Image from 'next/image';
 import { DietDetailTableProps } from '@/types/dietDetaileTableTypes';
 import { useRouter } from 'next/navigation';
 
-const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
+const DietDetaileTable = ({
+  dietDetailItems,
+  selectedDate,
+}: DietDetailTableProps) => {
   const router = useRouter();
   const isfeedback = (feedback: string | null) => {
     return (
@@ -34,14 +37,14 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
     return (
       <>
         기록일: {recordDate} <br />
-        업데이트시간:
+        업데이트:
         <br /> {upatedDate} &nbsp;
         {hours}:{minutes}
       </>
     );
   };
 
-  console.log('dietDetailItems', dietDetailItems);
+  // console.log('dietDetailItems', dietDetailItems);
 
   return (
     <div className="mt-[1.4rem]">
@@ -148,7 +151,7 @@ const DietDetaileTable = ({ dietDetailItems }: DietDetailTableProps) => {
               className="text-[#6F6F6F] hover:bg-[#F4F6FC]"
               onClick={() =>
                 router.push(
-                  `/user/${dietDetailTableItem.challenge_id}/diet/${dietDetailTableItem.user.id}`
+                  `/user/${dietDetailTableItem.challenge_id}/diet/${dietDetailTableItem.user.id}/${selectedDate}`
                 )
               }
             >

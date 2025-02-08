@@ -8,6 +8,7 @@ import DietTable from '@/components/dietDashboard/dietTable';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import Title from '@/components/layout/title';
 import Sidebar from '@/components/fixedBars/sidebar';
+import { useParams } from 'next/navigation';
 
 interface AdminUser {
   email: string;
@@ -70,7 +71,12 @@ interface ChallengeParticipant {
   };
   daily_records: DailyRecord[];
 }
+type ParamsType = {
+  challengeId: string;
+};
 export default function User() {
+  const params = useParams() as ParamsType;
+
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<any[]>([]);
@@ -116,7 +122,21 @@ export default function User() {
           throw new Error('Failed to fetch challenges');
         }
         const challengesData = await challengesResponse.json();
-        setChallenges(challengesData);
+
+        const sortedChallenges = challengesData.sort(
+          (a: Challenges, b: Challenges) => {
+            return (
+              new Date(b.challenges.start_date).getTime() -
+              new Date(a.challenges.start_date).getTime()
+            );
+          }
+        );
+
+        setChallenges(sortedChallenges);
+        // 첫 번째 챌린지를 기본값으로 설정
+        if (sortedChallenges.length > 0) {
+          setSelectedChallengeId(sortedChallenges[0].challenges.id);
+        }
 
         // 코치 데이터 가져오기
         const coachResponse = await fetch('/api/coach-info');
@@ -151,6 +171,16 @@ export default function User() {
     return mobileSize;
   }, []);
 
+  useEffect(() => {
+    const urlChallengeId = params.challengeId;
+
+    if (
+      urlChallengeId &&
+      challenges.some((c) => c.challenges.id === urlChallengeId)
+    ) {
+      setSelectedChallengeId(urlChallengeId);
+    }
+  }, [challenges]);
   //console.log('coachData', coachData);
   const handleChallengeSelect = (challengeId: string) => {
     // 선택된 챌린지 찾기
@@ -174,6 +204,7 @@ export default function User() {
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         coach={adminData.display_name}
+        selectedChallengeId={selectedChallengeId}
       />
       <div className="flex-1 overflow-auto">
         <div className="pt-[2rem]">

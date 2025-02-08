@@ -1,22 +1,28 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import TextBox from './textBox';
-import { AI_Feedback } from './mock/DietItems';
-import Title from './layout/title';
-import TotalFeedbackCounts from './totalCounts/totalFeedbackCount';
-import MealPhotoLayout from './layout/mealPhotoLayout';
-import { useSearchParams, useParams } from 'next/navigation';
-import Sidebar from './fixedBars/sidebar';
+import TextBox from '@/components/textBox';
+import { AI_Feedback } from '@/components/mock/DietItems';
+import Title from '@/components/layout/title';
+import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
+import MealPhotoLayout from '@/components/layout/mealPhotoLayout';
+import { useParams } from 'next/navigation';
+import Sidebar from '@/components/fixedBars/sidebar';
 import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
-import Calendar from './input/calendar';
+import Calendar from '@/components/input/calendar';
 import { DailyMealData, UserData } from '@/types/dietItemContainerTypes';
-import calendarUtils from './utils/calendarUtils';
-import DateInput from './input/dateInput';
+import calendarUtils from '@/components/utils/calendarUtils';
+import DateInput from '@/components/input/dateInput';
 
 const getAIFeedback = (user_id: string, date: string) => {
   return AI_Feedback.find(
     (feedback) => feedback.user_id === user_id && feedback.date === date
   );
+};
+
+type PageParams = {
+  challengeId: string;
+  dailyRecordId: string;
+  selectedDate: string; // 명백히 string임을 명시
 };
 
 // const getMealByTypeAndDate = (
@@ -32,14 +38,12 @@ const getAIFeedback = (user_id: string, date: string) => {
 //   );
 // };
 
-export default function DietItemContainer() {
-  const params = useParams();
+export default function SelectedDate() {
+  const params = useParams() as PageParams;
   const [isDisable, setIsDisable] = useState(false);
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
-
   const [coachFeedback, setCoachFeedback] = useState('');
-
   const [challengeTitle, setChallengeTitle] = useState('');
   const [recordDate, setRecordDate] = useState('');
   const [userData, setUserData] = useState({
@@ -100,6 +104,9 @@ export default function DietItemContainer() {
     const filtered = allDailyMeals.filter((meal) => {
       const mealDate = new Date(meal.recordDate);
 
+      if (params.selectedDate) {
+        return meal.recordDate === params.selectedDate;
+      }
       // 챌린지 기간 내의 기록인지 확인
       const isInChallengeRange =
         new Date(meal.recordDate) >= new Date(challengePeriods.start_date) &&
@@ -109,10 +116,9 @@ export default function DietItemContainer() {
       const isInSelectedMonth =
         mealDate.getFullYear() === year && mealDate.getMonth() === month;
 
-      const shouldInclude = isInChallengeRange && isInSelectedMonth;
       // console.log('Meal date:', meal.recordDate, 'Include?:', shouldInclude);
 
-      return shouldInclude;
+      return isInChallengeRange && isInSelectedMonth;
     });
 
     //console.log('Filtered meals:', filtered);
@@ -297,9 +303,19 @@ export default function DietItemContainer() {
 
         setAllDailyMeals(sortedMeals); // 전체 기록 저장
 
+        if (params.selectedDate) {
+          setRecordDate(params.selectedDate);
+
+          const filtered = sortedMeals.filter(
+            (meal) => meal.recordDate === params.selectedDate
+          );
+          setFilteredDailyMeals(filtered);
+        }
+
         // 현재 월의 기록으로 필터링
 
         const challengesResponse = await fetch('/api/challenges');
+
         if (!challengesResponse.ok) {
           throw new Error('Failed to fetch challenges');
         }
@@ -353,7 +369,7 @@ export default function DietItemContainer() {
 
     // window.addEventListener('scroll', handleScroll);
     // return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [params.dailyRecordId, params.selectedDate]);
 
   useEffect(() => {
     filterMealsByMonth(currentDate);

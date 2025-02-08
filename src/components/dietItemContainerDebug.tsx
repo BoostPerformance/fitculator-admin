@@ -1,11 +1,11 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import TextBox from './textBox';
 import { AI_Feedback } from './mock/DietItems';
 import Title from './layout/title';
 import TotalFeedbackCounts from './totalCounts/totalFeedbackCount';
 import MealPhotoLayout from './layout/mealPhotoLayout';
-import { useSearchParams, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Sidebar from './fixedBars/sidebar';
 import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
 import Calendar from './input/calendar';
@@ -34,6 +34,7 @@ const getAIFeedback = (user_id: string, date: string) => {
 
 export default function DietItemContainer() {
   const params = useParams();
+  const [visibleItems, setVisibleItems] = useState(2);
   const [isDisable, setIsDisable] = useState(false);
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
@@ -42,6 +43,8 @@ export default function DietItemContainer() {
 
   const [challengeTitle, setChallengeTitle] = useState('');
   const [recordDate, setRecordDate] = useState('');
+  const [dailyMeals, setDailyMeals] = useState<DailyMealData[]>([]);
+
   const [userData, setUserData] = useState({
     id: '',
     name: '사용자',
@@ -68,7 +71,9 @@ export default function DietItemContainer() {
     start_date: '',
     end_date: '',
   });
+  const [selectedDate, setSelectedDate] = useState<string>('2025-1-13');
   const [currentDate, setCurrentDate] = useState(new Date());
+
   const [allDailyMeals, setAllDailyMeals] = useState<DailyMealData[]>([]); // 전체 기록
   const [filteredDailyMeals, setFilteredDailyMeals] = useState<DailyMealData[]>(
     []
@@ -127,6 +132,7 @@ export default function DietItemContainer() {
 
     // 선택된 날짜에 해당하는 기록만 필터링
     const filtered = allDailyMeals.filter((meal) => {
+      //console.log('allDailyMeals', allDailyMeals);
       return (
         meal.recordDate === formattedDate &&
         new Date(meal.recordDate) >= new Date(challengePeriods.start_date) &&
@@ -157,94 +163,19 @@ export default function DietItemContainer() {
   };
 
   const handleChallengeSelect = (challengeId: string) => {
-    setSelectedChallengeId(challengeId);
     const selectedChallenge = challenges.find(
       (challenge) => challenge.challenges.id === challengeId
     );
-
-    // console.log('Found Challenge:', selectedChallenge);
 
     if (selectedChallenge) {
       setChallengeTitle(selectedChallenge.challenges.title);
     }
   };
 
-  // const userMeals = meals.filter(
-  //   (meal: Meals) =>
-  //     meal.daily_records.challenge_participants.users.id === userData.id &&
-  //     meal.daily_records.record_date === recordDate
-  // );
-
-  // const handleScroll = () => {
-  //   if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-  //     setVisibleItems((prev) => prev + 2);
-  //   }
-  // };
-
   const handleGenerateAnalyse = () => {
     setIsDisable(true);
     console.log('AI 결과 생성 중...');
   };
-
-  // const handleSaveFeedback = (
-  //   mealType: string,
-  //   userId: string,
-  //   date: string
-  // ) => {
-  //   const meal = meals.find(
-  //     (meal) =>
-  //       meal.user_id === userId &&
-  //       meal.date === date &&
-  //       meal.meal_type === mealType
-  //   );
-  //   if (meal) {
-  //     meal.additional_comments = commentText[`${mealType}-${date}`] || '';
-  //     console.log('피드백 저장:', meal);
-  //   }
-  //   setCommentVisible((prev) => {
-  //     const newVisibility = { ...prev };
-  //     newVisibility[`${mealType}-${date}`] = false;
-  //     return newVisibility;
-  //   });
-  // };
-
-  // const handleAddComment = (mealType: string) => {
-  //   setCommentVisible((prev) => {
-  //     const newVisibility = { ...prev };
-  //     newVisibility[`${mealType}`] = !newVisibility[`${mealType}`];
-  //     return newVisibility;
-  //   });
-  // };
-
-  // const handleCancelComment = (mealType: string) => {
-  //   setCommentVisible((prev) => {
-  //     const newVisibility = { ...prev };
-  //     newVisibility[`${mealType}-${date}`] = false;
-  //     return newVisibility;
-  //   });
-  // };
-
-  // const handleCommentChange = (
-  //   mealType: string,
-  //   date: string,
-  //   text: string
-  // ) => {
-  //   setCommentText((prev) => {
-  //     const newComments = { ...prev };
-  //     newComments[`${mealType}-${date}`] = text;
-  //     return newComments;
-  //   });
-  // };
-
-  // const fetchMeals = async () => {
-  //   try {
-  //     const response = await fetch('/api/dietItem');
-  //     const data = await response.json();
-  //     setMeals(data);
-  //   } catch (error) {
-  //     console.error('Error fetching meals:', error);
-  //   }
-  // };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -255,7 +186,7 @@ export default function DietItemContainer() {
         const userMeals = mealsData.filter(
           (meal: any) =>
             meal.daily_records?.challenge_participants?.users?.id ===
-            params.dailyRecordId
+            params.userId
         );
 
         const mealsByDate = userMeals.reduce(
@@ -309,6 +240,11 @@ export default function DietItemContainer() {
         const currentChallenge = challengeData.find(
           (challenge: any) => challenge.challenge_id === params.challengeId
         );
+        console.log('challengeData', {
+          challengeData: challengeData,
+          challengeId: params.challengeId,
+        });
+
         if (currentChallenge) {
           setChallengeTitle(currentChallenge.challenges.title);
           setSelectedChallengeId(currentChallenge.challenges.id);
@@ -325,11 +261,11 @@ export default function DietItemContainer() {
         if (!challengeParticipantsResponse.ok) {
           throw new Error('Failed to fetch admin data');
         }
-        const userData = await challengeParticipantsResponse.json();
-        setUserData(userData);
+        const userDataResponse = await challengeParticipantsResponse.json();
+        setUserData(userDataResponse);
 
-        const currentUser = userData.find((user: UserData) => {
-          return user.users.id === params.dailyRecordId;
+        const currentUser = userDataResponse.find((user: UserData) => {
+          return user.users.id === params.userId;
         });
 
         if (currentUser) {
@@ -381,63 +317,32 @@ export default function DietItemContainer() {
   };
 
   const currentChallengeIndex = challenges.find(
-    (challenge) => challenge.challenge_id === selectedChallengeId
+    (challenge) => challenge.challenges.id === selectedChallengeId
   );
 
   const challengeDates = {
     startDate: currentChallengeIndex?.challenges?.start_date || '',
     endDate: currentChallengeIndex?.challenges?.end_date || '',
   };
+  //console.log('selectedChallengeId', selectedChallengeId);
 
   const displayMeals = filteredDailyMeals.length
     ? filteredDailyMeals
     : [emptyDailyMeal];
 
-  const calculateChallengeMetrics = () => {
-    // 챌린지 전체 일수 계산
-    const startDate = new Date(challengePeriods.start_date);
-    const endDate = new Date(challengePeriods.end_date);
-    const totalDays =
-      Math.ceil(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-      ) + 1;
-
-    // 현재 날짜 기준으로 계산
-    const today = new Date();
-    const isAfterChallenge = today > endDate;
-
-    let uploadCount = 0;
-
-    allDailyMeals.forEach((dailyMeal) => {
-      const recordDate = new Date(dailyMeal.recordDate);
-
-      // 챌린지 기간 내의 기록인지 확인
-      const isInRange =
-        recordDate >= startDate &&
-        (isAfterChallenge ? recordDate <= endDate : recordDate <= today);
-
-      if (isInRange) {
-        // 각 식사 타입별로 확인
-        Object.values(dailyMeal.meals).forEach((meal) => {
-          // 설명이나 사진이 있는 경우에만 카운트
-          if (meal.description.trim() !== '' || meal.mealPhotos.length > 0) {
-            uploadCount++;
-          }
-        });
-      }
-    });
-
-    return {
-      total: totalDays,
-      count: uploadCount,
-    };
+  const formatDateForComparison = (dateStr: string) => {
+    return dateStr.split('T')[0]; // Remove any time component
   };
 
-  const metrics = useMemo(
-    () => calculateChallengeMetrics(),
-    [allDailyMeals, challengePeriods]
-  );
+  const isInChallengeRange = (date: Date) => {
+    const dateStr = calendarUtils.formatDate(date);
+    const startStr = formatDateForComparison(challengeDates.startDate);
+    const endStr = formatDateForComparison(challengeDates.endDate);
 
+    return dateStr >= startStr && dateStr <= endStr;
+  };
+
+  // console.log(userData);
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
       <Sidebar
@@ -459,8 +364,8 @@ export default function DietItemContainer() {
 
             <Title title={`${userData.name}님의 식단현황`} />
             <TotalFeedbackCounts
-              counts={metrics.count.toString()}
-              total={metrics.total.toString()}
+              counts="tody"
+              total="chal"
               borderColor="border-[#FDB810]"
               textColor="text-[#FDB810]"
               title="총 식단 업로드"
@@ -474,13 +379,7 @@ export default function DietItemContainer() {
                 currentDate={currentDate}
                 weekdays={weekdays}
                 handleDateClick={handleDateClick}
-                isInChallengeRange={(date) => {
-                  return calendarUtils.isInChallengeRange(
-                    date,
-                    challenges,
-                    selectedChallengeId
-                  );
-                }}
+                isInChallengeRange={isInChallengeRange}
                 CalenderclassName="sm:w-[90%]"
                 selectedDate={recordDate}
               />
@@ -489,9 +388,7 @@ export default function DietItemContainer() {
             <div className="flex sm:justify-center sm:items-center pt-[1rem]">
               <DateInput
                 onChange={(newDate: string) => {
-                  setRecordDate(newDate); // selectedDate 대신 recordDate를 업데이트
-
-                  // 선택된 날짜에 해당하는 기록만 필터링 (Calendar와 동일한 로직 적용)
+                  setRecordDate(newDate);
                   const filtered = allDailyMeals.filter((meal) => {
                     return (
                       meal.recordDate === newDate &&
@@ -518,47 +415,26 @@ export default function DietItemContainer() {
             <div className="grid grid-cols-5 gap-[1rem] sm:grid-cols-1 sm:px-[1rem]">
               {(
                 ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
-              ).map((mealType) => {
-                const formatRecordDate = dailyMeal.meals[mealType]?.updatedAt
-                  ? (() => {
-                      const date = new Date(
-                        dailyMeal.meals[mealType]?.updatedAt || ''
-                      );
-                      const year = date.getFullYear();
-                      const month = String(date.getMonth() + 1).padStart(
-                        2,
-                        '0'
-                      );
-                      const day = String(date.getDate()).padStart(2, '0');
-                      const hours = String(date.getHours()).padStart(2, '0');
-                      const minutes = String(date.getMinutes()).padStart(
-                        2,
-                        '0'
-                      );
-                      return `최근 수정일: ${year}-${month}-${day} ${hours}:${minutes}`;
-                    })()
-                  : '';
-                return (
-                  <MealPhotoLayout
-                    key={mealType}
-                    title={
-                      mealType === 'breakfast'
-                        ? '아침'
-                        : mealType === 'lunch'
-                        ? '점심'
-                        : mealType === 'dinner'
-                        ? '저녁'
-                        : mealType === 'snack'
-                        ? '간식'
-                        : '영양제'
-                    }
-                    src={dailyMeal.meals[mealType]?.mealPhotos || []}
-                    descriptions={dailyMeal.meals[mealType]?.description || ''}
-                    time={formatRecordDate}
-                    onAddComment={() => console.log('comment area')}
-                  />
-                );
-              })}
+              ).map((mealType) => (
+                <MealPhotoLayout
+                  key={mealType}
+                  title={
+                    mealType === 'breakfast'
+                      ? '아침'
+                      : mealType === 'lunch'
+                      ? '점심'
+                      : mealType === 'dinner'
+                      ? '저녁'
+                      : mealType === 'snack'
+                      ? '간식'
+                      : '영양제'
+                  }
+                  src={dailyMeal.meals[mealType]?.mealPhotos || []}
+                  descriptions={dailyMeal.meals[mealType]?.description || ''}
+                  time={dailyMeal.meals[mealType]?.updatedAt || ''}
+                  onAddComment={() => console.log('comment area')}
+                />
+              ))}
             </div>
 
             <div className="flex items-center justify-around sm:flex-col w-full">

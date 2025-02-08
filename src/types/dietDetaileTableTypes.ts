@@ -67,8 +67,10 @@ export interface ProcessedMeal {
 
 export interface DietDetailTableProps {
   dietDetailItems: ProcessedMeal[];
+  selectedDate: string;
 }
 
 export interface MobildDieDetailTableProps {
   dietDetailItems: ProcessedMeal[];
+  selectedDate: string;
 }

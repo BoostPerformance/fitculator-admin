@@ -12,7 +12,7 @@ export default function DietItem() {
   const params = useParams();
   const { challenges, adminData } = useDietData(params.challengeId);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
-  const [selectedDate, setSelectedDate] = useState<string>('2025-1-13');
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const [challengeTitle, setChallengeTitle] = useState('');
   const { isMobile, isTablet, isDesktop } = useResponsive();
 
@@ -60,6 +60,7 @@ export default function DietItem() {
     (meal) => meal.record_date === selectedDate
   );
   // console.log('processedMeals', processedMeals);
+  console.log('selectedDate page', selectedDate);
 
   return (
     <div className="bg-white-1 flex sm:flex-col">
@@ -68,6 +69,7 @@ export default function DietItem() {
         onSelectChallenge={handleChallengeSelect}
         coach={adminData.display_name}
         onSelectChallengeTitle={handleChallengeSelect}
+        selectedChallengeId={selectedChallengeId}
       />
       <div className="flex flex-col gap-[1rem]">
         <div className="px-[2rem] pt-[2rem]">

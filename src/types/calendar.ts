@@ -29,5 +29,4 @@ export interface DateInputProps {
   selectedDate: string | undefined;
   challengeStartDate?: string; // YYYY-MM-DD format
   challengeEndDate?: string; // YYYY-MM-DD format
-  defaultCurrentDate?: string; // YYYY-MM-DD format
 }
