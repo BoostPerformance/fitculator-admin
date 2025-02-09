@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Prisma } from '@prisma/client';
+import { createClient } from '@supabase/supabase-js';
 import prisma from '@/lib/prisma';
 import { nanoid } from 'nanoid';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ROLE_KEY!
+);
 
 export async function POST(req: NextRequest) {
   try {
