@@ -209,7 +209,7 @@ export default function Sidebar({
                                 </button>
                               </Link>
                             </li>
-                            <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
+                            {/* <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
                               <Image
                                 src="/svg/subtitle-icon.svg"
                                 width={20}
@@ -222,7 +222,7 @@ export default function Sidebar({
                               >
                                 운동
                               </Link>
-                            </li>
+                            </li> */}
                           </ul>
                         </div>
                       ))}

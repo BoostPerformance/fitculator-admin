@@ -10,7 +10,7 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession();
-    console.log('Current session email:', session?.user?.email);
+    //console.log('Current session email:', session?.user?.email);
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     const { data: adminUser, error: adminError } = await supabase
       .from('admin_users')
-      .select('id, admin_role')
+      .select('id, admin_role, organization_id, display_name')
       .eq('email', session.user.email)
       .single();
 
@@ -26,15 +26,12 @@ export async function GET(request: NextRequest) {
       throw adminError;
     }
 
-    // 개발자나 시스템 관리자인 경우 URL 파라미터에서 id를 가져올 수 있음
-    const targetAdminId = ['developer', 'system_admin'].includes(
-      adminUser.admin_role
-    )
-      ? 'admin_heeju'
-      : adminUser.id;
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    // 코치가 아닌 경우 기본 정보만 반환
+    if (adminUser.admin_role !== 'coach') {
+      return NextResponse.json({
+        display_name: adminUser.display_name,
+        admin_role: adminUser.admin_role,
+      });
     }
 
     const { data: coach, error: coachError } = await supabase
@@ -60,7 +57,7 @@ export async function GET(request: NextRequest) {
        )
      `
       )
-      .eq('admin_user_id', targetAdminId)
+      .eq('admin_user_id', adminUser.id)
       .single();
 
     if (coachError) {

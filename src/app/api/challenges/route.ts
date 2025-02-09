@@ -10,7 +10,6 @@ const supabase = createClient(
 export async function GET() {
   try {
     const session = await getServerSession();
-    //console.log('Session', session?.user);
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -26,10 +25,7 @@ export async function GET() {
       throw adminError;
     }
 
-    let coachId = 'coach_heeju'; // 기본값으로 희주 코치 ID 설정
-
     if (adminUser.admin_role === 'coach') {
-      console.log('adminUser.id', adminUser.id);
       const { data: coach, error: coachError } = await supabase
         .from('coaches')
         .select('id')
@@ -40,20 +36,10 @@ export async function GET() {
         throw coachError;
       }
 
-      coachId = coach.id;
-    }
-    // role이 'developer'나 'system_admin'이 아닌 경우 접근 거부
-    else if (!['developer', 'system_admin'].includes(adminUser.admin_role)) {
-      return NextResponse.json(
-        { error: 'Unauthorized access' },
-        { status: 403 }
-      );
-    }
-
-    const { data: challengeData, error } = await supabase
-      .from('challenge_coaches')
-      .select(
-        `
+      const { data: challengeData, error } = await supabase
+        .from('challenge_coaches')
+        .select(
+          `
         *,
         challenges!challenge_id (
           id,
@@ -91,16 +77,17 @@ export async function GET() {
           )
         )
       `
-      )
-      .eq('coach_id', coachId);
-    console.log(coachId);
-    if (error) {
-      throw error;
+        )
+        .eq('coach_id', coach.id);
+
+      if (error) {
+        throw error;
+      }
+
+      //console.log(challengeData);
+
+      return NextResponse.json(challengeData);
     }
-
-    //console.log(challengeData);
-
-    return NextResponse.json(challengeData);
   } catch (error) {
     console.error('Error fetching Data:', error);
     return NextResponse.json(

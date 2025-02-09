@@ -1,25 +1,23 @@
 import Image from 'next/image';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 interface TextBoxProps {
   title: string;
-  value?: string;
+  value?: string; // 코치 피드백용
   placeholder?: string;
-  content?: string;
   button1?: string;
   button2?: string;
   svg1: string;
   svg2?: string;
-  onClick1?: () => void;
-  onClick2?: () => void;
-  onModalClick?: () => void;
-  onModalClose?: () => void;
+  onClick1?: () => void; // AI 생성 버튼용
+  onClick2?: () => void; // 복사 버튼용
+  onSave?: (feedback: string, date: string) => Promise<void>;
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   Btn1className?: string;
   Btn2className?: string;
   readOnly?: boolean;
-  isModal?: boolean;
   copyIcon?: boolean;
+  isFeedbackMode?: boolean; // 코치 피드백 모드인지 구분
 }
 
 const TextBox = ({
@@ -32,61 +30,63 @@ const TextBox = ({
   svg2,
   onClick1,
   onClick2,
-  onModalClick,
-  onModalClose,
   onChange,
   Btn1className,
   Btn2className,
   readOnly = false,
-  isModal = false,
   copyIcon,
+  onSave,
+  isFeedbackMode,
 }: TextBoxProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [copyMessage, setCopyMessage] = useState<boolean>(false);
+  const [feedback, setFeedback] = useState(value || '');
+
+  useEffect(() => {
+    if (value !== undefined) {
+      setFeedback(value);
+    }
+  }, [value]);
+
+  const handleSave = async () => {
+    if (onSave && value) {
+      try {
+        await onSave(feedback, value);
+        console.log('Feedback saved successfully');
+      } catch (error) {
+        console.error('Failed to save feedback:', error);
+      }
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (isFeedbackMode) {
+      console.log('isFeedbackMode', isFeedbackMode);
+      handleSave();
+    } else {
+      onClick1?.();
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setFeedback(newValue);
+    onChange?.(e);
+  };
 
   const handleCopy = async () => {
     if (textareaRef.current) {
       try {
         await navigator.clipboard.writeText(textareaRef.current.value);
-        setCopyMessage(true);
+        setCopyMessage(true); // "텍스트가 복사되었습니다" 메시지 표시
         setTimeout(() => {
-          setCopyMessage(false);
+          setCopyMessage(false); // 5초 후 메시지 숨김
         }, 5000);
       } catch (err) {
         console.error('복사 실패:', err);
       }
     }
   };
-
-  if (isModal) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-white rounded-lg p-6 w-[90%] max-w-[500px] relative">
-          <h4 className="text-xl font-semibold mb-4">{title} 코멘트 달기</h4>
-          <textarea
-            placeholder={placeholder}
-            className={`border p-2 w-full rounded-md text-base h-[8rem]`}
-          />
-          <div className="flex justify-end gap-2 mt-4">
-            <button
-              className="bg-[#FF9257] text-white rounded-md py-2 px-4"
-              onClick={onModalClick}
-            >
-              {button1}
-            </button>
-            {button2 && (
-              <button
-                className={`bg-gray-500 text-white rounded-md py-2 px-4`}
-                onClick={onModalClose}
-              >
-                {button2}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mt-[2rem] p-[1rem] border rounded-md relative lg:w-[48rem] lg:h-[30rem]">
@@ -105,8 +105,8 @@ const TextBox = ({
       {copyIcon && (
         <div
           className={`absolute top-[0.5rem] left-[10rem] bg-green-100 text-green-800 text-1-500 p-[0.5rem] rounded-[0.5rem] 
-        transform transition-opacity duration-500 ease-in-out
-        ${copyMessage ? 'opacity-100' : 'opacity-0'}`}
+          transform transition-opacity duration-500 ease-in-out
+          ${copyMessage ? 'opacity-100' : 'opacity-0'}`}
         >
           텍스트가 복사되었습니다.
         </div>
@@ -116,24 +116,24 @@ const TextBox = ({
         <textarea
           ref={textareaRef}
           placeholder={placeholder}
-          value={value}
+          value={isFeedbackMode ? feedback : value}
           className={`border p-2 w-full rounded-md text-0.875-400 h-[20rem] ${
             readOnly ? 'bg-gray-100 cursor-not-allowed' : ''
           }`}
           readOnly={readOnly}
-          onChange={onChange}
+          onChange={handleChange}
         />
         <div className="flex gap-[1rem] w-[19.625rem]">
           <div className="flex relative sm:justify-center w-full justify-end">
             <button
-              className={`${Btn1className} rounded-md  text-0.875-400 mt-[0.5rem] lg:w-[9.3125rem] sm:w-full h-[2.5rem]`}
-              onClick={onClick1}
+              className={`${Btn1className} rounded-md text-0.875-400 mt-[0.5rem] lg:w-[9.3125rem] sm:w-full h-[2.5rem]`}
+              onClick={handleButtonClick}
             >
               {button1}
             </button>
             <Image
               src={svg1}
-              alt="copy icon"
+              alt="icon"
               width={17}
               height={17}
               className="absolute top-[1.2rem] right-[6rem] sm:left-[2.4rem] w-4 h-4"
@@ -142,7 +142,7 @@ const TextBox = ({
           {button2 && (
             <div className="flex relative justify-center w-full">
               <button
-                className={`${Btn2className} rounded-md  text-0.875-400 mt-[0.5rem] w-[9.3125rem] h-[2.5rem]`}
+                className={`${Btn2className} rounded-md text-0.875-400 mt-[0.5rem] w-[9.3125rem] h-[2.5rem]`}
                 onClick={onClick2}
               >
                 {button2}
@@ -150,7 +150,7 @@ const TextBox = ({
               {svg2 && (
                 <Image
                   src={svg2}
-                  alt="copy icon"
+                  alt="icon"
                   width={17}
                   height={17}
                   className="absolute top-[1.2rem] left-[2.4rem] w-4 h-4"

@@ -12,6 +12,7 @@ import Calendar from '@/components/input/calendar';
 import { DailyMealData, UserData } from '@/types/dietItemContainerTypes';
 import calendarUtils from '@/components/utils/calendarUtils';
 import DateInput from '@/components/input/dateInput';
+import { useFeedback } from '@/components/hooks/useFeedback';
 
 const getAIFeedback = (user_id: string, date: string) => {
   return AI_Feedback.find(
@@ -39,11 +40,16 @@ type PageParams = {
 // };
 
 export default function SelectedDate() {
+  const { saveFeedback } = useFeedback();
   const params = useParams() as PageParams;
+  const [feedbacksByDate, setFeedbacksByDate] = useState<{
+    [key: string]: string;
+  }>({});
+
   const [isDisable, setIsDisable] = useState(false);
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
-  const [coachFeedback, setCoachFeedback] = useState('');
+  //  const [coachFeedback, setCoachFeedback] = useState('');
   const [challengeTitle, setChallengeTitle] = useState('');
   const [recordDate, setRecordDate] = useState('');
   const [userData, setUserData] = useState({
@@ -87,16 +93,83 @@ export default function SelectedDate() {
       supplement: { description: '', mealPhotos: [], updatedAt: '' },
     },
     feedbacks: {
-      coachFeedback: '',
-      aiFeedback: '',
+      coach_feedback: '',
+      ai_feedback: '',
     },
   };
+
+  const handleSaveFeedback = async (feedback: string, date: string) => {
+    try {
+      if (!recordDate) {
+        console.error('No record date selected');
+        return;
+      }
+
+      const currentChallenge = challenges.find(
+        (challenge) => challenge.challenge_id === selectedChallengeId
+      );
+
+      if (!currentChallenge) {
+        console.error('Challenge not found');
+        return;
+      }
+
+      const participant =
+        currentChallenge.challenges.challenge_participants.find(
+          (participant) => participant.users.id === params.dailyRecordId
+        );
+
+      if (!participant) {
+        console.error('Participant not found');
+        return;
+      }
+
+      const dailyRecord = participant.daily_records.find(
+        (record) => record.record_date === recordDate
+      );
+
+      if (!dailyRecord) {
+        console.error('Daily record not found');
+        return;
+      }
+
+      const response = await saveFeedback({
+        daily_record_id: dailyRecord.id,
+        coach_feedback: feedback,
+      });
+
+      // 전체 meals 데이터 업데이트
+      const updatedAllMeals = allDailyMeals.map((meal) =>
+        meal.recordDate === recordDate
+          ? {
+              ...meal,
+              feedbacks: {
+                ...meal.feedbacks,
+                coach_feedback: feedback,
+              },
+            }
+          : meal
+      );
+      setAllDailyMeals(updatedAllMeals);
+
+      // recordDate는 현재 선택된 날짜로 유지
+      const currentDate = recordDate;
+
+      // 현재 날짜에 해당하는 데이터 필터링
+      const updatedFilteredMeals = updatedAllMeals.filter(
+        (meal) => meal.recordDate === currentDate
+      );
+      setFilteredDailyMeals(updatedFilteredMeals);
+
+      console.log('Feedback saved successfully:', response);
+    } catch (error) {
+      console.error('Failed to save feedback:', error);
+    }
+  };
+
   // 달력 날짜가 변경될 때마다 해당 월의 기록만 필터링하는 함수
   const filterMealsByMonth = (date: Date) => {
     if (!challengePeriods.start_date || !challengePeriods.end_date) return;
-    //console.log('Filtering for date:', date);
-    //console.log('Challenge periods:', challengePeriods);
-    //console.log('All meals:', allDailyMeals);
 
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -168,8 +241,6 @@ export default function SelectedDate() {
       (challenge) => challenge.challenges.id === challengeId
     );
 
-    // console.log('Found Challenge:', selectedChallenge);
-
     if (selectedChallenge) {
       setChallengeTitle(selectedChallenge.challenges.title);
     }
@@ -186,6 +257,13 @@ export default function SelectedDate() {
   //     setVisibleItems((prev) => prev + 2);
   //   }
   // };
+
+  const handleFeedbackChange = (date: string, feedback: string) => {
+    setFeedbacksByDate((prev) => ({
+      ...prev,
+      [date]: feedback,
+    }));
+  };
 
   const handleGenerateAnalyse = () => {
     setIsDisable(true);
@@ -273,9 +351,9 @@ export default function SelectedDate() {
                 recordDate: date,
                 meals: {},
                 feedbacks: {
-                  coachFeedback:
+                  coach_feedback:
                     meal.daily_records.feedbacks?.coach_feedback || '',
-                  aiFeedback: meal.daily_records.feedbacks?.ai_feedback || '',
+                  ai_feedback: meal.daily_records.feedbacks?.ai_feedback || '',
                 },
               };
             }
@@ -390,11 +468,20 @@ export default function SelectedDate() {
     };
   }, [challengePeriods, currentDate, allDailyMeals]);
 
-  //console.log('challengePeriods', challengePeriods);
+  useEffect(() => {
+    if (recordDate) {
+      const filtered = allDailyMeals.filter((meal) => {
+        return (
+          meal.recordDate === recordDate &&
+          new Date(meal.recordDate) >= new Date(challengePeriods.start_date) &&
+          new Date(meal.recordDate) <= new Date(challengePeriods.end_date)
+        );
+      });
+      setFilteredDailyMeals(filtered);
+    }
+  }, [recordDate, allDailyMeals, challengePeriods]);
 
-  const handleFeedbackChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCoachFeedback(e.target.value);
-  };
+  //console.log('challengePeriods', challengePeriods);
 
   const currentChallengeIndex = challenges.find(
     (challenge) => challenge.challenge_id === selectedChallengeId
@@ -407,8 +494,24 @@ export default function SelectedDate() {
 
   const displayMeals = filteredDailyMeals.length
     ? filteredDailyMeals
-    : [emptyDailyMeal];
-
+    : recordDate
+    ? [
+        {
+          recordDate: recordDate,
+          meals: {
+            breakfast: { description: '', mealPhotos: [], updatedAt: '' },
+            lunch: { description: '', mealPhotos: [], updatedAt: '' },
+            dinner: { description: '', mealPhotos: [], updatedAt: '' },
+            snack: { description: '', mealPhotos: [], updatedAt: '' },
+            supplement: { description: '', mealPhotos: [], updatedAt: '' },
+          },
+          feedbacks: {
+            coach_feedback: '',
+            ai_feedback: '',
+          },
+        },
+      ]
+    : [];
   const calculateChallengeMetrics = () => {
     // 챌린지 전체 일수 계산
     const startDate = new Date(challengePeriods.start_date);
@@ -453,6 +556,8 @@ export default function SelectedDate() {
     () => calculateChallengeMetrics(),
     [allDailyMeals, challengePeriods]
   );
+
+  //console.log('challenges', challenges);
 
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
@@ -580,7 +685,7 @@ export default function SelectedDate() {
             <div className="flex items-center justify-around sm:flex-col w-full">
               <TextBox
                 title="AI 분석 결과"
-                content={dailyMeal.feedbacks.aiFeedback}
+                value={dailyMeal.feedbacks.ai_feedback}
                 placeholder="결과생성 버튼을 눌러주세요."
                 button1="생성"
                 button2="복사"
@@ -593,15 +698,24 @@ export default function SelectedDate() {
                 } bg-[#F89A1B] text-white`}
                 Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
               />
+
               <TextBox
                 title="코치 피드백"
-                value={dailyMeal.feedbacks.coachFeedback}
+                value={
+                  feedbacksByDate[dailyMeal.recordDate] ||
+                  dailyMeal.feedbacks.coach_feedback
+                }
                 placeholder="피드백을 작성하세요."
                 button1="남기기"
-                Btn1className="bg-[#48BA5D] text-white "
+                Btn1className="bg-[#48BA5D] text-white"
                 svg1="/svg/send.svg"
-                onClick2={() => console.log('피드백 전송')}
-                onChange={handleFeedbackChange}
+                onChange={(e) =>
+                  handleFeedbackChange(dailyMeal.recordDate, e.target.value)
+                }
+                onSave={(feedback) => {
+                  return handleSaveFeedback(feedback, dailyMeal.recordDate);
+                }}
+                isFeedbackMode={true}
                 copyIcon
               />
             </div>
