@@ -11,7 +11,7 @@ interface TextBoxProps {
   svg2?: string;
   onClick1?: () => void; // AI 생성 버튼용
   onClick2?: () => void; // 복사 버튼용
-  onSave?: (feedback: string) => Promise<void>; // 코치 피드백 저장용
+  onSave?: (feedback: string, date: string) => Promise<void>;
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   Btn1className?: string;
   Btn2className?: string;
@@ -49,9 +49,9 @@ const TextBox = ({
   }, [value]);
 
   const handleSave = async () => {
-    if (onSave) {
+    if (onSave && value) {
       try {
-        await onSave(feedback);
+        await onSave(feedback, value);
         console.log('Feedback saved successfully');
       } catch (error) {
         console.error('Failed to save feedback:', error);

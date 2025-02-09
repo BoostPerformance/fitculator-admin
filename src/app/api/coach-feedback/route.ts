@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    console.log('coach-feedback body', body);
+    //console.log('coach-feedback body', body);
 
     if (!body.daily_record_id) {
       return NextResponse.json(

@@ -100,7 +100,11 @@ export default function SelectedDate() {
 
   const handleSaveFeedback = async (feedback: string, date: string) => {
     try {
-      // 현재 선택된 challenge에서 해당 날짜의 daily_record id 찾기
+      if (!recordDate) {
+        console.error('No record date selected');
+        return;
+      }
+
       const currentChallenge = challenges.find(
         (challenge) => challenge.challenge_id === selectedChallengeId
       );
@@ -121,7 +125,7 @@ export default function SelectedDate() {
       }
 
       const dailyRecord = participant.daily_records.find(
-        (record) => record.record_date === date // recordDate 대신 파라미터로 받은 date 사용
+        (record) => record.record_date === recordDate
       );
 
       if (!dailyRecord) {
@@ -134,52 +138,38 @@ export default function SelectedDate() {
         coach_feedback: feedback,
       });
 
-      // 상태 업데이트
-      setFilteredDailyMeals((prevMeals) =>
-        prevMeals.map((meal) =>
-          meal.recordDate === date
-            ? {
-                ...meal,
-                feedbacks: {
-                  ...meal.feedbacks,
-                  coach_feedback: feedback,
-                },
-              }
-            : meal
-        )
+      // 전체 meals 데이터 업데이트
+      const updatedAllMeals = allDailyMeals.map((meal) =>
+        meal.recordDate === recordDate
+          ? {
+              ...meal,
+              feedbacks: {
+                ...meal.feedbacks,
+                coach_feedback: feedback,
+              },
+            }
+          : meal
       );
+      setAllDailyMeals(updatedAllMeals);
 
-      setAllDailyMeals((prevMeals) =>
-        prevMeals.map((meal) =>
-          meal.recordDate === date
-            ? {
-                ...meal,
-                feedbacks: {
-                  ...meal.feedbacks,
-                  coach_feedback: feedback,
-                },
-              }
-            : meal
-        )
+      // recordDate는 현재 선택된 날짜로 유지
+      const currentDate = recordDate;
+
+      // 현재 날짜에 해당하는 데이터 필터링
+      const updatedFilteredMeals = updatedAllMeals.filter(
+        (meal) => meal.recordDate === currentDate
       );
-
-      // 피드백 저장 후 해당 날짜의 상태 초기화
-      setFeedbacksByDate((prev) => ({
-        ...prev,
-        [date]: feedback,
-      }));
+      setFilteredDailyMeals(updatedFilteredMeals);
 
       console.log('Feedback saved successfully:', response);
     } catch (error) {
       console.error('Failed to save feedback:', error);
     }
   };
+
   // 달력 날짜가 변경될 때마다 해당 월의 기록만 필터링하는 함수
   const filterMealsByMonth = (date: Date) => {
     if (!challengePeriods.start_date || !challengePeriods.end_date) return;
-    //console.log('Filtering for date:', date);
-    //console.log('Challenge periods:', challengePeriods);
-    //console.log('All meals:', allDailyMeals);
 
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -478,6 +468,19 @@ export default function SelectedDate() {
     };
   }, [challengePeriods, currentDate, allDailyMeals]);
 
+  useEffect(() => {
+    if (recordDate) {
+      const filtered = allDailyMeals.filter((meal) => {
+        return (
+          meal.recordDate === recordDate &&
+          new Date(meal.recordDate) >= new Date(challengePeriods.start_date) &&
+          new Date(meal.recordDate) <= new Date(challengePeriods.end_date)
+        );
+      });
+      setFilteredDailyMeals(filtered);
+    }
+  }, [recordDate, allDailyMeals, challengePeriods]);
+
   //console.log('challengePeriods', challengePeriods);
 
   const currentChallengeIndex = challenges.find(
@@ -491,8 +494,24 @@ export default function SelectedDate() {
 
   const displayMeals = filteredDailyMeals.length
     ? filteredDailyMeals
-    : [emptyDailyMeal];
-
+    : recordDate
+    ? [
+        {
+          recordDate: recordDate,
+          meals: {
+            breakfast: { description: '', mealPhotos: [], updatedAt: '' },
+            lunch: { description: '', mealPhotos: [], updatedAt: '' },
+            dinner: { description: '', mealPhotos: [], updatedAt: '' },
+            snack: { description: '', mealPhotos: [], updatedAt: '' },
+            supplement: { description: '', mealPhotos: [], updatedAt: '' },
+          },
+          feedbacks: {
+            coach_feedback: '',
+            ai_feedback: '',
+          },
+        },
+      ]
+    : [];
   const calculateChallengeMetrics = () => {
     // 챌린지 전체 일수 계산
     const startDate = new Date(challengePeriods.start_date);
@@ -538,7 +557,7 @@ export default function SelectedDate() {
     [allDailyMeals, challengePeriods]
   );
 
-  console.log('challenges', challenges);
+  //console.log('challenges', challenges);
 
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
@@ -693,9 +712,9 @@ export default function SelectedDate() {
                 onChange={(e) =>
                   handleFeedbackChange(dailyMeal.recordDate, e.target.value)
                 }
-                onSave={(feedback) =>
-                  handleSaveFeedback(feedback, dailyMeal.recordDate)
-                }
+                onSave={(feedback) => {
+                  return handleSaveFeedback(feedback, dailyMeal.recordDate);
+                }}
                 isFeedbackMode={true}
                 copyIcon
               />
