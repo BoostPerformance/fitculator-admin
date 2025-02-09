@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DietTableProps, ChallengeParticipant } from '@/types/userPageTypes';
 import Modal from '../layout/modal';
 
@@ -7,7 +7,13 @@ const DietTable: React.FC<DietTableProps> = ({
   dailyRecordsData,
   coachMemo,
 }) => {
+  const [participantMemos, setParticipantMemos] = useState<{
+    [key: string]: string;
+  }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] =
+    useState<ChallengeParticipant | null>(null);
+
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
     const today = new Date();
     const startDate = new Date(participant.challenges.start_date);
@@ -54,7 +60,7 @@ const DietTable: React.FC<DietTableProps> = ({
 
     const groupedData = new Map();
 
-    records.forEach((record) => {
+    const recordData = records.forEach((record) => {
       const participantId = record.id;
       if (!groupedData.has(participantId)) {
         groupedData.set(participantId, {
@@ -62,16 +68,38 @@ const DietTable: React.FC<DietTableProps> = ({
           feedbackRatio: calculateFeedbackRatio(record),
         });
       }
-
-      //console.log('records', records);
     });
+    console.log('recordData', recordData);
 
     return Array.from(groupedData.values());
   };
 
-  const handleModalOpen = () => {
-    setIsModalOpen(!isModalOpen);
+  useEffect(() => {
+    console.log('participantMemos updated:', participantMemos);
+  }, [participantMemos]);
+
+  const handleCoachMemoSave = (memo: string, participantId: string) => {
+    console.log('Saving memo:', {
+      memo,
+      participantId,
+      currentMemos: participantMemos,
+    });
+
+    setParticipantMemos((prev) => {
+      const newMemos = {
+        ...prev,
+        [participantId]: memo,
+      };
+      console.log('New participantMemos:', newMemos);
+      return newMemos;
+    });
   };
+
+  const handleModalOpen = (participant: ChallengeParticipant) => {
+    setSelectedParticipant(participant);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="mt-[1.4rem]">
       <table className="table-auto w-full bg-white shadow-md rounded-md">
@@ -129,28 +157,40 @@ const DietTable: React.FC<DietTableProps> = ({
           </tr>
         </thead>
         <tbody className="text-center ">
-          {participants(dailyRecordsData).map((data, index) => (
-            <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC] ">
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
-                {data.participant.users?.display_name}
-              </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {data.participant.users?.name}
-              </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 ">
-                <button onClick={handleModalOpen}>
-                  {coachMemo || '코치메모'}{' '}
-                </button>
-              </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {data.feedbackRatio.formatted}
-              </td>
-            </tr>
-          ))}
+          {participants(dailyRecordsData).map((data, index) => {
+            console.log('participantMemos', participantMemos);
+            return (
+              <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC] ">
+                <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
+                  {data.participant.users?.display_name}
+                </td>
+                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                  {data.participant.users?.name}
+                </td>
+                <td className="p-[1rem] sm:text-0.625-500 sm:p-0 ">
+                  <button onClick={() => handleModalOpen(data.participant)}>
+                    {participantMemos[data.participant.users.id] || '코치메모'}
+                  </button>
+                </td>
+                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                  {data.feedbackRatio.formatted}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <div className="absolute items-center justify-center ">
-        {isModalOpen && <Modal onClose={() => setIsModalOpen(false)} />}
+        {isModalOpen && selectedParticipant && (
+          <Modal
+            onClose={() => setIsModalOpen(false)}
+            participantId={selectedParticipant.id}
+            challengeId={selectedParticipant.challenges.id}
+            onSave={(memo) =>
+              handleCoachMemoSave(memo, selectedParticipant.users.id)
+            }
+          />
+        )}
       </div>
     </div>
   );

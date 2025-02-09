@@ -38,6 +38,7 @@ export async function GET() {
       feedbacks!daily_record_id (
         id,
         coach_feedback,
+        coach_memo,
         created_at
       )
     )
