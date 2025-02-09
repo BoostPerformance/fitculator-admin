@@ -24,6 +24,7 @@ export interface CoachData {
 }
 
 export interface Challenges {
+  challenge_id: string;
   challenges: {
     id: string;
     title: string;
@@ -61,4 +62,5 @@ export interface ChallengeParticipant {
 
 export interface DietTableProps {
   dailyRecordsData: ChallengeParticipant[];
+  coachMemo?: string;
 }

@@ -11,6 +11,7 @@ interface MainContentProps {
   selectedChallengeId: string;
   challenges: Challenges[];
   isMobile: boolean;
+  coachMemo?: string;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -19,6 +20,7 @@ const MainContent: React.FC<MainContentProps> = ({
   selectedChallengeId,
   challenges,
   isMobile,
+  coachMemo,
 }) => {
   return (
     <div className="flex-1 overflow-auto">
@@ -36,7 +38,7 @@ const MainContent: React.FC<MainContentProps> = ({
         <ResponsiveImages isMobile={isMobile} />
 
         <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1">
-          <DietTable dailyRecordsData={dailyRecords} />
+          <DietTable dailyRecordsData={dailyRecords} coachMemo={coachMemo} />
         </div>
       </div>
     </div>

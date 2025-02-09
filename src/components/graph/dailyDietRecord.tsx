@@ -61,9 +61,8 @@ const DailyDietRecord = ({ activities }: any) => {
         일별 식단 기록 현황
       </h2>
 
-      <div className="lg:min-w-[48rem] sm:min-w-full md:min-w-[38rem]">
+      <div className="w-full">
         <div className="flex flex-col gap-1 ">
-          {/* Days header and Upload status */}
           <div className="flex items-center w-full mb-4 ">
             <div className="lg:w-[5rem] sm:w-16 md:w-[2rem] shrink-0 sm:hidden inline" />
             <div className="flex flex-1 items-start sm:pl-[2rem] sm:gap-[4rem] lg:gap-[3rem]">
@@ -85,7 +84,7 @@ const DailyDietRecord = ({ activities }: any) => {
             return (
               <div
                 key={index}
-                className="flex lg:justify-start sm:justify-center w-full pb-8 sm:items-start   sm:gap-2 "
+                className="flex lg:justify-start sm:justify-center w-full pb-8 sm:items-start sm:gap-2 "
               >
                 <div className="w-[5rem] sm:w-[3rem]">
                   <span className="text-gray-700 sm:text-0.75-500 md:text-0.75-500">
@@ -113,7 +112,7 @@ const DailyDietRecord = ({ activities }: any) => {
                       </div>
 
                       <div className="flex flex-1 items-center gap-2">
-                        <div className="h-3 mt-[1rem] bg-orange-500 rounded-full w-[20rem] sm:w-[13.5rem] sm:mt-[1rem] md:mt-[1rem] md:w-[16.5rem]" />
+                        <div className="h-3 mt-[1rem] bg-orange-500 rounded-full w-[17rem] sm:w-[13.5rem] sm:mt-[1rem] md:mt-[1rem] md:w-[16.5rem]" />
                       </div>
                     </div>
                   </div>

@@ -9,7 +9,7 @@ interface GraphSectionProps {
 
 const GraphSection: React.FC<GraphSectionProps> = ({ activities }) => {
   return (
-    <div className="dark:bg-blue-4 grid grid-cols-7 gap-[1rem] my-6 sm:flex sm:flex-col md:flex-col md:flex md:px-[2rem]">
+    <div className="dark:bg-blue-4 grid grid-cols-7 gap-[1rem] my-6 sm:grid-cols-1 md:grid-cols-1 md:px-[2rem] grid-rows-1">
       <TrafficSourceChart />
       <DailyDietRecord activities={activities} />
       <WorkoutLeaderboeard />

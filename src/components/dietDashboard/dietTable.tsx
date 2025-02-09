@@ -1,7 +1,13 @@
 import Image from 'next/image';
+import { useState } from 'react';
 import { DietTableProps, ChallengeParticipant } from '@/types/userPageTypes';
+import Modal from '../layout/modal';
 
-const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
+const DietTable: React.FC<DietTableProps> = ({
+  dailyRecordsData,
+  coachMemo,
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
     const today = new Date();
     const startDate = new Date(participant.challenges.start_date);
@@ -63,14 +69,17 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
     return Array.from(groupedData.values());
   };
 
+  const handleModalOpen = () => {
+    setIsModalOpen(!isModalOpen);
+  };
   return (
     <div className="mt-[1.4rem]">
       <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
           <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
-            <th className="p-[1rem] w-[10%] sm:p-0 sm:pt-[1.4rem]">
+            <th className="p-[1rem] lg:w-[15%] sm:w-[18%] sm:p-0 sm:pt-[1.4rem]">
               <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.5rem] sm:text-0.75-500 sm:p-0">
+                <div className="lg:pl-[5.2rem] sm:text-0.75-500 sm:p-0">
                   닉네임
                 </div>
                 <button>
@@ -83,9 +92,9 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
                 </button>
               </div>
             </th>
-            <th className="p-[1rem] w-[10%] sm:p-0 sm:pt-[1.4rem]">
+            <th className="p-[1rem] lg:w-[15%] sm:w-[18%]  sm:p-0 sm:pt-[1.4rem]">
               <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+                <div className="lg:pl-[5.2rem] sm:text-0.75-500 sm:p-0">
                   이름
                 </div>
                 <button>
@@ -129,11 +138,9 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
                 {data.participant.users?.name}
               </td>
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0 ">
-                <input
-                  type="text"
-                  placeholder="코치메모"
-                  className="sm:text-center placeholder:text-center"
-                />
+                <button onClick={handleModalOpen}>
+                  {coachMemo || '코치메모'}{' '}
+                </button>
               </td>
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
                 {data.feedbackRatio.formatted}
@@ -142,6 +149,9 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
           ))}
         </tbody>
       </table>
+      <div className="absolute items-center justify-center ">
+        {isModalOpen && <Modal onClose={() => setIsModalOpen(false)} />}
+      </div>
     </div>
   );
 };
