@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    console.log('coach-feedback body', body);
+    //console.log('coach-feedback body', body);
 
     if (!body.daily_record_id) {
       return NextResponse.json(
@@ -20,39 +20,37 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    // 기존 피드백 확인
-    const existingFeedback = await prisma.feedbacks.findUnique({
-      where: {
-        daily_record_id: body.daily_record_id,
-      },
-    });
-
     let result;
 
-    if (existingFeedback) {
-      // 기존 피드백 수정
-      result = await prisma.feedbacks.update({
+    const feedback = await prisma.$transaction(async (tx) => {
+      const existingFeedback = await tx.feedbacks.findUnique({
         where: {
           daily_record_id: body.daily_record_id,
         },
-        data: {
-          coach_feedback: body.coach_feedback,
-          updated_at: new Date(),
-        },
       });
-    } else {
-      // 새 피드백 생성
-      result = await prisma.feedbacks.create({
-        data: {
-          id: nanoid(),
-          daily_record_id: body.daily_record_id,
-          coach_feedback: body.coach_feedback,
-          ai_feedback: '',
-          updated_at: new Date(),
-        },
-      });
-    }
+
+      if (existingFeedback) {
+        return tx.feedbacks.update({
+          where: {
+            daily_record_id: body.daily_record_id,
+          },
+          data: {
+            coach_feedback: body.coach_feedback,
+            updated_at: new Date(),
+          },
+        });
+      } else {
+        return tx.feedbacks.create({
+          data: {
+            id: nanoid(),
+            daily_record_id: body.daily_record_id,
+            coach_feedback: body.coach_feedback,
+            ai_feedback: '',
+            updated_at: new Date(),
+          },
+        });
+      }
+    });
 
     return NextResponse.json(result);
   } catch (error) {
