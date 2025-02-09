@@ -86,10 +86,9 @@ const handler = NextAuth({
           token.role = adminUser.admin_role;
           token.organization_id = adminUser.organization_id;
           token.admin_user_id = adminUser.id;
-
-          // console.log(adminUser, token);
         }
       }
+      // console.log('token', token);
 
       return token;
     },

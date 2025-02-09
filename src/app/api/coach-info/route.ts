@@ -1,15 +1,43 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getServerSession } from 'next-auth';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ROLE_KEY!
 );
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // 먼저 코치 기본 정보 조회
-    const { data: coach, error: error } = await supabase
+    const session = await getServerSession();
+    console.log('Current session email:', session?.user?.email);
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    const { data: adminUser, error: adminError } = await supabase
+      .from('admin_users')
+      .select('id, admin_role')
+      .eq('email', session.user.email)
+      .single();
+
+    if (adminError) {
+      throw adminError;
+    }
+
+    // 개발자나 시스템 관리자인 경우 URL 파라미터에서 id를 가져올 수 있음
+    const targetAdminId = ['developer', 'system_admin'].includes(
+      adminUser.admin_role
+    )
+      ? 'admin_heeju'
+      : adminUser.id;
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    const { data: coach, error: coachError } = await supabase
       .from('coaches')
       .select(
         `
@@ -32,8 +60,12 @@ export async function GET() {
        )
      `
       )
-      .eq('admin_user_id', 'admin_002')
+      .eq('admin_user_id', targetAdminId)
       .single();
+
+    if (coachError) {
+      throw coachError;
+    }
 
     // 받아온 데이터 구조 변환
     const formattedData = {
@@ -54,10 +86,6 @@ export async function GET() {
     };
     // console.log(coach);
     //console.log(formattedData);
-
-    if (error) {
-      throw error;
-    }
 
     return NextResponse.json(formattedData);
   } catch (error) {

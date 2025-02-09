@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getServerSession } from 'next-auth';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,11 +9,17 @@ const supabase = createClient(
 
 export async function GET() {
   try {
-    // 먼저 코치 기본 정보 조회
+    const session = await getServerSession();
+    // console.log(session);
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
     const { data: adminUser, error: error } = await supabase
       .from('admin_users')
       .select('*')
-      .eq('id', 'admin_heeju')
+      .eq('email', session.user.email)
       .single();
 
     // 받아온 데이터 구조 변환
@@ -20,13 +27,25 @@ export async function GET() {
     // console.log(adminUser);
 
     // console.log(formattedData);
+
+    //console.log('Query result:', { adminUser, error });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!adminUser) {
+      return NextResponse.json(
+        {
+          error: 'Admin user not found',
+        },
+        { status: 404 }
+      );
+    }
     const coachInfo = {
       admin_role: adminUser?.admin_role,
       display_name: adminUser?.display_name,
     };
-    if (error) {
-      throw error;
-    }
 
     return NextResponse.json(coachInfo);
   } catch (error) {
