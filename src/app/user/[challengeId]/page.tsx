@@ -257,6 +257,8 @@ export default function User() {
             <TrafficSourceChart />
             <DailyDietRecord activities={filteredDailyRecordsbyId} />
             <WorkoutLeaderboeard />
+          </div>
+          <div>
             <Image
               src={
                 isMobile
