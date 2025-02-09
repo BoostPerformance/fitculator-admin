@@ -216,16 +216,16 @@ export default function User() {
           />
           <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
             <TotalFeedbackCounts
-              counts="10"
-              total="30"
+              counts="0"
+              total="0"
               title="진행현황"
               borderColor="border-green"
               textColor="text-green"
               grids="col-span-2"
             />
             <TotalFeedbackCounts
-              counts={'10'}
-              total={'30'}
+              counts={'0'}
+              total={'0'}
               title={'오늘 운동 업로드 멤버'}
               borderColor="border-blue-5"
               textColor="text-blue-5"
