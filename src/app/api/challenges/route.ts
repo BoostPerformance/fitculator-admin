@@ -29,7 +29,6 @@ export async function GET() {
     let coachId = 'coach_heeju'; // 기본값으로 희주 코치 ID 설정
 
     if (adminUser.admin_role === 'coach') {
-      console.log('adminUser.id', adminUser.id);
       const { data: coach, error: coachError } = await supabase
         .from('coaches')
         .select('id')
@@ -41,9 +40,7 @@ export async function GET() {
       }
 
       coachId = coach.id;
-    }
-    // role이 'developer'나 'system_admin'이 아닌 경우 접근 거부
-    else if (!['developer', 'system_admin'].includes(adminUser.admin_role)) {
+    } else if (!['developer', 'system_admin'].includes(adminUser.admin_role)) {
       return NextResponse.json(
         { error: 'Unauthorized access' },
         { status: 403 }

@@ -10,7 +10,7 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession();
-    console.log('Current session email:', session?.user?.email);
+    //console.log('Current session email:', session?.user?.email);
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -27,11 +27,9 @@ export async function GET(request: NextRequest) {
     }
 
     // 개발자나 시스템 관리자인 경우 URL 파라미터에서 id를 가져올 수 있음
-    const targetAdminId = ['developer', 'system_admin'].includes(
-      adminUser.admin_role
-    )
-      ? 'admin_heeju'
-      : adminUser.id;
+    const targetAdminId =
+      ['developer', 'system_admin'].includes(adminUser.admin_role) &&
+      adminUser.id;
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
