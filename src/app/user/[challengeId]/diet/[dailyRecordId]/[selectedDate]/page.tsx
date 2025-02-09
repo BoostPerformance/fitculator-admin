@@ -49,7 +49,7 @@ export default function SelectedDate() {
   const [isDisable, setIsDisable] = useState(false);
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
-  const [coachFeedback, setCoachFeedback] = useState('');
+  //  const [coachFeedback, setCoachFeedback] = useState('');
   const [challengeTitle, setChallengeTitle] = useState('');
   const [recordDate, setRecordDate] = useState('');
   const [userData, setUserData] = useState({

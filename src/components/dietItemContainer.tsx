@@ -83,8 +83,8 @@ export default function DietItemContainer() {
       supplement: { description: '', mealPhotos: [], updatedAt: '' },
     },
     feedbacks: {
-      coachFeedback: '',
-      aiFeedback: '',
+      coach_feedback: '',
+      ai_feedback: '',
     },
   };
   // 달력 날짜가 변경될 때마다 해당 월의 기록만 필터링하는 함수
@@ -267,9 +267,9 @@ export default function DietItemContainer() {
                 recordDate: date,
                 meals: {},
                 feedbacks: {
-                  coachFeedback:
+                  coach_feedback:
                     meal.daily_records.feedbacks?.coach_feedback || '',
-                  aiFeedback: meal.daily_records.feedbacks?.ai_feedback || '',
+                  ai_feedback: meal.daily_records.feedbacks?.ai_feedback || '',
                 },
               };
             }
@@ -564,7 +564,6 @@ export default function DietItemContainer() {
             <div className="flex items-center justify-around sm:flex-col w-full">
               <TextBox
                 title="AI 분석 결과"
-                content={dailyMeal.feedbacks.aiFeedback}
                 placeholder="결과생성 버튼을 눌러주세요."
                 button1="생성"
                 button2="복사"
@@ -579,7 +578,7 @@ export default function DietItemContainer() {
               />
               <TextBox
                 title="코치 피드백"
-                value={dailyMeal.feedbacks.coachFeedback}
+                value={dailyMeal.feedbacks.coach_feedback}
                 placeholder="피드백을 작성하세요."
                 button1="남기기"
                 Btn1className="bg-[#48BA5D] text-white "
