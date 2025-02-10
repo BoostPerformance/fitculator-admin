@@ -13,6 +13,7 @@ import {
   calculateTodayDietUploads,
   calculateTotalDietUploads,
 } from '@/components/statistics/challengeParticipantsDietStatics';
+import DailyDietRecordMobile from '@/components/graph/dailyDietRecordMobile';
 
 interface AdminUser {
   email: string;
@@ -287,6 +288,7 @@ export default function User() {
           <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:flex sm:flex-col">
             <TrafficSourceChart />
             <DailyDietRecord activities={filteredDailyRecordsbyId} />
+            <DailyDietRecordMobile activities={filteredDailyRecordsbyId} />
             <WorkoutLeaderboeard />
           </div>
           {/* <div>

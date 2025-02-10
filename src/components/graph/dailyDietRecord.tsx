@@ -45,7 +45,7 @@ const DailyDietRecord = ({ activities }: any) => {
   };
 
   return (
-    <div className="bg-white rounded-lg p-3 grid-cols-4 gap-4 col-span-2 overflow-y-auto h-[50rem]">
+    <div className="bg-white rounded-lg p-3 grid-cols-4 gap-4 col-span-2 overflow-y-auto h-[50rem] sm:hidden lg:block md:block">
       <div className="grid grid-cols-4 gap-4 ">
         {/* Header Row */}
         <div className="col-span-1 text-gray-500 text-right pr-4"></div>
