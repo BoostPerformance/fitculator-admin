@@ -15,13 +15,12 @@ const WorkoutLeaderboardItem = ({
   // const scoreValue = parseFloat(score.replace(/[^0-9.]/g, ''));
 
   // 1000을 기준으로 퍼센트 계산
-  const progressWidth = (score / 1000) * 100;
+  const progressWidth = (score / 100) * 100;
 
   return (
     <div className="flex items-center gap-4 mb-4">
       <div className="w-6">{rank}</div>
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-full bg-gray-200" />
         <span>{name}</span>
       </div>
 
@@ -34,7 +33,7 @@ const WorkoutLeaderboardItem = ({
                 : 'from-blue-400 to-blue-200'
             }  rounded-full`}
             style={{ width: `${progressWidth}%` }}
-          ></div>
+          />
           {score > 100 && (
             <Image
               src="/svg/fire.svg"

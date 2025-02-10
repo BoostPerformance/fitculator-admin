@@ -14,25 +14,16 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function TrafficSourceChart() {
   const data: ChartData<'doughnut'> = {
-    labels: [
-      '달리기',
-      '하이트',
-      '테니스',
-      '등산',
-      '사이클',
-      '수영',
-      '크로스 트레이닝',
-      '걷기',
-    ],
+    labels: ['달리기', '하이트', '테니스', '등산', '사이클', '', '', ''],
     datasets: [
       {
         data: [30, 25, 20, 15, 5, 5, 5],
         backgroundColor: [
-          '#2196F3',
-          '#F44336',
-          '#4CAF50',
-          '#795548',
-          '#00D9F1',
+          '#3FE2FF',
+          '#3E82F1',
+          '#ADB9FF',
+          '#7CF5DD',
+          '#3FE2FF',
           '#FF9800',
           '#03A9F4',
           '#9C27B0',
@@ -66,26 +57,6 @@ export default function TrafficSourceChart() {
     cutout: '30%',
   };
 
-  // const textCenter = {
-  //   id: 'textCenter',
-  //   beforeDraw: function (chart: any) {
-  //     const width = chart.width;
-  //     const height = chart.height;
-  //     const ctx = chart.ctx;
-
-  //     ctx.restore();
-  //     const fontSize = (height / 160).toFixed(2);
-  //     ctx.font = `${fontSize}em Arial`;
-  //     ctx.textBaseline = 'middle';
-
-  //     const text = '인기운동';
-  //     const textX = Math.round((width - ctx.measureText(text).width) / 2);
-  //     const textY = height / 2;
-
-  //     ctx.fillText(text, textX, textY);
-  //     ctx.save();
-  //   },
-  // };
   const exerciseList = [
     { name: '달리기', percentage: '30%', rank: 1 },
     { name: '주짓수', percentage: '25%', rank: 2 },
