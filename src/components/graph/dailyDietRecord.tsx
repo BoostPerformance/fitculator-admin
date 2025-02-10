@@ -16,7 +16,7 @@ interface ChallengeParticipant {
   users: {
     id: string;
     name: string;
-    username: string;
+    display_name: string;
   };
   challenges: {
     id: string;
@@ -45,92 +45,73 @@ const DailyDietRecord = ({ activities }: any) => {
   };
 
   return (
-    <div className="bg-white rounded-lg p-3 sm:p-1 col-span-2">
-      <h2 className="text-xl font-medium mb-6 text-gray-600">
-        일별 식단 기록 현황
-      </h2>
-
-      <div className="w-full">
-        <div className="flex flex-col gap-1 items-center">
-          <div className="flex items-center mb-4 ">
-            <div className="lg:pl-16 sm:w-16 md:w-[2rem] shrink-0 sm:hidden inline" />
-            <div className="flex flex-1 items-start sm:pl-[3.5rem] sm:gap-[4rem] lg:gap-[3rem]">
-              <div className="flex gap-2  sm:gap-[0.3rem]">
-                {days.map((day, idx) => (
-                  <div key={idx} className="w-6 text-center text-gray-500">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              <div className="text-gray-500 sm:hidden">총 업로드</div>
-            </div>
+    <div className="bg-white rounded-lg p-3 grid grid-cols-5 gap-4 col-span-2">
+      {/* Header Row */}
+      <div className="col-span-1 text-gray-500 text-right pr-4">참가자</div>
+      <div className="col-span-3 grid grid-cols-7 gap-2">
+        {days.map((day, idx) => (
+          <div key={idx} className="text-center text-gray-500">
+            {day}
           </div>
-
-          {/* Activity rows */}
-
-          {activities.map((activity: any, index: any) => {
-            const weekDates = getWeekDates(activity.challenges.start_date);
-            return (
-              <div
-                key={index}
-                className="flex lg:justify-start sm:justify-center w-full pb-8 sm:items-start sm:gap-2 "
-              >
-                <div className="w-[5rem] sm:w-[3rem]">
-                  <span className="text-gray-700 sm:text-0.75-500 md:text-0.75-500">
-                    {activity.users.name}
-                  </span>
-                </div>
-
-                <div className="flex items-start gap-[2rem] sm:gap-3 sm:w-[17rem] md:gap-2">
-                  <div>
-                    <div className="flex  flex-col md:gap-[2rem]">
-                      <div className="flex gap-[0.7rem] sm:gap-2 md:gap-[1rem] ">
-                        {weekDates.map((date, idx) => {
-                          const hasRecord = hasRecordForDate(
-                            activity.daily_records,
-                            date
-                          );
-                          return (
-                            <div
-                              key={idx}
-                              className={`w-[1.25rem] h-[1.25rem] rounded flex items-center justify-center
-                          ${hasRecord ? 'bg-[#FAAA16]' : 'bg-gray-100'}`}
-                            />
-                          );
-                        })}
-                      </div>
-
-                      <div className="flex flex-1 items-center gap-2">
-                        <div className="h-3 mt-[1rem] bg-orange-500 rounded-full w-[13.5rem] sm:mt-[1rem] md:mt-[1rem] md:w-[16.5rem] sm:w-[12rem]" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-[0.3rem] items-center sm:gap-2 ">
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                      <svg
-                        viewBox="0 0 24 24"
-                        className="w-4 h-4 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-gray-600 whitespace-nowrap">
-                      {`${activity.daily_records.length}/${weekDates.length}`}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        ))}
       </div>
+      <div className="col-span-1 text-center text-gray-500">총 기록</div>
+
+      {/* Activity Rows */}
+      {activities.map((activity: any, index: number) => {
+        const weekDates = getWeekDates(activity.challenges.start_date);
+        return (
+          <React.Fragment key={index}>
+            {/* Names Column */}
+            <div className="col-span-1 flex flex-col items-end pr-4">
+              <div className="text-gray-700 mb-4">{activity.users.name}</div>
+            </div>
+
+            {/* Daily Records Column */}
+            <div className="col-span-3 grid grid-cols-7 gap-2">
+              {weekDates.map((date, idx) => {
+                const hasRecord = hasRecordForDate(
+                  activity.daily_records,
+                  date
+                );
+                return (
+                  <div key={idx} className="flex flex-col items-center">
+                    <div
+                      className={`w-[2rem] h-[2rem] rounded flex items-center justify-center
+                      ${hasRecord ? 'bg-[#FAAA16]' : 'bg-gray-100'}`}
+                    />
+                    {/* <div className="h-3 mt-2 bg-orange-500 rounded-full w-full" /> */}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Total Records Column */}
+            <div className="col-span-1 flex items-center justify-center">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <span className="text-gray-600">
+                  {`${activity.daily_records.length}/${weekDates.length}`}
+                </span>
+              </div>
+            </div>
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 };
