@@ -46,7 +46,7 @@ export async function GET() {
               )
     )
   `);
-    // console.log(dailyRecords);
+    //console.log('dailyRecords', dailyRecords);
 
     //if (error) throw error;
 

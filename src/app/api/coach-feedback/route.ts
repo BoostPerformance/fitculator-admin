@@ -7,6 +7,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
+    console.log('body', body);
+    console.log('body.daily_record_id', body.daily_record_id);
+
     if (!body.daily_record_id) {
       return NextResponse.json(
         { error: 'daily_record_id is required' },
@@ -16,12 +19,18 @@ export async function POST(req: NextRequest) {
 
     const result = await prisma.$transaction(
       async (tx) => {
-        // findUnique 대신 findFirst 사용
+        console.log('Received daily_record_id:', {
+          value: body.daily_record_id,
+          type: typeof body.daily_record_id,
+        });
+
         const existingFeedback = await tx.feedbacks.findFirst({
           where: {
             daily_record_id: body.daily_record_id,
           },
         });
+
+        // console.log('Existing feedback:', existingFeedback);
 
         if (existingFeedback) {
           return await tx.feedbacks.update({
@@ -34,9 +43,14 @@ export async function POST(req: NextRequest) {
             },
           });
         } else {
+          // console.log('Creating feedback with data:', {
+          //   daily_record_id: body.daily_record_id,
+          //   coach_feedback: body.coach_feedback || '',
+          //   ai_feedback: '',
+          // });
+
           return await tx.feedbacks.create({
             data: {
-              id: nanoid(),
               daily_record_id: body.daily_record_id,
               coach_feedback: body.coach_feedback || '',
               ai_feedback: '',

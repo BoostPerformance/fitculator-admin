@@ -154,8 +154,10 @@ export default function SelectedDate() {
         (record) => record.record_date === recordDate
       );
 
+      console.log('participant', participant);
+      console.log('recordDate', recordDate);
       if (!dailyRecord) {
-        console.error('Daily record not found');
+        console.error('Daily record not found', recordDate);
         return;
       }
 
@@ -163,6 +165,7 @@ export default function SelectedDate() {
         daily_record_id: dailyRecord.id,
         coach_feedback: feedback,
       });
+      console.log('response', response);
 
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 3000);
@@ -750,7 +753,7 @@ export default function SelectedDate() {
                   handleFeedbackChange(dailyMeal.recordDate, e.target.value)
                 }
                 onSave={(feedback) => {
-                  console.log('feedback 저장완료');
+                  alert('feedback 저장완료');
                   return handleSaveFeedback(feedback, dailyMeal.recordDate);
                 }}
                 isFeedbackMode={true}
