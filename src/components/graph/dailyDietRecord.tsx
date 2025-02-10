@@ -45,24 +45,24 @@ const DailyDietRecord = ({ activities }: any) => {
   };
 
   return (
-    <div className="bg-white rounded-lg p-6 sm:p-1 col-span-2 lg:min-w-[600px]">
+    <div className="bg-white rounded-lg p-3 sm:p-1 col-span-2">
       <h2 className="text-xl font-medium mb-6 text-gray-600">
         일별 식단 기록 현황
       </h2>
 
-      <div className="w-auto ">
-        <div className="flex flex-col gap-1 ">
-          <div className="flex items-center w-full mb-4 ">
-            <div className="lg:w-[5rem] sm:w-16 md:w-[2rem] shrink-0 sm:hidden inline" />
-            <div className="flex flex-1 items-start sm:pl-[3.5rem] sm:gap-[4rem] lg:gap-[3rem] ">
-              <div className="flex gap-1  sm:gap-[0.3rem] ">
+      <div className="w-full">
+        <div className="flex flex-col gap-1 items-center">
+          <div className="flex items-center mb-4 ">
+            <div className="lg:pl-16 sm:w-16 md:w-[2rem] shrink-0 sm:hidden inline" />
+            <div className="flex flex-1 items-start sm:pl-[3.5rem] sm:gap-[4rem] lg:gap-[3rem]">
+              <div className="flex gap-2  sm:gap-[0.3rem]">
                 {days.map((day, idx) => (
                   <div key={idx} className="w-6 text-center text-gray-500">
                     {day}
                   </div>
                 ))}
               </div>
-              <div className="text-gray-500 sm:hidden">총 업로드 현황</div>
+              <div className="text-gray-500 sm:hidden">총 업로드</div>
             </div>
           </div>
 
@@ -105,7 +105,7 @@ const DailyDietRecord = ({ activities }: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-[1rem] items-center sm:gap-2 ">
+                  <div className="flex gap-[0.3rem] items-center sm:gap-2 ">
                     <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                       <svg
                         viewBox="0 0 24 24"
