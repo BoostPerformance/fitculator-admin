@@ -36,12 +36,12 @@ export interface Challenges {
 export interface DailyRecord extends Challenges {
   id: string;
   record_date: string;
-  feedbacks: {
+  feedbacks?: {
     coach_feedback: string;
     created_at: string;
-    coach_memo: string;
+    coach_memo?: string;
     id: string;
-  }[];
+  };
 }
 
 export interface ChallengeParticipant {
