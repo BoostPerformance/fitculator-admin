@@ -103,10 +103,8 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
         <thead>
           <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
             <th className="p-[1rem] lg:w-[15%] sm:w-[18%] sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[5.2rem] sm:text-0.75-500 sm:p-0">
-                  닉네임
-                </div>
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="sm:text-0.75-500 sm:p-0">닉네임</div>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -118,10 +116,8 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
               </div>
             </th>
             <th className="p-[1rem] lg:w-[15%] sm:w-[18%]  sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[5.2rem] sm:text-0.75-500 sm:p-0">
-                  이름
-                </div>
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="sm:text-0.75-500 sm:p-0">이름</div>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -134,10 +130,8 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
             </th>
 
             <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
-              <div className=" flex justify-center  items-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem] lg:pr-[9rem] sm:p-0">
-                <div className="lg:pl-[10.3rem] sm:text-0.75-500 sm:p-0">
-                  코치메모
-                </div>
+              <div className=" flex justify-center items-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]  sm:p-0">
+                <div className="sm:text-0.75-500 sm:p-0">코치메모</div>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"

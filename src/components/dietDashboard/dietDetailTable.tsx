@@ -52,8 +52,8 @@ const DietDetaileTable = ({
         <thead>
           <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
             <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem] w-[10%]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2rem] sm:text-0.75-500 sm:p-0">
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
                   닉네임
                 </div>
                 <button>
@@ -67,8 +67,8 @@ const DietDetaileTable = ({
               </div>
             </th>
             <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem] w-[10%]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
                   이름
                 </div>
                 <button>
@@ -83,46 +83,46 @@ const DietDetaileTable = ({
             </th>
 
             <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
                   아침
                 </div>
               </div>
             </th>
 
             <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
                   점심
                 </div>
               </div>
             </th>
 
             <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
                   저녁
                 </div>
               </div>
             </th>
 
             <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem] w-[10%]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
                   간식
                 </div>
               </div>
             </th>
             <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem] w-[10%]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
                   영양제
                 </div>
               </div>
             </th>
             <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
                   업데이트
                 </div>
                 <button>
@@ -136,8 +136,8 @@ const DietDetaileTable = ({
               </div>
             </th>
             <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]  w-[13%]">
-              <div className="relative flex items-center justify-between sm:flex-col sm:gap-[1rem]">
-                <div className="lg:pl-[2.7rem] sm:text-0.75-500 sm:p-0">
+              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
                   피드백 현황
                 </div>
               </div>
@@ -148,7 +148,7 @@ const DietDetaileTable = ({
           {dietDetailItems.map((dietDetailTableItem: any, index: number) => (
             <tr
               key={index}
-              className="text-[#6F6F6F] hover:bg-[#F4F6FC]"
+              className="text-[#6F6F6F] hover:bg-[#F4F6FC] cursor-pointer"
               onClick={() =>
                 router.push(
                   `/user/${dietDetailTableItem.challenge_id}/diet/${dietDetailTableItem.user.id}/${selectedDate}`
