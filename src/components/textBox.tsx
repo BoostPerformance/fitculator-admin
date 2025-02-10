@@ -52,7 +52,7 @@ const TextBox = ({
     if (onSave && value) {
       try {
         await onSave(feedback, value);
-        console.log('Feedback saved successfully');
+        //  console.log('Feedback saved successfully');
       } catch (error) {
         console.error('Failed to save feedback:', error);
       }
@@ -89,7 +89,7 @@ const TextBox = ({
   };
 
   return (
-    <div className="mt-[2rem] p-[1rem] border rounded-md relative lg:w-[48rem] lg:h-[30rem]">
+    <div className="mt-[2rem] p-[1rem] border rounded-md relative lg:w-[48rem] lg:h-[30rem] sm:min-w-[25rem]">
       <h4 className="text-1.375-700 font-semibold mb-2 flex items-center">
         {title}
         <button className="ml-2 text-[1rem]" onClick={handleCopy}>
@@ -123,10 +123,12 @@ const TextBox = ({
           readOnly={readOnly}
           onChange={handleChange}
         />
-        <div className="flex gap-[1rem] w-[19.625rem]">
-          <div className="flex relative sm:justify-center w-full justify-end">
+        <div className="flex gap-[1rem] w-[19.625rem] sm:w-[17rem]">
+          <div className="flex relative sm:justify-center sm:gap-[1.4rem] w-full justify-end">
             <button
-              className={`${Btn1className} rounded-md text-0.875-400 mt-[0.5rem] lg:w-[9.3125rem] sm:w-full h-[2.5rem]`}
+              className={`${Btn1className} rounded-md text-0.875-400 mt-[0.5rem] ${
+                button2 ? 'lg:w-[9.3125rem]' : 'w-full'
+              } sm:w-full h-[2.5rem]`}
               onClick={handleButtonClick}
             >
               {button1}
@@ -136,11 +138,16 @@ const TextBox = ({
               alt="icon"
               width={17}
               height={17}
-              className="absolute top-[1.2rem] right-[6rem] sm:left-[2.4rem] w-4 h-4"
+              className={`absolute top-[1.2rem] ${
+                button2
+                  ? 'lg:right-[5.3rem] lg:top-[1.2rem] sm:left-[2rem]'
+                  : 'lg:right-[11.5rem] lg:top-[1.3rem] sm:left-[6rem] sm:top-[1.3rem]'
+              }  w-4 h-4`}
+              onClick={handleButtonClick}
             />
           </div>
           {button2 && (
-            <div className="flex relative justify-center w-full">
+            <div className="flex relative justify-center w-1/2">
               <button
                 className={`${Btn2className} rounded-md text-0.875-400 mt-[0.5rem] w-[9.3125rem] h-[2.5rem]`}
                 onClick={onClick2}
@@ -154,6 +161,7 @@ const TextBox = ({
                   width={17}
                   height={17}
                   className="absolute top-[1.2rem] left-[2.4rem] w-4 h-4"
+                  onClick={onClick2}
                 />
               )}
             </div>

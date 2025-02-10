@@ -60,7 +60,7 @@ export default function DietItem() {
     (meal) => meal.record_date === selectedDate
   );
   // console.log('processedMeals', processedMeals);
-  console.log('selectedDate page', selectedDate);
+  //console.log('selectedDate page', selectedDate);
 
   return (
     <div className="bg-white-1 flex sm:flex-col">

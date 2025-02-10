@@ -130,14 +130,14 @@ const MealPhotoLayout = ({
         <div className="mt-2 text-sm text-gray-600">{time}</div>
         <div className="text-sm mt-1">{descriptions}</div>
       </div>
-      <div className="flex justify-center mt-4">
+      {/* <div className="flex justify-center mt-4">
         <button
           className="text-gray-500 hover:text-gray-700"
           onClick={onAddComment}
         >
           <FaPlus size={20} />
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };

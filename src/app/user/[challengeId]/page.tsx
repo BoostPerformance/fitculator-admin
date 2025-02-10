@@ -160,6 +160,7 @@ export default function User() {
           throw new Error('Failed to fetch daily-records data');
         }
         const dailyRecordsdata = await dailyRecordsresponse.json();
+
         setDailyRecords(dailyRecordsdata);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -199,7 +200,7 @@ export default function User() {
   //console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
 
   return (
-    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col">
+    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
@@ -208,24 +209,26 @@ export default function User() {
       />
       <div className="flex-1 overflow-auto">
         <div className="pt-[2rem]">
-          <Title
-            title={
-              coachData &&
-              `${coachData.organization_name} ${adminData.display_name} ${adminData.admin_role}`
-            }
-          />
+          <div className="pl-[1rem]">
+            <Title
+              title={
+                coachData &&
+                `${coachData.organization_name} ${adminData.display_name} ${adminData.admin_role}`
+              }
+            />
+          </div>
           <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
             <TotalFeedbackCounts
-              counts="10"
-              total="30"
+              counts="0"
+              total="0"
               title="진행현황"
               borderColor="border-green"
               textColor="text-green"
               grids="col-span-2"
             />
             <TotalFeedbackCounts
-              counts={'10'}
-              total={'30'}
+              counts={'0'}
+              total={'0'}
               title={'오늘 운동 업로드 멤버'}
               borderColor="border-blue-5"
               textColor="text-blue-5"

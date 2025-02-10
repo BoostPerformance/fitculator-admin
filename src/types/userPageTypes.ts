@@ -39,6 +39,7 @@ export interface DailyRecord extends Challenges {
   feedbacks: {
     coach_feedback: string;
     created_at: string;
+    coach_memo: string;
     id: string;
   }[];
 }
@@ -62,5 +63,4 @@ export interface ChallengeParticipant {
 
 export interface DietTableProps {
   dailyRecordsData: ChallengeParticipant[];
-  coachMemo?: string;
 }

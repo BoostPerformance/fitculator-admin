@@ -40,12 +40,12 @@ export default function User() {
     fetchAllData();
   }, []);
 
-  console.log('challenges', challenges);
+  //console.log('challenges', challenges);
 
   const calcChallenges = challenges.find(
     (challenge) => challenge.challenges.id === selectedChallengeId
   );
-  console.log('calc', calcChallenges);
+  //console.log('calc', calcChallenges);
 
   const challengeParticipantsMemos =
     calcChallenges?.challenges?.challenge_participants.map((participant) => {
@@ -62,7 +62,7 @@ export default function User() {
       };
     });
 
-  console.log('challengeParticipantsMemos', challengeParticipantsMemos);
+  //console.log('challengeParticipantsMemos', challengeParticipantsMemos);
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col md:flex-col">
       <Sidebar

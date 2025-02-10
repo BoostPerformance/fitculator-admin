@@ -38,7 +38,7 @@ const MainContent: React.FC<MainContentProps> = ({
         <ResponsiveImages isMobile={isMobile} />
 
         <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1">
-          <DietTable dailyRecordsData={dailyRecords} coachMemo={coachMemo} />
+          <DietTable dailyRecordsData={dailyRecords} />
         </div>
       </div>
     </div>

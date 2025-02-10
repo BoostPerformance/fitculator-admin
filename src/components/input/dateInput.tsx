@@ -63,6 +63,7 @@ const DateInput = ({
             width={20}
             height={20}
             className="absolute right-[2rem]"
+            onClick={() => setOpen(!open)}
           />
         </div>
       </div>
