@@ -118,8 +118,8 @@ export default function Sidebar({
         </div>
       </div>
       {userDropdown && (
-        <div className="z-50 sm:top-full  sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1 items-start flex-col text-gray-10 text-1-700 gap-[0.5rem] bg-white drop-shadow">
-          <div className="hover:bg-gray-3 ">전체회원 정보보기</div>
+        <div className="z-50 sm:top-full sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1 items-start flex-col text-gray-10 text-1-700 gap-[0.5rem] bg-white drop-shadow lg: absolute lg:left-[1rem] rounded-[0.5rem] lg:w-[20rem] sm:w-[14rem] sm:items-end lg:items-end">
+          {/* <div className="hover:bg-gray-3 ">전체회원 정보보기</div>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="122"
@@ -128,9 +128,9 @@ export default function Sidebar({
             fill="none"
           >
             <path d="M0 1H122" stroke="#E1E1E1" />
-          </svg>
+          </svg> */}
           <LogoutButton />
-          <svg
+          {/* <svg
             xmlns="http://www.w3.org/2000/svg"
             width="122"
             height="2"
@@ -138,7 +138,7 @@ export default function Sidebar({
             fill="none"
           >
             <path d="M0 1H122" stroke="#E1E1E1" />
-          </svg>
+          </svg> */}
         </div>
       )}
 
