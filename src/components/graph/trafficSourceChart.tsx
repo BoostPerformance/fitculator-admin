@@ -83,12 +83,12 @@ export default function TrafficSourceChart() {
   ];
 
   return (
-    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2">
+    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2 w-full">
       <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
         인기운동
       </h2>
       <div>
-        <div className="w-full sm:py-[2rem] pb-[1rem] flex items-center justify-center">
+        <div className="w-full h-[13rem] sm:py-[2rem] pb-[1rem] flex items-center justify-center">
           <Doughnut data={data} options={options} />
         </div>
 
