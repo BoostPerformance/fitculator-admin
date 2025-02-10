@@ -14,6 +14,30 @@ import calendarUtils from '@/components/utils/calendarUtils';
 import DateInput from '@/components/input/dateInput';
 import { useFeedback } from '@/components/hooks/useFeedback';
 
+interface CustomAlertProps {
+  message: string;
+  isVisible: boolean;
+  onClose: () => void;
+}
+
+const CustomAlert = ({ message, isVisible, onClose }: CustomAlertProps) => {
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed top-4 right-4 p-4 bg-white rounded-lg shadow-lg border border-green-500 animate-in fade-in slide-in-from-top-3">
+      <div className="flex items-center gap-2">
+        <div className="text-green-600">{message}</div>
+        <button
+          onClick={onClose}
+          className="ml-2 text-gray-400 hover:text-gray-600"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const getAIFeedback = (user_id: string, date: string) => {
   return AI_Feedback.find(
     (feedback) => feedback.user_id === user_id && feedback.date === date
@@ -41,6 +65,8 @@ type PageParams = {
 
 export default function SelectedDate() {
   const { saveFeedback } = useFeedback();
+  const [showAlert, setShowAlert] = useState(false);
+
   const params = useParams() as PageParams;
   const [feedbacksByDate, setFeedbacksByDate] = useState<{
     [key: string]: string;
@@ -138,7 +164,9 @@ export default function SelectedDate() {
         coach_feedback: feedback,
       });
 
-      // 전체 meals 데이터 업데이트
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+
       const updatedAllMeals = allDailyMeals.map((meal) =>
         meal.recordDate === recordDate
           ? {
@@ -561,6 +589,12 @@ export default function SelectedDate() {
 
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
+      <CustomAlert
+        message="피드백이 성공적으로 저장되었습니다."
+        isVisible={showAlert}
+        onClose={() => setShowAlert(false)}
+      />
+
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
@@ -716,6 +750,7 @@ export default function SelectedDate() {
                   handleFeedbackChange(dailyMeal.recordDate, e.target.value)
                 }
                 onSave={(feedback) => {
+                  console.log('feedback 저장완료');
                   return handleSaveFeedback(feedback, dailyMeal.recordDate);
                 }}
                 isFeedbackMode={true}

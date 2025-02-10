@@ -70,16 +70,16 @@ const ChallengeStatistics: React.FC<ChallengeStatisticsProps> = ({
   return (
     <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3 sm:px-[0.3rem] md:grid md:grid-cols-5 md:grid-rows-1 md:pb-[1rem] md:gap-[-.3rem]">
       <TotalFeedbackCounts
-        counts="10"
-        total="30명"
+        counts="0"
+        total="0명"
         title="진행현황"
         borderColor="border-green"
         textColor="text-green"
         grids="sm:col-span-2 "
       />
       <TotalFeedbackCounts
-        counts={'10'}
-        total={'30명'}
+        counts={'0'}
+        total={'0명'}
         title={'오늘 운동 업로드 멤버'}
         borderColor="border-blue-5"
         textColor="text-blue-5"
@@ -92,8 +92,8 @@ const ChallengeStatistics: React.FC<ChallengeStatisticsProps> = ({
         textColor="text-yellow"
       />
       <TotalFeedbackCounts
-        counts={'10'}
-        total={'30개'}
+        counts={'0'}
+        total={'0개'}
         title={'전체 운동 업로드 수'}
         borderColor="border-blue-5"
         textColor="text-blue-5"

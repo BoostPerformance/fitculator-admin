@@ -13,7 +13,7 @@ const DietDetaileTable = ({
       <div
         className={`py-[0.375rem] px-[0.625rem] ${
           feedback ? 'bg-[#13BE6E]' : 'bg-red-500'
-        } text-white  rounded-[0.3rem] text-0.875-500`}
+        } text-white rounded-[0.3rem] text-0.875-500 whitespace-nowrap`}
       >
         <div>{feedback ? '완료' : '미완성'}</div>
       </div>
@@ -25,37 +25,30 @@ const DietDetaileTable = ({
     updated_date: string,
     updated_time: string
   ) => {
-    // 날짜 포맷팅 (YYYY-MM-DD)
     const recordDate = new Date(record_date).toISOString().split('T')[0];
-
-    // 시간 포맷팅 (HH:MM)
     const upatedDate = new Date(updated_date).toISOString().split('T')[0];
     const updateTime = new Date(updated_time);
     const hours = String(updateTime.getHours()).padStart(2, '0');
     const minutes = String(updateTime.getMinutes()).padStart(2, '0');
 
     return (
-      <>
+      <div className="whitespace-nowrap">
         기록일: {recordDate} <br />
         업데이트:
         <br /> {upatedDate} &nbsp;
         {hours}:{minutes}
-      </>
+      </div>
     );
   };
 
-  // console.log('dietDetailItems', dietDetailItems);
-
   return (
-    <div className="mt-[1.4rem]">
-      <table className="table-auto w-full bg-white shadow-md rounded-md">
+    <div className="mt-6 overflow-x-auto">
+      <table className="w-full bg-white shadow-md rounded-md min-w-[1000px]">
         <thead>
-          <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
-            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem] w-[10%]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
-                  닉네임
-                </div>
+          <tr className="bg-white text-left text-[#A1A1A1]">
+            <th className="w-[8%] p-4 lg:p-6">
+              <div className="flex items-center justify-start gap-1">
+                <span className="lg:text-base sm:text-sm">닉네임</span>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -66,11 +59,9 @@ const DietDetaileTable = ({
                 </button>
               </div>
             </th>
-            <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem] w-[10%]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
-                  이름
-                </div>
+            <th className="w-[8%] p-4 lg:p-6">
+              <div className="flex items-center justify-start gap-2">
+                <span className="lg:text-base sm:text-sm">이름</span>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -81,50 +72,24 @@ const DietDetaileTable = ({
                 </button>
               </div>
             </th>
-
-            <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
-                  아침
-                </div>
-              </div>
+            <th className="w-[15%] p-4 lg:p-6">
+              <span className="lg:text-base sm:text-sm">아침</span>
             </th>
-
-            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
-                  점심
-                </div>
-              </div>
+            <th className="w-[15%] p-4 lg:p-6">
+              <span className="lg:text-base sm:text-sm">점심</span>
             </th>
-
-            <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
-                  저녁
-                </div>
-              </div>
+            <th className="w-[15%] p-4 lg:p-6">
+              <span className="lg:text-base sm:text-sm">저녁</span>
             </th>
-
-            <th className="p-[1rem]  sm:p-0 sm:pt-[1.4rem] w-[10%]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
-                  간식
-                </div>
-              </div>
+            <th className="w-[8%] p-4 lg:p-6">
+              <span className="lg:text-base sm:text-sm">간식</span>
             </th>
-            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem] w-[10%]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
-                  영양제
-                </div>
-              </div>
+            <th className="w-[8%] p-4 lg:p-6">
+              <span className="lg:text-base sm:text-sm">영양제</span>
             </th>
-            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
-                  업데이트
-                </div>
+            <th className="w-[13%] p-4 lg:p-6">
+              <div className="flex items-center justify-start gap-2">
+                <span className="lg:text-base sm:text-sm">업데이트</span>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -135,55 +100,63 @@ const DietDetaileTable = ({
                 </button>
               </div>
             </th>
-            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]  w-[13%]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="lg:text-1-500 sm:text-0.75-500 sm:p-0">
-                  피드백 현황
-                </div>
-              </div>
+            <th className="w-[10%] p-4 lg:p-6">
+              <span className="lg:text-base sm:text-sm">피드백 현황</span>
             </th>
           </tr>
         </thead>
-        <tbody className="text-center ">
+        <tbody>
           {dietDetailItems.map((dietDetailTableItem: any, index: number) => (
             <tr
               key={index}
-              className="text-[#6F6F6F] hover:bg-[#F4F6FC] cursor-pointer"
+              className="text-[#6F6F6F] hover:bg-[#F4F6FC] cursor-pointer  border-gray-13 border-b-[0.1rem]"
               onClick={() =>
                 router.push(
                   `/user/${dietDetailTableItem.challenge_id}/diet/${dietDetailTableItem.user.id}/${selectedDate}`
                 )
               }
             >
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
-                {dietDetailTableItem.user.username}
+              <td className="p-4 lg:p-6 sm:text-sm ">
+                <div className="truncate">
+                  {dietDetailTableItem.user.username}
+                </div>
               </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {dietDetailTableItem.user.name}
+              <td className="p-4 lg:p-6 sm:text-sm">
+                <div className="truncate">{dietDetailTableItem.user.name}</div>
               </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {dietDetailTableItem.meals.breakfast}
+              <td className="p-4 lg:p-6 sm:text-sm">
+                <div className="line-clamp-3">
+                  {dietDetailTableItem.meals.breakfast}
+                </div>
               </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {dietDetailTableItem.meals.lunch}
+              <td className="p-4 lg:p-6 sm:text-sm">
+                <div className="line-clamp-3">
+                  {dietDetailTableItem.meals.lunch}
+                </div>
               </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {dietDetailTableItem.meals.dinner}
+              <td className="p-4 lg:p-6 sm:text-sm">
+                <div className="line-clamp-3">
+                  {dietDetailTableItem.meals.dinner}
+                </div>
               </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {dietDetailTableItem.meals.snack}
+              <td className="p-4 lg:p-6 sm:text-sm">
+                <div className="line-clamp-2">
+                  {dietDetailTableItem.meals.snack}
+                </div>
               </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {dietDetailTableItem.meals.supplement}
+              <td className="p-4 lg:p-6 sm:text-sm">
+                <div className="line-clamp-2">
+                  {dietDetailTableItem.meals.supplement}
+                </div>
               </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 w-[13rem]">
+              <td className="p-4 lg:p-6 sm:text-sm">
                 {formatDateTime(
                   dietDetailTableItem.daily_record.record_date,
                   dietDetailTableItem.daily_record.updated_at,
                   dietDetailTableItem.daily_record.updated_at
                 )}
               </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+              <td className="p-4 lg:p-6 sm:text-sm text-center">
                 {isfeedback(
                   dietDetailTableItem.daily_record.feedbacks?.coach_feedback
                 )}
