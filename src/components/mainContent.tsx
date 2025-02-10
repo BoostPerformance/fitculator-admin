@@ -2,7 +2,7 @@ import Title from './layout/title';
 import ChallengeStatistics from './statistics/challengeStatistics';
 import { ChallengeParticipant, Challenges } from '@/types/userPageTypes';
 import GraphSection from './graph/graphSection';
-import ResponsiveImages from './responsiveImages';
+//import ResponsiveImages from './responsiveImages';
 import DietTable from './dietDashboard/dietTable';
 
 interface MainContentProps {
@@ -10,7 +10,7 @@ interface MainContentProps {
   dailyRecords: ChallengeParticipant[];
   selectedChallengeId: string;
   challenges: Challenges[];
-  isMobile: boolean;
+  isMobile?: boolean;
   coachMemo?: string;
 }
 
@@ -34,8 +34,6 @@ const MainContent: React.FC<MainContentProps> = ({
         />
 
         <GraphSection activities={dailyRecords} />
-
-        <ResponsiveImages isMobile={isMobile} />
 
         <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1">
           <DietTable dailyRecordsData={dailyRecords} />

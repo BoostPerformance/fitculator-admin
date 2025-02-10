@@ -45,30 +45,32 @@ const DailyDietRecord = ({ activities }: any) => {
   };
 
   return (
-    <div className="bg-white rounded-lg p-3 grid grid-cols-5 gap-4 col-span-2">
+    <div className="bg-white rounded-lg p-3 grid grid-cols-4 gap-4 col-span-2">
       {/* Header Row */}
       <div className="col-span-1 text-gray-500 text-right pr-4">참가자</div>
-      <div className="col-span-3 grid grid-cols-7 gap-2">
+      <div className="col-span-1 grid grid-cols-7 gap-2">
         {days.map((day, idx) => (
           <div key={idx} className="text-center text-gray-500">
             {day}
           </div>
         ))}
       </div>
+      <div className="col-span-1 text-center text-gray-500">진행률</div>
       <div className="col-span-1 text-center text-gray-500">총 기록</div>
 
       {/* Activity Rows */}
-      {activities.map((activity: any, index: number) => {
+      {activities.map((activity, index) => {
+        //console.log(activity);
         const weekDates = getWeekDates(activity.challenges.start_date);
         return (
           <React.Fragment key={index}>
             {/* Names Column */}
             <div className="col-span-1 flex flex-col items-end pr-4">
-              <div className="text-gray-700 mb-4">{activity.users.name}</div>
+              <div className="text-gray-700">{activity.users.name}</div>
             </div>
 
             {/* Daily Records Column */}
-            <div className="col-span-3 grid grid-cols-7 gap-2">
+            <div className="col-span-1 grid grid-cols-7 gap-2">
               {weekDates.map((date, idx) => {
                 const hasRecord = hasRecordForDate(
                   activity.daily_records,
@@ -77,13 +79,36 @@ const DailyDietRecord = ({ activities }: any) => {
                 return (
                   <div key={idx} className="flex flex-col items-center">
                     <div
-                      className={`w-[2rem] h-[2rem] rounded flex items-center justify-center
+                      className={`w-[1rem] h-[1rem] rounded flex items-center justify-center
                       ${hasRecord ? 'bg-[#FAAA16]' : 'bg-gray-100'}`}
                     />
-                    {/* <div className="h-3 mt-2 bg-orange-500 rounded-full w-full" /> */}
                   </div>
                 );
               })}
+            </div>
+
+            {/* Progress Bar Column */}
+            <div className="col-span-1 flex items-center">
+              <div className="w-full h-3 bg-gray-100 rounded-full relative overflow-hidden">
+                {(() => {
+                  const startDate = new Date(activity.challenges.start_date);
+                  const endDate = new Date(activity.challenges.end_date);
+                  const totalDays = Math.ceil(
+                    (endDate.getTime() - startDate.getTime()) /
+                      (1000 * 3600 * 24)
+                  );
+                  const recordedDays = activity.daily_records.length;
+
+                  return (
+                    <div
+                      className="absolute top-0 left-0 h-full bg-orange-500 rounded-full"
+                      style={{
+                        width: `${(recordedDays / totalDays) * 100}%`,
+                      }}
+                    />
+                  );
+                })()}
+              </div>
             </div>
 
             {/* Total Records Column */}

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
+//import Image from 'next/image';
 import TrafficSourceChart from '@/components/graph/trafficSourceChart';
 import DailyDietRecord from '@/components/graph/dailyDietRecord';
 import WorkoutLeaderboeard from '@/components/graph/workoutLeaderboeard';
@@ -289,7 +289,7 @@ export default function User() {
             <DailyDietRecord activities={filteredDailyRecordsbyId} />
             <WorkoutLeaderboeard />
           </div>
-          <div>
+          {/* <div>
             <Image
               src={
                 isMobile
@@ -310,7 +310,7 @@ export default function User() {
                 className="w-full lg:col-span-3"
               />
             )}
-          </div>
+          </div> */}
           <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1">
             <DietTable dailyRecordsData={filteredDailyRecordsbyId} />
           </div>
