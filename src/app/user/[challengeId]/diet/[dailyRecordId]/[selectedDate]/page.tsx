@@ -161,7 +161,7 @@ export default function SelectedDate() {
       );
       setFilteredDailyMeals(updatedFilteredMeals);
 
-      console.log('Feedback saved successfully:', response);
+     // console.log('Feedback saved successfully:', response);
     } catch (error) {
       console.error('Failed to save feedback:', error);
     }

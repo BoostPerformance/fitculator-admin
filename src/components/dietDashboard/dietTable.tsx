@@ -3,10 +3,7 @@ import { useState, useEffect } from 'react';
 import { DietTableProps, ChallengeParticipant } from '@/types/userPageTypes';
 import Modal from '../layout/modal';
 
-const DietTable: React.FC<DietTableProps> = ({
-  dailyRecordsData,
-  coachMemo,
-}) => {
+const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   const [participantMemos, setParticipantMemos] = useState<{
     [key: string]: string;
   }>({});
@@ -60,7 +57,7 @@ const DietTable: React.FC<DietTableProps> = ({
 
     const groupedData = new Map();
 
-    const recordData = records.forEach((record) => {
+    const recordDate = records.forEach((record) => {
       const participantId = record.id;
       if (!groupedData.has(participantId)) {
         groupedData.set(participantId, {
@@ -69,14 +66,14 @@ const DietTable: React.FC<DietTableProps> = ({
         });
       }
     });
-    console.log('recordData', recordData);
+    //console.log('recordDate', recordDate);
 
     return Array.from(groupedData.values());
   };
 
-  useEffect(() => {
-    console.log('participantMemos updated:', participantMemos);
-  }, [participantMemos]);
+  // useEffect(() => {
+  //   console.log('participantMemos updated:', participantMemos);
+  // }, [participantMemos]);
 
   const handleCoachMemoSave = (memo: string, participantId: string) => {
     console.log('Saving memo:', {

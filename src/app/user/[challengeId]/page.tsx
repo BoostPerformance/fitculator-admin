@@ -160,6 +160,7 @@ export default function User() {
           throw new Error('Failed to fetch daily-records data');
         }
         const dailyRecordsdata = await dailyRecordsresponse.json();
+
         setDailyRecords(dailyRecordsdata);
       } catch (error) {
         console.error('Error fetching data:', error);

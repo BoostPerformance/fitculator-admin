@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    console.log('Received body:', body);
+    //console.log('Received body:', body);
 
     // 해당 참가자의 해당 날짜 daily_record 찾기
     const participant = await prisma.challenge_participants.findFirst({
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log('Found participant:', participant);
+    //console.log('Found participant:', participant);
 
     if (!participant) {
       return NextResponse.json(

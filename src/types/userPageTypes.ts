@@ -63,5 +63,4 @@ export interface ChallengeParticipant {
 
 export interface DietTableProps {
   dailyRecordsData: ChallengeParticipant[];
-  coachMemo?: string;
 }
