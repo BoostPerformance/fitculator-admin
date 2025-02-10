@@ -161,7 +161,7 @@ export default function SelectedDate() {
       );
       setFilteredDailyMeals(updatedFilteredMeals);
 
-     // console.log('Feedback saved successfully:', response);
+      // console.log('Feedback saved successfully:', response);
     } catch (error) {
       console.error('Failed to save feedback:', error);
     }
@@ -579,6 +579,7 @@ export default function SelectedDate() {
             </div>
 
             <Title title={`${userData.name}님의 식단현황`} />
+
             <TotalFeedbackCounts
               counts={metrics.count.toString()}
               total={metrics.total.toString()}
@@ -634,7 +635,9 @@ export default function SelectedDate() {
         </div>
         {displayMeals.map((dailyMeal) => (
           <div key={dailyMeal.recordDate} className="relative mb-[2rem]">
-            <h2 className="text-[1.5rem] font-bold">{dailyMeal.recordDate}</h2>
+            <h2 className="text-[1.5rem] font-bold sm:pl-[1rem]">
+              {dailyMeal.recordDate}
+            </h2>
 
             <div className="grid grid-cols-5 gap-[1rem] sm:grid-cols-1 sm:px-[1rem]">
               {(

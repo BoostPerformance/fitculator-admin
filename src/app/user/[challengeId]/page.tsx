@@ -209,12 +209,14 @@ export default function User() {
       />
       <div className="flex-1 overflow-auto">
         <div className="pt-[2rem]">
-          <Title
-            title={
-              coachData &&
-              `${coachData.organization_name} ${adminData.display_name} ${adminData.admin_role}`
-            }
-          />
+          <div className="pl-[1rem]">
+            <Title
+              title={
+                coachData &&
+                `${coachData.organization_name} ${adminData.display_name} ${adminData.admin_role}`
+              }
+            />
+          </div>
           <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
             <TotalFeedbackCounts
               counts="0"
