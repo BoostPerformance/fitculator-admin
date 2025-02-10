@@ -39,7 +39,7 @@ export interface UserData {
   daily_records: DailyRecords[];
   id: string;
   users: {
-    display_name: string;
+    username: string;
     id: string;
     name: string;
   };
@@ -65,7 +65,7 @@ export interface Meals {
         start_date: string;
         title: string;
       };
-      users: { id: string; name: string; display_name: string };
+      users: { id: string; name: string; username: string };
     };
     feedbacks: {
       ai_feedback: string;

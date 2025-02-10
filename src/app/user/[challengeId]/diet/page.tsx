@@ -67,7 +67,7 @@ export default function DietItem() {
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
-        coach={adminData.display_name}
+        coach={adminData.username}
         onSelectChallengeTitle={handleChallengeSelect}
         selectedChallengeId={selectedChallengeId}
       />

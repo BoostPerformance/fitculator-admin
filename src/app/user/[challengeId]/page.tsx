@@ -16,7 +16,7 @@ import {
 
 interface AdminUser {
   email: string;
-  display_name: string;
+  username: string;
 }
 
 interface Challenge {
@@ -64,7 +64,7 @@ interface ChallengeParticipant {
   users: {
     id: string;
     name: string;
-    display_name: string;
+    username: string;
   };
   challenges: {
     id: string;
@@ -87,7 +87,7 @@ export default function User() {
   const [isMobile, setIsMobile] = useState(false);
   const [adminData, setAdminData] = useState({
     admin_role: '',
-    display_name: '',
+    username: '',
   });
   const [coachData, setCoachData] = useState<CoachData>({
     id: '',
@@ -102,7 +102,7 @@ export default function User() {
     updated_at: '',
     admin_users: {
       email: '',
-      display_name: '',
+      username: '',
     },
     challenge_coaches: [],
   });
@@ -208,7 +208,7 @@ export default function User() {
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
-        coach={adminData.display_name}
+        coach={adminData.username}
         selectedChallengeId={selectedChallengeId}
       />
       <div className="flex-1 overflow-auto">
@@ -217,7 +217,7 @@ export default function User() {
             <Title
               title={
                 coachData &&
-                `${coachData.organization_name} ${adminData.display_name} ${adminData.admin_role}`
+                `${coachData.organization_name} ${adminData.username} ${adminData.admin_role}`
               }
             />
           </div>

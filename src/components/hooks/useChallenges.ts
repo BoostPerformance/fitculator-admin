@@ -33,7 +33,7 @@ interface Challenges {
       users: {
         id: string;
         name: string;
-        display_name: string;
+        username: string;
       };
     }[];
   };

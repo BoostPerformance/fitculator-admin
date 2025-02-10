@@ -1,6 +1,6 @@
 export interface AdminUser {
   email: string;
-  display_name: string;
+  username: string;
 }
 
 export interface Challenge {
@@ -49,7 +49,7 @@ export interface ChallengeParticipant {
   users: {
     id: string;
     name: string;
-    display_name: string;
+    username: string;
   };
   challenges: {
     id: string;

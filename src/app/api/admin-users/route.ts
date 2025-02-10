@@ -44,7 +44,7 @@ export async function GET() {
     }
     const coachInfo = {
       admin_role: adminUser?.admin_role,
-      display_name: adminUser?.display_name,
+      username: adminUser?.username,
     };
 
     return NextResponse.json(coachInfo);

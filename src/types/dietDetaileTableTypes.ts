@@ -8,7 +8,7 @@ export type MealType =
 export interface User {
   id: string;
   name: string;
-  display_name: string;
+  username: string;
 }
 
 export interface Challenges {
@@ -57,7 +57,7 @@ export interface ProcessedMeal {
   challenges: Challenges;
   user: {
     id: string;
-    display_name: string;
+    username: string;
     name: string;
   };
   daily_record: DailyRecords;

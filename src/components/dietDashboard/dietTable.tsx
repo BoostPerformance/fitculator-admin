@@ -176,7 +176,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
           {participants(dailyRecordsData).map((data, index) => (
             <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
-                {data.participant.users?.display_name}
+                {data.participant.users?.username}
               </td>
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
                 {data.participant.users?.name}

@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 //   id: string;
 //   challenge_id: string;
 //   users: {
-//     display_name: string;
+//     username: string;
 //     name: string;
 //   };
 //   daily_records: {
@@ -30,7 +30,7 @@ export async function GET() {
       { data: dailyMeals, error: mealError },
       { data: coachMemo, error: coachMemoError },
     ] = await Promise.all([
-      supabase.from('users').select('display_name, name'),
+      supabase.from('users').select('username, name'),
       supabase.from('daily_records').select('record_date'),
       supabase.from('feedbacks').select('coach_memo'),
     ]);

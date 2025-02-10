@@ -68,7 +68,7 @@ export default function User() {
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
-        coach={adminData.display_name}
+        coach={adminData.username}
       />
       <MainContent
         challengeTitle={challengeTitle}

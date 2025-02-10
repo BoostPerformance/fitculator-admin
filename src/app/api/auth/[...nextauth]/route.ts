@@ -12,7 +12,7 @@ declare module 'next-auth' {
       admin_role?: string;
       organization_id?: string;
       admin_user_id?: string;
-      display_name?: string;
+      username?: string;
     };
   }
 }
@@ -82,7 +82,7 @@ const handler = NextAuth({
           .single();
 
         if (adminUser) {
-          token.name = adminUser.display_name;
+          token.name = adminUser.username;
           token.role = adminUser.admin_role;
           token.organization_id = adminUser.organization_id;
           token.admin_user_id = adminUser.id;
@@ -111,7 +111,7 @@ const handler = NextAuth({
           session.user.admin_user_id = adminUser.id;
           session.user.admin_role = adminUser.admin_role;
           session.user.email = adminUser.email;
-          session.user.display_name = adminUser.display_name;
+          session.user.username = adminUser.username;
         }
         if (error) {
           console.log(error);

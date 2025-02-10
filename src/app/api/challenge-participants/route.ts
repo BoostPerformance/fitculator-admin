@@ -13,7 +13,7 @@ export async function GET() {
     // ).select(`*,
     //   users: service_user_id (
     //   id,
-    //   display_name,
+    //   username,
     //   name,
     //   )`);
 
@@ -22,7 +22,7 @@ export async function GET() {
     id,
     users!service_user_id (
       id,
-      display_name,
+      username,
       name
     ),
     challenges!challenge_id (

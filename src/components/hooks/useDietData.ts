@@ -6,7 +6,7 @@ export const useDietData = (challengeId: string | string[] | undefined) => {
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [adminData, setAdminData] = useState({
     admin_role: '',
-    display_name: '',
+    username: '',
   });
 
   useEffect(() => {

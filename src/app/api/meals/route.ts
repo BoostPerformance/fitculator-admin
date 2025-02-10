@@ -25,7 +25,7 @@ export async function GET() {
             ),
             users!service_user_id (
               id,
-              display_name,
+              username,
               name
             )
           )

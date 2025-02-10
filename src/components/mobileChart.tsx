@@ -48,7 +48,7 @@ export default function MobileChart({
           return (
             <>
               <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem]">
-                {meal.user.display_name}
+                {meal.user.username}
               </div>
               <table className="flex flex-col gap-[1rem] items-center justify-center">
                 <thead>

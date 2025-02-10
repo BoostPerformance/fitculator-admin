@@ -21,7 +21,7 @@ model admin_users {
   id              String         @id
   auth_user_id    String?        @db.Uuid
   email           String         @unique
-  display_name    String
+  username    String
   organization_id String?
   admin_role      admin_role
   is_active       Boolean?       @default(true)
@@ -205,7 +205,7 @@ model role_permissions {
 model users {
   id                     String                   @id
   discord_id             String?                  @unique @db.VarChar(255)
-  display_name           String?                  @db.VarChar(50)
+  username           String?                  @db.VarChar(50)
   name                   String                   @db.VarChar(100)
   email                  String                   @unique @db.VarChar(255)
   phone_number           String?                  @unique @db.VarChar(20)

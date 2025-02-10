@@ -4,7 +4,7 @@ import { useState } from 'react';
 export const useAdminData = () => {
   const [adminData, setAdminData] = useState({
     admin_role: '',
-    display_name: '',
+    username: '',
   });
 
   const fetchAdminData = async () => {

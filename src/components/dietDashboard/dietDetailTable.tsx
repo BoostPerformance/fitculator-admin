@@ -156,7 +156,7 @@ const DietDetaileTable = ({
               }
             >
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
-                {dietDetailTableItem.user.display_name}
+                {dietDetailTableItem.user.username}
               </td>
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
                 {dietDetailTableItem.user.name}

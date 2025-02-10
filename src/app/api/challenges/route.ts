@@ -52,7 +52,7 @@ export async function GET() {
             users!service_user_id (
               id,
               name,
-              display_name
+              username
             ),
             daily_records (
               id,

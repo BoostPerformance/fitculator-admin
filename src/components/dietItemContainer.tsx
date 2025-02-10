@@ -45,10 +45,10 @@ export default function DietItemContainer() {
   const [userData, setUserData] = useState({
     id: '',
     name: '사용자',
-    display_name: '',
+    username: '',
   });
   const [orgName, setOrgName] = useState({
-    display_name: '코치님',
+    username: '코치님',
     organization_name: '조직명',
   });
   // const [commentVisible, setCommentVisible] = useState<{
@@ -336,7 +336,7 @@ export default function DietItemContainer() {
           setUserData({
             id: currentUser.users.id,
             name: currentUser.users.name,
-            display_name: currentUser.users.display_name,
+            username: currentUser.users.username,
           });
         }
 
@@ -444,7 +444,7 @@ export default function DietItemContainer() {
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         onSelectChallengeTitle={handleChallengeSelect}
-        coach={orgName.display_name}
+        coach={orgName.username}
       />
 
       <div>

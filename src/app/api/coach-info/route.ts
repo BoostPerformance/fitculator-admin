@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     const { data: adminUser, error: adminError } = await supabase
       .from('admin_users')
-      .select('id, admin_role, organization_id, display_name')
+      .select('id, admin_role, organization_id, username')
       .eq('email', session.user.email)
       .single();
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     // 코치가 아닌 경우 기본 정보만 반환
     if (adminUser.admin_role !== 'coach') {
       return NextResponse.json({
-        display_name: adminUser.display_name,
+        username: adminUser.username,
         admin_role: adminUser.admin_role,
       });
     }
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         `
        *,
        admin_users (
-         display_name,
+         username,
          email,
          organization:organization_id(
          id,
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       admin_user_id: coach.admin_user_id,
       organization_id: coach.organization_id,
       organization_name: coach.admin_users.organization.name,
-      display_name: coach.admin_users.display_name,
+      username: coach.admin_users.username,
       profile_image_url: coach.profile_image_url,
       challenges: coach.challenge_coaches.map((cc: any) => ({
         id: cc.challenge.id,

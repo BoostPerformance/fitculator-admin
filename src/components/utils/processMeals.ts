@@ -26,7 +26,7 @@ export const processMeals = (filteredByChallengeId: ProcessedMeal[]) => {
             challenges: participant.challenges,
             user: {
               id: participant.users.id,
-              display_name: participant.users.display_name,
+              username: participant.users.username,
               name: participant.users.name,
             },
             daily_record: record,
