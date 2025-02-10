@@ -36,10 +36,14 @@ export async function GET() {
       id,
       record_date,
       feedbacks!daily_record_id (
-        id,
-        coach_feedback,
-        created_at
-      )
+                id,
+                coach_feedback,
+                ai_feedback,
+                coach_id,
+                daily_record_id,
+                coach_memo,
+                updated_at
+              )
     )
   `);
     // console.log(dailyRecords);

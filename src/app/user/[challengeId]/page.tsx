@@ -9,6 +9,10 @@ import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import Title from '@/components/layout/title';
 import Sidebar from '@/components/fixedBars/sidebar';
 import { useParams } from 'next/navigation';
+import {
+  calculateTodayDietUploads,
+  calculateTotalDietUploads,
+} from '@/components/statistics/challengeParticipantsDietStatics';
 
 interface AdminUser {
   email: string;
@@ -200,7 +204,7 @@ export default function User() {
   //console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
 
   return (
-    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col">
+    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col sm:px-[1rem]">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
@@ -234,29 +238,53 @@ export default function User() {
               textColor="text-blue-5"
             />
             <TotalFeedbackCounts
-              counts={'10'}
-              total={'30'}
+              counts={
+                calculateTodayDietUploads(
+                  dailyRecords,
+                  challenges,
+                  selectedChallengeId
+                ).counts
+              }
+              total={
+                calculateTodayDietUploads(
+                  dailyRecords,
+                  challenges,
+                  selectedChallengeId
+                ).total
+              }
               title={'오늘 식단 업로드 멤버'}
               borderColor="border-yellow"
               textColor="text-yellow"
             />
             <TotalFeedbackCounts
-              counts={'10'}
-              total={'30'}
+              counts={'0'}
+              total={'0'}
               title={'전체 운동 업로드 수'}
               borderColor="border-blue-5"
               textColor="text-blue-5"
             />
             <TotalFeedbackCounts
-              counts={'10'}
-              total={'30'}
+              counts={
+                calculateTotalDietUploads(
+                  dailyRecords,
+                  challenges,
+                  selectedChallengeId
+                ).counts
+              }
+              total={
+                calculateTotalDietUploads(
+                  dailyRecords,
+                  challenges,
+                  selectedChallengeId
+                ).total
+              }
               title={'전체 식단 업로드 수'}
               borderColor="border-yellow"
               textColor="text-yellow"
             />
           </div>
 
-          <div className="dark:bg-blue-4 grid grid-cols-7 gap-[1rem] my-6 sm:flex sm:flex-col">
+          <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:flex sm:flex-col">
             <TrafficSourceChart />
             <DailyDietRecord activities={filteredDailyRecordsbyId} />
             <WorkoutLeaderboeard />

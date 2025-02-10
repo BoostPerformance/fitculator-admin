@@ -22,10 +22,10 @@ export default function Modal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!coachMemo.trim()) {
-      alert('메모 내용을 입력해주세요.');
-      return;
-    }
+    // if (!coachMemo.trim()) {
+    //   alert('메모 내용을 입력해주세요.');
+    //   return;
+    // }
 
     try {
       await saveCoachMemo({
