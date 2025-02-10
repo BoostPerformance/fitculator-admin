@@ -54,8 +54,8 @@ export default function Modal({
         onClick={onClose}
       />
 
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-        <div className="bg-white rounded-lg p-6 w-[30rem] shadow-xl">
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 ">
+        <div className="bg-white rounded-lg p-6 w-[30rem] shadow-xl sm:w-[22rem]">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-medium">코치메모</h2>
             <button
