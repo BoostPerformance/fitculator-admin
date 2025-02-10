@@ -14,7 +14,7 @@ export async function GET() {
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
-    console.log(session, session);
+    //console.log(session, session);
 
     const { data: adminUser, error: adminError } = await supabase
       .from('admin_users')

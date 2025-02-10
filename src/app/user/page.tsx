@@ -65,7 +65,7 @@ export default function User() {
 
   //console.log('challengeParticipantsMemos', challengeParticipantsMemos);
   return (
-    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col md:flex-col">
+    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col sm:px-[1rem]">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
