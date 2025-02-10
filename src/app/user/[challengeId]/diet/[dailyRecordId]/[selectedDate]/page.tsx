@@ -24,7 +24,7 @@ const CustomAlert = ({ message, isVisible, onClose }: CustomAlertProps) => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed top-4 right-4 p-4 bg-white rounded-lg shadow-lg border border-green-500 animate-in fade-in slide-in-from-top-3">
+    <div className="fixed top-4 right-4 p-4 bg-white rounded-lg shadow-lg border border-green-500 animate-in fade-in slide-in-from-top-3 z-50">
       <div className="flex items-center gap-2">
         <div className="text-green-600">{message}</div>
         <button
@@ -154,10 +154,8 @@ export default function SelectedDate() {
         (record) => record.record_date === recordDate
       );
 
-      console.log('participant', participant);
-      console.log('recordDate', recordDate);
       if (!dailyRecord) {
-        console.error('Daily record not found', recordDate);
+        console.error('Daily record not found');
         return;
       }
 
@@ -165,10 +163,14 @@ export default function SelectedDate() {
         daily_record_id: dailyRecord.id,
         coach_feedback: feedback,
       });
-      console.log('response', response);
 
+      // console.log('피드백 저장 응답:', response); // 응답 확인
       setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
+      // console.log('showAlert 상태:', true); // 상태 변경 확인
+      setTimeout(() => {
+        setShowAlert(false);
+        //  console.log('showAlert 상태:', false); // 타이머 동작 확인
+      }, 3000);
 
       const updatedAllMeals = allDailyMeals.map((meal) =>
         meal.recordDate === recordDate
@@ -183,10 +185,7 @@ export default function SelectedDate() {
       );
       setAllDailyMeals(updatedAllMeals);
 
-      // recordDate는 현재 선택된 날짜로 유지
       const currentDate = recordDate;
-
-      // 현재 날짜에 해당하는 데이터 필터링
       const updatedFilteredMeals = updatedAllMeals.filter(
         (meal) => meal.recordDate === currentDate
       );
@@ -752,9 +751,8 @@ export default function SelectedDate() {
                 onChange={(e) =>
                   handleFeedbackChange(dailyMeal.recordDate, e.target.value)
                 }
-                onSave={(feedback) => {
-                  alert('feedback 저장완료');
-                  return handleSaveFeedback(feedback, dailyMeal.recordDate);
+                onSave={async (feedback) => {
+                  await handleSaveFeedback(feedback, dailyMeal.recordDate);
                 }}
                 isFeedbackMode={true}
                 copyIcon

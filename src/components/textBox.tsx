@@ -61,7 +61,7 @@ const TextBox = ({
 
   const handleButtonClick = () => {
     if (isFeedbackMode) {
-      console.log('isFeedbackMode', isFeedbackMode);
+      // console.log('isFeedbackMode', isFeedbackMode);
       handleSave();
     } else {
       onClick1?.();

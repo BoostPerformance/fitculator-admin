@@ -47,7 +47,7 @@ export async function GET() {
           { status: 404 }
         );
       }
-      console.log('coach', coach);
+      //console.log('coach', coach);
 
       const { data: challengeData, error } = await supabase
         .from('challenge_coaches')
@@ -93,13 +93,13 @@ export async function GET() {
         )
         .eq('coach_id', coach.id);
 
-      console.log('coach object:', coach); // coach 객체 전체 내용 확인
-      console.log('coach id type:', typeof coach); // id의 타입 확인
+      //  console.log('coach object:', coach); // coach 객체 전체 내용 확인
+      //console.log('coach id type:', typeof coach); // id의 타입 확인
       if (error) {
         throw error;
       }
 
-      console.log(coach);
+      //  console.log(coach);
 
       if (coachError) {
         console.log('Coach Error:', coachError, 'Admin ID:', adminUser.id);

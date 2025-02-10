@@ -28,7 +28,7 @@ export default function User() {
       ),
     [dailyRecords, selectedChallengeId]
   );
-  console.log('dailyRecords', dailyRecords);
+  //console.log('dailyRecords', dailyRecords);
 
   useEffect(() => {
     const fetchAllData = async () => {

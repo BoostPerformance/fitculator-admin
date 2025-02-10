@@ -555,7 +555,6 @@ export default function DietItemContainer() {
                     src={dailyMeal.meals[mealType]?.mealPhotos || []}
                     descriptions={dailyMeal.meals[mealType]?.description || ''}
                     time={formatRecordDate}
-                    onAddComment={() => console.log('comment area')}
                   />
                 );
               })}
