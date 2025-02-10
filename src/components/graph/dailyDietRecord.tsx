@@ -45,17 +45,17 @@ const DailyDietRecord = ({ activities }: any) => {
   };
 
   return (
-    <div className="bg-white rounded-lg p-6 col-span-2 min-w-[600px]">
+    <div className="bg-white rounded-lg p-6 sm:p-1 col-span-2 lg:min-w-[600px]">
       <h2 className="text-xl font-medium mb-6 text-gray-600">
         일별 식단 기록 현황
       </h2>
 
-      <div className="w-full">
+      <div className="w-auto ">
         <div className="flex flex-col gap-1 ">
           <div className="flex items-center w-full mb-4 ">
             <div className="lg:w-[5rem] sm:w-16 md:w-[2rem] shrink-0 sm:hidden inline" />
-            <div className="flex flex-1 items-start sm:pl-[2rem] sm:gap-[4rem] lg:gap-[3rem]">
-              <div className="flex gap-1 sm:pl-[1rem] sm:gap-[0.6rem]">
+            <div className="flex flex-1 items-start sm:pl-[3.5rem] sm:gap-[4rem] lg:gap-[3rem] ">
+              <div className="flex gap-1  sm:gap-[0.3rem] ">
                 {days.map((day, idx) => (
                   <div key={idx} className="w-6 text-center text-gray-500">
                     {day}
@@ -84,7 +84,7 @@ const DailyDietRecord = ({ activities }: any) => {
                 <div className="flex items-start gap-[2rem] sm:gap-3 sm:w-[17rem] md:gap-2">
                   <div>
                     <div className="flex  flex-col md:gap-[2rem]">
-                      <div className="flex gap-[0.7rem] sm:gap-2 md:gap-[1rem]">
+                      <div className="flex gap-[0.7rem] sm:gap-2 md:gap-[1rem] ">
                         {weekDates.map((date, idx) => {
                           const hasRecord = hasRecordForDate(
                             activity.daily_records,
@@ -101,7 +101,7 @@ const DailyDietRecord = ({ activities }: any) => {
                       </div>
 
                       <div className="flex flex-1 items-center gap-2">
-                        <div className="h-3 mt-[1rem] bg-orange-500 rounded-full w-[13.5rem] sm:mt-[1rem] md:mt-[1rem] md:w-[16.5rem]" />
+                        <div className="h-3 mt-[1rem] bg-orange-500 rounded-full w-[13.5rem] sm:mt-[1rem] md:mt-[1rem] md:w-[16.5rem] sm:w-[12rem]" />
                       </div>
                     </div>
                   </div>
