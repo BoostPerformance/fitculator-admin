@@ -14,17 +14,29 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function TrafficSourceChart() {
   const data: ChartData<'doughnut'> = {
-    labels: ['달리기', '주짓수', '웨이트', '사이클', '테니스'],
+    labels: [
+      '달리기',
+      '하이트',
+      '테니스',
+      '등산',
+      '사이클',
+      '수영',
+      '크로스 트레이닝',
+      '걷기',
+    ],
     datasets: [
       {
-        data: [30, 25, 20, 15, 10],
+        data: [30, 25, 20, 15, 5, 5, 5],
         backgroundColor: [
-          '#98A8FF',
-          '#00D9FF',
-          '#3E82F1',
-          '#98A8F1',
+          '#2196F3',
+          '#F44336',
+          '#4CAF50',
+          '#795548',
           '#00D9F1',
-          '#3E82FF',
+          '#FF9800',
+          '#03A9F4',
+          '#9C27B0',
+          '#009688',
         ],
       },
     ],

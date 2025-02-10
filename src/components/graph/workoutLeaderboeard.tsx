@@ -2,17 +2,18 @@ import WorkoutLeaderboardItem from './workoutLeaderboardItem';
 
 const WorkoutLeaderboeard = () => {
   const leaderboardData = [
-    { rank: 1, name: '은지', score: '979.2pt' },
-    { rank: 2, name: '희주', score: '879.2pt' },
-    { rank: 3, name: '민희', score: '779.2pt' },
-    { rank: 4, name: '다희', score: '679.2pt' },
-    { rank: 5, name: '민재', score: '579.2pt' },
-    { rank: 6, name: '영진', score: '479.2pt' },
-    { rank: 7, name: '현지', score: '379.2pt' },
-    { rank: 8, name: '유준', score: '279.2pt' },
-    { rank: 9, name: '주형', score: '179.2pt' },
-    { rank: 10, name: '희영', score: '99.2pt' },
-    { rank: 11, name: '대희', score: '79.2pt' },
+    { rank: 1, name: '하은', score: 100.1 },
+    { rank: 2, name: '설희', score: 38.6 },
+    { rank: 3, name: '건호', score: 33.3 },
+    { rank: 4, name: '채린', score: 28 },
+    { rank: 5, name: '수경', score: 27.9 },
+    { rank: 6, name: '종원', score: 26.7 },
+    { rank: 7, name: '성훈', score: 24.7 },
+    { rank: 8, name: 'suyeon', score: 20 },
+    { rank: 8, name: 'Ahyun', score: 20 },
+    { rank: 9, name: 'Hyeonwoo', score: 17.8 },
+    { rank: 10, name: 'Mārtiņš', score: 10 },
+    { rank: 11, name: '지니', score: 10 },
   ];
 
   return (
