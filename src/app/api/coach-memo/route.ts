@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       );
     }
-    console.log('dailyRecord', dailyRecord);
+    // console.log('dailyRecord', dailyRecord);
 
     // 트랜잭션으로 피드백 처리
     const feedback = await prisma.$transaction(async (tx) => {
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
         });
       }
     });
-    console.log('feedback', feedback);
+    //console.log('feedback', feedback);
 
     return NextResponse.json(feedback);
   } catch (error) {

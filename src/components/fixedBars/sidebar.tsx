@@ -151,7 +151,7 @@ export default function Sidebar({
               <div className="relative">
                 <button
                   onClick={handleDropdown}
-                  className="w-[17rem] flex items-center justify-between lg:text-1.5-900 border-b-[0.1rem] border-gray-13 py-[0.8rem] sm:w-full"
+                  className="w-[17rem] flex items-center justify-between lg:text-1.5-900 border-b-[0.1rem] border-gray-13 py-[0.8rem] sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500 cursor-pointer"
                 >
                   챌린지
                   {isOpenDropdown ? (
@@ -161,6 +161,7 @@ export default function Sidebar({
                       height={30}
                       alt="arrow-down "
                       className="w-[1rem] "
+                      onClick={handleDropdown}
                     />
                   ) : (
                     <Image
@@ -169,16 +170,17 @@ export default function Sidebar({
                       height={30}
                       alt="arrow-up "
                       className="w-[1rem] "
+                      onClick={handleDropdown}
                     />
                   )}
                 </button>
                 {isOpenDropdown && (
-                  <div className="relative lg:relative md:fixed md:left-0 md:right-0 md:bg-white md:w-full md:z-50 md:mt-0 sm:h-screen">
-                    <div className="md:flex md:flex-col md:items-center">
+                  <div className="relative lg:relative md:fixed md:left-0 md:right-0 md:bg-white md:w-full md:z-50 md:mt-0 sm:h-screen sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500 ">
+                    <div className=" md:flex md:flex-col md:items-center">
                       {data.map((item: any, index: number) => (
                         <div
                           key={`challenge-${index}`}
-                          className={`w-[15rem] p-[1rem] text-gray-2 dark:text-white ${
+                          className={` w-[15rem] p-[1rem] text-gray-2 dark:text-white ${
                             selectedTitle === item.challenges.title
                               ? 'bg-gray-100'
                               : ''

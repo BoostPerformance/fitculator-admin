@@ -200,7 +200,7 @@ export default function User() {
   //console.log('filteredDailyRecordsbyId', filteredDailyRecordsbyId);
 
   return (
-    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] pr-[1rem] h-screen overflow-hidden sm:flex-col">
+    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
