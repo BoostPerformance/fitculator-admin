@@ -46,7 +46,7 @@ export default function MobileChart({
       <div className="flex flex-col gap-4">
         {dietDetailItems.map((meal: any, index: any) => {
           return (
-            <>
+            <div className="pt-[1rem]" key={meal.user.id || index}>
               <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem]">
                 {meal.user.username}
               </div>
@@ -78,10 +78,10 @@ export default function MobileChart({
                   </tr>
                 </tbody>
               </table>
-              <div className="w-full text-center">
+              <div className="w-full text-center pt-[2rem]">
                 {isfeedback(meal.daily_record.feedbacks?.coach_feedback)}
               </div>
-            </>
+            </div>
           );
         })}
       </div>
