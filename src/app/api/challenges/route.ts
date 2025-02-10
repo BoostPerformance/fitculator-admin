@@ -91,7 +91,7 @@ export async function GET() {
     )
   `
         )
-        .eq('coach_id', coach.id);
+        .eq('coach_id', coach?.id);
 
       //  console.log('coach object:', coach); // coach 객체 전체 내용 확인
       //console.log('coach id type:', typeof coach); // id의 타입 확인
