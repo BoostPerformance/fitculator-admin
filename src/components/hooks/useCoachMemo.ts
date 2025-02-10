@@ -28,7 +28,7 @@ export const useCoachMemo = () => {
       }
 
       const result = await response.json();
-      console.log('coach-memo result:', result);
+      //  console.log('coach-memo result:', result);
       return result;
     } catch (err) {
       setError(

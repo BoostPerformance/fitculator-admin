@@ -120,7 +120,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
     //   }
     // }, [dailyRecordsData]);
   };
-  console.log('dailyRecordsData', dailyRecordsData);
+  //console.log('dailyRecordsData', dailyRecordsData);
 
   return (
     <div className="mt-[1.4rem]">
