@@ -44,20 +44,9 @@ const DailyDietRecord = ({ activities }: any) => {
     return records.some((record) => record.record_date === date);
   };
 
-  const calculateProgress = (participant: ChallengeParticipant) => {
-    const weekDates = getWeekDates(participant.challenges.start_date);
-    const completedDays = participant.daily_records.length;
-    const totalDays = weekDates.length;
-    return {
-      completed: completedDays,
-      total: totalDays,
-      formatted: `${completedDays}/${totalDays}`,
-    };
-  };
-
   return (
-    <div className="bg-white sm:p-6 md:p-6 rounded-lg p-3 lg:py-7 col-span-3 pl-8 md:flex md:flex-col md:items-center">
-      <h2 className="text-xl font-medium mb-6 text-gray-600 text-left">
+    <div className="bg-white rounded-lg p-6 col-span-2 min-w-[600px]">
+      <h2 className="text-xl font-medium mb-6 text-gray-600">
         일별 식단 기록 현황
       </h2>
 
@@ -94,8 +83,8 @@ const DailyDietRecord = ({ activities }: any) => {
 
                 <div className="flex items-start gap-[2rem] sm:gap-3 sm:w-[17rem] md:gap-2">
                   <div>
-                    <div className="flex lg:items-center sm:flex-col lg:gap-[3rem] md:gap-[2rem]">
-                      <div className="flex gap-1 sm:gap-2 md:gap-[1rem]">
+                    <div className="flex  flex-col md:gap-[2rem]">
+                      <div className="flex gap-[0.7rem] sm:gap-2 md:gap-[1rem]">
                         {weekDates.map((date, idx) => {
                           const hasRecord = hasRecordForDate(
                             activity.daily_records,
@@ -112,7 +101,7 @@ const DailyDietRecord = ({ activities }: any) => {
                       </div>
 
                       <div className="flex flex-1 items-center gap-2">
-                        <div className="h-3 mt-[1rem] bg-orange-500 rounded-full w-[17rem] sm:w-[13.5rem] sm:mt-[1rem] md:mt-[1rem] md:w-[16.5rem]" />
+                        <div className="h-3 mt-[1rem] bg-orange-500 rounded-full w-[13.5rem] sm:mt-[1rem] md:mt-[1rem] md:w-[16.5rem]" />
                       </div>
                     </div>
                   </div>

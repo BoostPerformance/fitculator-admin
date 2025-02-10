@@ -88,22 +88,12 @@ export default function TrafficSourceChart() {
         인기운동
       </h2>
       <div>
-        <div className="flex items-center justify-around">
-          <div className="lg:w-[15rem] sm:w-[15rem] sm:py-[2rem]">
-            <Doughnut data={data} options={options} />
-          </div>
+        <div className="w-full sm:py-[2rem] pb-[1rem] flex items-center justify-center">
+          <Doughnut data={data} options={options} />
         </div>
-        <div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="302"
-            height="2"
-            viewBox="0 0 302 2"
-            fill="none"
-          >
-            <path d="M0 1H302" stroke="#E1E1E1" />
-          </svg>
-          <div className="border-t border-gray-200 pt-4 sm:px-[3rem]">
+
+        <div className="w-full gap-[2rem]">
+          <div className="lg:px-[2rem] border-t border-gray-200 pt-4 sm:px-[3rem]">
             <div className="flex justify-between text-gray-7 sm:py-[1rem]">
               <div className="sm:px-[1rem]">운동종목</div>
               <div>퍼센트</div>
