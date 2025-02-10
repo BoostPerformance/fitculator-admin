@@ -139,7 +139,9 @@ const TextBox = ({
               width={17}
               height={17}
               className={`absolute top-[1.2rem] ${
-                button2 ? 'sm:left-[2rem]' : 'sm:left-[6rem] sm:top-[1.3rem]'
+                button2
+                  ? 'lg:right-[5.3rem] lg:top-[1.2rem] sm:left-[2rem]'
+                  : 'lg:right-[11.5rem] lg:top-[1.3rem] sm:left-[6rem] sm:top-[1.3rem]'
               }  w-4 h-4`}
               onClick={handleButtonClick}
             />
