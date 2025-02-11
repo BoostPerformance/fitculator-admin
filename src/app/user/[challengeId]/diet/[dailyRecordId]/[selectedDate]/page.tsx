@@ -159,10 +159,10 @@ export default function SelectedDate() {
         return;
       }
 
-      const response = await saveFeedback({
-        daily_record_id: dailyRecord.id,
-        coach_feedback: feedback,
-      });
+      // const response = await saveFeedback({
+      //   daily_record_id: dailyRecord.id,
+      //   coach_feedback: feedback,
+      // });
 
       // console.log('피드백 저장 응답:', response); // 응답 확인
       setShowAlert(true);
