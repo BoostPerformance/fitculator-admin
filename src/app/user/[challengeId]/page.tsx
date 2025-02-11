@@ -79,6 +79,34 @@ interface ChallengeParticipant {
 type ParamsType = {
   challengeId: string;
 };
+
+const calculateChallengeProgress = (startDate: string, endDate: string) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const today = new Date();
+
+  // 전체 챌린지 기간 계산
+  const totalDays =
+    Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+  // 오늘까지의 진행 일수 계산
+  let progressDays;
+  if (today < start) {
+    progressDays = 0;
+  } else if (today > end) {
+    progressDays = totalDays;
+  } else {
+    progressDays = Math.ceil(
+      (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+    );
+  }
+
+  return {
+    progressDays: progressDays.toString(),
+    totalDays: totalDays.toString(),
+  };
+};
+
 export default function User() {
   const params = useParams() as ParamsType;
 
@@ -127,6 +155,7 @@ export default function User() {
           throw new Error('Failed to fetch challenges');
         }
         const challengesData = await challengesResponse.json();
+        console.log('challengesData', challengesData);
 
         const sortedChallenges = challengesData.sort(
           (a: Challenges, b: Challenges) => {
@@ -204,6 +233,26 @@ export default function User() {
   );
   //console.log('dailyRecords', dailyRecords);
 
+  const getSelectedChallengeDates = () => {
+    const selectedChallenge = challenges.find(
+      (challenge) => challenge.challenges.id === selectedChallengeId
+    );
+    return selectedChallenge
+      ? {
+          startDate: selectedChallenge.challenges.start_date,
+          endDate: selectedChallenge.challenges.end_date,
+        }
+      : null;
+  };
+
+  const challengeDates = getSelectedChallengeDates();
+  const progress = challengeDates
+    ? calculateChallengeProgress(
+        challengeDates.startDate,
+        challengeDates.endDate
+      )
+    : { progressDays: '0', totalDays: '0' };
+
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col sm:px-[1rem]">
       <Sidebar
@@ -224,8 +273,8 @@ export default function User() {
           </div>
           <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
             <TotalFeedbackCounts
-              counts="0"
-              total="0"
+              counts={progress.progressDays}
+              total={`${progress.totalDays}일`}
               title="진행현황"
               borderColor="border-green"
               textColor="text-green"
@@ -259,7 +308,7 @@ export default function User() {
             />
             <TotalFeedbackCounts
               counts={'0'}
-              total={'0'}
+              total={''}
               title={'전체 운동 업로드 수'}
               borderColor="border-blue-5"
               textColor="text-blue-5"
