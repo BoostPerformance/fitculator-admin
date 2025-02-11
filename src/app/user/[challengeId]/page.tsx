@@ -306,7 +306,7 @@ export default function User() {
     : { progressDays: '0', totalDays: '0' };
 
   return (
-    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col sm:px-[1rem]">
+    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col sm:px-[1rem] md:flex-col md:px-[0.4rem]">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
@@ -335,7 +335,12 @@ export default function User() {
             <TotalFeedbackCounts
               counts={`${workOutCountToday}`}
               total={'24명'}
-              title={'오늘 운동 업로드 멤버'}
+              title={
+                <span>
+                  오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
+                  업로드 멤버
+                </span>
+              }
               borderColor="border-blue-5"
               textColor="text-blue-5"
             />
@@ -354,14 +359,24 @@ export default function User() {
                   selectedChallengeId
                 ).total
               }
-              title={'오늘 식단 업로드 멤버'}
+              title={
+                <span>
+                  오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
+                  업로드 멤버
+                </span>
+              }
               borderColor="border-yellow"
               textColor="text-yellow"
             />
             <TotalFeedbackCounts
               counts={`${workoutCount}개`}
               total={''}
-              title={'전체 운동 업로드 수'}
+              title={
+                <span>
+                  전체 운동 <br className="md:inline sm:hidden lg:hidden" />
+                  업로드 수
+                </span>
+              }
               borderColor="border-blue-5"
               textColor="text-blue-5"
             />
@@ -380,7 +395,12 @@ export default function User() {
                   selectedChallengeId
                 ).total
               }
-              title={'전체 식단 업로드 수'}
+              title={
+                <span>
+                  전체 식단 <br className="md:inline sm:hidden lg:hidden" />
+                  업로드 수
+                </span>
+              }
               borderColor="border-yellow"
               textColor="text-yellow"
             />

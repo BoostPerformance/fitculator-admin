@@ -91,7 +91,7 @@ export default function Sidebar({
 
   return (
     <div className="sm:relative top-0 z-40">
-      <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[18rem]">
+      <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]">
         <button
           onClick={handleSidebarOpen}
           className={`${isMobile ? '' : 'hidden'}`}
@@ -112,13 +112,13 @@ export default function Sidebar({
               width={30}
               height={30}
               alt="logo"
-              className={` w-[1rem] dark:invert`}
+              className={` w-[1rem] dark:invert lg:w-[0.8rem]`}
             />
           </button>
         </div>
       </div>
       {userDropdown && (
-        <div className="z-50 sm:top-full sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1 items-start flex-col text-gray-10 text-1-700 gap-[0.5rem] bg-white drop-shadow-md lg: absolute lg:left-[1rem] rounded-[0.5rem] lg:w-[17rem] sm:w-[14rem] sm:items-end lg:items-end md:right-[1rem] md:w-[10rem] md:items-end">
+        <div className="z-50 sm:top-full sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1 items-start flex-col text-gray-10 text-1-700 gap-[0.5rem] bg-white drop-shadow-md lg:absolute lg:left-[0.5rem] rounded-[0.5rem] lg:w-[14rem] sm:w-[14rem] sm:items-end lg:items-end md:right-[1rem] md:w-[10rem] md:items-end ">
           {/* <div className="hover:bg-gray-3 ">전체회원 정보보기</div>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -144,14 +144,14 @@ export default function Sidebar({
 
       {(isSidebarOpen || !isMobile) && (
         <div
-          className={` bg-white drop-shadow-sm dark:bg-blue-4 sm:w-full sm:flex sm:items-center sm:justify-center lg:h-full z-50 md:w-full md:items-center md:flex  md:justify-center  md:border  lg:w-[18rem]`}
+          className={` bg-white drop-shadow-sm dark:bg-blue-4 sm:w-full sm:flex sm:items-center sm:justify-center lg:h-full z-50 md:w-full md:items-center md:flex md:border lg:w-[15rem] md:justify-start`}
         >
-          <div className=" flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[18rem] md:w-[18rem] p-[2.3rem] sm:items-center md:py-[1rem] md:pb-[2rem]">
+          <div className=" flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[15rem] md:w-[18rem] p-[2.3rem] sm:items-center md:py-[1rem]  md:pb-[2rem]">
             <nav className="w-full">
               <div className="relative">
                 <button
                   onClick={handleDropdown}
-                  className="w-[14rem] flex items-center justify-between lg:text-1.5-900 border-b-[0.1rem] border-gray-13 py-[0.8rem] sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500 cursor-pointer"
+                  className="w-[11rem] flex items-center justify-between lg:text-1.25-900 border-b-[0.1rem] border-gray-13 py-[0.8rem] sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500 cursor-pointer"
                 >
                   챌린지
                   {isOpenDropdown ? (
@@ -160,7 +160,7 @@ export default function Sidebar({
                       width={20}
                       height={30}
                       alt="arrow-down "
-                      className="w-[1rem] "
+                      className="w-[1rem] lg:w-[0.8rem]"
                       onClick={handleDropdown}
                     />
                   ) : (
@@ -169,18 +169,18 @@ export default function Sidebar({
                       width={20}
                       height={30}
                       alt="arrow-up "
-                      className="w-[1rem] "
+                      className="w-[1rem]  lg:w-[0.8rem]"
                       onClick={handleDropdown}
                     />
                   )}
                 </button>
                 {isOpenDropdown && (
-                  <div className="relative lg:relative md:fixed md:left-0 md:right-0 md:bg-white md:w-full md:z-50 md:mt-0 sm:h-screen sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500 ">
-                    <div className=" md:flex md:flex-col md:items-center">
+                  <div className="relative lg:relative md:fixed md:left-0 md:right-0 md:bg-white md:w-full md:z-50 md:mt-0 sm:h-screen sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500">
+                    <div className=" md:flex md:flex-col md:items-start md:pl-6">
                       {data.map((item: any, index: number) => (
                         <div
                           key={`challenge-${index}`}
-                          className={` w-[14rem] p-[1rem] text-gray-2 dark:text-white ${
+                          className={` w-[11rem] md:w-[12rem] p-[1rem] text-gray-2 dark:text-white ${
                             selectedTitle === item.challenges.title
                               ? 'bg-gray-100'
                               : ''
@@ -188,7 +188,7 @@ export default function Sidebar({
                         >
                           <div className="flex flex-col gap-2">
                             <button
-                              className="lg:text-1.25-700 text-left hover:bg-gray-3"
+                              className="lg:text-1-700 text-left hover:bg-gray-3"
                               onClick={() => handleChallengeClick(item)}
                             >
                               {item.challenges.title}
@@ -205,6 +205,7 @@ export default function Sidebar({
                               />
                               <Link href={`/user/${item.challenges.id}/diet`}>
                                 <button
+                                  className="lg:text-1-700 md:text-1.125-500 sm:text-1-500"
                                   onClick={() => handleChallengeClick(item)}
                                 >
                                   식단
