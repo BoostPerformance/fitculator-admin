@@ -8,7 +8,11 @@ import { useParams } from 'next/navigation';
 import Sidebar from '@/components/fixedBars/sidebar';
 import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
 import Calendar from '@/components/input/calendar';
-import { DailyMealData, UserData, PhotoData } from '@/types/dietItemContainerTypes';
+import {
+  DailyMealData,
+  UserData,
+  PhotoData,
+} from '@/types/dietItemContainerTypes';
 import calendarUtils from '@/components/utils/calendarUtils';
 import DateInput from '@/components/input/dateInput';
 import { useFeedback } from '@/components/hooks/useFeedback';
@@ -36,7 +40,6 @@ const CustomAlert = ({ message, isVisible, onClose }: CustomAlertProps) => {
     </div>
   );
 };
-
 
 type PageParams = {
   challengeId: string;
@@ -139,9 +142,9 @@ export default function SelectedDate() {
         return;
       }
 
-      await saveFeedback({
+      const response = await saveFeedback({
         daily_record_id: dailyRecord.id,
-        coach_feedback: feedback
+        coach_feedback: feedback,
       });
 
       // console.log('피드백 저장 응답:', response); // 응답 확인
@@ -278,7 +281,7 @@ export default function SelectedDate() {
   const handleGenerateAnalyse = async () => {
     try {
       setIsDisable(true);
-      
+
       // 현재 선택된 daily record의 ID 찾기
       const currentChallenge = challenges.find(
         (challenge) => challenge.challenge_id === selectedChallengeId
@@ -289,9 +292,10 @@ export default function SelectedDate() {
         return;
       }
 
-      const participant = currentChallenge.challenges.challenge_participants.find(
-        (participant) => participant.users.id === params.dailyRecordId
-      );
+      const participant =
+        currentChallenge.challenges.challenge_participants.find(
+          (participant) => participant.users.id === params.dailyRecordId
+        );
 
       if (!participant) {
         console.error('Participant not found');
@@ -421,25 +425,32 @@ export default function SelectedDate() {
         const mealsData = await mealsResponse.json();
 
         const userMeals = mealsData.filter(
-          (meal: { daily_records?: { challenge_participants?: { users?: { id: string } } } }) =>
+          (meal: {
+            daily_records?: {
+              challenge_participants?: { users?: { id: string } };
+            };
+          }) =>
             meal.daily_records?.challenge_participants?.users?.id ===
             params.dailyRecordId
         );
 
         const mealsByDate = userMeals.reduce(
-          (acc: { [key: string]: DailyMealData }, meal: { 
-            daily_records: { 
-              record_date: string;
-              feedbacks?: {
-                coach_feedback?: string;
-                ai_feedback?: string;
-              }
-            };
-            meal_type: string;
-            description?: string;
-            meal_photos?: PhotoData[];
-            updated_at?: string;
-          }) => {
+          (
+            acc: { [key: string]: DailyMealData },
+            meal: {
+              daily_records: {
+                record_date: string;
+                feedbacks?: {
+                  coach_feedback?: string;
+                  ai_feedback?: string;
+                };
+              };
+              meal_type: string;
+              description?: string;
+              meal_photos?: PhotoData[];
+              updated_at?: string;
+            }
+          ) => {
             const date = meal.daily_records.record_date;
 
             if (!acc[date]) {
@@ -471,8 +482,9 @@ export default function SelectedDate() {
         );
 
         const mealsByDateValues = Object.values(mealsByDate) as DailyMealData[];
-        const sortedMeals = mealsByDateValues.sort((a, b) =>
-          new Date(b.recordDate).getTime() - new Date(a.recordDate).getTime()
+        const sortedMeals = mealsByDateValues.sort(
+          (a, b) =>
+            new Date(b.recordDate).getTime() - new Date(a.recordDate).getTime()
         );
 
         setAllDailyMeals(sortedMeals); // 전체 기록 저장
@@ -497,7 +509,8 @@ export default function SelectedDate() {
         setChallenges(challengeData);
 
         const currentChallenge = challengeData.find(
-          (challenge: ProcessedMeal) => challenge.challenge_id === params.challengeId
+          (challenge: ProcessedMeal) =>
+            challenge.challenge_id === params.challengeId
         );
         if (currentChallenge) {
           setChallengeTitle(currentChallenge.challenges.title);
@@ -531,6 +544,7 @@ export default function SelectedDate() {
         }
 
         const orgDataResponse = await fetch('/api/coach-info');
+
         const orgData = await orgDataResponse.json();
 
         setOrgName(orgData);
@@ -658,7 +672,11 @@ export default function SelectedDate() {
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
       <CustomAlert
-        message={isDisable ? "AI 피드백을 생성 중입니다..." : "AI 피드백이 생성되었습니다."}
+        message={
+          isDisable
+            ? 'AI 피드백을 생성 중입니다...'
+            : 'AI 피드백이 생성되었습니다.'
+        }
         isVisible={showAlert}
         onClose={() => setShowAlert(false)}
       />

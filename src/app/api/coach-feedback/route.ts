@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       .eq('admin_user_id', adminUser?.id)
       .single();
 
-    //console.log('coach정보', coach);
+    console.log('coach정보', coach);
     const body = await req.json();
 
     if (!body.daily_record_id) {

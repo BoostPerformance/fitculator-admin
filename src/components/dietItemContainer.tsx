@@ -37,9 +37,7 @@ export default function DietItemContainer() {
   const [isDisable, setIsDisable] = useState(false);
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
-
   const [coachFeedback, setCoachFeedback] = useState('');
-
   const [challengeTitle, setChallengeTitle] = useState('');
   const [recordDate, setRecordDate] = useState('');
   const [userData, setUserData] = useState({
