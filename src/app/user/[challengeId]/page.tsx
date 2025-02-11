@@ -80,6 +80,10 @@ type ParamsType = {
   challengeId: string;
 };
 
+interface Workouts {
+  created_at: string;
+}
+
 const calculateChallengeProgress = (startDate: string, endDate: string) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -109,7 +113,8 @@ const calculateChallengeProgress = (startDate: string, endDate: string) => {
 
 export default function User() {
   const params = useParams() as ParamsType;
-
+  const [workoutCount, setWorkoutCount] = useState([]);
+  const [workOutCountToday, setWorkOutCountToday] = useState<number>(0);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<any[]>([]);
@@ -149,13 +154,60 @@ export default function User() {
 
     const fetchData = async () => {
       try {
+        const workoutData = await fetch('/api/workouts');
+
+        if (!workoutData.ok) {
+          throw new Error('Failed to fetch workoutData');
+        }
+        const workoutDataResponse = await workoutData.json();
+
+        //console.log('workoutDataResponse', workoutDataResponse);
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = '2025-02-10';
+
+        const workOutCount = workoutDataResponse.filter((item: any) => {
+          const createdAt = item.created_at.split('T')[0];
+
+          return createdAt === today;
+        }).length;
+
+        setWorkoutCount(workOutCount);
+
+        // 먼저 오늘 날짜의 기록만 필터링
+        const todaysWorkouts = workoutDataResponse.filter((item: any) => {
+          const createdAt = item.created_at.split('T')[0];
+          return createdAt === today;
+        });
+
+        const arrWorkout = todaysWorkouts.map((item: any) => {
+          return item.user_id;
+        });
+        const newSet = new Set(arrWorkout);
+        const totalWorkoutUploadMember = newSet.size;
+        // console.log('newSet', newSet.size);
+
+        // // 필터링된 기록에서 고유한 user_id만 추출
+        // const uniqueUsers = new Set(
+        //   todaysWorkouts.map((item: any) => {
+        //     //   console.log('todaysWorkouts item', item);
+        //     return item.user_id;
+        //   })
+        // );
+
+        // // 고유한 사용자 수
+        // const workOutCounting = uniqueUsers.size;
+
+        setWorkOutCountToday(totalWorkoutUploadMember);
+        // console.log('Unique users who worked out today:', workOutCount);
+
         // 챌린지 데이터 가져오기
+
         const challengesResponse = await fetch('/api/challenges');
         if (!challengesResponse.ok) {
           throw new Error('Failed to fetch challenges');
         }
         const challengesData = await challengesResponse.json();
-        console.log('challengesData', challengesData);
+        // console.log('challengesData', challengesData);
 
         const sortedChallenges = challengesData.sort(
           (a: Challenges, b: Challenges) => {
@@ -281,8 +333,8 @@ export default function User() {
               grids="col-span-2"
             />
             <TotalFeedbackCounts
-              counts={'0'}
-              total={'0'}
+              counts={`${workOutCountToday}`}
+              total={'24명'}
               title={'오늘 운동 업로드 멤버'}
               borderColor="border-blue-5"
               textColor="text-blue-5"
@@ -307,7 +359,7 @@ export default function User() {
               textColor="text-yellow"
             />
             <TotalFeedbackCounts
-              counts={'0'}
+              counts={`${workoutCount}개`}
               total={''}
               title={'전체 운동 업로드 수'}
               borderColor="border-blue-5"

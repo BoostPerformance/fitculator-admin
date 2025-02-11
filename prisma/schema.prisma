@@ -178,6 +178,7 @@ model users {
   updated_at             DateTime?                @default(now()) @db.Timestamp(6)
   profile_image_url      String?
   challenge_participants challenge_participants[]
+  workouts               workouts[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -192,6 +193,31 @@ model feedbacks {
   updated_at      DateTime?     @default(now()) @db.Timestamptz(6)
   coaches         coaches?      @relation(fields: [coach_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   daily_records   daily_records @relation(fields: [daily_record_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model workout_types {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String    @db.VarChar(20)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model workouts {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String?   @db.Uuid
+  category_id      String?   @db.Uuid
+  title            String    @db.VarChar(100)
+  timestamp        DateTime  @db.Timestamp(6)
+  duration_minutes Int
+  avg_heart_rate   Int
+  max_heart_rate   Int?
+  points           Float     @db.Real
+  calories         Int
+  progress         Decimal?  @db.Decimal(3, 2)
+  note             String?
+  created_at       DateTime? @default(now()) @db.Timestamp(6)
+  intensity        Int?      @db.SmallInt
+  users            users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum admin_role {
