@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import TextBox from '@/components/textBox';
-import { AI_Feedback } from '@/components/mock/DietItems';
 import Title from '@/components/layout/title';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import MealPhotoLayout from '@/components/layout/mealPhotoLayout';
@@ -9,7 +8,7 @@ import { useParams } from 'next/navigation';
 import Sidebar from '@/components/fixedBars/sidebar';
 import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
 import Calendar from '@/components/input/calendar';
-import { DailyMealData, UserData } from '@/types/dietItemContainerTypes';
+import { DailyMealData, UserData, PhotoData } from '@/types/dietItemContainerTypes';
 import calendarUtils from '@/components/utils/calendarUtils';
 import DateInput from '@/components/input/dateInput';
 import { useFeedback } from '@/components/hooks/useFeedback';
@@ -38,11 +37,6 @@ const CustomAlert = ({ message, isVisible, onClose }: CustomAlertProps) => {
   );
 };
 
-const getAIFeedback = (user_id: string, date: string) => {
-  return AI_Feedback.find(
-    (feedback) => feedback.user_id === user_id && feedback.date === date
-  );
-};
 
 type PageParams = {
   challengeId: string;
@@ -109,22 +103,8 @@ export default function SelectedDate() {
   const [filteredDailyMeals, setFilteredDailyMeals] = useState<DailyMealData[]>(
     []
   ); // 필터링된 기록
-  const emptyDailyMeal = {
-    recordDate: recordDate,
-    meals: {
-      breakfast: { description: '', mealPhotos: [], updatedAt: '' },
-      lunch: { description: '', mealPhotos: [], updatedAt: '' },
-      dinner: { description: '', mealPhotos: [], updatedAt: '' },
-      snack: { description: '', mealPhotos: [], updatedAt: '' },
-      supplement: { description: '', mealPhotos: [], updatedAt: '' },
-    },
-    feedbacks: {
-      coach_feedback: '',
-      ai_feedback: '',
-    },
-  };
 
-  const handleSaveFeedback = async (feedback: string, date: string) => {
+  const handleSaveFeedback = async (feedback: string) => {
     try {
       if (!recordDate) {
         console.error('No record date selected');
@@ -159,10 +139,11 @@ export default function SelectedDate() {
         return;
       }
 
-      // const response = await saveFeedback({
-      //   daily_record_id: dailyRecord.id,
-      //   coach_feedback: feedback,
-      // });
+      await saveFeedback({
+        daily_record_id: dailyRecord.id,
+        coach_feedback: feedback,
+        coach_id: orgName.username // Add coach_id from orgName
+      });
 
       // console.log('피드백 저장 응답:', response); // 응답 확인
       setShowAlert(true);
@@ -295,9 +276,83 @@ export default function SelectedDate() {
     }));
   };
 
-  const handleGenerateAnalyse = () => {
-    setIsDisable(true);
-    console.log('AI 결과 생성 중...');
+  const handleGenerateAnalyse = async () => {
+    try {
+      setIsDisable(true);
+      
+      // 현재 선택된 daily record의 ID 찾기
+      const currentChallenge = challenges.find(
+        (challenge) => challenge.challenge_id === selectedChallengeId
+      );
+
+      if (!currentChallenge) {
+        console.error('Challenge not found');
+        return;
+      }
+
+      const participant = currentChallenge.challenges.challenge_participants.find(
+        (participant) => participant.users.id === params.dailyRecordId
+      );
+
+      if (!participant) {
+        console.error('Participant not found');
+        return;
+      }
+
+      const dailyRecord = participant.daily_records.find(
+        (record) => record.record_date === recordDate
+      );
+
+      if (!dailyRecord) {
+        console.error('Daily record not found');
+        return;
+      }
+
+      // AI 피드백 생성 API 호출
+      const response = await fetch('/api/diet-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          dailyRecordId: dailyRecord.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate AI feedback');
+      }
+
+      const feedback = await response.json();
+
+      // 피드백 상태 업데이트
+      const updatedAllMeals = allDailyMeals.map((meal) =>
+        meal.recordDate === recordDate
+          ? {
+              ...meal,
+              feedbacks: {
+                ...meal.feedbacks,
+                ai_feedback: feedback.ai_feedback,
+              },
+            }
+          : meal
+      );
+      setAllDailyMeals(updatedAllMeals);
+
+      const updatedFilteredMeals = updatedAllMeals.filter(
+        (meal) => meal.recordDate === recordDate
+      );
+      setFilteredDailyMeals(updatedFilteredMeals);
+
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Error generating AI feedback:', error);
+    } finally {
+      setIsDisable(false);
+    }
   };
 
   // const handleSaveFeedback = (
@@ -367,13 +422,25 @@ export default function SelectedDate() {
         const mealsData = await mealsResponse.json();
 
         const userMeals = mealsData.filter(
-          (meal: any) =>
+          (meal: { daily_records?: { challenge_participants?: { users?: { id: string } } } }) =>
             meal.daily_records?.challenge_participants?.users?.id ===
             params.dailyRecordId
         );
 
         const mealsByDate = userMeals.reduce(
-          (acc: { [key: string]: DailyMealData }, meal: any) => {
+          (acc: { [key: string]: DailyMealData }, meal: { 
+            daily_records: { 
+              record_date: string;
+              feedbacks?: {
+                coach_feedback?: string;
+                ai_feedback?: string;
+              }
+            };
+            meal_type: string;
+            description?: string;
+            meal_photos?: PhotoData[];
+            updated_at?: string;
+          }) => {
             const date = meal.daily_records.record_date;
 
             if (!acc[date]) {
@@ -404,10 +471,10 @@ export default function SelectedDate() {
           {}
         );
 
-        const sortedMeals = Object.values(mealsByDate).sort(
-          (a: any, b: any) =>
-            new Date(b.recordDate).getTime() - new Date(a.recordDate).getTime()
-        ) as DailyMealData[];
+        const mealsByDateValues = Object.values(mealsByDate) as DailyMealData[];
+        const sortedMeals = mealsByDateValues.sort((a, b) =>
+          new Date(b.recordDate).getTime() - new Date(a.recordDate).getTime()
+        );
 
         setAllDailyMeals(sortedMeals); // 전체 기록 저장
 
@@ -431,7 +498,7 @@ export default function SelectedDate() {
         setChallenges(challengeData);
 
         const currentChallenge = challengeData.find(
-          (challenge: any) => challenge.challenge_id === params.challengeId
+          (challenge: ProcessedMeal) => challenge.challenge_id === params.challengeId
         );
         if (currentChallenge) {
           setChallengeTitle(currentChallenge.challenges.title);
@@ -592,7 +659,7 @@ export default function SelectedDate() {
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
       <CustomAlert
-        message="피드백이 성공적으로 저장되었습니다."
+        message={isDisable ? "AI 피드백을 생성 중입니다..." : "AI 피드백이 생성되었습니다."}
         isVisible={showAlert}
         onClose={() => setShowAlert(false)}
       />
@@ -752,7 +819,7 @@ export default function SelectedDate() {
                   handleFeedbackChange(dailyMeal.recordDate, e.target.value)
                 }
                 onSave={async (feedback) => {
-                  await handleSaveFeedback(feedback, dailyMeal.recordDate);
+                  await handleSaveFeedback(feedback);
                 }}
                 isFeedbackMode={true}
                 copyIcon
