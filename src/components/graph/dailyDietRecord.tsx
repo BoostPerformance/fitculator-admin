@@ -49,14 +49,14 @@ const DailyDietRecord = ({ activities }: any) => {
       <div className="grid grid-cols-4 gap-4 ">
         {/* Header Row */}
         <div className="col-span-1 text-gray-500 text-right pr-4"></div>
-        <div className="col-span-1 grid grid-cols-7 gap-1">
+        <div className="col-span-1 grid grid-cols-7 gap-1 items-start">
           {days.map((day, idx) => (
-            <div key={idx} className="text-center text-gray-500 ">
+            <div key={idx} className="text-center text-gray-500 text-0.7-500">
               {day}
             </div>
           ))}
         </div>
-        <div className="col-span-1 text-center text-gray-500">
+        <div className="col-span-1 text-center text-gray-500 text-0.7-500">
           총 업로드 현황
         </div>
         <div className="col-span-1 text-center text-gray-500"></div>
@@ -67,8 +67,10 @@ const DailyDietRecord = ({ activities }: any) => {
           return (
             <React.Fragment key={index}>
               {/* Names Column */}
-              <div className="col-span-1 flex flex-col items-end pr-4">
-                <div className="text-gray-700">{activity.users.name}</div>
+              <div className="col-span-1 flex flex-col items-start pr-4">
+                <div className="text-gray-700 text-0.625-500">
+                  {activity.users.name}
+                </div>
               </div>
 
               {/* Daily Records Column */}
