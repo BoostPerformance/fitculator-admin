@@ -73,9 +73,10 @@ export const DietStatistics = ({ processedMeals }: DietStatsProps) => {
         textColor="text-green"
         grids="col-span-1"
       />
+
       <TotalFeedbackCounts
-        counts={feedbackStats.completed.toString()}
-        total={`${feedbackStats.total}명`}
+        counts={`${feedbackStats.total}명`}
+        total={''}
         title="피드백 미작성"
         borderColor="border-[#FDB810]"
         textColor="text-[#FDB810]"
