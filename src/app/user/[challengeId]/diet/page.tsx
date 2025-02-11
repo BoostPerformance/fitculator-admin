@@ -56,6 +56,10 @@ export default function DietItem() {
     () => processMeals(filteredByChallengeId),
     [filteredByChallengeId]
   );
+
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = '2025-02-11';
+
   const filteredByDate = processedMeals.filter(
     (meal) => meal.record_date === selectedDate
   );

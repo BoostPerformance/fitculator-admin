@@ -43,6 +43,7 @@ const DateInput = ({
       new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
     );
   };
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="relative sm:flex sm:justify-center">
