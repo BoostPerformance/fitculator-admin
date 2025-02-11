@@ -91,7 +91,7 @@ export default function Sidebar({
 
   return (
     <div className="sm:relative top-0 z-40">
-      <div className="sticky flex justify-end sm:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[18rem]">
+      <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[18rem]">
         <button
           onClick={handleSidebarOpen}
           className={`${isMobile ? '' : 'hidden'}`}
@@ -104,7 +104,7 @@ export default function Sidebar({
             className={` w-[1.5rem] dark:invert`}
           />
         </button>
-        <div className="flex sm:gap-[0.5rem] lg:gap-[1rem]">
+        <div className="flex sm:gap-[0.5rem] lg:gap-[1rem] md:gap-[1rem]">
           <div>안녕하세요, {coach}님 </div>
           <button onClick={handleUserDropdown}>
             <Image
@@ -118,7 +118,7 @@ export default function Sidebar({
         </div>
       </div>
       {userDropdown && (
-        <div className="z-50 sm:top-full sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1 items-start flex-col text-gray-10 text-1-700 gap-[0.5rem] bg-white drop-shadow lg: absolute lg:left-[1rem] rounded-[0.5rem] lg:w-[17rem] sm:w-[14rem] sm:items-end lg:items-end">
+        <div className="z-50 sm:top-full sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1 items-start flex-col text-gray-10 text-1-700 gap-[0.5rem] bg-white drop-shadow-md lg: absolute lg:left-[1rem] rounded-[0.5rem] lg:w-[17rem] sm:w-[14rem] sm:items-end lg:items-end md:right-[1rem] md:w-[10rem] md:items-end">
           {/* <div className="hover:bg-gray-3 ">전체회원 정보보기</div>
           <svg
             xmlns="http://www.w3.org/2000/svg"

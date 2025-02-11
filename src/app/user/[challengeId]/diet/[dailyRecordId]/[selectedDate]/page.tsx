@@ -687,7 +687,7 @@ export default function SelectedDate() {
   };
 
   return (
-    <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
+    <div className=" flex sm:flex-col md:flex-col gap-[1rem] sm:bg-[#E4E9FF] sm:min-w-[24rem]">
       <CustomAlert
         message={
           copyMessage
@@ -710,7 +710,7 @@ export default function SelectedDate() {
         coach={orgName.username}
       />
 
-      <div>
+      <div className="md:px-[1rem]">
         <div className="flex-1 py-[3rem]">
           <div className="sm:px-[1rem]">
             <div className=" flex">
