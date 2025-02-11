@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import TextBox from '@/components/textBox';
 import Title from '@/components/layout/title';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
@@ -61,6 +62,7 @@ type PageParams = {
 // };
 
 export default function SelectedDate() {
+  const router = useRouter();
   const { saveFeedback } = useFeedback();
   const [showAlert, setShowAlert] = useState(false);
 
@@ -667,7 +669,7 @@ export default function SelectedDate() {
     [allDailyMeals, challengePeriods]
   );
 
-  //console.log('challenges', challenges);
+  // console.log('challenges', selectedChallengeId);
 
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
@@ -709,7 +711,13 @@ export default function SelectedDate() {
             />
           </div>
           {mobileSize ? (
-            <div className="flex items-center justify-center ">
+            <div className="flex items-center justify-center flex-col">
+              <button
+                className=" p-4 drop-shadow-md hover:bg-gray-13 rounded-md border-[0.1rem]"
+                onClick={() => router.push(`/user/${selectedChallengeId}/diet`)}
+              >
+                ← 뒤로가기
+              </button>
               <Calendar
                 handlePrevMonth={handlePrevMonth}
                 handleNextMonth={handleNextMonth}
@@ -728,7 +736,13 @@ export default function SelectedDate() {
               />
             </div>
           ) : (
-            <div className="flex sm:justify-center sm:items-center pt-[1rem]">
+            <div className="flex sm:justify-center sm:items-center pt-[1rem] gap-[1rem]">
+              <button
+                className=" p-4 drop-shadow-md hover:bg-gray-13 rounded-md border-[0.1rem]"
+                onClick={() => router.push(`/user/${selectedChallengeId}/diet`)}
+              >
+                ← 뒤로가기
+              </button>
               <DateInput
                 onChange={(newDate: string) => {
                   setRecordDate(newDate); // selectedDate 대신 recordDate를 업데이트
