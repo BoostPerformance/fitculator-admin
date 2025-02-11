@@ -141,8 +141,7 @@ export default function SelectedDate() {
 
       await saveFeedback({
         daily_record_id: dailyRecord.id,
-        coach_feedback: feedback,
-        coach_id: orgName.username // Add coach_id from orgName
+        coach_feedback: feedback
       });
 
       // console.log('피드백 저장 응답:', response); // 응답 확인
