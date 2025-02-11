@@ -78,9 +78,9 @@ const TextBox = ({
     if (textareaRef.current) {
       try {
         await navigator.clipboard.writeText(textareaRef.current.value);
-        setCopyMessage(true); // "텍스트가 복사되었습니다" 메시지 표시
+        setCopyMessage(true);
         setTimeout(() => {
-          setCopyMessage(false); // 5초 후 메시지 숨김
+          setCopyMessage(false);
         }, 5000);
       } catch (err) {
         console.error('복사 실패:', err);

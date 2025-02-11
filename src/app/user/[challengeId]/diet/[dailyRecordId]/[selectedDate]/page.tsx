@@ -670,17 +670,37 @@ export default function SelectedDate() {
   );
 
   // console.log('challenges', selectedChallengeId);
+  const [copyMessage, setCopyMessage] = useState<boolean>(false);
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyMessage(true);
+      setShowAlert(true); // 복사 성공 알림 표시
+      setTimeout(() => {
+        setCopyMessage(false);
+        setShowAlert(false);
+      }, 3000);
+    } catch (err) {
+      console.error('복사 실패:', err);
+    }
+  };
 
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
       <CustomAlert
         message={
-          isDisable
-            ? 'AI 피드백을 생성 중입니다...'
-            : 'AI 피드백이 생성되었습니다.'
+          copyMessage
+            ? '복사가 완료됐습니다.'
+            : isDisable
+            ? '피드백 작성 중입니다...'
+            : '피드백 작성이 완료됐습니다.'
         }
-        isVisible={showAlert}
-        onClose={() => setShowAlert(false)}
+        isVisible={showAlert || copyMessage}
+        onClose={() => {
+          setShowAlert(false);
+          setCopyMessage(false);
+        }}
       />
 
       <Sidebar
@@ -826,6 +846,7 @@ export default function SelectedDate() {
                 placeholder="결과생성 버튼을 눌러주세요."
                 button1="생성"
                 button2="복사"
+                onClick2={() => handleCopy(dailyMeal.feedbacks.ai_feedback)}
                 onClick1={handleGenerateAnalyse}
                 readOnly={true}
                 svg1="/image/createIcon.png"
@@ -834,6 +855,7 @@ export default function SelectedDate() {
                   isDisable ? 'disabled bg-gray-1' : ''
                 } bg-[#F89A1B] text-white`}
                 Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
+                copyIcon
               />
 
               <TextBox
