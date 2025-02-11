@@ -11,6 +11,8 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
+    await prisma.$connect();
+
     const session = await getServerSession();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -51,7 +53,7 @@ export async function POST(req: NextRequest) {
         daily_record_id: body.daily_record_id,
         coach_id: coach?.id,
         coach_feedback: body.coach_feedback || '',
-        ai_feedback: '', // 스키마에 맞게 빈 문자열 추가
+        ai_feedback: '',
         updated_at: new Date(),
       },
     });
@@ -59,9 +61,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
     console.error('[Feedback Error]:', error);
+    // 에러 상세 내용 추가
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     return NextResponse.json(
-      { error: 'Failed to save feedback' },
+      {
+        error: 'Failed to save feedback Backend',
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
+  } finally {
+    // 작업 완료 후 연결 해제
+    await prisma.$disconnect();
   }
 }
