@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
         })),
       })),
     };
-    // console.log(coach);
+    //console.log(coach);
     //console.log(formattedData);
 
     return NextResponse.json(formattedData);

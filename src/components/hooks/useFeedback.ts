@@ -2,6 +2,7 @@
 import { useState } from 'react';
 
 interface FeedbackData {
+  coach_id: string;
   daily_record_id: string;
   coach_feedback: string;
 }

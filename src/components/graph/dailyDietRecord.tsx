@@ -49,9 +49,9 @@ const DailyDietRecord = ({ activities }: any) => {
       <div className="grid grid-cols-4 gap-4 ">
         {/* Header Row */}
         <div className="col-span-1 text-gray-500 text-right pr-4"></div>
-        <div className="col-span-1 grid grid-cols-7 gap-2">
+        <div className="col-span-1 grid grid-cols-7 gap-1">
           {days.map((day, idx) => (
-            <div key={idx} className="text-center text-gray-500">
+            <div key={idx} className="text-center text-gray-500 ">
               {day}
             </div>
           ))}

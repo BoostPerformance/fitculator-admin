@@ -1,14 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, Prisma } from '@prisma/client';
+//import { Prisma } from '@prisma/client';
+import { getServerSession } from 'next-auth/next';
 import prisma from '@/lib/prisma';
-import { nanoid } from 'nanoid';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ROLE_KEY!
+);
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const session = await getServerSession();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
 
-    // console.log('body', body);
-    //console.log('body.daily_record_id', body.daily_record_id);
+    // Supabase에서 코치 정보 조회 (기존 GET 메서드의 로직 재사용)
+    const { data: adminUser } = await supabase
+      .from('admin_users')
+      .select('id')
+      .eq('email', session.user.email)
+      .single();
+
+    const { data: coach } = await supabase
+      .from('coaches')
+      .select('id')
+      .eq('admin_user_id', adminUser?.id)
+      .single();
+
+    //console.log('coach정보', coach);
+    const body = await req.json();
 
     if (!body.daily_record_id) {
       return NextResponse.json(
@@ -17,63 +39,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await prisma.$transaction(
-      async (tx) => {
-        // console.log('Received daily_record_id:', {
-        //   value: body.daily_record_id,
-        //   type: typeof body.daily_record_id,
-        // });
-
-        const existingFeedback = await tx.feedbacks.findFirst({
-          where: {
-            daily_record_id: body.daily_record_id,
-          },
-        });
-
-        // console.log('Existing feedback:', existingFeedback);
-
-        if (existingFeedback) {
-          return await tx.feedbacks.update({
-            where: {
-              daily_record_id: body.daily_record_id,
-            },
-            data: {
-              coach_feedback: body.coach_feedback || '',
-              updated_at: new Date(),
-            },
-          });
-        } else {
-          // console.log('Creating feedback with data:', {
-          //   daily_record_id: body.daily_record_id,
-          //   coach_feedback: body.coach_feedback || '',
-          //   ai_feedback: '',
-          // });
-
-          return await tx.feedbacks.create({
-            data: {
-              daily_record_id: body.daily_record_id,
-              coach_feedback: body.coach_feedback || '',
-              ai_feedback: '',
-              updated_at: new Date(),
-            },
-          });
-        }
+    const result = await prisma.feedbacks.upsert({
+      where: {
+        daily_record_id: body.daily_record_id,
       },
-      {
-        timeout: 10000,
-        maxWait: 5000,
-        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-      }
-    );
+      update: {
+        coach_feedback: body.coach_feedback || '',
+        updated_at: new Date(),
+      },
+      create: {
+        daily_record_id: body.daily_record_id,
+        coach_id: coach?.id,
+        coach_feedback: body.coach_feedback || '',
+        ai_feedback: '', // 스키마에 맞게 빈 문자열 추가
+        updated_at: new Date(),
+      },
+    });
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
     console.error('[Feedback Error]:', error);
     return NextResponse.json(
-      { error: 'Failed to save feedback Backend' },
+      { error: 'Failed to save feedback' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
