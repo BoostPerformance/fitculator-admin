@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/fixedBars/sidebar';
 import { useDietData } from '@/components/hooks/useDietData';
 import { DietStatistics } from '@/components/statistics/dietStatistics';
@@ -10,6 +10,8 @@ import { processMeals } from '@/components/utils/processMeals';
 
 export default function DietItem() {
   const params = useParams();
+  const searchParams = useSearchParams();
+  const urlDate = searchParams.get('date');
   const { challenges, adminData } = useDietData(params.challengeId);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('');
@@ -17,6 +19,15 @@ export default function DietItem() {
   const { isMobile, isTablet, isDesktop } = useResponsive();
 
   useEffect(() => {
+    if (urlDate) {
+      setSelectedDate(urlDate);
+      const row = document.querySelector(`[data-date="${urlDate}"]`);
+      if (row) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        row.classList.add('bg-yellow-50');
+        setTimeout(() => row.classList.remove('bg-yellow-50'), 3000);
+      }
+    }
     if (challenges.length > 0 && params.challengeId) {
       const currentChallenge = challenges.find(
         (challenge) => challenge.challenge_id === params.challengeId
@@ -26,7 +37,8 @@ export default function DietItem() {
         setChallengeTitle(currentChallenge.challenges.title);
       }
     }
-  }, [challenges, params.challengeId]);
+    console.log('urlDate', urlDate);
+  }, [challenges, params.challengeId, urlDate]);
 
   const handleChallengeSelect = (challengeId: string) => {
     const selectedChallenge = challenges.find(
@@ -57,12 +69,15 @@ export default function DietItem() {
     [filteredByChallengeId]
   );
 
-  const today = new Date().toISOString().split('T')[0];
-  const yesterday = '2025-02-11';
+  // const today = new Date().toISOString().split('T')[0];
+  // const yesterday = '2025-02-11';
 
-  const filteredByDate = processedMeals.filter(
-    (meal) => meal.record_date === selectedDate
-  );
+  const filteredByDate = useMemo(() => {
+    return processedMeals.filter((meal) => {
+      //console.log('processedMeals', processedMeals);
+      return meal.record_date === selectedDate;
+    });
+  }, [processedMeals, selectedDate]);
   // console.log('processedMeals', processedMeals);
   //console.log('selectedDate page', selectedDate);
 

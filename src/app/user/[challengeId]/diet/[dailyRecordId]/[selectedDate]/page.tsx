@@ -48,25 +48,14 @@ type PageParams = {
   selectedDate: string; // 명백히 string임을 명시
 };
 
-// const getMealByTypeAndDate = (
-//   user_id: string,
-//   date: string,
-//   mealType: string
-// ) => {
-//   return meals.find(
-//     (meal) =>
-//       meal.user_id === user_id &&
-//       meal.date === date &&
-//       meal.meal_type === mealType
-//   );
-// };
-
 export default function SelectedDate() {
   const router = useRouter();
+
   const { saveFeedback } = useFeedback();
   const [showAlert, setShowAlert] = useState(false);
 
   const params = useParams() as PageParams;
+  const selectedDate = params.selectedDate;
   const [feedbacksByDate, setFeedbacksByDate] = useState<{
     [key: string]: string;
   }>({});
@@ -360,6 +349,11 @@ export default function SelectedDate() {
     }
   };
 
+  const handleBack = () => {
+    console.log(`/user/${params.challengeId}/diet?date=${params.selectedDate}`);
+    router.push(`/user/${params.challengeId}/diet?date=${params.selectedDate}`);
+  };
+
   // const handleSaveFeedback = (
   //   mealType: string,
   //   userId: string,
@@ -491,11 +485,11 @@ export default function SelectedDate() {
 
         setAllDailyMeals(sortedMeals); // 전체 기록 저장
 
-        if (params.selectedDate) {
-          setRecordDate(params.selectedDate);
+        if (selectedDate) {
+          setRecordDate(selectedDate);
 
           const filtered = sortedMeals.filter(
-            (meal) => meal.recordDate === params.selectedDate
+            (meal) => meal.recordDate === selectedDate
           );
           setFilteredDailyMeals(filtered);
         }
@@ -533,6 +527,7 @@ export default function SelectedDate() {
         const userData = await challengeParticipantsResponse.json();
         setUserData(userData);
 
+        //console.log('userData', userData);
         const currentUser = userData.find((user: UserData) => {
           return user.users.id === params.dailyRecordId;
         });
@@ -734,7 +729,7 @@ export default function SelectedDate() {
             <div className="flex items-center justify-center flex-col">
               <button
                 className=" p-4 drop-shadow-md hover:bg-gray-13 rounded-md border-[0.1rem]"
-                onClick={() => router.push(`/user/${selectedChallengeId}/diet`)}
+                onClick={handleBack}
               >
                 ← 뒤로가기
               </button>
@@ -759,7 +754,7 @@ export default function SelectedDate() {
             <div className="flex sm:justify-center sm:items-center pt-[1rem] gap-[1rem]">
               <button
                 className=" p-4 drop-shadow-md hover:bg-gray-13 rounded-md border-[0.1rem]"
-                onClick={() => router.push(`/user/${selectedChallengeId}/diet`)}
+                onClick={handleBack}
               >
                 ← 뒤로가기
               </button>
