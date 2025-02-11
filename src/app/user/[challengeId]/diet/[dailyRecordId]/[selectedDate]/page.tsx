@@ -755,11 +755,11 @@ export default function SelectedDate() {
         </div>
         {displayMeals.map((dailyMeal) => (
           <div key={dailyMeal.recordDate} className="relative mb-[2rem]">
-            <h2 className="text-[1.5rem] font-bold sm:pl-[1rem]">
+            <h2 className="text-[1.5rem] font-bold sm:pl-[1rem] pb-[1rem]">
               {dailyMeal.recordDate}
             </h2>
 
-            <div className="grid grid-cols-5 gap-[1rem] sm:grid-cols-1 sm:px-[1rem]">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:px-4 px-4 ">
               {(
                 ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
               ).map((mealType) => {
@@ -805,7 +805,7 @@ export default function SelectedDate() {
               })}
             </div>
 
-            <div className="flex items-center justify-around sm:flex-col w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4 mt-8 ">
               <TextBox
                 title="AI 분석 결과"
                 value={dailyMeal.feedbacks.ai_feedback}
