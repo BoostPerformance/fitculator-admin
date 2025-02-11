@@ -42,7 +42,7 @@ export default function MobileChart({
     );
   };
   return (
-    <div className="mt-[1.4rem] sm:bg-white ">
+    <div className="mt-[1.4rem] sm:bg-white sm:px-[1rem]">
       <div className="flex flex-col gap-4">
         {dietDetailItems.map((meal: any, index: any) => {
           return (

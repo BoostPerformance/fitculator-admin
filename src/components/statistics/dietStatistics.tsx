@@ -57,7 +57,7 @@ export const DietStatistics = ({ processedMeals }: DietStatsProps) => {
   const feedbackStats = getFeedbackStats(processedMeals);
 
   return (
-    <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-2 px-[2rem] pb-[3rem]">
+    <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-2 px-[2rem] pb-[3rem] sm:px-[0.5rem]">
       <TotalFeedbackCounts
         counts={`${totalMealUploads}개`}
         title="전체식단 업로드 수"
