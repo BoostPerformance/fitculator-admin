@@ -45,9 +45,9 @@ const DietDetaileTable = ({
     <div className="mt-6 overflow-x-auto">
       <table className="w-full bg-white shadow-md rounded-md min-w-[1000px]">
         <thead>
-          <tr className="bg-white text-left text-[#A1A1A1]">
+          <tr className="bg-white lg:text-left md:text-center text-[#A1A1A1]">
             <th className="w-[8%] p-4 lg:p-6">
-              <div className="flex items-center justify-start gap-1">
+              <div className="flex items-center justify-start gap-1 md:justify-center">
                 <span className="lg:text-base sm:text-sm">닉네임</span>
                 <button>
                   <Image
@@ -60,8 +60,8 @@ const DietDetaileTable = ({
               </div>
             </th>
             <th className="w-[8%] p-4 lg:p-6">
-              <div className="flex items-center justify-start gap-2">
-                <span className="lg:text-base sm:text-sm">이름</span>
+              <div className="flex items-center justify-start gap-2 md:justify-center">
+                <span className="lg:text-base sm:text-sm ">이름</span>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -84,11 +84,11 @@ const DietDetaileTable = ({
             <th className="w-[8%] p-4 lg:p-6">
               <span className="lg:text-base sm:text-sm">간식</span>
             </th>
-            <th className="w-[8%] p-4 lg:p-6">
+            <th className="w-[9%] p-4 lg:p-6">
               <span className="lg:text-base sm:text-sm">영양제</span>
             </th>
             <th className="w-[13%] p-4 lg:p-6">
-              <div className="flex items-center justify-start gap-2">
+              <div className="flex items-center justify-start gap-2 md:justify-center">
                 <span className="lg:text-base sm:text-sm">업데이트</span>
                 <button>
                   <Image
@@ -101,7 +101,9 @@ const DietDetaileTable = ({
               </div>
             </th>
             <th className="w-[10%] p-4 lg:p-6">
-              <span className="lg:text-base sm:text-sm">피드백 현황</span>
+              <span className="lg:text-base sm:text-sm">
+                피드백 <br className="lg:hidden sm:hidden md:inline" /> 현황
+              </span>
             </th>
           </tr>
         </thead>

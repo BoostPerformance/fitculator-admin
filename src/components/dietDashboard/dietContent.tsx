@@ -22,7 +22,7 @@ export const DietContent = ({
   mobileSize,
 }: DietContentProps) => {
   return (
-    <div className="px-[2rem]">
+    <div className="lg:px-[2rem] md:px-[1rem] sm:px-[0.5em]">
       <div className="flex sm:justify-center sm:items-center">
         <DateInput
           onChange={onDateChange}

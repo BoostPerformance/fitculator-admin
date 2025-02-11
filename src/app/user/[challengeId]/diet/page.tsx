@@ -82,7 +82,7 @@ export default function DietItem() {
   //console.log('selectedDate page', selectedDate);
 
   return (
-    <div className="bg-white-1 flex sm:flex-col">
+    <div className="bg-white-1 flex sm:flex-col md:flex-col">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
