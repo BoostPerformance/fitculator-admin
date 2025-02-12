@@ -296,7 +296,7 @@ export default function SelectedDate() {
       console.log('feedbacksByDate 업데이트:', {
         date,
         feedback,
-        전체상태: newState,
+        전체상태newState: newState,
       });
 
       return newState;
@@ -405,6 +405,7 @@ export default function SelectedDate() {
         });
 
         const mealsData = await mealsResponse.json();
+        console.log('새로 불러온 데이터:', mealsData);
 
         const userMeals = mealsData.filter(
           (meal: {
