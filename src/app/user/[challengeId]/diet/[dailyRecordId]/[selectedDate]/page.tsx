@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import TextBox from '@/components/textBox';
 import Title from '@/components/layout/title';
@@ -172,35 +172,71 @@ export default function SelectedDate() {
   };
 
   // 달력 날짜가 변경될 때마다 해당 월의 기록만 필터링하는 함수
-  const filterMealsByMonth = (date: Date) => {
-    if (!challengePeriods.start_date || !challengePeriods.end_date) return;
+  const filterMealsByMonth = useCallback(
+    (date: Date) => {
+      if (!challengePeriods.start_date || !challengePeriods.end_date) return;
 
-    const year = date.getFullYear();
-    const month = date.getMonth();
+      const year = date.getFullYear();
+      const month = date.getMonth();
 
-    const filtered = allDailyMeals.filter((meal) => {
-      const mealDate = new Date(meal.recordDate);
+      const filtered = allDailyMeals.filter((meal) => {
+        const mealDate = new Date(meal.recordDate);
 
-      if (params.selectedDate) {
-        return meal.recordDate === params.selectedDate;
-      }
-      // 챌린지 기간 내의 기록인지 확인
-      const isInChallengeRange =
-        new Date(meal.recordDate) >= new Date(challengePeriods.start_date) &&
-        new Date(meal.recordDate) <= new Date(challengePeriods.end_date);
+        if (params.selectedDate) {
+          return meal.recordDate === params.selectedDate;
+        }
 
-      // 선택된 월의 기록인지 확인
-      const isInSelectedMonth =
-        mealDate.getFullYear() === year && mealDate.getMonth() === month;
+        const isInChallengeRange =
+          new Date(meal.recordDate) >= new Date(challengePeriods.start_date) &&
+          new Date(meal.recordDate) <= new Date(challengePeriods.end_date);
 
-      // console.log('Meal date:', meal.recordDate, 'Include?:', shouldInclude);
+        const isInSelectedMonth =
+          mealDate.getFullYear() === year && mealDate.getMonth() === month;
 
-      return isInChallengeRange && isInSelectedMonth;
-    });
+        return isInChallengeRange && isInSelectedMonth;
+      });
 
-    //console.log('Filtered meals:', filtered);
-    setFilteredDailyMeals(filtered);
-  };
+      setFilteredDailyMeals(filtered);
+    },
+    [
+      challengePeriods.start_date,
+      challengePeriods.end_date,
+      allDailyMeals,
+      params.selectedDate,
+    ]
+  );
+
+  // useEffect 수정
+  useEffect(() => {
+    const fetchData = async () => {
+      // ... 기존 코드 ...
+    };
+
+    fetchData();
+  }, [
+    params.dailyRecordId,
+    params.selectedDate,
+    params.challengeId,
+    selectedDate,
+    currentDate,
+    filterMealsByMonth,
+  ]);
+
+  // 두 번째 useEffect 수정
+  useEffect(() => {
+    filterMealsByMonth(currentDate);
+
+    const handleResize = () => {
+      setMobileSize(window.innerWidth <= 640);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [currentDate, filterMealsByMonth]);
 
   const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -554,7 +590,14 @@ export default function SelectedDate() {
 
     // window.addEventListener('scroll', handleScroll);
     // return () => window.removeEventListener('scroll', handleScroll);
-  }, [params.dailyRecordId, params.selectedDate]);
+  }, [
+    params.dailyRecordId,
+    params.selectedDate,
+    params.challengeId,
+    selectedDate,
+    currentDate,
+    filterMealsByMonth,
+  ]);
 
   useEffect(() => {
     filterMealsByMonth(currentDate);
@@ -573,7 +616,7 @@ export default function SelectedDate() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [challengePeriods, currentDate, allDailyMeals]);
+  }, [challengePeriods, currentDate, allDailyMeals, filterMealsByMonth]);
 
   useEffect(() => {
     if (recordDate) {
