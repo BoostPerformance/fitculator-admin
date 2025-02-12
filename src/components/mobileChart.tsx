@@ -42,13 +42,14 @@ export default function MobileChart({
     );
   };
   return (
-    <div className="mt-[1.4rem] sm:bg-white sm:px-[1rem]">
+    <div className="mt-[3rem] sm:bg-white sm:px-[1rem]">
       <div className="flex flex-col gap-4">
         {dietDetailItems.map((meal: any, index: any) => {
+          console.log('dietDetailItems', dietDetailItems);
           return (
-            <div className="pt-[1rem]" key={meal.user.id || index}>
-              <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem]">
-                {meal.user.username}
+            <div className="pt-[2rem]" key={meal.user.id || index}>
+              <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]">
+                {meal.user.name}
               </div>
               <table className="flex flex-col gap-[1rem] items-center justify-center">
                 <thead>
