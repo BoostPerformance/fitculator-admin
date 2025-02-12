@@ -62,6 +62,8 @@ model challenge_participants {
   status            String?         @default("active")
   created_at        DateTime?       @default(now()) @db.Timestamptz(6)
   updated_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  coach_memo        String?
+  memo_record_date  DateTime?       @db.Timestamptz(6)
   coaches           coaches?        @relation(fields: [assigned_coach_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   challenges        challenges      @relation(fields: [challenge_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users             users           @relation(fields: [service_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)

@@ -4,6 +4,7 @@ interface CoachMemoData {
   participant_id: string;
   challenge_id: string;
   coach_memo: string;
+  serviceUserId: string;
 }
 
 export const useCoachMemo = () => {
@@ -29,6 +30,7 @@ export const useCoachMemo = () => {
 
       const result = await response.json();
       console.log('coach-memo result:', result);
+
       return result;
     } catch (err) {
       setError(

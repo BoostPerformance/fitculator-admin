@@ -1,22 +1,14 @@
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { DietTableProps, ChallengeParticipant } from '@/types/userPageTypes';
-// import Modal from '../layout/modal';
-// <div className="absolute items-center justify-center">
-//   {isModalOpen && selectedParticipant && (
-//     <Modal
-//       onClose={() => setIsModalOpen(false)}
-//       participantId={selectedParticipant.id}
-//       challengeId={selectedParticipant.challenges.id}
-//       onSave={(memo) => handleCoachMemoSave(memo, selectedParticipant.id)}
-//     />
-//   )}
-// </div>;
-interface CoachMemoData {
-  participant_id: string;
-  challenge_id: string;
-  coach_memo: string;
-}
+import Modal from '../layout/modal';
+
+// interface CoachMemoData {
+//   participant_id: string;
+//   challenge_id: string;
+//   coach_memo: string;
+//   memo_record_date?: Date;
+// }
 
 const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   const [participantMemos, setParticipantMemos] = useState<{
@@ -25,6 +17,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] =
     useState<ChallengeParticipant | null>(null);
+  const [existCoachMemo, setExistCoachMemo] = useState('');
 
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
     const today = new Date();
@@ -73,7 +66,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
         });
       }
     });
-    //console.log('recordDate', recordDate);
+    // console.log('records dietTable', records);
 
     return Array.from(groupedData.values());
   };
@@ -83,18 +76,19 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   // }, [participantMemos]);
 
   const handleCoachMemoSave = (memo: string, participantId: string) => {
-    // console.log('Saving memo:', {
-    //   memo,
-    //   participantId,
-    //   currentMemos: participantMemos,
-    // });
+    console.log('Saving memo:', {
+      memo,
+      participantId,
+      currentMemos: participantMemos,
+    });
 
     setParticipantMemos((prev) => {
       const newMemos = {
         ...prev,
         [participantId]: memo,
       };
-      console.log('New participantMemos:', newMemos);
+
+      // console.log('New participantMemos @userpage dietTable:', newMemos);
       return newMemos;
     });
   };
@@ -102,6 +96,9 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   const handleModalOpen = (participant: ChallengeParticipant) => {
     setSelectedParticipant(participant);
     setIsModalOpen(true);
+    setExistCoachMemo(participant.coach_memo || '');
+
+    console.log('participant table', participant);
 
     // useEffect(() => {
     //   if (dailyRecordsData && dailyRecordsData.length > 0) {
@@ -124,6 +121,20 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
 
   return (
     <div className="mt-[1.4rem]">
+      <div className="absolute items-center justify-center">
+        {isModalOpen && selectedParticipant && (
+          <Modal
+            onClose={() => setIsModalOpen(false)}
+            participantId={selectedParticipant.id}
+            challengeId={selectedParticipant.challenges.id}
+            onSave={(memo) => handleCoachMemoSave(memo, selectedParticipant.id)}
+            serviceUserId={selectedParticipant.users.id}
+            coach_memo={existCoachMemo}
+            memo_record_date={new Date()}
+          />
+        )}
+      </div>
+      ;
       <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
           <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
@@ -154,7 +165,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
               </div>
             </th>
 
-            {/* <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
+            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
               <div className=" flex justify-center items-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]  sm:p-0">
                 <div className="sm:text-0.75-500 sm:p-0">코치메모</div>
                 <button>
@@ -166,31 +177,34 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
                   />
                 </button>
               </div>
-            </th> */}
+            </th>
             <th className="p-[1rem] w-[20%] lg:pl-[1rem] sm:p-0 sm:text-0.75-500 text-center">
               피드백 수
             </th>
           </tr>
         </thead>
         <tbody className="text-center">
-          {participants(dailyRecordsData).map((data, index) => (
-            <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
-                {data.participant.users?.username}
-              </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {data.participant.users?.name}
-              </td>
-              {/* <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                <button onClick={() => handleModalOpen(data.participant)}>
-                  {participantMemos[data.participant.id] || '코치메모'}
-                </button>
-              </td> */}
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {data.feedbackRatio.formatted}
-              </td>
-            </tr>
-          ))}
+          {participants(dailyRecordsData).map((data, index) => {
+            return (
+              <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
+                <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
+                  {data.participant.users?.username}
+                </td>
+                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                  {data.participant.users?.name}
+                </td>
+                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                  <button onClick={() => handleModalOpen(data.participant)}>
+                    {data.participant.coach_memo || '코치메모'}
+                    {data.participant.record_date || ''}
+                  </button>
+                </td>
+                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                  {data.feedbackRatio.formatted}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -13,7 +13,7 @@ import {
   calculateTodayDietUploads,
   calculateTotalDietUploads,
 } from '@/components/statistics/challengeParticipantsDietStatics';
-import DailyDietRecordMobile from '@/components/graph/dailyDietRecordMobile';
+//import DailyDietRecordMobile from '@/components/graph/dailyDietRecordMobile';
 
 interface AdminUser {
   email: string;
@@ -60,29 +60,29 @@ interface DailyRecord {
   }[];
 }
 
-interface ChallengeParticipant {
-  id: string;
-  users: {
-    id: string;
-    name: string;
-    username: string;
-  };
-  challenges: {
-    id: string;
-    title: string;
-    end_date: string;
-    start_date: string;
-    challenge_type: string;
-  };
-  daily_records: DailyRecord[];
-}
+// interface ChallengeParticipant {
+//   id: string;
+//   users: {
+//     id: string;
+//     name: string;
+//     username: string;
+//   };
+//   challenges: {
+//     id: string;
+//     title: string;
+//     end_date: string;
+//     start_date: string;
+//     challenge_type: string;
+//   };
+//   daily_records: DailyRecord[];
+// }
 type ParamsType = {
   challengeId: string;
 };
 
-interface Workouts {
-  created_at: string;
-}
+// interface Workouts {
+//   created_at: string;
+// }
 
 const calculateChallengeProgress = (startDate: string, endDate: string) => {
   const start = new Date(startDate);
@@ -163,7 +163,7 @@ export default function User() {
 
         //console.log('workoutDataResponse', workoutDataResponse);
         const today = new Date().toISOString().split('T')[0];
-        const yesterday = '2025-02-10';
+        //const yesterday = '2025-02-10';
 
         const workOutCount = workoutDataResponse.filter((item: any) => {
           const createdAt = item.created_at.split('T')[0];
@@ -247,6 +247,8 @@ export default function User() {
         }
         const dailyRecordsdata = await dailyRecordsresponse.json();
 
+        // console.log('dailyRecordsdata user-page', dailyRecordsdata);
+
         setDailyRecords(dailyRecordsdata);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -283,7 +285,7 @@ export default function User() {
   const filteredDailyRecordsbyId = dailyRecords.filter(
     (record) => record.challenges.id === selectedChallengeId
   );
-  //console.log('dailyRecords', dailyRecords);
+  //console.log('dailyRecords user page', dailyRecords);
 
   const getSelectedChallengeDates = () => {
     const selectedChallenge = challenges.find(

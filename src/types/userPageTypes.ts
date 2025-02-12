@@ -46,6 +46,8 @@ export interface DailyRecord extends Challenges {
 
 export interface ChallengeParticipant {
   id: string;
+  coach_memo?: string;
+  memo_record_date?: string;
   users: {
     id: string;
     name: string;
