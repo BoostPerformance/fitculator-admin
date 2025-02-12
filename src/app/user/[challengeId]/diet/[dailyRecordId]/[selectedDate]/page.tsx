@@ -398,7 +398,6 @@ export default function SelectedDate() {
 
         // fetch 호출 부분 수정
         const mealsResponse = await fetch(`api/meals`, {
-          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
