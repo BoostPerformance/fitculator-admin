@@ -391,13 +391,13 @@ export default function SelectedDate() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const baseURL =
-          process.env.NODE_ENV === 'development'
-            ? '/api' // 개발 환경에서는 내부 API 라우트 사용
-            : 'https://studio-admin.fitculator.pro/api'; // 프로덕션 환경에서는 실제 API 서버 사용
+        // const baseURL =
+        //   process.env.NODE_ENV === 'development'
+        //     ? '/api' // 개발 환경에서는 내부 API 라우트 사용
+        //     : 'https://studio-admin.fitculator.pro/api'; // 프로덕션 환경에서는 실제 API 서버 사용
 
         // fetch 호출 부분 수정
-        const mealsResponse = await fetch(`${baseURL}/meals`, {
+        const mealsResponse = await fetch(`api/meals`, {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
@@ -405,7 +405,12 @@ export default function SelectedDate() {
         });
 
         const mealsData = await mealsResponse.json();
-        console.log('새로 불러온 데이터:', mealsData);
+        // console.log('새로 불러온 데이터:', mealsData);
+
+        // console.log('상태 업데이트 전:', {
+        //   allDailyMeals,
+        //   filteredDailyMeals,
+        // });
 
         const userMeals = mealsData.filter(
           (meal: {
