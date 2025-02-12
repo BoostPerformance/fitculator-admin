@@ -59,7 +59,6 @@ export default function SelectedDate() {
   const [feedbacksByDate, setFeedbacksByDate] = useState<{
     [key: string]: string;
   }>({});
-
   const [isDisable, setIsDisable] = useState(false);
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
@@ -288,10 +287,18 @@ export default function SelectedDate() {
   // };
 
   const handleFeedbackChange = (date: string, feedback: string) => {
-    setFeedbacksByDate((prev) => ({
-      ...prev,
-      [date]: feedback,
-    }));
+    setFeedbacksByDate((prev) => {
+      const newState = {
+        ...prev,
+        [date]: feedback,
+      };
+      console.log('feedbacksByDate 업데이트:', {
+        date,
+        feedback,
+        전체상태: newState,
+      });
+      return newState;
+    });
   };
 
   const handleGenerateAnalyse = async () => {
@@ -565,8 +572,6 @@ export default function SelectedDate() {
       });
       setFilteredDailyMeals(filtered);
     }
-
-    console.log('feedbacksByDate', feedbacksByDate);
   }, [recordDate, allDailyMeals, challengePeriods]);
 
   //console.log('challengePeriods', challengePeriods);
@@ -837,7 +842,18 @@ export default function SelectedDate() {
 
               <TextBox
                 title="코치 피드백"
-                value={dailyMeal.feedbacks.coach_feedback}
+                value={(() => {
+                  const currentValue =
+                    feedbacksByDate[dailyMeal.recordDate] ||
+                    dailyMeal.feedbacks.coach_feedback;
+                  console.log('TextBox value 계산:', {
+                    date: dailyMeal.recordDate,
+                    임시저장값: feedbacksByDate[dailyMeal.recordDate],
+                    기존피드백: dailyMeal.feedbacks.coach_feedback,
+                    최종표시값: currentValue,
+                  });
+                  return currentValue;
+                })()}
                 placeholder="피드백을 작성하세요."
                 button1="남기기"
                 Btn1className="bg-[#48BA5D] text-white"
