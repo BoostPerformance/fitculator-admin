@@ -6,6 +6,7 @@ const nextConfig = {
         {
           source: '/api/:path*',
           destination: 'https://studio-admin.fitculator.pro/api/:path*',
+          basePath: false,
         },
       ];
     }

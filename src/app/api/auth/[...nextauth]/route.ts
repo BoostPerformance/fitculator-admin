@@ -40,8 +40,8 @@ const handler = NextAuth({
   pages: {
     signIn:
       process.env.NODE_ENV === 'development'
-        ? '/user/' // 개발 환경
-        : 'https://your-vercel-domain.com/user/', // 프로덕션 환경
+        ? '/user/'
+        : 'https://your-vercel-domain.com/user/',
     error: '/auth/error',
   },
   callbacks: {
@@ -132,6 +132,7 @@ const handler = NextAuth({
           }
         }
       }
+
       //console.log(session);
       return session;
     },
