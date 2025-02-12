@@ -72,12 +72,15 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   //   console.log('participantMemos updated:', participantMemos);
   // }, [participantMemos]);
 
-  // const handleCoachMemoSave = (memo: string, participantId: string) => {
-  //   // console.log('Saving memo:', {
-  //   //   memo,
-  //   //   participantId,
-  //   // });
-  // };
+  const handleCoachMemoSave = (memo: string) => {
+    if (selectedParticipant) {
+      // 선택된 참가자의 메모를 업데이트
+      setSelectedParticipant({
+        ...selectedParticipant,
+        coach_memo: memo,
+      });
+    }
+  };
 
   const handleModalOpen = (participant: ChallengeParticipant) => {
     setSelectedParticipant(participant);
@@ -115,6 +118,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
             challengeId={selectedParticipant.challenges.id}
             serviceUserId={selectedParticipant.users.id}
             coach_memo={existCoachMemo}
+            onSave={handleCoachMemoSave}
           />
         )}
       </div>
@@ -179,8 +183,9 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
                 </td>
                 <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
                   <button onClick={() => handleModalOpen(data.participant)}>
-                    {data.participant.coach_memo || '코치메모'}
-                    {data.participant.record_date || ''}
+                    {selectedParticipant?.id === data.participant.id
+                      ? selectedParticipant.coach_memo || '코치메모'
+                      : data.participant.coach_memo || '코치메모'}
                   </button>
                 </td>
                 <td className="p-[1rem] sm:text-0.625-500 sm:p-0">

@@ -59,6 +59,7 @@ export default function Modal({
       //console.log('coachMemo', coachMemo);
 
       if (onSave) {
+        // console.log('coachMemo', coachMemo);
         onSave(coachMemo);
       }
 

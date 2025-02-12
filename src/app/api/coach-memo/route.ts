@@ -46,8 +46,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log('Found participant:', participant);
-    console.log('result', result);
+    //console.log('Found participant:', participant);
+    //console.log('result', result);
 
     if (!participant) {
       return NextResponse.json(
