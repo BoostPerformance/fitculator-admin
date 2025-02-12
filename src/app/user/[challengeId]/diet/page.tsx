@@ -16,7 +16,7 @@ export default function DietItem() {
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [challengeTitle, setChallengeTitle] = useState('');
-  const { isMobile, isTablet, isDesktop } = useResponsive();
+  const { isMobile } = useResponsive();
 
   useEffect(() => {
     if (urlDate) {

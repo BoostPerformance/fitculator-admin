@@ -133,12 +133,12 @@ export default function SelectedDate() {
         return;
       }
 
-      await saveFeedback({
+      const response = await saveFeedback({
         daily_record_id: dailyRecord.id,
         coach_feedback: feedback,
       });
 
-      // console.log('피드백 저장 응답:', response); // 응답 확인
+      console.log('피드백 저장 응답:', response); // 응답 확인
       setShowAlert(true);
       // console.log('showAlert 상태:', true); // 상태 변경 확인
       setTimeout(() => {
@@ -209,15 +209,147 @@ export default function SelectedDate() {
   // useEffect 수정
   useEffect(() => {
     const fetchData = async () => {
-      // ... 기존 코드 ...
+      try {
+        const mealsResponse = await fetch('/api/meals');
+        const mealsData = await mealsResponse.json();
+
+        const userMeals = mealsData.filter(
+          (meal: {
+            daily_records?: {
+              challenge_participants?: { users?: { id: string } };
+            };
+          }) =>
+            meal.daily_records?.challenge_participants?.users?.id ===
+            params.dailyRecordId
+        );
+
+        const mealsByDate = userMeals.reduce(
+          (
+            acc: { [key: string]: DailyMealData },
+            meal: {
+              daily_records: {
+                record_date: string;
+                feedbacks?: {
+                  coach_feedback?: string;
+                  ai_feedback?: string;
+                };
+              };
+              meal_type: string;
+              description?: string;
+              meal_photos?: PhotoData[];
+              updated_at?: string;
+            }
+          ) => {
+            const date = meal.daily_records.record_date;
+
+            if (!acc[date]) {
+              acc[date] = {
+                recordDate: date,
+                meals: {},
+                feedbacks: {
+                  coach_feedback:
+                    meal.daily_records.feedbacks?.coach_feedback || '',
+                  ai_feedback: meal.daily_records.feedbacks?.ai_feedback || '',
+                },
+              };
+            }
+
+            const mealType = meal.meal_type.toLowerCase();
+            acc[date].meals[mealType] = {
+              description: meal.description || '',
+              mealPhotos: Array.isArray(meal.meal_photos)
+                ? meal.meal_photos
+                : meal.meal_photos
+                ? [meal.meal_photos]
+                : [],
+              updatedAt: meal.updated_at || '',
+            };
+
+            return acc;
+          },
+          {}
+        );
+
+        const mealsByDateValues = Object.values(mealsByDate) as DailyMealData[];
+        const sortedMeals = mealsByDateValues.sort(
+          (a, b) =>
+            new Date(b.recordDate).getTime() - new Date(a.recordDate).getTime()
+        );
+
+        setAllDailyMeals(sortedMeals); // 전체 기록 저장
+
+        if (selectedDate) {
+          setRecordDate(selectedDate);
+
+          const filtered = sortedMeals.filter(
+            (meal) => meal.recordDate === selectedDate
+          );
+          setFilteredDailyMeals(filtered);
+        }
+
+        // 현재 월의 기록으로 필터링
+
+        const challengesResponse = await fetch('/api/challenges');
+
+        if (!challengesResponse.ok) {
+          throw new Error('Failed to fetch challenges');
+        }
+        const challengeData = await challengesResponse.json();
+        setChallenges(challengeData);
+
+        const currentChallenge = challengeData.find(
+          (challenge: ProcessedMeal) =>
+            challenge.challenge_id === params.challengeId
+        );
+        if (currentChallenge) {
+          setChallengeTitle(currentChallenge.challenges.title);
+          setSelectedChallengeId(currentChallenge.challenges.id);
+          setChallengePeriods({
+            start_date: currentChallenge.challenges.start_date,
+            end_date: currentChallenge.challenges.end_date,
+          });
+          // 데이터 로드 후 바로 필터링 실행
+          filterMealsByMonth(currentDate);
+        }
+        const challengeParticipantsResponse = await fetch(
+          '/api/challenge-participants'
+        );
+        if (!challengeParticipantsResponse.ok) {
+          throw new Error('Failed to fetch admin data');
+        }
+        const userData = await challengeParticipantsResponse.json();
+        setUserData(userData);
+
+        //console.log('userData', userData);
+        const currentUser = userData.find((user: UserData) => {
+          return user.users.id === params.dailyRecordId;
+        });
+
+        if (currentUser) {
+          setUserData({
+            id: currentUser.users.id,
+            name: currentUser.users.name,
+            username: currentUser.users.username,
+          });
+        }
+
+        const orgDataResponse = await fetch('/api/coach-info');
+
+        const orgData = await orgDataResponse.json();
+
+        setOrgName(orgData);
+      } catch (error) {
+        console.log('Error fetching data:', error);
+      }
     };
 
     fetchData();
+
+    // window.addEventListener('scroll', handleScroll);
+    // return () => window.removeEventListener('scroll', handleScroll);
   }, [
     params.dailyRecordId,
     params.selectedDate,
-    params.challengeId,
-    selectedDate,
     currentDate,
     filterMealsByMonth,
   ]);
@@ -386,7 +518,7 @@ export default function SelectedDate() {
   };
 
   const handleBack = () => {
-    console.log(`/user/${params.challengeId}/diet?date=${params.selectedDate}`);
+    //  console.log(`/user/${params.challengeId}/diet?date=${params.selectedDate}`);
     router.push(`/user/${params.challengeId}/diet?date=${params.selectedDate}`);
   };
 
