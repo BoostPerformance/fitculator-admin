@@ -292,11 +292,13 @@ export default function SelectedDate() {
         ...prev,
         [date]: feedback,
       };
+
       console.log('feedbacksByDate 업데이트:', {
         date,
         feedback,
         전체상태: newState,
       });
+
       return newState;
     });
   };
