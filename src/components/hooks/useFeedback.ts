@@ -1,4 +1,3 @@
-// hooks/useFeedback.ts
 import { useState } from 'react';
 
 interface FeedbackData {

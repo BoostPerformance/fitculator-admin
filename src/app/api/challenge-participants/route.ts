@@ -20,6 +20,8 @@ export async function GET() {
     const { data: dailyRecords } = await supabase.from('challenge_participants')
       .select(`
     id,
+    coach_memo,
+    memo_record_date,
     users!service_user_id (
       id,
       username,
