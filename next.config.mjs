@@ -1,5 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async rewrites() {
+    if (process.env.NODE_ENV === 'production') {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'https://studio-admin.fitculator.pro/api/:path*',
+        },
+      ];
+    }
+
+    return [];
+  },
   output: 'standalone',
 
   pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
