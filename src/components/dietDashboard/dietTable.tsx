@@ -11,9 +11,6 @@ import Modal from '../layout/modal';
 // }
 
 const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
-  const [participantMemos, setParticipantMemos] = useState<{
-    [key: string]: string;
-  }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] =
     useState<ChallengeParticipant | null>(null);
@@ -75,30 +72,19 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   //   console.log('participantMemos updated:', participantMemos);
   // }, [participantMemos]);
 
-  const handleCoachMemoSave = (memo: string, participantId: string) => {
-    console.log('Saving memo:', {
-      memo,
-      participantId,
-      currentMemos: participantMemos,
-    });
-
-    setParticipantMemos((prev) => {
-      const newMemos = {
-        ...prev,
-        [participantId]: memo,
-      };
-
-      // console.log('New participantMemos @userpage dietTable:', newMemos);
-      return newMemos;
-    });
-  };
+  // const handleCoachMemoSave = (memo: string, participantId: string) => {
+  //   // console.log('Saving memo:', {
+  //   //   memo,
+  //   //   participantId,
+  //   // });
+  // };
 
   const handleModalOpen = (participant: ChallengeParticipant) => {
     setSelectedParticipant(participant);
     setIsModalOpen(true);
     setExistCoachMemo(participant.coach_memo || '');
 
-    console.log('participant table', participant);
+    // console.log('participant table', participant);
 
     // useEffect(() => {
     //   if (dailyRecordsData && dailyRecordsData.length > 0) {
@@ -127,10 +113,8 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
             onClose={() => setIsModalOpen(false)}
             participantId={selectedParticipant.id}
             challengeId={selectedParticipant.challenges.id}
-            onSave={(memo) => handleCoachMemoSave(memo, selectedParticipant.id)}
             serviceUserId={selectedParticipant.users.id}
             coach_memo={existCoachMemo}
-            memo_record_date={new Date()}
           />
         )}
       </div>

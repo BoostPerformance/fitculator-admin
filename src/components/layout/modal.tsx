@@ -18,13 +18,13 @@ export default function Modal({
   challengeId,
   serviceUserId,
   coach_memo,
-  memo_record_date,
+  // memo_record_date,
   onSave,
 }: ModalProps) {
   const [coachMemo, setCoachMemo] = useState(coach_memo);
-  const [memoDate, setMemoDate] = useState<Date | null>(
-    memo_record_date || null
-  );
+  // const [memoDate, setMemoDate] = useState<Date | null>(
+  //   memo_record_date || null
+  // );
 
   const router = useRouter();
   const { saveCoachMemo, isLoading } = useCoachMemo();
@@ -34,9 +34,9 @@ export default function Modal({
     setCoachMemo(newMemo);
 
     // 메모가 있을 때만 날짜 업데이트
-    if (newMemo.trim()) {
-      setMemoDate(new Date());
-    }
+    // if (newMemo.trim()) {
+    //   setMemoDate(new Date());
+    // }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,11 +52,11 @@ export default function Modal({
         participant_id: participantId!,
         challenge_id: challengeId!,
         coach_memo: coachMemo,
-        memo_record_date: memoDate,
+        // memo_record_date: memoDate,
         serviceUserId: serviceUserId,
       });
 
-      console.log('coachMemo', coachMemo);
+      //console.log('coachMemo', coachMemo);
 
       if (onSave) {
         onSave(coachMemo);
@@ -75,19 +75,19 @@ export default function Modal({
   //   setCoachMemo(e.target.value);
   // };
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return '';
+  // const formatDate = (date: Date | null) => {
+  //   if (!date) return '';
 
-    const d = new Date(date);
+  //   const d = new Date(date);
 
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
+  //   const year = d.getFullYear();
+  //   const month = String(d.getMonth() + 1).padStart(2, '0');
+  //   const day = String(d.getDate()).padStart(2, '0');
+  //   const hours = String(d.getHours()).padStart(2, '0');
+  //   const minutes = String(d.getMinutes()).padStart(2, '0');
 
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
-  };
+  //   return `${year}-${month}-${day} ${hours}:${minutes}`;
+  // };
   return (
     <>
       <div
@@ -100,7 +100,7 @@ export default function Modal({
           <div className="flex justify-between items-center mb-4">
             <div className="flex flex-col">
               <h2 className="text-lg font-medium">코치메모</h2>
-              <h3>{formatDate(memoDate)}</h3>
+              {/* <h3>{formatDate(memoDate)}</h3> */}
             </div>
             <button
               onClick={onClose}

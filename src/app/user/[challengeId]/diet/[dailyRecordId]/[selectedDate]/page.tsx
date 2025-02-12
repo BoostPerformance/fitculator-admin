@@ -133,7 +133,7 @@ export default function SelectedDate() {
         return;
       }
 
-      const response = await saveFeedback({
+      await saveFeedback({
         daily_record_id: dailyRecord.id,
         coach_feedback: feedback,
       });
