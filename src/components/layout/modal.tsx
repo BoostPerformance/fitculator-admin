@@ -51,7 +51,7 @@ export default function Modal({
       await saveCoachMemo({
         participant_id: participantId!,
         challenge_id: challengeId!,
-        coach_memo: coachMemo,
+        coach_memo: coachMemo || '',
         // memo_record_date: memoDate,
         serviceUserId: serviceUserId,
       });
@@ -60,7 +60,7 @@ export default function Modal({
 
       if (onSave) {
         // console.log('coachMemo', coachMemo);
-        onSave(coachMemo);
+        onSave(coachMemo || '');
       }
 
       // 성공 시 페이지 새로고침
