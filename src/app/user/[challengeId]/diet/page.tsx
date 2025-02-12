@@ -37,7 +37,7 @@ export default function DietItem() {
         setChallengeTitle(currentChallenge.challenges.title);
       }
     }
-    console.log('urlDate', urlDate);
+    // console.log('urlDate', urlDate);
   }, [challenges, params.challengeId, urlDate]);
 
   const handleChallengeSelect = (challengeId: string) => {
