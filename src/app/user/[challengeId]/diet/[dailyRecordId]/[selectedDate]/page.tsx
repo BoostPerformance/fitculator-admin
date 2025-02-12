@@ -133,18 +133,15 @@ export default function SelectedDate() {
         return;
       }
 
-      const response = await saveFeedback({
+      await saveFeedback({
         daily_record_id: dailyRecord.id,
         coach_feedback: feedback,
       });
 
-      console.log('피드백 저장 응답:', response); // 응답 확인
-      setShowAlert(true);
-      // console.log('showAlert 상태:', true); // 상태 변경 확인
-      setTimeout(() => {
-        setShowAlert(false);
-        //  console.log('showAlert 상태:', false); // 타이머 동작 확인
-      }, 3000);
+      console.log('저장된 피드백:', {
+        date: recordDate,
+        feedback: feedback,
+      });
 
       const updatedAllMeals = allDailyMeals.map((meal) =>
         meal.recordDate === recordDate
@@ -159,13 +156,21 @@ export default function SelectedDate() {
       );
       setAllDailyMeals(updatedAllMeals);
 
-      const currentDate = recordDate;
       const updatedFilteredMeals = updatedAllMeals.filter(
-        (meal) => meal.recordDate === currentDate
+        (meal) => meal.recordDate === recordDate
       );
       setFilteredDailyMeals(updatedFilteredMeals);
 
-      // console.log('Feedback saved successfully:', response);
+      // 피드백 상태 업데이트
+      setFeedbacksByDate((prev) => ({
+        ...prev,
+        [recordDate]: feedback,
+      }));
+
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 3000);
     } catch (error) {
       console.error('Failed to save feedback Page:', error);
     }
@@ -526,14 +531,7 @@ export default function SelectedDate() {
 
     // window.addEventListener('scroll', handleScroll);
     // return () => window.removeEventListener('scroll', handleScroll);
-  }, [
-    params.dailyRecordId,
-    params.selectedDate,
-    params.challengeId,
-    selectedDate,
-    currentDate,
-    filterMealsByMonth,
-  ]);
+  }, [params.selectedDate, params.challengeId]);
 
   //3.
   useEffect(() => {
@@ -567,6 +565,8 @@ export default function SelectedDate() {
       });
       setFilteredDailyMeals(filtered);
     }
+
+    console.log('feedbacksByDate', feedbacksByDate);
   }, [recordDate, allDailyMeals, challengePeriods]);
 
   //console.log('challengePeriods', challengePeriods);
@@ -600,6 +600,7 @@ export default function SelectedDate() {
         },
       ]
     : [];
+
   const calculateChallengeMetrics = () => {
     // 챌린지 전체 일수 계산
     const startDate = new Date(challengePeriods.start_date);
@@ -836,10 +837,7 @@ export default function SelectedDate() {
 
               <TextBox
                 title="코치 피드백"
-                value={
-                  feedbacksByDate[dailyMeal.recordDate] ||
-                  dailyMeal.feedbacks.coach_feedback
-                }
+                value={dailyMeal.feedbacks.coach_feedback}
                 placeholder="피드백을 작성하세요."
                 button1="남기기"
                 Btn1className="bg-[#48BA5D] text-white"
