@@ -391,15 +391,17 @@ export default function SelectedDate() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const baseURL =
-        //   process.env.NODE_ENV === 'development'
-        //     ? '/api' // 개발 환경에서는 내부 API 라우트 사용
-        //     : 'https://studio-admin.fitculator.pro/api'; // 프로덕션 환경에서는 실제 API 서버 사용
+        const baseURL =
+          process.env.NODE_ENV === 'development'
+            ? '/api' // 개발 환경에서는 내부 API 라우트 사용
+            : 'https://studio-admin.fitculator.pro/api'; // 프로덕션 환경에서는 실제 API 서버 사용
 
         // fetch 호출 부분 수정
-        const mealsResponse = await fetch(`api/meals`, {
+        const mealsResponse = await fetch(`${baseURL}/meals`, {
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
           },
         });
 
@@ -536,6 +538,8 @@ export default function SelectedDate() {
         const orgData = await orgDataResponse.json();
 
         setOrgName(orgData);
+
+        console.log('mealsByDateValues', mealsByDateValues);
       } catch (error) {
         console.log('Error fetching data:', error);
       }
