@@ -433,11 +433,11 @@ export default function SelectedDate() {
           throw new Error('Failed to fetch meals data');
         }
 
-        console.log('Response headers:', {
-          cache: mealsResponse.headers.get('cache-control'),
-          timestamp: mealsResponse.headers.get('x-request-time'),
-          etag: mealsResponse.headers.get('etag'),
-        });
+        // console.log('Response headers:', {
+        //   cache: mealsResponse.headers.get('cache-control'),
+        //   timestamp: mealsResponse.headers.get('x-request-time'),
+        //   etag: mealsResponse.headers.get('etag'),
+        // });
 
         const mealsData = await mealsResponse.json();
         // console.log('새로 불러온 데이터:', mealsData);
@@ -480,10 +480,10 @@ export default function SelectedDate() {
           ) => {
             const date = meal.daily_records.record_date;
 
-            console.log('각 식단의 피드백 데이터:', {
-              date,
-              feedbacks: meal.daily_records.feedbacks,
-            });
+            // console.log('각 식단의 피드백 데이터:', {
+            //   date,
+            //   feedbacks: meal.daily_records.feedbacks,
+            // });
 
             if (!acc[date]) {
               acc[date] = {
@@ -519,8 +519,8 @@ export default function SelectedDate() {
             new Date(b.recordDate).getTime() - new Date(a.recordDate).getTime()
         );
 
-        console.log('Fresh data loaded at:', new Date().toISOString());
-        console.log('최종 정렬된 데이터:', sortedMeals);
+        // console.log('Fresh data loaded at:', new Date().toISOString());
+        // console.log('최종 정렬된 데이터:', sortedMeals);
 
         setAllDailyMeals(sortedMeals); // 전체 기록 저장
 
@@ -585,7 +585,7 @@ export default function SelectedDate() {
 
         setOrgName(orgData);
 
-        console.log('mealsByDateValues', mealsByDateValues);
+        // console.log('mealsByDateValues', mealsByDateValues);
       } catch (error) {
         console.log('Error fetching data:', error);
       }
@@ -903,12 +903,12 @@ export default function SelectedDate() {
                   const currentValue =
                     feedbacksByDate[dailyMeal.recordDate] ||
                     dailyMeal.feedbacks.coach_feedback;
-                  console.log('TextBox value 계산:', {
-                    date: dailyMeal.recordDate,
-                    임시저장값: feedbacksByDate[dailyMeal.recordDate],
-                    기존피드백: dailyMeal.feedbacks.coach_feedback,
-                    최종표시값: currentValue,
-                  });
+                  // console.log('TextBox value 계산:', {
+                  //   date: dailyMeal.recordDate,
+                  //   임시저장값: feedbacksByDate[dailyMeal.recordDate],
+                  //   기존피드백: dailyMeal.feedbacks.coach_feedback,
+                  //   최종표시값: currentValue,
+                  // });
                   return currentValue;
                 })()}
                 placeholder="피드백을 작성하세요."

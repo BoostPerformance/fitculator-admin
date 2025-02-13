@@ -12,12 +12,12 @@ const supabase = createClient(
 
 export async function GET(request: Request) {
   try {
-    console.log('GET request received:', new Date().toISOString());
+    // console.log('GET request received:', new Date().toISOString());
 
     const url = new URL(request.url);
     const timestamp = url.searchParams.get('t') || Date.now();
 
-    console.log('Request timestamp:', timestamp);
+    // console.log('Request timestamp:', timestamp);
     // 현재 진행 중인 챌린지와 코치들의 피드백 현황 조회
     const { data: meals, error: mealsError } = await supabase.from('meals')
       .select(`
