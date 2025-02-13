@@ -132,16 +132,21 @@ export default function SelectedDate() {
         return;
       }
 
+      // API 호출 전 상태
+      console.log('저장 전 상태:', {
+        recordDate,
+        feedback,
+        currentAllMeals: allDailyMeals,
+        currentFilteredMeals: filteredDailyMeals,
+      });
+
+      // API 호출
       await saveFeedback({
         daily_record_id: dailyRecord.id,
         coach_feedback: feedback,
       });
 
-      console.log('저장된 피드백:', {
-        date: recordDate,
-        feedback: feedback,
-      });
-
+      // 데이터 업데이트를 한 번에 처리
       const updatedAllMeals = allDailyMeals.map((meal) =>
         meal.recordDate === recordDate
           ? {
@@ -153,14 +158,20 @@ export default function SelectedDate() {
             }
           : meal
       );
+
+      console.log('업데이트된 상태:', {
+        recordDate,
+        feedback,
+        updatedAllMeals: updatedAllMeals.find(
+          (meal) => meal.recordDate === recordDate
+        ),
+      });
+
+      // 한 번에 모든 상태 업데이트
       setAllDailyMeals(updatedAllMeals);
-
-      const updatedFilteredMeals = updatedAllMeals.filter(
-        (meal) => meal.recordDate === recordDate
+      setFilteredDailyMeals(
+        updatedAllMeals.filter((meal) => meal.recordDate === recordDate)
       );
-      setFilteredDailyMeals(updatedFilteredMeals);
-
-      // 피드백 상태 업데이트
       setFeedbacksByDate((prev) => ({
         ...prev,
         [recordDate]: feedback,
@@ -171,7 +182,7 @@ export default function SelectedDate() {
         setShowAlert(false);
       }, 3000);
     } catch (error) {
-      console.error('Failed to save feedback Page:', error);
+      console.error('Failed to save feedback:', error);
     }
   };
 
@@ -442,6 +453,11 @@ export default function SelectedDate() {
           ) => {
             const date = meal.daily_records.record_date;
 
+            console.log('각 식단의 피드백 데이터:', {
+              date,
+              feedbacks: meal.daily_records.feedbacks,
+            });
+
             if (!acc[date]) {
               acc[date] = {
                 recordDate: date,
@@ -475,6 +491,8 @@ export default function SelectedDate() {
           (a, b) =>
             new Date(b.recordDate).getTime() - new Date(a.recordDate).getTime()
         );
+
+        console.log('최종 정렬된 데이터:', sortedMeals);
 
         setAllDailyMeals(sortedMeals); // 전체 기록 저장
 

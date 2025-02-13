@@ -22,13 +22,14 @@ export const useFeedback = () => {
         body: JSON.stringify(data),
       });
 
-      console.log('coachFeedback response', response);
+      //console.log('coachFeedback response', response);
 
       if (!response.ok) {
         throw new Error('Failed to save feedback at useFeedback ');
       }
 
       const result = await response.json();
+      console.log('저장된 피드백 데이터:', result);
       return result;
     } catch (err) {
       setError(
