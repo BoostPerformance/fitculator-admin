@@ -549,7 +549,7 @@ export default function SelectedDate() {
 
     // window.addEventListener('scroll', handleScroll);
     // return () => window.removeEventListener('scroll', handleScroll);
-  }, [params.selectedDate, params.challengeId]);
+  }, [params.selectedDate, params.challengeId, params.selectedDate]);
 
   //3.
   useEffect(() => {
