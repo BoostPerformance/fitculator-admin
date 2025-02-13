@@ -1,7 +1,7 @@
 import { CiSearch } from 'react-icons/ci';
 const SearchIput = ({ placeholder = 'Search' }) => {
   const handleSearch = () => {
-    console.log('diet search clicked');
+    //console.log('diet search clicked');
   };
   return (
     <div className="relative ">
