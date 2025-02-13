@@ -417,26 +417,27 @@ export default function SelectedDate() {
         const timestamp = new Date().getTime();
 
         const mealsResponse = await fetch(`${baseURL}/meals?t=${timestamp}`, {
+          method: 'GET',
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             Pragma: 'no-cache',
-            Expires: '0',
+            'If-None-Match': '', // ETag 무시
+            'If-Modified-Since': '', // Last-Modified 무시
           },
           cache: 'no-store',
+          next: { revalidate: 0 },
         });
-
-        console.log('Response headers:', {
-          contentType: mealsResponse.headers.get('content-type'),
-          cacheControl: mealsResponse.headers.get('cache-control'),
-          etag: mealsResponse.headers.get('etag'),
-          date: mealsResponse.headers.get('date'),
-        });
-
         if (!mealsResponse.ok) {
           throw new Error('Failed to fetch meals data');
         }
+
+        console.log('Response headers:', {
+          cache: mealsResponse.headers.get('cache-control'),
+          timestamp: mealsResponse.headers.get('x-request-time'),
+          etag: mealsResponse.headers.get('etag'),
+        });
 
         const mealsData = await mealsResponse.json();
         // console.log('새로 불러온 데이터:', mealsData);

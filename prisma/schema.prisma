@@ -138,6 +138,7 @@ model meals {
   description     String
   created_at      DateTime?     @default(now()) @db.Timestamptz(6)
   updated_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  meal_time       DateTime?     @db.Timestamptz(6)
   meal_photos     meal_photos[]
   daily_records   daily_records @relation(fields: [daily_record_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
