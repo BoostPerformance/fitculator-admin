@@ -413,14 +413,23 @@ export default function SelectedDate() {
             ? '/api' // 개발 환경에서는 내부 API 라우트 사용
             : 'https://studio-admin.fitculator.pro/api'; // 프로덕션 환경에서는 실제 API 서버 사용
 
-        // fetch 호출 부분 수정
-        const mealsResponse = await fetch(`${baseURL}/meals`, {
+        //const timestamp = new Date().getTime();
+        const timestamp = new Date().getTime();
+
+        const mealsResponse = await fetch(`${baseURL}/meals?t=${timestamp}`, {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+            Expires: '0',
           },
+          cache: 'no-store',
         });
+
+        if (!mealsResponse.ok) {
+          throw new Error('Failed to fetch meals data');
+        }
 
         const mealsData = await mealsResponse.json();
         // console.log('새로 불러온 데이터:', mealsData);
@@ -429,6 +438,10 @@ export default function SelectedDate() {
         //   allDailyMeals,
         //   filteredDailyMeals,
         // });
+        if (!Array.isArray(mealsData)) {
+          console.error('Invalid meals data format:', mealsData);
+          return;
+        }
 
         const userMeals = mealsData.filter(
           (meal: {
@@ -498,6 +511,7 @@ export default function SelectedDate() {
             new Date(b.recordDate).getTime() - new Date(a.recordDate).getTime()
         );
 
+        console.log('Fresh data loaded at:', new Date().toISOString());
         console.log('최종 정렬된 데이터:', sortedMeals);
 
         setAllDailyMeals(sortedMeals); // 전체 기록 저장
