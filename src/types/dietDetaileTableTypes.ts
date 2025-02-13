@@ -30,7 +30,7 @@ export interface ChallengeParticipant {
 export interface Feedbacks {
   id: string;
   ai_feedback?: string;
-  coach_feedback?: string;
+  coach_feedback: string;
   coach_id: string;
   coach_memo?: string;
   daily_record_id: string;
