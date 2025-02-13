@@ -33,13 +33,36 @@ export async function GET() {
         `);
 
     if (mealsError) throw mealsError;
-    //console.log(meals);
-    return NextResponse.json(meals);
+
+    return NextResponse.json(meals, {
+      headers: {
+        'Cache-Control':
+          'no-store, no-cache, must-revalidate, proxy-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+    });
   } catch (error) {
+    console.error('Detailed error in meals API:', {
+      error,
+      timestamp: new Date().toISOString(),
+      errorStack: error instanceof Error ? error.stack : undefined,
+    });
     console.error('Error fetching meals:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch meals' },
-      { status: 500 }
+      {
+        error: 'Failed to fetch meals',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      {
+        status: 500,
+        headers: {
+          'Cache-Control':
+            'no-store, no-cache, must-revalidate, proxy-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
     );
   }
 }

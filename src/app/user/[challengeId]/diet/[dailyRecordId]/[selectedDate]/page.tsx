@@ -427,6 +427,13 @@ export default function SelectedDate() {
           cache: 'no-store',
         });
 
+        console.log('Response headers:', {
+          contentType: mealsResponse.headers.get('content-type'),
+          cacheControl: mealsResponse.headers.get('cache-control'),
+          etag: mealsResponse.headers.get('etag'),
+          date: mealsResponse.headers.get('date'),
+        });
+
         if (!mealsResponse.ok) {
           throw new Error('Failed to fetch meals data');
         }
