@@ -132,14 +132,6 @@ export default function SelectedDate() {
         return;
       }
 
-      // API 호출 전 상태
-      console.log('저장 전 상태:', {
-        recordDate,
-        feedback,
-        currentAllMeals: allDailyMeals,
-        currentFilteredMeals: filteredDailyMeals,
-      });
-
       // API 호출
       await saveFeedback({
         daily_record_id: dailyRecord.id,
@@ -159,23 +151,37 @@ export default function SelectedDate() {
           : meal
       );
 
-      console.log('업데이트된 상태:', {
-        recordDate,
-        feedback,
-        updatedAllMeals: updatedAllMeals.find(
-          (meal) => meal.recordDate === recordDate
-        ),
-      });
+      // console.log('업데이트된 상태:', {
+      //   recordDate,
+      //   feedback,
+      //   updatedAllMeals: updatedAllMeals.find(
+      //     (meal) => meal.recordDate === recordDate
+      //   ),
+      // });
 
-      // 한 번에 모든 상태 업데이트
+      //저장 하자마자 바로 로컬 상태 업데이트
       setAllDailyMeals(updatedAllMeals);
       setFilteredDailyMeals(
         updatedAllMeals.filter((meal) => meal.recordDate === recordDate)
       );
+
       setFeedbacksByDate((prev) => ({
         ...prev,
         [recordDate]: feedback,
       }));
+
+      console.log('State updates complete:', {
+        recordDate,
+        feedback,
+        updatedState: {
+          allDailyMeals: updatedAllMeals.find(
+            (meal) => meal.recordDate === recordDate
+          ),
+          filteredDailyMeals: updatedAllMeals.filter(
+            (meal) => meal.recordDate === recordDate
+          ),
+        },
+      });
 
       setShowAlert(true);
       setTimeout(() => {

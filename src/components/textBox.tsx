@@ -1,29 +1,30 @@
+// TextBox.tsx
 import Image from 'next/image';
 import React, { useRef, useState, useEffect } from 'react';
 
 interface TextBoxProps {
   title: string;
-  value?: string; // 코치 피드백용
+  value?: string;
   placeholder?: string;
   button1?: string;
   button2?: string;
   svg1: string;
   svg2?: string;
-  onClick1?: () => void; // AI 생성 버튼용
-  onClick2?: () => void; // 복사 버튼용
-  onSave?: (feedback: string, date: string) => Promise<void>;
+  onClick1?: () => void;
+  onClick2?: () => void;
+  onSave?: (feedback: string) => Promise<void>; // date 파라미터 제거
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   Btn1className?: string;
   Btn2className?: string;
   readOnly?: boolean;
   copyIcon?: boolean;
-  isFeedbackMode?: boolean; // 코치 피드백 모드인지 구분
+  isFeedbackMode?: boolean;
 }
 
 const TextBox = ({
   title,
   placeholder,
-  value,
+  value = '',
   button1,
   button2,
   svg1,
@@ -40,39 +41,24 @@ const TextBox = ({
 }: TextBoxProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [copyMessage, setCopyMessage] = useState<boolean>(false);
-  const [feedback, setFeedback] = useState(value || '');
+  const [localValue, setLocalValue] = useState(value);
 
   useEffect(() => {
-    if (value !== undefined) {
-      setFeedback(value);
-    }
-    //  console.log('value', value);
+    setLocalValue(value);
   }, [value]);
-
-  const handleSave = async () => {
-    if (onSave && value) {
-      try {
-        await onSave(feedback, value);
-        //  console.log('Feedback saved successfully');
-      } catch (error) {
-        console.error('Failed to save feedback textBox:', error);
-      }
-    }
-  };
-
-  const handleButtonClick = () => {
-    if (isFeedbackMode) {
-      // console.log('isFeedbackMode', isFeedbackMode);
-      handleSave();
-    } else {
-      onClick1?.();
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
-    setFeedback(newValue);
+    setLocalValue(newValue);
     onChange?.(e);
+  };
+
+  const handleButtonClick = async () => {
+    if (isFeedbackMode && onSave) {
+      await onSave(localValue);
+    } else {
+      onClick1?.();
+    }
   };
 
   const handleCopy = async () => {
@@ -117,7 +103,7 @@ const TextBox = ({
         <textarea
           ref={textareaRef}
           placeholder={placeholder}
-          value={isFeedbackMode ? feedback : value}
+          value={isFeedbackMode ? localValue : value}
           className={`border p-2 w-full rounded-md text-0.875-400 h-[20rem] ${
             readOnly ? 'bg-gray-100 cursor-not-allowed' : ''
           }`}
@@ -142,8 +128,8 @@ const TextBox = ({
               className={`absolute top-[1.2rem] ${
                 button2
                   ? 'lg:right-[5.3rem] lg:top-[1.2rem] sm:left-[2rem]'
-                  : 'lg:right-[11.5rem] lg:top-[1.3rem] sm:left-[6rem] sm:top-[1.3rem] md:'
-              }  w-4 h-4`}
+                  : 'lg:right-[11.5rem] lg:top-[1.3rem] sm:left-[6rem] sm:top-[1.3rem]'
+              } w-4 h-4`}
               onClick={handleButtonClick}
             />
           </div>
