@@ -49,7 +49,7 @@ export default function MobileChart({
     <div className="mt-[3rem] sm:bg-white sm:px-[1rem]">
       <div className="flex flex-col gap-4">
         {dietDetailItems.map((meal: ProcessedMeal, index: number) => {
-          console.log('dietDetailItems', dietDetailItems);
+          //console.log('dietDetailItems', dietDetailItems);
           return (
             <div className="pt-[2rem]" key={meal.user.id || index}>
               <button
