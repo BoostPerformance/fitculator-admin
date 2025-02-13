@@ -1,5 +1,8 @@
 import Image from 'next/image';
-import { MobildDieDetailTableProps } from '@/types/dietDetaileTableTypes';
+import {
+  MobildDieDetailTableProps,
+  ProcessedMeal,
+} from '@/types/dietDetaileTableTypes';
 import { useRouter } from 'next/navigation';
 
 export default function MobileChart({
@@ -8,8 +11,6 @@ export default function MobileChart({
 }: MobildDieDetailTableProps) {
   const router = useRouter();
   const isMealUploaded = (mealName: string) => {
-    //console.log('mealName', mealName !== '');
-
     return mealName !== '' ? (
       <>
         <Image
@@ -30,6 +31,7 @@ export default function MobileChart({
       </>
     );
   };
+
   const isfeedback = (feedback: string | null) => {
     return (
       <div
@@ -41,16 +43,36 @@ export default function MobileChart({
       </div>
     );
   };
+
+  //console.log('dietDetailItems', dietDetailItems);
   return (
     <div className="mt-[3rem] sm:bg-white sm:px-[1rem]">
       <div className="flex flex-col gap-4">
-        {dietDetailItems.map((meal: any, index: any) => {
+        {dietDetailItems.map((meal: ProcessedMeal, index: number) => {
           console.log('dietDetailItems', dietDetailItems);
           return (
             <div className="pt-[2rem]" key={meal.user.id || index}>
-              <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]">
+              <button
+                onClick={() =>
+                  router.push(
+                    `/user/${meal.challenge_id}/diet/${meal.user.id}/${selectedDate}`
+                  )
+                }
+                className="text-[#6F6F6F] text-1.125-500 bg-gray-8 p-2 rounded-[0.5rem]"
+              >
+                피드백 남기기 →
+              </button>
+              <div
+                onClick={() =>
+                  router.push(
+                    `/user/${meal.challenge_id}/diet/${meal.user.id}/${selectedDate}`
+                  )
+                }
+                className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]"
+              >
                 {meal.user.name}
               </div>
+
               <table className="flex flex-col gap-[1rem] items-center justify-center">
                 <thead>
                   <tr className="flex gap-[2rem] items-center justify-center text-gray-11 text-1-500">
@@ -65,11 +87,6 @@ export default function MobileChart({
                   <tr
                     key={index}
                     className="flex gap-[2rem] items-center justify-center"
-                    onClick={() =>
-                      router.push(
-                        `/user/${meal.challenge_id}/diet/${meal.user.id}/${selectedDate}`
-                      )
-                    }
                   >
                     <td>{isMealUploaded(meal.meals.breakfast)}</td>
                     <td>{isMealUploaded(meal.meals.lunch)}</td>
@@ -79,7 +96,14 @@ export default function MobileChart({
                   </tr>
                 </tbody>
               </table>
-              <div className="w-full text-center pt-[2rem]">
+              <div
+                className="w-full text-center pt-[2rem]"
+                onClick={() =>
+                  router.push(
+                    `/user/${meal.challenge_id}/diet/${meal.user.id}/${selectedDate}`
+                  )
+                }
+              >
                 {isfeedback(meal.daily_record.feedbacks?.coach_feedback)}
               </div>
             </div>
