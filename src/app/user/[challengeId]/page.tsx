@@ -13,7 +13,6 @@ import {
   calculateTodayDietUploads,
   calculateTotalDietUploads,
 } from '@/components/statistics/challengeParticipantsDietStatics';
-import DailyDietRecordMobile from '@/components/graph/dailyDietRecordMobile';
 
 interface AdminUser {
   email: string;
@@ -50,39 +49,9 @@ interface Challenges {
   };
 }
 
-interface DailyRecord {
-  id: string;
-  record_date: string;
-  feedbacks: {
-    coach_feedback: string;
-    created_at: string;
-    id: string;
-  }[];
-}
-
-interface ChallengeParticipant {
-  id: string;
-  users: {
-    id: string;
-    name: string;
-    username: string;
-  };
-  challenges: {
-    id: string;
-    title: string;
-    end_date: string;
-    start_date: string;
-    challenge_type: string;
-  };
-  daily_records: DailyRecord[];
-}
 type ParamsType = {
   challengeId: string;
 };
-
-interface Workouts {
-  created_at: string;
-}
 
 const calculateChallengeProgress = (startDate: string, endDate: string) => {
   const start = new Date(startDate);
@@ -161,9 +130,8 @@ export default function User() {
         }
         const workoutDataResponse = await workoutData.json();
 
-        //console.log('workoutDataResponse', workoutDataResponse);
+        console.log('workoutDataResponse', workoutDataResponse);
         const today = new Date().toISOString().split('T')[0];
-        const yesterday = '2025-02-10';
 
         const workOutCount = workoutDataResponse.filter((item: any) => {
           const createdAt = item.created_at.split('T')[0];
@@ -184,23 +152,8 @@ export default function User() {
         });
         const newSet = new Set(arrWorkout);
         const totalWorkoutUploadMember = newSet.size;
-        // console.log('newSet', newSet.size);
-
-        // // 필터링된 기록에서 고유한 user_id만 추출
-        // const uniqueUsers = new Set(
-        //   todaysWorkouts.map((item: any) => {
-        //     //   console.log('todaysWorkouts item', item);
-        //     return item.user_id;
-        //   })
-        // );
-
-        // // 고유한 사용자 수
-        // const workOutCounting = uniqueUsers.size;
 
         setWorkOutCountToday(totalWorkoutUploadMember);
-        // console.log('Unique users who worked out today:', workOutCount);
-
-        // 챌린지 데이터 가져오기
 
         const challengesResponse = await fetch('/api/challenges');
         if (!challengesResponse.ok) {
@@ -246,7 +199,6 @@ export default function User() {
           throw new Error('Failed to fetch daily-records data');
         }
         const dailyRecordsdata = await dailyRecordsresponse.json();
-
         setDailyRecords(dailyRecordsdata);
       } catch (error) {
         console.error('Error fetching data:', error);
