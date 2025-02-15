@@ -25,12 +25,21 @@ const DietDetaileTable = ({
     updated_date: string,
     updated_time: string
   ) => {
-    const recordDate = new Date(record_date).toISOString().split('T')[0];
-    const upatedDate = new Date(updated_date).toISOString().split('T')[0];
-    const updateTime = new Date(updated_time);
-    const hours = String(updateTime.getHours()).padStart(2, '0');
-    const minutes = String(updateTime.getMinutes()).padStart(2, '0');
+    const recordDateKST = new Date(
+      new Date(record_date).getTime() + 9 * 60 * 60 * 1000
+    );
+    const updatedDateKST = new Date(
+      new Date(updated_date).getTime() + 9 * 60 * 60 * 1000
+    );
+    const updateTimeKST = new Date(
+      new Date(updated_time).getTime() + 9 * 60 * 60 * 1000
+    );
 
+    // 날짜 포맷팅
+    const recordDate = recordDateKST.toISOString().split('T')[0];
+    const upatedDate = updatedDateKST.toISOString().split('T')[0];
+    const hours = String(updateTimeKST.getHours()).padStart(2, '0');
+    const minutes = String(updateTimeKST.getMinutes()).padStart(2, '0');
     return (
       <div className="whitespace-nowrap">
         기록일: {recordDate} <br />
