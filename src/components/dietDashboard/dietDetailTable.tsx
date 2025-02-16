@@ -24,6 +24,7 @@ const DietDetaileTable = ({
     feedback_updated_at: string | null | undefined,
     feedback_created_at: string | null | undefined
   ) => {
+
     try {
       // 둘 다 없는 경우 early return
       if (!feedback_updated_at && !feedback_created_at) {
@@ -63,6 +64,7 @@ const DietDetaileTable = ({
           createdDisplay = `${CreatedformattedDate} ${created_hours}:${created_minutes}`;
         }
       }
+
 
       return (
         <div className="whitespace-nowrap">
