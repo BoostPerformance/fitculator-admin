@@ -12,7 +12,7 @@ export const processMeals = (filteredByChallengeId: ProcessedMeal[]) => {
     }))
   );
 
-  // console.log('filteredByChallengeId', filteredByChallengeId);
+  console.log('filteredByChallengeId', filteredByChallengeId);
   const filteredMeals = allParticipants.reduce(
     (acc: Record<string, ProcessedMeal>, participant) => {
       //console.log('allParticipants', allParticipants);

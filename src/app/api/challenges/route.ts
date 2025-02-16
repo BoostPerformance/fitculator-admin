@@ -72,6 +72,7 @@ export async function GET() {
           id,
           record_date,
           updated_at,
+          created_at,
           meals (
             id,
             meal_type,
@@ -85,7 +86,8 @@ export async function GET() {
             coach_id,
             daily_record_id,
             coach_memo,
-            updated_at
+            updated_at,
+            created_at
           )
         )
       )

@@ -43,13 +43,69 @@ export default function MobileChart({
       </div>
     );
   };
+  const formatDateTime = (
+    feedback_updated_at: string | null | undefined,
+    feedback_created_at: string | null | undefined
+  ) => {
+    try {
+      // 둘 다 없는 경우 early return
+      if (!feedback_updated_at && !feedback_created_at) {
+        return <div></div>;
+      }
+
+      let updatedDisplay = '날짜 정보 없음';
+      let createdDisplay = '날짜 정보 없음';
+
+      // updated_at 처리
+      if (feedback_updated_at) {
+        const date = new Date(feedback_updated_at);
+        if (!isNaN(date.getTime())) {
+          // 유효한 날짜인지 확인
+          const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+          const formattedDate = kstDate.toISOString().split('T')[0];
+          const hours = String(kstDate.getHours()).padStart(2, '0');
+          const minutes = String(kstDate.getMinutes()).padStart(2, '0');
+          updatedDisplay = `${formattedDate} ${hours}:${minutes}`;
+        }
+      }
+
+      // created_at 처리
+      if (feedback_created_at) {
+        const created_date = new Date(feedback_created_at);
+        if (!isNaN(created_date.getTime())) {
+          // 유효한 날짜인지 확인
+          const koreanTime = new Date(
+            created_date.getTime() + 9 * 60 * 60 * 1000
+          );
+          const CreatedformattedDate = koreanTime.toISOString().split('T')[0];
+          const created_hours = String(koreanTime.getHours()).padStart(2, '0');
+          const created_minutes = String(koreanTime.getMinutes()).padStart(
+            2,
+            '0'
+          );
+          createdDisplay = `${CreatedformattedDate} ${created_hours}:${created_minutes}`;
+        }
+      }
+
+      return (
+        <div className="whitespace-nowrap">
+          피드백 생성: &nbsp;{createdDisplay}
+          <br />
+          업데이트: &nbsp;{updatedDisplay}
+        </div>
+      );
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return <div>날짜 정보 없음</div>;
+    }
+  };
 
   //console.log('dietDetailItems', dietDetailItems);
   return (
     <div className="mt-[3rem] sm:bg-white sm:px-[1rem]">
       <div className="flex flex-col gap-4">
         {dietDetailItems.map((meal: ProcessedMeal, index: number) => {
-          //console.log('dietDetailItems', dietDetailItems);
+          // console.log('dietDetailItems', dietDetailItems);
           return (
             <div className="pt-[2rem]" key={meal.user.id || index}>
               <button
@@ -105,6 +161,12 @@ export default function MobileChart({
                 }
               >
                 {isfeedback(meal.daily_record.feedbacks?.coach_feedback)}
+              </div>
+              <div>
+                {formatDateTime(
+                  meal.daily_record.feedbacks?.updated_at,
+                  meal.daily_record.feedbacks?.created_at
+                )}
               </div>
             </div>
           );

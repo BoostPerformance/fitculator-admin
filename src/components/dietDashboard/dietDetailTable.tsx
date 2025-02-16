@@ -21,35 +21,61 @@ const DietDetaileTable = ({
   };
 
   const formatDateTime = (
-    record_date: string,
-    updated_date: string,
-    updated_time: string
+    feedback_updated_at: string | null | undefined,
+    feedback_created_at: string | null | undefined
   ) => {
-    const recordDateKST = new Date(
-      new Date(record_date).getTime() + 9 * 60 * 60 * 1000
-    );
-    const updatedDateKST = new Date(
-      new Date(updated_date).getTime() + 9 * 60 * 60 * 1000
-    );
-    const updateTimeKST = new Date(
-      new Date(updated_time).getTime() + 9 * 60 * 60 * 1000
-    );
+    try {
+      // 둘 다 없는 경우 early return
+      if (!feedback_updated_at && !feedback_created_at) {
+        return <div></div>;
+      }
 
-    // 날짜 포맷팅
-    const recordDate = recordDateKST.toISOString().split('T')[0];
-    const upatedDate = updatedDateKST.toISOString().split('T')[0];
-    const hours = String(updateTimeKST.getHours()).padStart(2, '0');
-    const minutes = String(updateTimeKST.getMinutes()).padStart(2, '0');
-    return (
-      <div className="whitespace-nowrap">
-        기록일: {recordDate} <br />
-        업데이트:
-        <br /> {upatedDate} &nbsp;
-        {hours}:{minutes}
-      </div>
-    );
+      let updatedDisplay = '날짜 정보 없음';
+      let createdDisplay = '날짜 정보 없음';
+
+      // updated_at 처리
+      if (feedback_updated_at) {
+        const date = new Date(feedback_updated_at);
+        if (!isNaN(date.getTime())) {
+          // 유효한 날짜인지 확인
+          const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+          const formattedDate = kstDate.toISOString().split('T')[0];
+          const hours = String(kstDate.getHours()).padStart(2, '0');
+          const minutes = String(kstDate.getMinutes()).padStart(2, '0');
+          updatedDisplay = `${formattedDate} ${hours}:${minutes}`;
+        }
+      }
+
+      // created_at 처리
+      if (feedback_created_at) {
+        const created_date = new Date(feedback_created_at);
+        if (!isNaN(created_date.getTime())) {
+          // 유효한 날짜인지 확인
+          const koreanTime = new Date(
+            created_date.getTime() + 9 * 60 * 60 * 1000
+          );
+          const CreatedformattedDate = koreanTime.toISOString().split('T')[0];
+          const created_hours = String(koreanTime.getHours()).padStart(2, '0');
+          const created_minutes = String(koreanTime.getMinutes()).padStart(
+            2,
+            '0'
+          );
+          createdDisplay = `${CreatedformattedDate} ${created_hours}:${created_minutes}`;
+        }
+      }
+
+      return (
+        <div className="whitespace-nowrap">
+          피드백 생성: &nbsp;{createdDisplay}
+          <br />
+          업데이트: &nbsp;{updatedDisplay}
+        </div>
+      );
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return <div>날짜 정보 없음</div>;
+    }
   };
-
   return (
     <div className="mt-6 overflow-x-auto">
       <table className="w-full bg-white shadow-md rounded-md min-w-[1000px]">
@@ -98,7 +124,10 @@ const DietDetaileTable = ({
             </th>
             <th className="w-[13%] p-4 lg:p-6">
               <div className="flex items-center justify-start gap-2 md:justify-center">
-                <span className="lg:text-base sm:text-sm">업데이트</span>
+                <span className="lg:text-base sm:text-sm text-center">
+                  피드백 <br />
+                  업데이트
+                </span>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -162,9 +191,8 @@ const DietDetaileTable = ({
               </td>
               <td className="p-4 lg:p-6 sm:text-sm">
                 {formatDateTime(
-                  dietDetailTableItem.daily_record.record_date,
-                  dietDetailTableItem.daily_record.updated_at,
-                  dietDetailTableItem.daily_record.updated_at
+                  dietDetailTableItem.daily_record.feedbacks?.updated_at,
+                  dietDetailTableItem.daily_record.feedbacks?.created_at
                 )}
               </td>
               <td className="p-4 lg:p-6 sm:text-sm text-center">

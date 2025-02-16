@@ -1,4 +1,4 @@
-import { FaPlus } from 'react-icons/fa6';
+//import { FaPlus } from 'react-icons/fa6';
 import Image from 'next/image';
 
 interface PhotoData {
@@ -21,7 +21,6 @@ const MealPhotoLayout = ({
   src = [],
   descriptions = '',
   time = '',
-  onAddComment,
 }: MealPhotoLayoutProps) => {
   const filteredPhotos = src?.filter((photo) => photo || []);
 

@@ -688,12 +688,13 @@ export default function SelectedDate() {
 
       if (isInRange) {
         // 각 식사 타입별로 확인
-        Object.values(dailyMeal.meals).forEach((meal) => {
-          // 설명이나 사진이 있는 경우에만 카운트
-          if (meal.description.trim() !== '' || meal.mealPhotos.length > 0) {
-            uploadCount++;
-          }
-        });
+        console.log('dailyMeal', dailyMeal);
+        const hasAnyMeal = Object.values(dailyMeal.meals).some(
+          (meal) => meal.description.trim() !== '' || meal.mealPhotos.length > 0
+        );
+        if (hasAnyMeal) {
+          uploadCount++;
+        }
       }
     });
 
@@ -838,9 +839,14 @@ export default function SelectedDate() {
               ).map((mealType) => {
                 const formatRecordDate = dailyMeal.meals[mealType]?.updatedAt
                   ? (() => {
-                      const date = new Date(
+                      // UTC 시간을 KST로 변환 (UTC+9)
+                      const utcDate = new Date(
                         dailyMeal.meals[mealType]?.updatedAt || ''
                       );
+                      const date = new Date(
+                        utcDate.getTime() + 9 * 60 * 60 * 1000
+                      );
+
                       const year = date.getFullYear();
                       const month = String(date.getMonth() + 1).padStart(
                         2,
@@ -852,6 +858,7 @@ export default function SelectedDate() {
                         2,
                         '0'
                       );
+
                       return `최근 수정일: ${year}-${month}-${day} ${hours}:${minutes}`;
                     })()
                   : '';
