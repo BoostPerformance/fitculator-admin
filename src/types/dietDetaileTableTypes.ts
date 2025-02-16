@@ -35,6 +35,7 @@ export interface Feedbacks {
   coach_memo?: string;
   daily_record_id: string;
   updated_at: string;
+  created_at: string;
 }
 
 export interface DailyRecords {
@@ -43,6 +44,7 @@ export interface DailyRecords {
   meals: Meals[];
   feedbacks: Feedbacks;
   updated_at: string;
+  created_at: string;
 }
 
 export interface Meals {
