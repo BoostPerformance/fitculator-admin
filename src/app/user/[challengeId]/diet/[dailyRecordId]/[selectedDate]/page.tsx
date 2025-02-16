@@ -688,7 +688,7 @@ export default function SelectedDate() {
 
       if (isInRange) {
         // 각 식사 타입별로 확인
-        console.log('dailyMeal', dailyMeal);
+        //  console.log('dailyMeal', dailyMeal);
         const hasAnyMeal = Object.values(dailyMeal.meals).some(
           (meal) => meal.description.trim() !== '' || meal.mealPhotos.length > 0
         );

@@ -8,11 +8,13 @@ interface DietStatsProps {
 
 export const DietStatistics = ({ processedMeals }: DietStatsProps) => {
   const getTotalMealUploads = (meals: ProcessedMeal[]) => {
+    // console.log('meals', meals);
     return meals.reduce((total, meal) => {
-      const mealCount = Object.values(meal.meals).filter(
-        (value) => value !== ''
-      ).length;
-      return total + mealCount;
+      const hasAnyMeal = Object.values(meal.meals).some(
+        (description) => description.trim() !== ''
+      );
+
+      return total + (hasAnyMeal ? 1 : 0);
     }, 0);
   };
 
@@ -75,7 +77,7 @@ export const DietStatistics = ({ processedMeals }: DietStatsProps) => {
       />
 
       <TotalFeedbackCounts
-        counts={`${feedbackStats.total}명`}
+        counts={`${feedbackStats.pending}명`}
         total={''}
         title="피드백 미작성"
         borderColor="border-[#FDB810]"
