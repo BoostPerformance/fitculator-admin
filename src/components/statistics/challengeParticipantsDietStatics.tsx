@@ -108,49 +108,87 @@ export const calculateTotalDietUploads = (
   const endDate = new Date(selectedChallenge.challenges.end_date);
   const today = new Date();
 
-  // 챌린지 시작일부터 오늘 또는 종료일 중 더 이른 날짜까지의 총 일수 계산
   const lastDate = today < endDate ? today : endDate;
   const totalDays =
     Math.floor(
       (lastDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
     ) + 1;
 
-  // 해당 챌린지의 데일리 레코드만 필터링
   const challengeRecords = dailyRecords.filter(
     (record) => record.challenges.id === selectedChallengeId
   );
 
-  // 전체 예상 식단 기록 수 계산 (분모) - 하루 1회 기준
   const totalParticipants = challengeRecords.length;
-  const totalExpectedRecords = totalParticipants * totalDays; // 하루 1회 기준
+  const totalExpectedRecords = totalParticipants * totalDays;
 
-  // 실제 업로드된 일일 식단 수 계산 (분자)
   let totalUploads = 0;
-  challengeRecords.forEach((record) => {
-    // 각 날짜별로 한 번이라도 식단을 올렸는지 확인
-    const uniqueDates = new Set();
 
-    record.daily_records.forEach((dailyRecord) => {
-      const recordDate = new Date(dailyRecord.record_date);
-      if (recordDate >= startDate && recordDate <= lastDate) {
-        // 해당 날짜에 하나라도 description이 있는 meal이 있으면 카운트
-        const hasValidMeal = dailyRecord.meals?.some(
-          (meal) => meal.description && meal.description.trim() !== ''
-        );
+  // console.log('selectedChallengeId:', selectedChallengeId);
+  // console.log('challengeRecords:', challengeRecords);
+  challengeRecords.forEach((participant) => {
+    const uploadedDates = new Set();
 
-        if (hasValidMeal) {
-          // 날짜를 문자열로 변환하여 Set에 추가
-          uniqueDates.add(dailyRecord.record_date.split('T')[0]);
+    //console.log('Participant daily records:', participant.daily_records);
+
+    // daily_records가 있는지 확인
+    if (participant.daily_records && Array.isArray(participant.daily_records)) {
+      participant.daily_records.forEach((dailyRecord) => {
+        //console.log('Daily Record:', dailyRecord);
+        if (dailyRecord && dailyRecord.record_date) {
+          const recordDate = new Date(dailyRecord.record_date);
+
+          // console.log('Checking record:', {
+          //   recordDate,
+          //   meals: dailyRecord.meals,
+          //   isInRange: recordDate >= startDate && recordDate <= lastDate,
+          // });
+
+          if (recordDate >= startDate && recordDate <= lastDate) {
+            // meals 배열이 존재하는지 확인
+            const hasAnyMeal =
+              dailyRecord.meals &&
+              dailyRecord.meals.some(
+                (meal) => meal.description && meal.description.trim() !== ''
+              );
+
+            // console.log('Meal check:', {
+            //   date: dailyRecord.record_date,
+            //   hasAnyMeal,
+            //   meals: dailyRecord.meals,
+            // });
+
+            //  console.log('hasAnyMeal:', hasAnyMeal);
+            if (hasAnyMeal) {
+              uploadedDates.add(dailyRecord.record_date.split('T')[0]);
+              // console.log('Added date:', dailyRecord.record_date.split('T')[0]);
+              // console.log('Current uploadedDates:', uploadedDates);
+            }
+          }
         }
-      }
-    });
+      });
+    }
+    // console.log('Final uploadedDates for participant:', uploadedDates);
 
-    // 식단을 올린 날짜 수를 전체 업로드 수에 추가
-    totalUploads += uniqueDates.size;
+    totalUploads += uploadedDates.size;
   });
 
-  return {
+  // console.log({
+  //   challengePeriod: {
+  //     start: startDate,
+  //     end: endDate,
+  //     today,
+  //     lastDate,
+  //     totalDays,
+  //   },
+  //   participants: totalParticipants,
+  //   expectedRecords: totalExpectedRecords,
+  //   actualUploads: totalUploads,
+  // });
+  const result = {
     counts: totalUploads.toString(),
     total: `${totalExpectedRecords}개`,
   };
+
+  // console.log('Final result:', result);
+  return result;
 };

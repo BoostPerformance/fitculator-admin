@@ -37,6 +37,12 @@ export async function GET() {
     daily_records!participant_id (
       id,
       record_date,
+       meals (
+            id,
+            meal_type,
+            description,
+            updated_at
+          ),
       feedbacks!daily_record_id (
                 id,
                 coach_feedback,

@@ -130,7 +130,7 @@ export default function User() {
         }
         const workoutDataResponse = await workoutData.json();
 
-        console.log('workoutDataResponse', workoutDataResponse);
+        // console.log('workoutDataResponse', workoutDataResponse);
         const today = new Date().toISOString().split('T')[0];
 
         const workOutCount = workoutDataResponse.filter((item: any) => {
