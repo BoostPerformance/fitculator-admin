@@ -111,13 +111,13 @@ export const calculateTotalDietUploads = (
   const lastDate = today < endDate ? today : endDate;
   const totalDays =
     Math.floor(
-      (lastDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
     ) + 1;
 
   const challengeRecords = dailyRecords.filter(
     (record) => record.challenges.id === selectedChallengeId
   );
-
+  //분모: 전체 챌린지 일 수 * 챌린지 참여자
   const totalParticipants = challengeRecords.length;
   const totalExpectedRecords = totalParticipants * totalDays;
 
