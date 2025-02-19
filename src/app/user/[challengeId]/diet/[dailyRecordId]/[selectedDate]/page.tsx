@@ -566,12 +566,14 @@ export default function SelectedDate() {
         const userData = await challengeParticipantsResponse.json();
         setUserData(userData);
 
-        //console.log('userData', userData);
+        // console.log('userData', userData);
         const currentUser = userData.find((user: UserData) => {
           return user.users.id === params.dailyRecordId;
         });
 
         if (currentUser) {
+          // console.log(currentUser);
+
           setUserData({
             id: currentUser.users.id,
             name: currentUser.users.name,
@@ -610,7 +612,11 @@ export default function SelectedDate() {
 
     // 리사이즈 이벤트 리스너 등록
     window.addEventListener('resize', handleResize);
-
+    console.log({
+      id: userData.id,
+      name: userData.name,
+      username: userData.username,
+    });
     // 클린업 함수
     return () => {
       window.removeEventListener('resize', handleResize);
