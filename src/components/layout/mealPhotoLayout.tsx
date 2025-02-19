@@ -124,7 +124,7 @@ const MealPhotoLayout = ({
   return (
     <div className="w-full flex flex-col justify-between h-full">
       <div>
-        <h3 className="text-center mb-2 text-base font-semibold">{title}</h3>
+        <h3 className="mb-2 text-base font-semibold">{title}</h3>
         {renderPhotos()}
         <div className="mt-2 text-sm text-gray-600">{time}</div>
         <div className="text-sm mt-1">{descriptions}</div>

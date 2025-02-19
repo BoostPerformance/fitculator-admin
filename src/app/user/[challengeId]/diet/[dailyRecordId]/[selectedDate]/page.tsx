@@ -750,10 +750,10 @@ export default function SelectedDate() {
         coach={orgName.username}
       />
 
-      <div className="md:px-[1rem]">
+      <div className="md:px-[1rem] lg:w-full">
         <div className="flex-1 py-[3rem]">
           <div className="sm:px-[1rem]">
-            <div className=" flex">
+            <div className="flex invisible lg:visible">
               <div className="text-gray-2 text-1.25-700">
                 {orgName.organization_name}&nbsp;
               </div>
@@ -771,13 +771,14 @@ export default function SelectedDate() {
             />
           </div>
           {mobileSize ? (
-            <div className="flex items-center justify-center flex-col">
-              <button
+            <div className="flex justify-center">
+              {/* 뒤로가기 버튼 */}
+              {/* <button
                 className=" p-4 drop-shadow-md hover:bg-gray-13 rounded-md border-[0.1rem]"
                 onClick={handleBack}
               >
                 ← 뒤로가기
-              </button>
+              </button> */}
               <Calendar
                 handlePrevMonth={handlePrevMonth}
                 handleNextMonth={handleNextMonth}
@@ -796,13 +797,7 @@ export default function SelectedDate() {
               />
             </div>
           ) : (
-            <div className="flex sm:justify-center sm:items-center pt-[1rem] gap-[1rem]">
-              <button
-                className=" p-4 drop-shadow-md hover:bg-gray-13 rounded-md border-[0.1rem]"
-                onClick={handleBack}
-              >
-                ← 뒤로가기
-              </button>
+            <div className="pt-[1rem]">
               <DateInput
                 onChange={(newDate: string) => {
                   setRecordDate(newDate); // selectedDate 대신 recordDate를 업데이트
@@ -885,23 +880,25 @@ export default function SelectedDate() {
               })}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4 mt-8 ">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-[0.0625rem] px-4 mt-8 ">
               <TextBox
                 title="AI 분석 결과"
                 value={dailyMeal.feedbacks.ai_feedback}
-                placeholder="결과생성 버튼을 눌러주세요."
-                button1="생성"
-                button2="복사"
-                onClick2={() => handleCopy(dailyMeal.feedbacks.ai_feedback)}
-                onClick1={handleGenerateAnalyse}
+                placeholder="이 기능은 현재 준비 중입니다."
+                button1="복사"
+                onClick1={() => handleCopy(dailyMeal.feedbacks.ai_feedback)}
                 readOnly={true}
-                svg1="/image/createIcon.png"
-                svg2="/svg/copyIcon.svg"
-                Btn1className={`${
-                  isDisable ? 'disabled bg-gray-1' : ''
-                } bg-[#F89A1B] text-white`}
-                Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
+                svg1="/svg/copyIcon-white.svg"
+                Btn1className="bg-[#BDBDBD] text-white"
                 copyIcon
+
+                // AI 분석 결과 '생성' 버튼
+                // button2="생성"
+                // onClick2={handleGenerateAnalyse}
+                // svg2="/image/createIcon.png"
+                // Btn2className={`${
+                //   isDisable ? "disabled bg-gray-1" : ""
+                // } bg-[#F89A1B] text-white`}
               />
 
               <TextBox
@@ -920,7 +917,7 @@ export default function SelectedDate() {
                 })()}
                 placeholder="피드백을 작성하세요."
                 button1="남기기"
-                Btn1className="bg-[#48BA5D] text-white"
+                Btn1className="bg-[#BDBDBD] text-white"
                 svg1="/svg/send.svg"
                 onChange={(e) =>
                   handleFeedbackChange(dailyMeal.recordDate, e.target.value)
