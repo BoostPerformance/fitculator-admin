@@ -85,8 +85,6 @@ const DietDetaileTable = ({
           <thead>
             <tr className="bg-white text-[#A1A1A1]">
               <th className="w-[6%] p-3">
-                {' '}
-                {/* 닉네임 width 축소 */}
                 <div className="flex items-center justify-start gap-1">
                   <span className="text-sm">닉네임</span>
                   <button>
@@ -100,8 +98,6 @@ const DietDetaileTable = ({
                 </div>
               </th>
               <th className="w-[4%] p-3">
-                {' '}
-                {/* 이름 width 축소 */}
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-sm">이름</span>
                   <button>
@@ -115,8 +111,6 @@ const DietDetaileTable = ({
                 </div>
               </th>
               <th className="w-[17%] p-3">
-                {' '}
-                {/* 식단 width 증가 */}
                 <span className="text-sm">아침</span>
               </th>
               <th className="w-[17%] p-3">
@@ -205,13 +199,13 @@ const DietDetaileTable = ({
                 </td>
                 <td className="p-3 sm:text-sm">
                   {formatDateTime(
-                    dietDetailTableItem.daily_record.feedbacks?.updated_at,
-                    dietDetailTableItem.daily_record.feedbacks?.created_at
+                    dietDetailTableItem.daily_records.feedbacks?.updated_at,
+                    dietDetailTableItem.daily_records.feedbacks?.created_at
                   )}
                 </td>
                 <td className="p-4 lg:p-6 sm:text-sm text-center">
                   {isfeedback(
-                    dietDetailTableItem.daily_record.feedbacks?.coach_feedback
+                    dietDetailTableItem.daily_records.feedbacks?.coach_feedback
                   )}
                 </td>
               </tr>

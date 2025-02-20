@@ -170,18 +170,18 @@ export default function SelectedDate() {
         [recordDate]: feedback,
       }));
 
-      console.log('State updates complete:', {
-        recordDate,
-        feedback,
-        updatedState: {
-          allDailyMeals: updatedAllMeals.find(
-            (meal) => meal.recordDate === recordDate
-          ),
-          filteredDailyMeals: updatedAllMeals.filter(
-            (meal) => meal.recordDate === recordDate
-          ),
-        },
-      });
+      // console.log('State updates complete:', {
+      //   recordDate,
+      //   feedback,
+      //   updatedState: {
+      //     allDailyMeals: updatedAllMeals.find(
+      //       (meal) => meal.recordDate === recordDate
+      //     ),
+      //     filteredDailyMeals: updatedAllMeals.filter(
+      //       (meal) => meal.recordDate === recordDate
+      //     ),
+      //   },
+      // });
 
       setShowAlert(true);
       setTimeout(() => {
@@ -310,11 +310,11 @@ export default function SelectedDate() {
         [date]: feedback,
       };
 
-      console.log('feedbacksByDate 업데이트:', {
-        date,
-        feedback,
-        전체상태newState: newState,
-      });
+      // console.log('feedbacksByDate 업데이트:', {
+      //   date,
+      //   feedback,
+      //   전체상태newState: newState,
+      // });
 
       return newState;
     });
@@ -415,19 +415,22 @@ export default function SelectedDate() {
 
         const timestamp = new Date().getTime();
 
-        const mealsResponse = await fetch(`${baseURL}/meals?t=${timestamp}`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            Pragma: 'no-cache',
-            'If-None-Match': '', // ETag 무시
-            'If-Modified-Since': '', // Last-Modified 무시
-          },
-          cache: 'no-store',
-          next: { revalidate: 0 },
-        });
+        const mealsResponse = await fetch(
+          `${baseURL}/meals?t=${timestamp}&date=${selectedDate}`,
+          {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              Pragma: 'no-cache',
+              'If-None-Match': '', // ETag 무시
+              'If-Modified-Since': '', // Last-Modified 무시
+            },
+            cache: 'no-store',
+            next: { revalidate: 0 },
+          }
+        );
         if (!mealsResponse.ok) {
           throw new Error('Failed to fetch meals data');
         }
@@ -439,7 +442,7 @@ export default function SelectedDate() {
         // });
 
         const mealsData = await mealsResponse.json();
-        console.log('3. Original Meals Data:', mealsData);
+        //console.log('3. Original Meals Data:', mealsData);
 
         // console.log('새로 불러온 데이터:', mealsData);
 
@@ -452,6 +455,8 @@ export default function SelectedDate() {
           return;
         }
 
+        // console.log('mealsData', mealsData);
+        // console.log(mealsData.length);
         const userMeals = mealsData.filter(
           (meal: {
             daily_records?: {
@@ -565,7 +570,7 @@ export default function SelectedDate() {
             challenge.challenge_id === params.challengeId
         );
 
-        console.log('2. Current Challenge:', currentChallenge);
+        //  console.log('2. Current Challenge:', currentChallenge);
 
         if (currentChallenge) {
           setChallengeTitle(currentChallenge.challenges.title);
@@ -914,7 +919,7 @@ export default function SelectedDate() {
                     })()
                   : '';
 
-                // console.log('dailyMeal', dailyMeal);
+                //  console.log('dailyMeal', dailyMeal);
                 return (
                   <MealPhotoLayout
                     key={mealType}

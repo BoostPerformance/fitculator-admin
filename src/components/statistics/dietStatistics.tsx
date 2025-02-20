@@ -42,7 +42,7 @@ export const DietStatistics = ({ processedMeals }: DietStatsProps) => {
     let totalRecords = meals.length;
 
     meals.forEach((meal) => {
-      if (meal.daily_record.feedbacks?.coach_feedback) {
+      if (meal.daily_records.feedbacks?.coach_feedback) {
         completedFeedbacks++;
       }
     });

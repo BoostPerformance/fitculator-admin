@@ -10,25 +10,21 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ROLE_KEY!
 );
 
-// console.log('Supabase connection check:', {
-//   url: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 10) + '...',
-//   hasRoleKey: !!process.env.NEXT_PUBLIC_SUPABASE_ROLE_KEY,
-//   timestamp: new Date().toISOString(),
-// });
 export async function GET(request: Request) {
   try {
-    // console.log('GET request received:', new Date().toISOString());
-
     const url = new URL(request.url);
     const timestamp = url.searchParams.get('t') || Date.now();
+    const date = url.searchParams.get('date');
 
-    // console.log('Request timestamp:', timestamp);
-    // 현재 진행 중인 챌린지와 코치들의 피드백 현황 조회
-    const { data: meals, error: mealsError } = await supabase.from('meals')
-      .select(`
+    // console.log('Requested date:', date);
+
+    const { data: meals, error: mealsError } = await supabase
+      .from('meals')
+      .select(
+        `
          *,
          meal_photos (*),
-         daily_records!daily_record_id (
+         daily_records!inner(
           *,
           feedbacks (*),
           challenge_participants!participant_id (
@@ -45,18 +41,21 @@ export async function GET(request: Request) {
             )
           )
         )
-        `);
+        `
+      )
+      .eq('daily_records.record_date', date);
 
     if (mealsError) throw mealsError;
 
-    // const mealbyDate = meals.filter((item) => {
-    //   console.log('Checking meal:', {
-    //     date: item.daily_records.record_date,
-    //     matches: item.daily_records.record_date === '2025-02-19',
-    //   });
-    //   return item.daily_records.record_date === '2025-02-19';
+    // const filterMeal = meals.filter((item) => {
+    //   if (item.daily_records.record_date) {
+    //     return item.daily_records.record_date === '2025-02-19';
+    //   } else {
+    //     console.error('no records');
+    //   }
     // });
-    // console.log('mealbyDate', mealbyDate);
+    // console.log('filterMeal', filterMeal);
+    // console.log('meals', meals);
 
     return new NextResponse(JSON.stringify(meals), {
       headers: {
@@ -93,3 +92,45 @@ export async function GET(request: Request) {
     );
   }
 }
+
+// const mealbyDate = meals.filter((item) => {
+//   return item.daily_records.record_date === '2025-02-19';
+// });
+// console.log('mealbyDate', mealbyDate);
+
+// 총 레코드 수 확인
+// const countCheck = await supabase
+//   .from('meals')
+//   .select('*', { count: 'exact' });
+
+// console.log('Total records:', countCheck.count);
+
+// // 페이지네이션으로 확인
+// const check1 = await supabase
+//   .from('meals')
+//   .select(
+//     `
+//   *,
+//   daily_records!daily_record_id (
+//     *,
+//     challenge_participants!participant_id (*)
+//   )
+// `
+//   )
+//   .range(0, 999);
+
+// const check2 = await supabase
+//   .from('meals')
+//   .select(
+//     `
+//   *,
+//   daily_records!daily_record_id (
+//     *,
+//     challenge_participants!participant_id (*)
+//   )
+// `
+//   )
+//   .range(1000, 1999);
+
+// console.log('First 1000:', check1.data?.length);
+// console.log('Next 1000:', check2.data?.length);

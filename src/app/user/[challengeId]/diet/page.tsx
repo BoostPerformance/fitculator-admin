@@ -74,7 +74,7 @@ export default function DietItem() {
 
   const filteredByDate = useMemo(() => {
     return processedMeals.filter((meal) => {
-      console.log('processedMeals', processedMeals);
+      //console.log('processedMeals', processedMeals);
       return meal.record_date === selectedDate;
     });
   }, [processedMeals, selectedDate]);

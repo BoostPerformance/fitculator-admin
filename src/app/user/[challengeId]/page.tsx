@@ -221,6 +221,7 @@ export default function User() {
     }
   }, [challenges]);
   //console.log('coachData', coachData);
+
   const handleChallengeSelect = (challengeId: string) => {
     // 선택된 챌린지 찾기
     const selectedChallenge = challenges.find(

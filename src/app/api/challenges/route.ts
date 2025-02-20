@@ -54,46 +54,46 @@ export async function GET() {
         .from('challenge_coaches')
         .select(
           `
-    challenge_id,
-    challenges!inner (
-      id,
-      title,
-      start_date,
-      end_date,
-      challenge_participants (
-        id,
-        service_user_id,
-        users (
-          id,
-          name,
-          username
-        ),
-        daily_records (
-          id,
-          record_date,
-          updated_at,
-          created_at,
-          meals (
-            id,
-            meal_type,
-            description,
-            updated_at,
-            meal_time
-          ),
-          feedbacks (
-            id,
-            coach_feedback,
-            ai_feedback,
-            coach_id,
-            daily_record_id,
-            coach_memo,
-            updated_at,
-            created_at
-          )
-        )
-      )
-    )
-  `
+            challenge_id,
+            challenges!inner (
+              id,
+              title,
+              start_date,
+              end_date,
+              challenge_participants (
+                id,
+                service_user_id,
+                users (
+                  id,
+                  name,
+                  username
+                ),
+                daily_records (
+                  id,
+                  record_date,
+                  updated_at,
+                  created_at,
+                  meals (
+                    id,
+                    meal_type,
+                    description,
+                    updated_at,
+                    meal_time
+                  ),
+                  feedbacks (
+                    id,
+                    coach_feedback,
+                    ai_feedback,
+                    coach_id,
+                    daily_record_id,
+                    coach_memo,
+                    updated_at,
+                    created_at
+                  )
+                )
+              )
+            )
+          `
         )
         .eq('coach_id', coach?.id);
 

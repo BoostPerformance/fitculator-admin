@@ -69,7 +69,7 @@ export interface ProcessedMeal {
     username: string;
     name: string;
   };
-  daily_record: DailyRecords;
+  daily_records: DailyRecords;
   meals: Record<MealType, MealDetail>;
   record_date: string;
 }
