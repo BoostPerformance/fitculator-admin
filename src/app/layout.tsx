@@ -1,24 +1,24 @@
-import localFont from 'next/font/local';
-import './globals.css';
-import React from 'react';
-import Head from 'next/head';
-import Footer from '@/components/layout/footer';
-import { ThemeProvider } from 'next-themes';
-import SessionProviderWrapper from '@/components/auth/sessionProviderWrapper';
-import { Providers } from './providers';
+import localFont from "next/font/local";
+import "./globals.css";
+import React from "react";
+import Head from "next/head";
+import Footer from "@/components/layout/footer";
+import { ThemeProvider } from "next-themes";
+import SessionProviderWrapper from "@/components/auth/sessionProviderWrapper";
+import { Providers } from "./providers";
 
 const pretendard = localFont({
-  src: '../fonts/PretendardVariable.woff2',
-  display: 'swap',
-  weight: '45 920',
-  variable: '--font-pretendard',
+  src: "../fonts/PretendardVariable.woff2",
+  display: "swap",
+  weight: "45 920",
+  variable: "--font-pretendard",
 });
 
 export const metadata = {
-  title: 'Fitculator-admin',
-  description: 'fitculator io',
+  title: "Fitculator-admin",
+  description: "fitculator io",
   icons: {
-    icon: '/images/logo-favicon.png',
+    icon: "/images/logo-favicon.png",
   },
 };
 
