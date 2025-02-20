@@ -71,7 +71,7 @@ export default function SelectedDate() {
     username: '',
   });
   const [orgName, setOrgName] = useState({
-    username: '코치',
+    username: '코치님',
     organization_name: '조직명',
   });
   // const [commentVisible, setCommentVisible] = useState<{
