@@ -125,7 +125,6 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
           />
         )}
       </div>
-      ;
       <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
           <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">

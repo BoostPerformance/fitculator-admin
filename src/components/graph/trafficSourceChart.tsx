@@ -66,7 +66,7 @@ export default function TrafficSourceChart() {
   ];
 
   return (
-    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2 w-full">
+    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2 w-full h-[31.25rem]">
       <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
         인기운동
       </h2>

@@ -36,7 +36,7 @@ export default function RootLayout({
         <SessionProviderWrapper>
           <ThemeProvider enableSystem={true} attribute="class">
             <Providers>{children}</Providers>
-            <Footer />
+            {/* <Footer /> */}
           </ThemeProvider>
         </SessionProviderWrapper>
       </body>
