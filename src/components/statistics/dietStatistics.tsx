@@ -8,10 +8,9 @@ interface DietStatsProps {
 
 export const DietStatistics = ({ processedMeals }: DietStatsProps) => {
   const getTotalMealUploads = (meals: ProcessedMeal[]) => {
-    // console.log('meals', meals);
     return meals.reduce((total, meal) => {
       const hasAnyMeal = Object.values(meal.meals).some(
-        (description) => description.trim() !== ''
+        (mealDetail) => mealDetail.description.trim() !== ''
       );
 
       return total + (hasAnyMeal ? 1 : 0);
@@ -24,7 +23,9 @@ export const DietStatistics = ({ processedMeals }: DietStatsProps) => {
 
     meals.forEach((meal) => {
       if (meal.record_date === today) {
-        const hasMeal = Object.values(meal.meals).some((value) => value !== '');
+        const hasMeal = Object.values(meal.meals).some(
+          (mealDetail) => mealDetail.description !== '' // MealDetail의 description 비교
+        );
         if (hasMeal) {
           todayMembers.add(meal.user.id);
         }
@@ -36,7 +37,6 @@ export const DietStatistics = ({ processedMeals }: DietStatsProps) => {
       totalMembers: new Set(meals.map((meal) => meal.user.id)).size,
     };
   };
-
   const getFeedbackStats = (meals: ProcessedMeal[]) => {
     let completedFeedbacks = 0;
     let totalRecords = meals.length;

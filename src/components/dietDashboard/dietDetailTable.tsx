@@ -24,7 +24,6 @@ const DietDetaileTable = ({
     feedback_updated_at: string | null | undefined,
     feedback_created_at: string | null | undefined
   ) => {
-
     try {
       // 둘 다 없는 경우 early return
       if (!feedback_updated_at && !feedback_created_at) {
@@ -64,7 +63,6 @@ const DietDetaileTable = ({
           createdDisplay = `${CreatedformattedDate} ${created_hours}:${created_minutes}`;
         }
       }
-
 
       return (
         <div className="whitespace-nowrap">
@@ -182,27 +180,27 @@ const DietDetaileTable = ({
                 </td>
                 <td className="p-3 sm:text-sm">
                   <div className="line-clamp-3">
-                    {dietDetailTableItem.meals.breakfast}
+                    {dietDetailTableItem.meals.breakfast.description}
                   </div>
                 </td>
                 <td className="p-3 sm:text-sm">
                   <div className="line-clamp-3">
-                    {dietDetailTableItem.meals.lunch}
+                    {dietDetailTableItem.meals.lunch.description}
                   </div>
                 </td>
                 <td className="p-3 sm:text-sm">
                   <div className="line-clamp-3">
-                    {dietDetailTableItem.meals.dinner}
+                    {dietDetailTableItem.meals.dinner.description}
                   </div>
                 </td>
                 <td className="p-3 sm:text-sm">
                   <div className="line-clamp-2">
-                    {dietDetailTableItem.meals.snack}
+                    {dietDetailTableItem.meals.snack.description}
                   </div>
                 </td>
                 <td className="p-3 sm:text-sm">
                   <div className="line-clamp-2">
-                    {dietDetailTableItem.meals.supplement}
+                    {dietDetailTableItem.meals.supplement.description}
                   </div>
                 </td>
                 <td className="p-3 sm:text-sm">

@@ -54,6 +54,11 @@ export interface Meals {
   meal_type: MealType;
 }
 
+interface MealDetail {
+  description: string;
+  updated_at: string;
+}
+
 export interface ProcessedMeal {
   challenge_id: string;
   challenges: Challenges;
@@ -63,7 +68,7 @@ export interface ProcessedMeal {
     name: string;
   };
   daily_record: DailyRecords;
-  meals: Record<MealType, string>;
+  meals: Record<MealType, MealDetail>;
   record_date: string;
 }
 

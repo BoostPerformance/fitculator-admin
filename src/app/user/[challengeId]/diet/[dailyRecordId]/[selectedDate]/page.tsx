@@ -868,6 +868,8 @@ export default function SelectedDate() {
                       return `최근 수정일: ${year}-${month}-${day} ${hours}:${minutes}`;
                     })()
                   : '';
+
+                console.log('dailyMeal', dailyMeal);
                 return (
                   <MealPhotoLayout
                     key={mealType}
