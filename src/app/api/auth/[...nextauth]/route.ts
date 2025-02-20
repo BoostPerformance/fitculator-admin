@@ -1,9 +1,9 @@
-import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
-import { createClient } from '@supabase/supabase-js';
-import 'next-auth';
+import NextAuth from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import { createClient } from "@supabase/supabase-js";
+import "next-auth";
 
-declare module 'next-auth' {
+declare module "next-auth" {
   interface Session {
     user: {
       email: string;
@@ -17,7 +17,7 @@ declare module 'next-auth' {
   }
 }
 
-declare module 'next-auth' {
+declare module "next-auth" {
   interface JWT {
     role?: string;
     organization_id?: string;
@@ -33,28 +33,28 @@ const supabase = createClient(
 const handler = NextAuth({
   providers: [
     GoogleProvider({
-      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET || '',
+      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET || "",
     }),
   ],
   pages: {
     signIn:
-      process.env.NODE_ENV === 'development'
-        ? '/user/'
-        : 'https://your-vercel-domain.com/user/',
-    error: '/auth/error',
+      process.env.NODE_ENV === "development"
+        ? "/user/"
+        : "https://your-vercel-domain.com/user/",
+    error: "/auth/error",
   },
   callbacks: {
     async signIn({ user }) {
       if (!user.email) {
-        console.log('No email provided');
+        console.log("No email provided");
         return false;
       }
 
       const { data: authUser, error: authError } = await supabase
-        .from('auth_users')
-        .select('email')
-        .eq('email', user.email);
+        .from("auth_users")
+        .select("email")
+        .eq("email", user.email);
 
       // console.log('user.email', user.email, authUser);
 
@@ -67,9 +67,9 @@ const handler = NextAuth({
 
       // admin_users 확인
       const { data: adminUser } = await supabase
-        .from('auth_users')
-        .select('email')
-        .eq('email', user.email);
+        .from("auth_users")
+        .select("email")
+        .eq("email", user.email);
 
       return !!adminUser;
     },
@@ -79,9 +79,9 @@ const handler = NextAuth({
       if (account && user) {
         // 구글 로그인 성공 시 토큰에 정보 저장
         const { data: adminUser } = await supabase
-          .from('admin_users')
-          .select('*')
-          .eq('email', user.email)
+          .from("admin_users")
+          .select("*")
+          .eq("email", user.email)
           .single();
 
         if (adminUser) {
@@ -103,9 +103,9 @@ const handler = NextAuth({
         );
 
         const { data: adminUser, error } = await adminClient
-          .from('admin_users')
-          .select('*')
-          .eq('email', session.user.email)
+          .from("admin_users")
+          .select("*")
+          .eq("email", session.user.email)
           .single();
 
         if (adminUser && !error) {
@@ -120,11 +120,11 @@ const handler = NextAuth({
           console.log(error);
         }
 
-        if (adminUser.admin_role === 'coach') {
+        if (adminUser.admin_role === "coach") {
           const { data: coachUser, error } = await adminClient
-            .from('coaches')
-            .select('profile_image_url')
-            .eq('admin_user_id', adminUser.id)
+            .from("coaches")
+            .select("profile_image_url")
+            .eq("admin_user_id", adminUser.id)
             .single();
 
           if (coachUser && !error) {
