@@ -15,7 +15,7 @@ const TotalFeedbackCounts = ({
 }) => {
   return (
     <div
-      className={`mt-[1rem] flex flex-col py-[1.25rem] lg:w-[17.8rem] bg-white justify-center border-b-[0.4rem] ${borderColor} px-[1.3rem] rounded-[0.2rem] drop-shadow-md ${grids} sm:items-center sm:gap-[0.6rem] md:items-center md:w-[9.5rem] md:p-0 md:py-[1rem] `}
+      className={`mt-[1rem] flex flex-col py-[1.25rem] lg:w-full bg-white justify-center border-b-[0.4rem] ${borderColor} px-[1.3rem] rounded-[0.2rem] drop-shadow-md ${grids} sm:items-center sm:gap-[0.6rem] md:items-center md:w-[9.5rem] md:p-0 md:py-[1rem] `}
     >
       <div className="text-left text-1.25-700 text-[#6F6F6F] sm:text-center sm:text-1-700 md:text-1-700">
         {title}

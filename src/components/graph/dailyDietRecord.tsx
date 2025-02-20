@@ -45,7 +45,7 @@ const DailyDietRecord = ({ activities }: any) => {
   };
 
   return (
-    <div className="bg-white rounded-lg p-3 col-span-2 overflow-y-auto h-[50rem] ">
+    <div className="bg-white rounded-lg p-3 col-span-2 overflow-y-auto h-[31.25rem]">
       {/* 헤더 부분 */}
       <div className="grid grid-cols-6 mb-4">
         {/* 이름 열 공간 */}

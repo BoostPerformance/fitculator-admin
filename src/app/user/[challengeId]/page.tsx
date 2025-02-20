@@ -258,16 +258,16 @@ export default function User() {
     : { progressDays: '0', totalDays: '0' };
 
   return (
-    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col sm:px-[1rem] md:flex-col md:px-[0.4rem]">
+    <div className="bg-white-1 dark:bg-blue-4 flex h-screen  sm:flex-col md:flex-col md:px-[0.4rem]">
       <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         coach={adminData.username}
         selectedChallengeId={selectedChallengeId}
       />
-      <div className="flex-1 overflow-auto">
-        <div className="pt-[2rem]">
-          <div className="pl-[1rem]">
+      <div className="w-full px-[2.125rem] sm:px-[1rem]">
+        <div className="pt-[1.25rem]">
+          <div className="mb-[1.25rem]">
             <Title
               title={
                 coachData &&
@@ -275,7 +275,7 @@ export default function User() {
               }
             />
           </div>
-          <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
+          <div className="flex justify-between gap-[1rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
             <TotalFeedbackCounts
               counts={progress.progressDays}
               total={`${progress.totalDays}일`}
