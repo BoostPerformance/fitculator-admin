@@ -144,11 +144,11 @@ export default function MobileChart({
                     key={index}
                     className="flex gap-[2rem] items-center justify-center"
                   >
-                    <td>{isMealUploaded(meal.meals.breakfast)}</td>
-                    <td>{isMealUploaded(meal.meals.lunch)}</td>
-                    <td>{isMealUploaded(meal.meals.dinner)}</td>
-                    <td>{isMealUploaded(meal.meals.snack)}</td>
-                    <td>{isMealUploaded(meal.meals.supplement)}</td>
+                    <td>{isMealUploaded(meal.meals.breakfast.description)}</td>
+                    <td>{isMealUploaded(meal.meals.lunch.description)}</td>
+                    <td>{isMealUploaded(meal.meals.dinner.description)}</td>
+                    <td>{isMealUploaded(meal.meals.snack.description)}</td>
+                    <td>{isMealUploaded(meal.meals.supplement.description)}</td>
                   </tr>
                 </tbody>
               </table>
