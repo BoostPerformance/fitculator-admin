@@ -10,6 +10,11 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ROLE_KEY!
 );
 
+// console.log('Supabase connection check:', {
+//   url: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 10) + '...',
+//   hasRoleKey: !!process.env.NEXT_PUBLIC_SUPABASE_ROLE_KEY,
+//   timestamp: new Date().toISOString(),
+// });
 export async function GET(request: Request) {
   try {
     // console.log('GET request received:', new Date().toISOString());
@@ -43,6 +48,15 @@ export async function GET(request: Request) {
         `);
 
     if (mealsError) throw mealsError;
+
+    // const mealbyDate = meals.filter((item) => {
+    //   console.log('Checking meal:', {
+    //     date: item.daily_records.record_date,
+    //     matches: item.daily_records.record_date === '2025-02-19',
+    //   });
+    //   return item.daily_records.record_date === '2025-02-19';
+    // });
+    // console.log('mealbyDate', mealbyDate);
 
     return new NextResponse(JSON.stringify(meals), {
       headers: {

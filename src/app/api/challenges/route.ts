@@ -77,7 +77,8 @@ export async function GET() {
             id,
             meal_type,
             description,
-            updated_at
+            updated_at,
+            meal_time
           ),
           feedbacks (
             id,

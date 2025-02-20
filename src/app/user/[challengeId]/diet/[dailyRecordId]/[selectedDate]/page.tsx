@@ -413,7 +413,6 @@ export default function SelectedDate() {
             ? '/api' // 개발 환경에서는 내부 API 라우트 사용
             : 'https://studio-admin.fitculator.pro/api'; // 프로덕션 환경에서는 실제 API 서버 사용
 
-        //const timestamp = new Date().getTime();
         const timestamp = new Date().getTime();
 
         const mealsResponse = await fetch(`${baseURL}/meals?t=${timestamp}`, {
@@ -440,6 +439,8 @@ export default function SelectedDate() {
         // });
 
         const mealsData = await mealsResponse.json();
+        console.log('3. Original Meals Data:', mealsData);
+
         // console.log('새로 불러온 데이터:', mealsData);
 
         // console.log('상태 업데이트 전:', {
@@ -460,6 +461,7 @@ export default function SelectedDate() {
             meal.daily_records?.challenge_participants?.users?.id ===
             params.dailyRecordId
         );
+        // console.log('4. Filtered User Meals:', userMeals);
 
         const mealsByDate = userMeals.reduce(
           (
@@ -476,13 +478,17 @@ export default function SelectedDate() {
               description?: string;
               meal_photos?: PhotoData[];
               updated_at?: string;
+              meal_time: string;
             }
           ) => {
             const date = meal.daily_records.record_date;
 
-            // console.log('각 식단의 피드백 데이터:', {
+            // console.log('현재 처리중인 meal 객체:', {
             //   date,
-            //   feedbacks: meal.daily_records.feedbacks,
+            //   meal_type: meal.meal_type,
+            //   description: meal.description,
+            //   meal_time: meal.meal_time, // 여기서 값이 있는지 확인
+            //   updated_at: meal.updated_at, // 여기서 값이 있는지 확인
             // });
 
             if (!acc[date]) {
@@ -506,7 +512,16 @@ export default function SelectedDate() {
                 ? [meal.meal_photos]
                 : [],
               updatedAt: meal.updated_at || '',
+              meal_time: meal.meal_time || '',
             };
+
+            // console.log('meal type:', mealType);
+            // console.log('processed meal data:', {
+            //   description: meal.description,
+            //   updated_at: meal.updated_at,
+            //   meal_time: meal.meal_time,
+            //   current_accumulator: acc[date].meals[mealType],
+            // });
 
             return acc;
           },
@@ -541,12 +556,17 @@ export default function SelectedDate() {
           throw new Error('Failed to fetch challenges');
         }
         const challengeData = await challengesResponse.json();
+        // console.log('1. Challenge API Response:', challengeData);
+
         setChallenges(challengeData);
 
         const currentChallenge = challengeData.find(
           (challenge: ProcessedMeal) =>
             challenge.challenge_id === params.challengeId
         );
+
+        console.log('2. Current Challenge:', currentChallenge);
+
         if (currentChallenge) {
           setChallengeTitle(currentChallenge.challenges.title);
           setSelectedChallengeId(currentChallenge.challenges.id);
@@ -655,11 +675,36 @@ export default function SelectedDate() {
         {
           recordDate: recordDate,
           meals: {
-            breakfast: { description: '', mealPhotos: [], updatedAt: '' },
-            lunch: { description: '', mealPhotos: [], updatedAt: '' },
-            dinner: { description: '', mealPhotos: [], updatedAt: '' },
-            snack: { description: '', mealPhotos: [], updatedAt: '' },
-            supplement: { description: '', mealPhotos: [], updatedAt: '' },
+            breakfast: {
+              description: '',
+              mealPhotos: [],
+              updatedAt: '',
+              meal_time: '',
+            },
+            lunch: {
+              description: '',
+              mealPhotos: [],
+              updatedAt: '',
+              meal_time: '',
+            },
+            dinner: {
+              description: '',
+              mealPhotos: [],
+              updatedAt: '',
+              meal_time: '',
+            },
+            snack: {
+              description: '',
+              mealPhotos: [],
+              updatedAt: '',
+              meal_time: '',
+            },
+            supplement: {
+              description: '',
+              mealPhotos: [],
+              updatedAt: '',
+              meal_time: '',
+            },
           },
           feedbacks: {
             coach_feedback: '',
@@ -843,11 +888,11 @@ export default function SelectedDate() {
               {(
                 ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
               ).map((mealType) => {
-                const formatRecordDate = dailyMeal.meals[mealType]?.updatedAt
+                const formatRecordDate = dailyMeal.meals[mealType]?.meal_time
                   ? (() => {
                       // UTC 시간을 KST로 변환 (UTC+9)
                       const utcDate = new Date(
-                        dailyMeal.meals[mealType]?.updatedAt || ''
+                        dailyMeal.meals[mealType]?.meal_time || ''
                       );
                       const date = new Date(
                         utcDate.getTime() + 9 * 60 * 60 * 1000
@@ -865,11 +910,11 @@ export default function SelectedDate() {
                         '0'
                       );
 
-                      return `최근 수정일: ${year}-${month}-${day} ${hours}:${minutes}`;
+                      return `식사 시간: ${year}-${month}-${day} ${hours}:${minutes}`;
                     })()
                   : '';
 
-                console.log('dailyMeal', dailyMeal);
+                // console.log('dailyMeal', dailyMeal);
                 return (
                   <MealPhotoLayout
                     key={mealType}

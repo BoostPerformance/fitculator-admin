@@ -200,9 +200,10 @@ model feedbacks {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model workout_types {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name       String    @db.VarChar(20)
-  created_at DateTime? @default(now()) @db.Timestamp(6)
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String               @db.VarChar(20)
+  created_at         DateTime?            @default(now()) @db.Timestamp(6)
+  workout_categories workout_categories[]
 }
 
 model workouts {
@@ -221,6 +222,17 @@ model workouts {
   created_at       DateTime? @default(now()) @db.Timestamp(6)
   intensity        Int?      @db.SmallInt
   users            users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model workout_categories {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type_id       String?        @db.Uuid
+  name_ko       String         @db.VarChar(50)
+  name_en       String         @db.VarChar(50)
+  icon          String?        @db.VarChar(50)
+  color         String?        @db.VarChar(7)
+  created_at    DateTime?      @default(now()) @db.Timestamp(6)
+  workout_types workout_types? @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum admin_role {

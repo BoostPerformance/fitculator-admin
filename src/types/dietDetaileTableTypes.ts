@@ -52,11 +52,13 @@ export interface Meals {
   updated_at: string;
   description: string;
   meal_type: MealType;
+  meal_time: string;
 }
 
 interface MealDetail {
   description: string;
   updated_at: string;
+  meal_time: string;
 }
 
 export interface ProcessedMeal {

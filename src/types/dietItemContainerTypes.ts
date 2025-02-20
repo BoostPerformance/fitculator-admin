@@ -12,6 +12,7 @@ export interface DailyMealData {
       description: string;
       mealPhotos: PhotoData[];
       updatedAt: string;
+      meal_time: string;
     };
   };
   feedbacks: {
@@ -52,6 +53,7 @@ export interface Meals {
   description: string;
   meal_photos: [string];
   updated_at: string;
+  meal_time: string;
   daily_records: {
     id: string;
     description: string;

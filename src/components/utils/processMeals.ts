@@ -31,11 +31,11 @@ export const processMeals = (filteredByChallengeId: ProcessedMeal[]) => {
             },
             daily_record: record,
             meals: {
-              breakfast: { description: '', updated_at: '' },
-              lunch: { description: '', updated_at: '' },
-              dinner: { description: '', updated_at: '' },
-              snack: { description: '', updated_at: '' },
-              supplement: { description: '', updated_at: '' },
+              breakfast: { description: '', updated_at: '', meal_time: '' },
+              lunch: { description: '', updated_at: '', meal_time: '' },
+              dinner: { description: '', updated_at: '', meal_time: '' },
+              snack: { description: '', updated_at: '', meal_time: '' },
+              supplement: { description: '', updated_at: '', meal_time: '' },
             },
             record_date: record.record_date,
           };
@@ -47,7 +47,16 @@ export const processMeals = (filteredByChallengeId: ProcessedMeal[]) => {
                 acc[uniqueId].meals[meal.meal_type] = {
                   description: meal.description,
                   updated_at: meal.updated_at || '',
+                  meal_time: meal.meal_time || '',
                 };
+                console.log(
+                  'here here',
+                  (acc[uniqueId].meals[meal.meal_type] = {
+                    description: meal.description,
+                    updated_at: meal.updated_at || '',
+                    meal_time: meal.meal_time || '',
+                  })
+                );
               }
             });
           }
