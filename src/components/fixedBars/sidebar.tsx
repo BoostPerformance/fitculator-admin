@@ -1,10 +1,10 @@
-'use client';
-import Image from 'next/image';
+"use client";
+import Image from "next/image";
 //import { FaBars } from 'react-icons/fa';
-import LogoutButton from '../buttons/logoutButton';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import LogoutButton from "../buttons/logoutButton";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Challenges {
   challenges: {
@@ -32,7 +32,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
-  const [selectedTitle, setSelectedTitle] = useState<string>('');
+  const [selectedTitle, setSelectedTitle] = useState<string>("");
   const [userDropdown, setUserDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
@@ -55,10 +55,10 @@ export default function Sidebar({
     handleResize();
 
     // 리사이즈 이벤트 리스너
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [selectedChallengeId, data]);
 
@@ -94,7 +94,7 @@ export default function Sidebar({
       <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]">
         <button
           onClick={handleSidebarOpen}
-          className={`${isMobile ? '' : 'hidden'}`}
+          className={`${isMobile ? "" : "hidden"}`}
         >
           <Image
             src="/svg/hamburger.svg"
@@ -104,16 +104,32 @@ export default function Sidebar({
             className={` w-[1.5rem] dark:invert`}
           />
         </button>
-        <div className="flex sm:gap-[0.5rem] lg:gap-[1rem] md:gap-[1rem]">
-          <div>안녕하세요, {coach}님 </div>
+        <div className="font-pretendard flex sm:gap-[0.5rem] lg:gap-[1rem] md:gap-[1rem]">
+          <Image
+            src="/image/logo.png"
+            width={110}
+            height={30}
+            alt="logo"
+          ></Image>
+          <div className="rel">안녕하세요, {coach}님</div>
           <button onClick={handleUserDropdown}>
-            <Image
-              src="/svg/arrow-down.svg"
-              width={30}
-              height={30}
-              alt="logo"
-              className={` w-[1rem] dark:invert lg:w-[0.8rem]`}
-            />
+            {userDropdown ? (
+              <Image
+                src="/svg/arrow-up.svg"
+                width={30}
+                height={30}
+                alt="arrow-up"
+                className={`w-[1rem] dark:invert lg:w-[0.8rem]`}
+              />
+            ) : (
+              <Image
+                src="/svg/arrow-down.svg"
+                width={30}
+                height={30}
+                alt="arrow-down"
+                className={`w-[1rem] dark:invert lg:w-[0.8rem]`}
+              />
+            )}
           </button>
         </div>
       </div>
@@ -156,20 +172,20 @@ export default function Sidebar({
                   챌린지
                   {isOpenDropdown ? (
                     <Image
-                      src="/svg/arrow-down.svg"
+                      src="/svg/arrow-up.svg"
                       width={20}
                       height={30}
-                      alt="arrow-down "
+                      alt="arrow-up"
                       className="w-[1rem] lg:w-[0.8rem]"
                       onClick={handleDropdown}
                     />
                   ) : (
                     <Image
-                      src="/svg/arrow-up.svg"
+                      src="/svg/arrow-down.svg"
                       width={20}
                       height={30}
-                      alt="arrow-up "
-                      className="w-[1rem]  lg:w-[0.8rem]"
+                      alt="arrow-down"
+                      className="w-[1rem] lg:w-[0.8rem]"
                       onClick={handleDropdown}
                     />
                   )}
@@ -182,8 +198,8 @@ export default function Sidebar({
                           key={`challenge-${index}`}
                           className={` w-[11rem] md:w-[12rem] p-[1rem] text-gray-2 dark:text-white ${
                             selectedTitle === item.challenges.title
-                              ? 'bg-gray-100'
-                              : ''
+                              ? "bg-gray-100"
+                              : ""
                           }`}
                         >
                           <div className="flex flex-col gap-2">
