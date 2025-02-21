@@ -90,8 +90,18 @@ export default function Sidebar({
   };
 
   return (
-    <div className="sm:relative top-0 z-40">
-      <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]">
+    <div className="lg:w-[18.75rem] lg:h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
+      {/* <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]"> */}
+      <div className="flex justify-start gap-[0.5rem] pt-[1.25rem]">
+        <Image src="/svg/logo_light.svg" width={30} height={30} alt="logo" />
+        <Image
+          src="/svg/logo_text_light.svg"
+          width={150}
+          height={30}
+          alt="logo_text"
+        />
+      </div>
+      <div className="flex justify-start sm:justify-between md:justify-between py-[1.25rem] lg:gap-[1rem]">
         <button
           onClick={handleSidebarOpen}
           className={`${isMobile ? "" : "hidden"}`}
@@ -101,156 +111,91 @@ export default function Sidebar({
             width={30}
             height={30}
             alt="logo"
-            className={` w-[1.5rem] dark:invert`}
+            className={`w-[1.5rem] dark:invert`}
           />
         </button>
-        <div className="font-pretendard flex sm:gap-[0.5rem] lg:gap-[1rem] md:gap-[1rem]">
-          <Image
-            src="/image/logo.png"
-            width={110}
-            height={30}
-            alt="logo"
-          ></Image>
-          <div className="rel">안녕하세요, {coach}님</div>
-          <button onClick={handleUserDropdown}>
-            {userDropdown ? (
-              <Image
-                src="/svg/arrow-up.svg"
-                width={30}
-                height={30}
-                alt="arrow-up"
-                className={`w-[1rem] dark:invert lg:w-[0.8rem]`}
-              />
-            ) : (
-              <Image
-                src="/svg/arrow-down.svg"
-                width={30}
-                height={30}
-                alt="arrow-down"
-                className={`w-[1rem] dark:invert lg:w-[0.8rem]`}
-              />
-            )}
+        <div className="relative flex justify-between items-center sm:gap-[0.5rem] md:gap-[1rem] w-full pr-[1.875rem]">
+          {/* <div>안녕하세요, {coach}님 </div> */}
+          <div className="flex justify-start items-center whitespace-nowrap">
+            안녕하세요,&nbsp;
+            <strong className="inline-block overflow-hidden whitespace-nowrap text-ellipsis">
+              {coach}
+            </strong>
+            님
+          </div>
+          <button
+            onClick={handleUserDropdown}
+            className="absolute top-1/2 right-0 -translate-y-1/2 flex flex-shrink-0 flex-grow-0 justify-center items-center w-[1.875rem] h-[1.875rem]"
+          >
+            <Image
+              src={userDropdown ? `/svg/arrow-up.svg` : `/svg/arrow-down.svg`}
+              width={30}
+              height={30}
+              alt="logo"
+              className={`dark:invert w-[1rem] lg:w-[0.8rem]`}
+            />
           </button>
+          {userDropdown && (
+            <div className="z-50 top-full absolute left-0 flex justify-end px-[1rem] py-[0.5rem] sm:right-1 items-start flex-col text-gray-10 text-1-700 gap-[0.5rem] bg-white drop-shadow-md lg:absolute lg:left-[0.5rem] rounded-[0.5rem] lg:w-[14rem] sm:w-[14rem] sm:items-end lg:items-end md:right-[1rem] md:w-[10rem] md:items-end ">
+              {/* <div className="hover:bg-gray-3 ">전체회원 정보보기</div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="122"
+                height="2"
+                viewBox="0 0 122 2"
+                fill="none"
+              >
+                <path d="M0 1H122" stroke="#E1E1E1" />
+              </svg> */}
+              <LogoutButton />
+              {/* <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="122"
+                height="2"
+                viewBox="0 0 122 2"
+                fill="none"
+              >
+                <path d="M0 1H122" stroke="#E1E1E1" />
+              </svg> */}
+            </div>
+          )}
         </div>
       </div>
-      {userDropdown && (
-        <div className="z-50 sm:top-full sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1 items-start flex-col text-gray-10 text-1-700 gap-[0.5rem] bg-white drop-shadow-md lg:absolute lg:left-[0.5rem] rounded-[0.5rem] lg:w-[14rem] sm:w-[14rem] sm:items-end lg:items-end md:right-[1rem] md:w-[10rem] md:items-end ">
-          {/* <div className="hover:bg-gray-3 ">전체회원 정보보기</div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="122"
-            height="2"
-            viewBox="0 0 122 2"
-            fill="none"
-          >
-            <path d="M0 1H122" stroke="#E1E1E1" />
-          </svg> */}
-          <LogoutButton />
-          {/* <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="122"
-            height="2"
-            viewBox="0 0 122 2"
-            fill="none"
-          >
-            <path d="M0 1H122" stroke="#E1E1E1" />
-          </svg> */}
-        </div>
-      )}
-
       {(isSidebarOpen || !isMobile) && (
         <div
-          className={` bg-white drop-shadow-sm dark:bg-blue-4 sm:w-full sm:flex sm:items-center sm:justify-center lg:h-full z-50 md:w-full md:items-center md:flex md:border lg:w-[15rem] md:justify-start`}
+          className={`sm:w-full sm:flex sm:items-center sm:justify-center z-50 md:w-full md:items-center md:flex md:border md:justify-start lg:w-full`}
         >
-          <div className=" flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[15rem] md:w-[18rem] p-[2.3rem] sm:items-center md:py-[1rem]  md:pb-[2rem]">
-            <nav className="w-full">
-              <div className="relative">
+          <nav className=" flex flex-col gap-[2rem] items-start md:w-[18rem] sm:items-center md:py-[1rem] md:pb-[2rem]">
+            <ul className="w-full">
+              <li className="w-full border-b-[0.1rem] border-gray-13">
                 <button
                   onClick={handleDropdown}
-                  className="w-[11rem] flex items-center justify-between lg:text-1.25-900 border-b-[0.1rem] border-gray-13 py-[0.8rem] sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500 cursor-pointer"
+                  className="w-full flex items-center justify-between lg:text-1.25-900  py-[0.8rem] sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500 cursor-pointer"
                 >
                   챌린지
-                  {isOpenDropdown ? (
-                    <Image
-                      src="/svg/arrow-up.svg"
-                      width={20}
-                      height={30}
-                      alt="arrow-up"
-                      className="w-[1rem] lg:w-[0.8rem]"
-                      onClick={handleDropdown}
-                    />
-                  ) : (
-                    <Image
-                      src="/svg/arrow-down.svg"
-                      width={20}
-                      height={30}
-                      alt="arrow-down"
-                      className="w-[1rem] lg:w-[0.8rem]"
-                      onClick={handleDropdown}
-                    />
-                  )}
+                  <Image
+                    src={
+                      isOpenDropdown
+                        ? `/svg/arrow-down.svg`
+                        : `/svg/arrow-up.svg`
+                    }
+                    width={30}
+                    height={30}
+                    alt="arrow-down "
+                    className="w-[1rem] lg:w-[0.8rem]"
+                    onClick={handleDropdown}
+                  />
                 </button>
                 {isOpenDropdown && (
-                  <div className="relative lg:relative md:fixed md:left-0 md:right-0 md:bg-white md:w-full md:z-50 md:mt-0 sm:h-screen sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500">
-                    <div className=" md:flex md:flex-col md:items-start md:pl-6">
-                      {data.map((item: any, index: number) => (
-                        <div
-                          key={`challenge-${index}`}
-                          className={` w-[11rem] md:w-[12rem] p-[1rem] text-gray-2 dark:text-white ${
-                            selectedTitle === item.challenges.title
-                              ? "bg-gray-100"
-                              : ""
-                          }`}
-                        >
-                          <div className="flex flex-col gap-2">
-                            <button
-                              className="lg:text-1-700 text-left hover:bg-gray-3"
-                              onClick={() => handleChallengeClick(item)}
-                            >
-                              {item.challenges.title}
-                            </button>
-                          </div>
-                          <ul className="flex flex-col gap-[0.3rem] py-[0.7rem]">
-                            <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
-                              <Image
-                                src="/svg/subtitle-icon.svg"
-                                width={20}
-                                height={30}
-                                alt="subtitle-icon"
-                                className="w-[0.75rem]"
-                              />
-                              <Link href={`/user/${item.challenges.id}/diet`}>
-                                <button
-                                  className="lg:text-1-700 md:text-1.125-500 sm:text-1-500"
-                                  onClick={() => handleChallengeClick(item)}
-                                >
-                                  식단
-                                </button>
-                              </Link>
-                            </li>
-                            {/* <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
-                              <Image
-                                src="/svg/subtitle-icon.svg"
-                                width={20}
-                                height={30}
-                                alt="subtitle-icon"
-                                className="w-[0.75rem]"
-                              />
-                              <Link
-                                href={`/user/${item.challenges.id}/exercise`}
-                              >
-                                운동
-                              </Link>
-                            </li> */}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <ul>
+                    <li>ㄴ식단</li>
+                    <li>ㄴ운동</li>
+                  </ul>
                 )}
-              </div>
-            </nav>
-          </div>
+              </li>
+              <li>핏다챌</li>
+            </ul>
+          </nav>
         </div>
       )}
     </div>

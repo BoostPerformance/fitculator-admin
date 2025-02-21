@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,53 +17,52 @@ export async function GET() {
     //   name,
     //   )`);
 
-    const { data: dailyRecords } = await supabase.from('challenge_participants')
+    const { data: dailyRecords } = await supabase.from("challenge_participants")
       .select(`
-    id,
-    coach_memo,
-    memo_record_date,
-    users!service_user_id (
-      id,
-      username,
-      name
-    ),
-    challenges!challenge_id (
-      id,
-      title,
-      challenge_type,
-      start_date,
-      end_date
-    ),
-    daily_records!participant_id (
-      id,
-      record_date,
-       meals (
-            id,
-            meal_type,
-            description,
-            updated_at
-          ),
-      feedbacks!daily_record_id (
+        id,
+        coach_memo,
+        memo_record_date,
+        users!service_user_id (
+          id,
+          username,
+          name
+        ),
+        challenges!challenge_id (
+          id,
+          title,
+          start_date,
+          end_date
+        ),
+        daily_records!participant_id (
+          id,
+          record_date,
+           meals (
                 id,
-                coach_feedback,
-                ai_feedback,
-                coach_id,
-                daily_record_id,
-                coach_memo,
+                meal_type,
+                description,
                 updated_at
-              )
-    )
-  `);
-    //console.log('dailyRecords', dailyRecords);
+              ),
+          feedbacks!daily_record_id (
+                    id,
+                    coach_feedback,
+                    ai_feedback,
+                    coach_id,
+                    daily_record_id,
+                    coach_memo,
+                    updated_at
+                  )
+        )
+      `);
+    // console.log("dailyRecords", dailyRecords);
 
     //if (error) throw error;
 
     return NextResponse.json(dailyRecords);
   } catch (error) {
-    console.error('Error fetching Data', error);
+    console.error("Error fetching Data", error);
     return NextResponse.json(
       {
-        error: 'failed to fetch data',
+        error: "failed to fetch data",
       },
       { status: 500 }
     );

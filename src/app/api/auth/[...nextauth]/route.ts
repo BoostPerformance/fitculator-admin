@@ -40,7 +40,7 @@ const handler = NextAuth({
   pages: {
     signIn:
       process.env.NODE_ENV === "development"
-        ? "/user/"
+        ? "/user"
         : "https://your-vercel-domain.com/user/",
     error: "/auth/error",
   },
