@@ -1,22 +1,22 @@
-'use client';
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import TextBox from '@/components/textBox';
-import Title from '@/components/layout/title';
-import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
-import MealPhotoLayout from '@/components/layout/mealPhotoLayout';
-import { useParams } from 'next/navigation';
-import Sidebar from '@/components/fixedBars/sidebar';
-import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
-import Calendar from '@/components/input/calendar';
+"use client";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import TextBox from "@/components/textBox";
+import Title from "@/components/layout/title";
+import TotalFeedbackCounts from "@/components/totalCounts/totalFeedbackCount";
+import MealPhotoLayout from "@/components/layout/mealPhotoLayout";
+import { useParams } from "next/navigation";
+import Sidebar from "@/components/fixedBars/sidebar";
+import { ProcessedMeal } from "@/types/dietDetaileTableTypes";
+import Calendar from "@/components/input/calendar";
 import {
   DailyMealData,
   UserData,
   PhotoData,
-} from '@/types/dietItemContainerTypes';
-import calendarUtils from '@/components/utils/calendarUtils';
-import DateInput from '@/components/input/dateInput';
-import { useFeedback } from '@/components/hooks/useFeedback';
+} from "@/types/dietItemContainerTypes";
+import calendarUtils from "@/components/utils/calendarUtils";
+import DateInput from "@/components/input/dateInput";
+import { useFeedback } from "@/components/hooks/useFeedback";
 
 interface CustomAlertProps {
   message: string;
@@ -61,18 +61,18 @@ export default function SelectedDate() {
   }>({});
   const [isDisable, setIsDisable] = useState(false);
   const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
-  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string>("");
   //  const [coachFeedback, setCoachFeedback] = useState('');
-  const [challengeTitle, setChallengeTitle] = useState('');
-  const [recordDate, setRecordDate] = useState('');
+  const [challengeTitle, setChallengeTitle] = useState("");
+  const [recordDate, setRecordDate] = useState("");
   const [userData, setUserData] = useState({
-    id: '',
-    name: '사용자',
-    username: '',
+    id: "",
+    name: "사용자",
+    username: "",
   });
   const [orgName, setOrgName] = useState({
-    username: '코치',
-    organization_name: '조직명',
+    username: "코치",
+    organization_name: "조직명",
   });
   // const [commentVisible, setCommentVisible] = useState<{
   //   [key: string]: boolean;
@@ -88,8 +88,8 @@ export default function SelectedDate() {
   //   supplement: '',
   // });
   const [challengePeriods, setChallengePeriods] = useState({
-    start_date: '',
-    end_date: '',
+    start_date: "",
+    end_date: "",
   });
   const [currentDate, setCurrentDate] = useState(new Date());
   const [allDailyMeals, setAllDailyMeals] = useState<DailyMealData[]>([]); // 전체 기록
@@ -100,7 +100,7 @@ export default function SelectedDate() {
   const handleSaveFeedback = async (feedback: string) => {
     try {
       if (!recordDate) {
-        console.error('No record date selected');
+        console.error("No record date selected");
         return;
       }
 
@@ -109,7 +109,7 @@ export default function SelectedDate() {
       );
 
       if (!currentChallenge) {
-        console.error('Challenge not found');
+        console.error("Challenge not found");
         return;
       }
 
@@ -119,7 +119,7 @@ export default function SelectedDate() {
         );
 
       if (!participant) {
-        console.error('Participant not found');
+        console.error("Participant not found");
         return;
       }
 
@@ -128,7 +128,7 @@ export default function SelectedDate() {
       );
 
       if (!dailyRecord) {
-        console.error('Daily record not found');
+        console.error("Daily record not found");
         return;
       }
 
@@ -170,7 +170,7 @@ export default function SelectedDate() {
         [recordDate]: feedback,
       }));
 
-      console.log('State updates complete:', {
+      console.log("State updates complete:", {
         recordDate,
         feedback,
         updatedState: {
@@ -188,7 +188,7 @@ export default function SelectedDate() {
         setShowAlert(false);
       }, 3000);
     } catch (error) {
-      console.error('Failed to save feedback:', error);
+      console.error("Failed to save feedback:", error);
     }
   };
 
@@ -236,14 +236,14 @@ export default function SelectedDate() {
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [currentDate, filterMealsByMonth]);
 
-  const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+  const weekdays = ["월", "화", "수", "목", "금", "토", "일"];
 
   const handleDateClick = (date: Date) => {
     const formattedDate = calendarUtils.formatDate(date);
@@ -310,7 +310,7 @@ export default function SelectedDate() {
         [date]: feedback,
       };
 
-      console.log('feedbacksByDate 업데이트:', {
+      console.log("feedbacksByDate 업데이트:", {
         date,
         feedback,
         전체상태newState: newState,
@@ -330,7 +330,7 @@ export default function SelectedDate() {
       );
 
       if (!currentChallenge) {
-        console.error('Challenge not found');
+        console.error("Challenge not found");
         return;
       }
 
@@ -340,7 +340,7 @@ export default function SelectedDate() {
         );
 
       if (!participant) {
-        console.error('Participant not found');
+        console.error("Participant not found");
         return;
       }
 
@@ -349,15 +349,15 @@ export default function SelectedDate() {
       );
 
       if (!dailyRecord) {
-        console.error('Daily record not found');
+        console.error("Daily record not found");
         return;
       }
 
       // AI 피드백 생성 API 호출
-      const response = await fetch('/api/diet-feedback', {
-        method: 'POST',
+      const response = await fetch("/api/diet-feedback", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           dailyRecordId: dailyRecord.id,
@@ -365,7 +365,7 @@ export default function SelectedDate() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate AI feedback');
+        throw new Error("Failed to generate AI feedback");
       }
 
       const feedback = await response.json();
@@ -394,7 +394,7 @@ export default function SelectedDate() {
         setShowAlert(false);
       }, 3000);
     } catch (error) {
-      console.error('Error generating AI feedback:', error);
+      console.error("Error generating AI feedback:", error);
     } finally {
       setIsDisable(false);
     }
@@ -409,28 +409,28 @@ export default function SelectedDate() {
     const fetchData = async () => {
       try {
         const baseURL =
-          process.env.NODE_ENV === 'development'
-            ? '/api' // 개발 환경에서는 내부 API 라우트 사용
-            : 'https://studio-admin.fitculator.pro/api'; // 프로덕션 환경에서는 실제 API 서버 사용
+          process.env.NODE_ENV === "development"
+            ? "/api" // 개발 환경에서는 내부 API 라우트 사용
+            : "https://studio-admin.fitculator.pro/api"; // 프로덕션 환경에서는 실제 API 서버 사용
 
         //const timestamp = new Date().getTime();
         const timestamp = new Date().getTime();
 
         const mealsResponse = await fetch(`${baseURL}/meals?t=${timestamp}`, {
-          method: 'GET',
-          credentials: 'include',
+          method: "GET",
+          credentials: "include",
           headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            Pragma: 'no-cache',
-            'If-None-Match': '', // ETag 무시
-            'If-Modified-Since': '', // Last-Modified 무시
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            "If-None-Match": "", // ETag 무시
+            "If-Modified-Since": "", // Last-Modified 무시
           },
-          cache: 'no-store',
+          cache: "no-store",
           next: { revalidate: 0 },
         });
         if (!mealsResponse.ok) {
-          throw new Error('Failed to fetch meals data');
+          throw new Error("Failed to fetch meals data");
         }
 
         // console.log('Response headers:', {
@@ -447,7 +447,7 @@ export default function SelectedDate() {
         //   filteredDailyMeals,
         // });
         if (!Array.isArray(mealsData)) {
-          console.error('Invalid meals data format:', mealsData);
+          console.error("Invalid meals data format:", mealsData);
           return;
         }
 
@@ -491,21 +491,21 @@ export default function SelectedDate() {
                 meals: {},
                 feedbacks: {
                   coach_feedback:
-                    meal.daily_records.feedbacks?.coach_feedback || '',
-                  ai_feedback: meal.daily_records.feedbacks?.ai_feedback || '',
+                    meal.daily_records.feedbacks?.coach_feedback || "",
+                  ai_feedback: meal.daily_records.feedbacks?.ai_feedback || "",
                 },
               };
             }
 
             const mealType = meal.meal_type.toLowerCase();
             acc[date].meals[mealType] = {
-              description: meal.description || '',
+              description: meal.description || "",
               mealPhotos: Array.isArray(meal.meal_photos)
                 ? meal.meal_photos
                 : meal.meal_photos
                 ? [meal.meal_photos]
                 : [],
-              updatedAt: meal.updated_at || '',
+              updatedAt: meal.updated_at || "",
             };
 
             return acc;
@@ -535,12 +535,13 @@ export default function SelectedDate() {
 
         // 현재 월의 기록으로 필터링
 
-        const challengesResponse = await fetch('/api/challenges');
+        const challengesResponse = await fetch("/api/challenges");
 
         if (!challengesResponse.ok) {
-          throw new Error('Failed to fetch challenges');
+          throw new Error("Failed to fetch challenges");
         }
         const challengeData = await challengesResponse.json();
+        console.log(challengeData);
         setChallenges(challengeData);
 
         const currentChallenge = challengeData.find(
@@ -558,10 +559,10 @@ export default function SelectedDate() {
           filterMealsByMonth(currentDate);
         }
         const challengeParticipantsResponse = await fetch(
-          '/api/challenge-participants'
+          "/api/challenge-participants"
         );
         if (!challengeParticipantsResponse.ok) {
-          throw new Error('Failed to fetch admin data');
+          throw new Error("Failed to fetch admin data");
         }
         const userData = await challengeParticipantsResponse.json();
         setUserData(userData);
@@ -579,7 +580,7 @@ export default function SelectedDate() {
           });
         }
 
-        const orgDataResponse = await fetch('/api/coach-info');
+        const orgDataResponse = await fetch("/api/coach-info");
 
         const orgData = await orgDataResponse.json();
 
@@ -587,7 +588,7 @@ export default function SelectedDate() {
 
         // console.log('mealsByDateValues', mealsByDateValues);
       } catch (error) {
-        console.log('Error fetching data:', error);
+        console.log("Error fetching data:", error);
       }
     };
 
@@ -609,11 +610,11 @@ export default function SelectedDate() {
     handleResize();
 
     // 리사이즈 이벤트 리스너 등록
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // 클린업 함수
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [challengePeriods, currentDate, allDailyMeals, filterMealsByMonth]);
 
@@ -638,8 +639,8 @@ export default function SelectedDate() {
   );
 
   const challengeDates = {
-    startDate: currentChallengeIndex?.challenges?.start_date || '',
-    endDate: currentChallengeIndex?.challenges?.end_date || '',
+    startDate: currentChallengeIndex?.challenges?.start_date || "",
+    endDate: currentChallengeIndex?.challenges?.end_date || "",
   };
 
   const displayMeals = filteredDailyMeals.length
@@ -649,15 +650,15 @@ export default function SelectedDate() {
         {
           recordDate: recordDate,
           meals: {
-            breakfast: { description: '', mealPhotos: [], updatedAt: '' },
-            lunch: { description: '', mealPhotos: [], updatedAt: '' },
-            dinner: { description: '', mealPhotos: [], updatedAt: '' },
-            snack: { description: '', mealPhotos: [], updatedAt: '' },
-            supplement: { description: '', mealPhotos: [], updatedAt: '' },
+            breakfast: { description: "", mealPhotos: [], updatedAt: "" },
+            lunch: { description: "", mealPhotos: [], updatedAt: "" },
+            dinner: { description: "", mealPhotos: [], updatedAt: "" },
+            snack: { description: "", mealPhotos: [], updatedAt: "" },
+            supplement: { description: "", mealPhotos: [], updatedAt: "" },
           },
           feedbacks: {
-            coach_feedback: '',
-            ai_feedback: '',
+            coach_feedback: "",
+            ai_feedback: "",
           },
         },
       ]
@@ -690,7 +691,7 @@ export default function SelectedDate() {
         // 각 식사 타입별로 확인
         //  console.log('dailyMeal', dailyMeal);
         const hasAnyMeal = Object.values(dailyMeal.meals).some(
-          (meal) => meal.description.trim() !== '' || meal.mealPhotos.length > 0
+          (meal) => meal.description.trim() !== "" || meal.mealPhotos.length > 0
         );
         if (hasAnyMeal) {
           uploadCount++;
@@ -722,7 +723,7 @@ export default function SelectedDate() {
         setShowAlert(false);
       }, 3000);
     } catch (err) {
-      console.error('복사 실패:', err);
+      console.error("복사 실패:", err);
     }
   };
 
@@ -731,10 +732,10 @@ export default function SelectedDate() {
       <CustomAlert
         message={
           copyMessage
-            ? '복사가 완료됐습니다.'
+            ? "복사가 완료됐습니다."
             : isDisable
-            ? '피드백 작성 중입니다...'
-            : '피드백 작성이 완료됐습니다.'
+            ? "피드백 작성 중입니다..."
+            : "피드백 작성이 완료됐습니다."
         }
         isVisible={showAlert || copyMessage}
         onClose={() => {
@@ -830,13 +831,13 @@ export default function SelectedDate() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:px-4 px-4 ">
               {(
-                ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
+                ["breakfast", "lunch", "dinner", "snack", "supplement"] as const
               ).map((mealType) => {
                 const formatRecordDate = dailyMeal.meals[mealType]?.updatedAt
                   ? (() => {
                       // UTC 시간을 KST로 변환 (UTC+9)
                       const utcDate = new Date(
-                        dailyMeal.meals[mealType]?.updatedAt || ''
+                        dailyMeal.meals[mealType]?.updatedAt || ""
                       );
                       const date = new Date(
                         utcDate.getTime() + 9 * 60 * 60 * 1000
@@ -845,36 +846,36 @@ export default function SelectedDate() {
                       const year = date.getFullYear();
                       const month = String(date.getMonth() + 1).padStart(
                         2,
-                        '0'
+                        "0"
                       );
-                      const day = String(date.getDate()).padStart(2, '0');
-                      const hours = String(date.getHours()).padStart(2, '0');
+                      const day = String(date.getDate()).padStart(2, "0");
+                      const hours = String(date.getHours()).padStart(2, "0");
                       const minutes = String(date.getMinutes()).padStart(
                         2,
-                        '0'
+                        "0"
                       );
 
                       return `최근 수정일: ${year}-${month}-${day} ${hours}:${minutes}`;
                     })()
-                  : '';
+                  : "";
                 return (
                   <MealPhotoLayout
                     key={mealType}
                     title={
-                      mealType === 'breakfast'
-                        ? '아침'
-                        : mealType === 'lunch'
-                        ? '점심'
-                        : mealType === 'dinner'
-                        ? '저녁'
-                        : mealType === 'snack'
-                        ? '간식'
-                        : '영양제'
+                      mealType === "breakfast"
+                        ? "아침"
+                        : mealType === "lunch"
+                        ? "점심"
+                        : mealType === "dinner"
+                        ? "저녁"
+                        : mealType === "snack"
+                        ? "간식"
+                        : "영양제"
                     }
                     src={dailyMeal.meals[mealType]?.mealPhotos || []}
-                    descriptions={dailyMeal.meals[mealType]?.description || ''}
+                    descriptions={dailyMeal.meals[mealType]?.description || ""}
                     time={formatRecordDate}
-                    onAddComment={() => console.log('comment area')}
+                    onAddComment={() => console.log("comment area")}
                   />
                 );
               })}

@@ -1,8 +1,8 @@
-import { NextResponse, NextRequest } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { getServerSession } from 'next-auth';
+import { NextResponse, NextRequest } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { getServerSession } from "next-auth";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,21 +15,21 @@ export async function GET(request: NextRequest) {
     //console.log('Current session email:', session?.user?.email);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const { data: adminUser, error: adminError } = await supabase
-      .from('admin_users')
-      .select('id, admin_role, organization_id, username')
-      .eq('email', session.user.email)
+      .from("admin_users")
+      .select("id, admin_role, organization_id, username")
+      .eq("email", session.user.email)
       .single();
-
+    // console.log("adminUser", adminUser);
     if (adminError) {
       throw adminError;
     }
 
     // 코치가 아닌 경우 기본 정보만 반환
-    if (adminUser.admin_role !== 'coach') {
+    if (adminUser.admin_role !== "coach") {
       return NextResponse.json({
         username: adminUser.username,
         admin_role: adminUser.admin_role,
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { data: coach, error: coachError } = await supabase
-      .from('coaches')
+      .from("coaches")
       .select(
         `
        *,
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
        )
      `
       )
-      .eq('admin_user_id', adminUser.id)
+      .eq("admin_user_id", adminUser.id)
       .single();
 
     if (coachError) {
@@ -83,15 +83,15 @@ export async function GET(request: NextRequest) {
         })),
       })),
     };
-    //console.log(coach);
+    // console.log(coach);
     //console.log(formattedData);
 
     return NextResponse.json(formattedData);
   } catch (error) {
-    console.error('Error fetching Data', error);
+    console.error("Error fetching Data", error);
     return NextResponse.json(
       {
-        error: 'failed to fetch data',
+        error: "failed to fetch data",
       },
       { status: 500 }
     );
