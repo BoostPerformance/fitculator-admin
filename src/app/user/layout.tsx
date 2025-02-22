@@ -34,7 +34,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
         coach={adminData.username}
         selectedChallengeId={selectedChallengeId}
       />
-      <main className="flex-1 px-[1rem] pt-[1.25rem] bg-white-1 dark:bg-blue-4">{ children }</main>
+      <main className="flex-1 px-[1rem] py-[1.25rem] bg-white-1 dark:bg-blue-4">{ children }</main>
     </div>
   )
 }

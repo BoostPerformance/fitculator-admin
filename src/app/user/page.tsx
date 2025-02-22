@@ -332,7 +332,8 @@ export default function User() {
               </span>
             }
             borderColor="border-blue-5"
-            textColor="text-blue-5"
+          textColor="text-blue-5"
+          grids="col-span-1"
           />
           <TotalFeedbackCounts
             counts={
@@ -370,6 +371,7 @@ export default function User() {
             }
             borderColor="border-blue-5"
             textColor="text-blue-5"
+            grids="col-span-1"
           />
           <TotalFeedbackCounts
             counts={
@@ -394,6 +396,7 @@ export default function User() {
             }
             borderColor="border-yellow"
             textColor="text-yellow"
+            grids="col-span-1"
           />
         </div>
 

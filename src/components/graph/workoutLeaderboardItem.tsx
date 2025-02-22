@@ -25,7 +25,8 @@ const WorkoutLeaderboardItem = ({
       </div>
 
       <div className="flex-1 relative">
-        <div className="sm:max-w-[5.625rem] h-2 bg-gray-100 rounded-full overflow-hidden">
+        {/* <div className="lg:max-w-[5.625rem] h-2 bg-gray-100 rounded-full overflow-hidden"> */}
+        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
           <div
             className={`h-full bg-gradient-to-r ${
               score > 100
@@ -50,7 +51,7 @@ const WorkoutLeaderboardItem = ({
         </div>
       </div>
 
-      <div className="lg:w-[3rem] md:w-[2.5rem] text-right">{score}</div>
+      <div className="lg:w-[3rem] md:w-[2.5rem] sm:w-[2.5rem] text-right flex-grow-0 flex-shrink">{score}</div>
     </div>
   );
 };
