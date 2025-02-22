@@ -11,10 +11,11 @@ export default function MobileChart({
   selectedDate,
   loading,
 }: MobildDieDetailTableProps) {
+  const router = useRouter();
   if (loading) {
     return <MobileChartSkeleton />;
   }
-  const router = useRouter();
+
   const isMealUploaded = (mealName: string) => {
     return mealName !== "" ? (
       <>
