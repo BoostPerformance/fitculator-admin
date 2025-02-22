@@ -1,7 +1,7 @@
 'use client';
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import Sidebar from '@/components/fixedBars/sidebar';
+// import Sidebar from '@/components/fixedBars/sidebar';
 import { useDietData } from '@/components/hooks/useDietData';
 import { DietStatistics } from '@/components/statistics/dietStatistics';
 import { DietContent } from '@/components/dietDashboard/dietContent';
@@ -83,13 +83,13 @@ export default function DietItem() {
 
   return (
     <div className="bg-white-1 flex sm:flex-col md:flex-col">
-      <Sidebar
+      {/* <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         coach={adminData.username}
         onSelectChallengeTitle={handleChallengeSelect}
         selectedChallengeId={selectedChallengeId}
-      />
+      /> */}
       <div className="flex flex-col gap-[1rem]">
         <div className="px-[2rem] pt-[2rem]">
           <div className="text-gray-2 text-1.25-700">{challengeTitle}</div>

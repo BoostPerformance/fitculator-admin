@@ -45,7 +45,7 @@ const DailyDietRecord = ({ activities }: any) => {
   };
 
   return (
-    <div className="bg-white rounded-lg p-3 col-span-2 overflow-y-auto h-[31.25rem]">
+    <div className="flex flex-col gap-[0.5rem] bg-white rounded-lg p-[1rem] col-span-2 max-h-[31.25rem] min-h-full overflow-y-auto scrollbar-hide">
       {/* 헤더 부분 */}
       <div className="grid grid-cols-6 mb-4">
         {/* 이름 열 공간 */}
@@ -79,7 +79,7 @@ const DailyDietRecord = ({ activities }: any) => {
             <div key={index} className="grid grid-cols-6 items-center">
               {/* 사용자 이름 */}
               <div className="col-span-1">
-                <span className="text-gray-700 text-0.625-500">
+                <span className="text-gray-700 lg:text-0.875-500 md:text-0.625-500">
                   {activity.users.name}
                 </span>
               </div>
@@ -116,7 +116,7 @@ const DailyDietRecord = ({ activities }: any) => {
 
               {/* 총 업로드 현황 카운트 */}
               <div className="col-span-1 flex justify-center">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
                     <svg
                       viewBox="0 0 24 24"
@@ -132,7 +132,7 @@ const DailyDietRecord = ({ activities }: any) => {
                       />
                     </svg>
                   </div>
-                  <span className="text-gray-600 text-0.875-500">
+                  <span className="text-gray-600 lg:text-0.875-500 md:text-0.625-500">
                     {`${activity.daily_records.length}/${weekDates.length}`}
                   </span>
                 </div>

@@ -6,7 +6,7 @@ import Title from './layout/title';
 import TotalFeedbackCounts from './totalCounts/totalFeedbackCount';
 import MealPhotoLayout from './layout/mealPhotoLayout';
 import { useSearchParams, useParams } from 'next/navigation';
-import Sidebar from './fixedBars/sidebar';
+// import Sidebar from './fixedBars/sidebar';
 import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
 import Calendar from './input/calendar';
 import { DailyMealData, UserData } from '@/types/dietItemContainerTypes';
@@ -438,12 +438,12 @@ export default function DietItemContainer() {
 
   return (
     <div className=" flex sm:flex-col gap-[1rem] sm:bg-[#E4E9FF]">
-      <Sidebar
+      {/* <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         onSelectChallengeTitle={handleChallengeSelect}
         coach={orgName.username}
-      />
+      /> */}
 
       <div>
         <div className="flex-1 py-[3rem]">
