@@ -1,7 +1,7 @@
 import { ChallengeParticipant } from "@/types/userPageTypes";
 import TrafficSourceChart from "./trafficSourceChart";
 import DailyDietRecord from "./dailyDietRecord";
-import WorkoutLeaderboeard from "./workoutLeaderboeard";
+// import WorkoutLeaderboeard from "./workoutLeaderboeard";
 import DailyDietRecordMobile from "./dailyDietRecordMobile";
 import { useEffect, useState } from "react";
 
@@ -19,7 +19,7 @@ const GraphSection: React.FC<GraphSectionProps> = ({
       <TrafficSourceChart challengeId={selectedChallengeId} />
       <DailyDietRecord activities={activities} />
       <DailyDietRecordMobile activities={activities} />
-      <WorkoutLeaderboeard workoutData={[]} />
+      {/* <WorkoutLeaderboeard workoutData={[]} /> */}
     </div>
   );
 };
