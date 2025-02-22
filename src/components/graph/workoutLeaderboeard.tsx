@@ -21,7 +21,7 @@ const WorkoutLeaderboeard = () => {
       <h2 className="text-[#6F6F6F] text-lg font-semibold mb-6 dark:text-gray-5">
         운동리더보드
       </h2>
-      <div className="overflow-y-auto max-h-96 dark:text-gray-5">
+      <div className="overflow-y-auto max-h-96 dark:text-gray-5 scrollbar-hide">
         {leaderboardData.map((item, index) => (
           <WorkoutLeaderboardItem
             key={index}

@@ -6,7 +6,7 @@ import Title from "@/components/layout/title";
 import TotalFeedbackCounts from "@/components/totalCounts/totalFeedbackCount";
 import MealPhotoLayout from "@/components/layout/mealPhotoLayout";
 import { useParams } from "next/navigation";
-import Sidebar from "@/components/fixedBars/sidebar";
+// import Sidebar from "@/components/fixedBars/sidebar";
 import { ProcessedMeal } from "@/types/dietDetaileTableTypes";
 import Calendar from "@/components/input/calendar";
 import {
@@ -744,12 +744,12 @@ export default function SelectedDate() {
         }}
       />
 
-      <Sidebar
+      {/* <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         onSelectChallengeTitle={handleChallengeSelect}
         coach={orgName.username}
-      />
+      /> */}
 
       <div className="md:px-[1rem] lg:w-full">
         <div className="flex-1 py-[3rem]">

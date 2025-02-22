@@ -18,7 +18,7 @@ export const metadata = {
   title: "Fitculator-admin",
   description: "fitculator io",
   icons: {
-    icon: "/images/logo-favicon.png",
+    icon: "/svg/logo_light.svg",
   },
 };
 
