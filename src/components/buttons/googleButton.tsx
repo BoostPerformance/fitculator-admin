@@ -4,10 +4,16 @@ interface GoogleLoginProps {
   onClick: () => void;
 }
 export default function GoogleButton({ onClick }: GoogleLoginProps) {
+  const handleClick = () => {
+    console.log('🔄 === Google Button Click ===');
+    console.log('📥 Initiating Google sign in...');
+    onClick();
+  };
+
   return (
     <button
       className="flex gap-[0.5rem] items-center border-gray-7 border-[0.12rem] rounded-[0.3rem] p-[0.4rem] text-0.75-500 text-black dark:text-gray-9"
-      onClick={onClick}
+      onClick={handleClick}
     >
       <Image
         src="/svg/google-logo.svg"

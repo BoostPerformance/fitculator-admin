@@ -1,5 +1,5 @@
-import TotalFeedbackCounts from '../totalCounts/totalFeedbackCount';
-import { ChallengeParticipant, Challenges } from '@/types/userPageTypes';
+import TotalFeedbackCounts from "../totalCounts/totalFeedbackCount";
+import { ChallengeParticipant, Challenges } from "@/types/userPageTypes";
 
 interface ChallengeStatisticsProps {
   dailyRecords: ChallengeParticipant[];
@@ -17,7 +17,7 @@ const ChallengeStatistics: React.FC<ChallengeStatisticsProps> = ({
       (challenge) => challenge.challenges.id === selectedChallengeId
     );
 
-    if (!selectedChallenge) return { count: '0', total: '0개' };
+    if (!selectedChallenge) return { count: "0", total: "0개" };
 
     const startDate = new Date(selectedChallenge.challenges.start_date);
     const endDate = new Date(selectedChallenge.challenges.end_date);
@@ -42,7 +42,7 @@ const ChallengeStatistics: React.FC<ChallengeStatisticsProps> = ({
   };
 
   const getTodayDietUploads = () => {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식으로 오늘 날짜 가져오기
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD 형식으로 오늘 날짜 가져오기
 
     // 선택된 챌린지에 대해서만 필터링
     const todayUploads = dailyRecords.filter((record) => {
@@ -50,7 +50,7 @@ const ChallengeStatistics: React.FC<ChallengeStatisticsProps> = ({
 
       // daily_records 배열에서 오늘 날짜의 기록이 있는지 확인
       return record.daily_records.some(
-        (dailyRecord: any) => dailyRecord.record_date.split('T')[0] === today
+        (dailyRecord: any) => dailyRecord.record_date.split("T")[0] === today
       );
     });
 
@@ -78,32 +78,32 @@ const ChallengeStatistics: React.FC<ChallengeStatisticsProps> = ({
         grids="sm:col-span-2 "
       />
       <TotalFeedbackCounts
-        counts={'0'}
-        total={'0명'}
-        title={'오늘 운동 업로드 멤버'}
+        counts={"0"}
+        total={"0명"}
+        title={"오늘 운동 업로드 멤버"}
         borderColor="border-blue-5"
         textColor="text-blue-5"
       />
       <TotalFeedbackCounts
         counts={todayStats.count}
         total={todayStats.total}
-        title={'오늘 식단 업로드 멤버'}
+        title={"오늘 식단 업로드 멤버"}
         borderColor="border-yellow"
         textColor="text-yellow"
       />
-      <TotalFeedbackCounts
+      {/* <TotalFeedbackCounts
         counts={'0'}
         total={'0개'}
         title={'전체 운동 업로드 수'}
         borderColor="border-blue-5"
         textColor="text-blue-5"
-      />
-      <TotalFeedbackCounts
+      /> */}
+      {/* <TotalFeedbackCounts
         counts={totalStats.total}
         title={'전체 식단 업로드 수'}
         borderColor="border-yellow"
         textColor="text-yellow"
-      />
+      /> */}
     </div>
   );
 };

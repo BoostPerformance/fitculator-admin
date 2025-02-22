@@ -1,6 +1,6 @@
-import React from 'react';
+import React from "react";
 
-const days = ['월', '화', '수', '목', '금', '토', '일'];
+const days = ["월", "화", "수", "목", "금", "토", "일"];
 interface DailyRecord {
   id: string;
   record_date: string;
@@ -16,7 +16,7 @@ interface ChallengeParticipant {
   users: {
     id: string;
     name: string;
-    display_name: string;
+    username: string;
   };
   challenges: {
     id: string;
@@ -35,7 +35,7 @@ const DailyDietRecord = ({ activities }: any) => {
     for (let i = 0; i < 7; i++) {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
-      dates.push(date.toISOString().split('T')[0]);
+      dates.push(date.toISOString().split("T")[0]);
     }
     return dates;
   };
@@ -93,8 +93,8 @@ const DailyDietRecord = ({ activities }: any) => {
                         className={`w-[1rem] h-[1rem] rounded-[0.1rem]
                         ${
                           hasRecordForDate(activity.daily_records, date)
-                            ? 'bg-[#FAAA16]'
-                            : 'bg-gray-100'
+                            ? "bg-[#FAAA16]"
+                            : "bg-gray-100"
                         }`}
                       />
                     </div>

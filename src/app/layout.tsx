@@ -1,11 +1,9 @@
 import localFont from 'next/font/local';
 import './globals.css';
 import React from 'react';
-import Head from 'next/head';
 import Footer from '@/components/layout/footer';
-import { ThemeProvider } from 'next-themes';
-import SessionProviderWrapper from '@/components/auth/sessionProviderWrapper';
-import { Providers } from './providers';
+import RootProvider from '@/components/providers/root-provider';
+import { Metadata, Viewport } from 'next';
 
 const pretendard = localFont({
   src: '../fonts/PretendardVariable.woff2',
@@ -14,11 +12,16 @@ const pretendard = localFont({
   variable: '--font-pretendard',
 });
 
-export const metadata = {
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1.0,
+};
+
+export const metadata: Metadata = {
   title: 'Fitculator-admin',
   description: 'fitculator io',
   icons: {
-    icon: '/images/logo-favicon.png',
+    icon: '/image/logo-icon.png',
   },
 };
 
@@ -29,16 +32,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scrollbar-hide" suppressHydrationWarning>
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      </Head>
       <body className={`${pretendard.variable} font-pretendard`}>
-        <SessionProviderWrapper>
-          <ThemeProvider enableSystem={true} attribute="class">
-            <Providers>{children}</Providers>
-            <Footer />
-          </ThemeProvider>
-        </SessionProviderWrapper>
+        <RootProvider>
+          {children}
+          <Footer />
+        </RootProvider>
       </body>
     </html>
   );

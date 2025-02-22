@@ -1,6 +1,3 @@
-//import { FaPlus } from 'react-icons/fa6';
-import Image from 'next/image';
-
 interface PhotoData {
   id: string;
   meal_id: string;
@@ -11,18 +8,18 @@ interface PhotoData {
 interface MealPhotoLayoutProps {
   title: string;
   src: PhotoData[];
-  descriptions: string | boolean;
+  descriptions: string;
   time: string;
   onAddComment?: () => void;
 }
 
 const MealPhotoLayout = ({
-  title = '식단',
+  title = "식단",
   src = [],
-  descriptions = '',
-  time = '',
+  descriptions = "",
+  time = "",
 }: MealPhotoLayoutProps) => {
-  const filteredPhotos = src?.filter((photo) => photo || []);
+  const filteredPhotos = src?.filter(Boolean) || [];
 
   // const timeToIOS = new Date(time).toISOString().split('T')[0];
   // console.log(timeToIOS);
@@ -40,12 +37,10 @@ const MealPhotoLayout = ({
     if (filteredPhotos.length === 1) {
       return (
         <div className="w-full h-32 overflow-hidden rounded-lg">
-          <Image
+          <img
             src={filteredPhotos[0].photo_url}
             alt="meal image"
             className="w-full h-full object-cover"
-            width={100}
-            height={100}
           />
         </div>
       );
@@ -56,12 +51,10 @@ const MealPhotoLayout = ({
         <div className="grid grid-cols-2 gap-2 h-32">
           {filteredPhotos.map((photo, index) => (
             <div key={index} className="overflow-hidden rounded-lg">
-              <Image
+              <img
                 src={photo.photo_url}
                 alt={`meal-${index}`}
                 className="w-full h-full object-cover"
-                width={100}
-                height={100}
               />
             </div>
           ))}
@@ -73,30 +66,24 @@ const MealPhotoLayout = ({
       return (
         <div className="grid grid-cols-2 gap-2 h-32">
           <div className="row-span-2 overflow-hidden rounded-lg">
-            <Image
+            <img
               src={filteredPhotos[0].photo_url}
               alt="meal-large"
               className="w-full h-full object-cover"
-              width={100}
-              height={100}
             />
           </div>
           <div className="overflow-hidden rounded-lg">
-            <Image
+            <img
               src={filteredPhotos[1].photo_url}
               alt="meal-small-1"
               className="w-full h-full object-cover"
-              width={100}
-              height={100}
             />
           </div>
           <div className="overflow-hidden rounded-lg">
-            <Image
+            <img
               src={filteredPhotos[2].photo_url}
               alt="meal-small-2"
               className="w-full h-full object-cover"
-              width={100}
-              height={100}
             />
           </div>
         </div>
@@ -108,12 +95,10 @@ const MealPhotoLayout = ({
       <div className="grid grid-cols-2 gap-2 h-32">
         {filteredPhotos.slice(0, 4).map((photo, index) => (
           <div key={index} className="overflow-hidden rounded-lg">
-            <Image
+            <img
               src={photo.photo_url}
               alt={`meal-${index}`}
               className="w-full h-full object-cover"
-              width={100}
-              height={100}
             />
           </div>
         ))}
@@ -127,7 +112,7 @@ const MealPhotoLayout = ({
         <h3 className="text-center mb-2 text-base font-semibold">{title}</h3>
         {renderPhotos()}
         <div className="mt-2 text-sm text-gray-600">{time}</div>
-        <div className="text-sm mt-1">{descriptions}</div>
+        <div className="text-sm mt-1 whitespace-pre-wrap">{descriptions}</div>
       </div>
       {/* <div className="flex justify-center mt-4">
         <button

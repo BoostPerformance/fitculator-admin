@@ -19,6 +19,12 @@ export interface DailyMealData {
     coach_feedback?: string;
     ai_feedback: string;
   };
+  user?: {
+    id: string;
+    name: string;
+    username: string;
+  };
+  upload_days_count?: number;
 }
 
 export interface DailyRecords {
@@ -49,7 +55,7 @@ export interface UserData {
 export interface Meals {
   id: string;
   daily_record_id: string;
-  meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
+  meal_type: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
   description: string;
   meal_photos: [string];
   updated_at: string;

@@ -1,37 +1,265 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
+"use client";
+import { useState, useEffect } from "react";
+import {
+  ProcessedMeal,
+  Challenges,
+  ChallengeParticipant,
+  DailyRecords,
+} from "@/types/dietDetaileTableTypes";
 
-export const useDietData = (challengeId: string | string[] | undefined) => {
-  const [challenges, setChallenges] = useState<ProcessedMeal[]>([]);
+interface DietRecord {
+  id: string;
+  record_date: string;
+  challenge_participants: {
+    id: string;
+    users: {
+      username: string;
+      name: string;
+    };
+  };
+  feedbacks: {
+    id: string;
+    coach_feedback: string | null;
+    coach_memo: string | null;
+    updated_at: string;
+    created_at: string;
+  } | null;
+  meals: {
+    breakfast: Array<{
+      id: string;
+      description: string;
+      meal_time: string;
+    }>;
+    lunch: Array<{
+      id: string;
+      description: string;
+      meal_time: string;
+    }>;
+    dinner: Array<{
+      id: string;
+      description: string;
+      meal_time: string;
+    }>;
+    snack: Array<{
+      id: string;
+      description: string;
+      meal_time: string;
+    }>;
+    supplement: Array<{
+      id: string;
+      description: string;
+      meal_time: string;
+    }>;
+  };
+}
+
+interface DietResponse {
+  data: DietRecord[];
+  count: number;
+}
+
+interface Challenge {
+  challenge_id: string;
+  challenges: {
+    id: string;
+    title: string;
+    start_date: string;
+    end_date: string;
+    challenge_participants: {
+      id: string;
+      service_user_id: string;
+    }[];
+  };
+}
+
+export const useDietData = (
+  challengeId: string,
+  selectedDate?: string,
+  page: number = 1,
+  limit: number = 10
+) => {
+  const [dietRecords, setDietRecords] = useState<DietRecord[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [adminData, setAdminData] = useState({
-    admin_role: '',
-    username: '',
+    admin_role: "",
+    username: "",
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [initialLimit, setInitialLimit] = useState(30);
 
+  // 초기 데이터 로드 (challenges와 admin data)
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
-        const challengesResponse = await fetch('/api/challenges');
-        if (!challengesResponse.ok) {
-          throw new Error('Failed to fetch challenges');
-        }
-        const challengeData = await challengesResponse.json();
-        setChallenges(challengeData);
+        setIsInitialLoading(true);
 
-        const adminResponse = await fetch('/api/admin-users');
-        if (!adminResponse.ok) {
-          throw new Error('Failed to fetch admin data');
+        // Promise.all을 사용하여 병렬로 데이터 가져오기
+        const [challengesResponse, adminResponse] = await Promise.all([
+          fetch("/api/challenges"),
+          fetch("/api/admin-users"),
+        ]);
+
+        if (!challengesResponse.ok || !adminResponse.ok) {
+          throw new Error("Failed to fetch initial data");
         }
-        const adminData = await adminResponse.json();
+
+        const [challengeData, adminData] = await Promise.all([
+          challengesResponse.json(),
+          adminResponse.json(),
+        ]);
+
+        setChallenges(challengeData);
         setAdminData(adminData);
+        setError(null);
       } catch (error) {
-        console.log('Error fetching data:', error);
+        console.error("Error fetching initial data:", error);
+        setError("초기 데이터를 불러오는데 실패했습니다.");
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
-    fetchData();
+    fetchInitialData();
   }, []);
 
-  return { challenges, adminData };
+  // 식단 데이터 로드
+  useEffect(() => {
+    const fetchDietData = async () => {
+      if (!challengeId || isInitialLoading) return;
+
+      try {
+        setLoading(true);
+        const url = new URL("/api/diet-table", window.location.origin);
+        url.searchParams.append("challengeId", challengeId);
+        url.searchParams.append("page", page.toString());
+        url.searchParams.append(
+          "limit",
+          page === 1 ? initialLimit.toString() : limit.toString()
+        );
+
+        if (selectedDate) {
+          url.searchParams.append("date", selectedDate);
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Failed to fetch diet records");
+        }
+
+        const data: DietResponse = await response.json();
+
+        // 받아온 데이터 로깅
+        console.log("[useDietData] Raw API response:", {
+          firstRecord: data.data[0],
+          totalCount: data.count,
+          allRecords: data.data,
+        });
+
+        // 첫 페이지에서 데이터가 30개 이하면 모두 불러오기
+        if (page === 1) {
+          setDietRecords(data.data);
+          setTotalCount(data.count);
+          setHasMore(data.count > initialLimit);
+        } else {
+          // 이전 데이터 유지하면서 새 데이터 추가
+          setDietRecords((prevRecords) => [...prevRecords, ...data.data]);
+          setHasMore(data.data.length === limit);
+        }
+        setError(null);
+      } catch (error) {
+        console.error("Error fetching diet data:", error);
+        setError("식단 데이터를 불러오는데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDietData();
+  }, [challengeId, selectedDate, page, limit, isInitialLoading]);
+
+  // 데이터 변환
+  const processedRecords = dietRecords.map((record): ProcessedMeal => {
+    console.log("[useDietData] Processing record:", record);
+
+    const challenge = challenges.find(
+      (c) => c.challenges.id === challengeId
+    )?.challenges;
+
+    console.log("[useDietData] Processing record feedbacks:", {
+      recordId: record.id,
+      feedbacks: record.feedbacks,
+      feedbackData: record.feedbacks
+        ? {
+            id: record.feedbacks.id,
+            coach_feedback: record.feedbacks.coach_feedback,
+            coach_memo: record.feedbacks.coach_memo,
+          }
+        : null,
+    });
+
+    const dailyRecord: DailyRecords = {
+      id: record.id,
+      record_date: record.record_date,
+      feedback:
+        record.feedbacks && record.feedbacks.coach_feedback
+          ? {
+              id: record.feedbacks.id,
+              coach_feedback: record.feedbacks.coach_feedback,
+              coach_memo: record.feedbacks.coach_memo,
+              daily_record_id: record.id,
+              updated_at: record.feedbacks.updated_at,
+              created_at: record.feedbacks.created_at,
+            }
+          : null,
+      meals: {
+        breakfast: record.meals.breakfast || [],
+        lunch: record.meals.lunch || [],
+        dinner: record.meals.dinner || [],
+        snack: record.meals.snack || [],
+        supplement: record.meals.supplement || [],
+      },
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+    };
+
+    return {
+      challenge_id: challengeId,
+      challenges: {
+        id: challengeId,
+        title: challenge?.title || "",
+        start_date: challenge?.start_date || "",
+        end_date: challenge?.end_date || "",
+        challenge_participants: [],
+      },
+      user: {
+        id: record.challenge_participants.id,
+        username: record.challenge_participants.users.username,
+        name: record.challenge_participants.users.name,
+      },
+      daily_records: dailyRecord,
+      record_date: record.record_date,
+    };
+  });
+
+  // 변환된 데이터 로깅
+  console.log("[useDietData] Processed records:", {
+    firstProcessedRecord: processedRecords[0],
+    totalProcessed: processedRecords.length,
+    allProcessedRecords: processedRecords,
+  });
+
+  return {
+    dietRecords: processedRecords,
+    challenges,
+    adminData,
+    loading,
+    error,
+    totalCount,
+    isInitialLoading,
+    hasMore,
+  };
 };

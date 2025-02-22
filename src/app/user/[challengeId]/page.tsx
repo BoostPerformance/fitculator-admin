@@ -1,18 +1,17 @@
-'use client';
-import { useEffect, useState } from 'react';
-//import Image from 'next/image';
-import TrafficSourceChart from '@/components/graph/trafficSourceChart';
-import DailyDietRecord from '@/components/graph/dailyDietRecord';
-import WorkoutLeaderboeard from '@/components/graph/workoutLeaderboeard';
-import DietTable from '@/components/dietDashboard/dietTable';
-import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
-import Title from '@/components/layout/title';
-import Sidebar from '@/components/fixedBars/sidebar';
-import { useParams } from 'next/navigation';
+"use client";
+import { useEffect, useState } from "react";
+import TrafficSourceChart from "@/components/graph/trafficSourceChart";
+import DailyDietRecord from "@/components/graph/dailyDietRecord";
+import WorkoutLeaderboard from "@/components/graph/workoutLeaderboard";
+import DietTable from "@/components/dietDashboard/dietTable";
+import TotalFeedbackCounts from "@/components/totalCounts/totalFeedbackCount";
+import Title from "@/components/layout/title";
+import Sidebar from "@/components/fixedBars/sidebar";
+import { useParams } from "next/navigation";
 import {
   calculateTodayDietUploads,
   calculateTotalDietUploads,
-} from '@/components/statistics/challengeParticipantsDietStatics';
+} from "@/components/statistics/challengeParticipantsDietStatics";
 
 interface AdminUser {
   email: string;
@@ -82,30 +81,32 @@ const calculateChallengeProgress = (startDate: string, endDate: string) => {
 
 export default function User() {
   const params = useParams() as ParamsType;
-  const [workoutCount, setWorkoutCount] = useState([]);
+  const [workoutCount, setWorkoutCount] = useState(0);
   const [workOutCountToday, setWorkOutCountToday] = useState<number>(0);
-  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string>("");
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [adminData, setAdminData] = useState({
-    admin_role: '',
-    username: '',
+    admin_role: "",
+    username: "",
   });
   const [coachData, setCoachData] = useState<CoachData>({
-    id: '',
-    admin_user_id: '',
-    organization_id: '',
-    organization_name: '',
-    profile_image_url: '',
-    introduction: '',
+    id: "",
+    admin_user_id: "",
+    organization_id: "",
+    organization_name: "",
+    profile_image_url: "",
+    introduction: "",
     specialization: [],
     is_active: false,
-    created_at: '',
-    updated_at: '',
+    created_at: "",
+    updated_at: "",
     admin_users: {
-      email: '',
-      username: '',
+      email: "",
+      username: "",
     },
     challenge_coaches: [],
   });
@@ -119,48 +120,40 @@ export default function User() {
     handleResize();
 
     // 리사이즈 이벤트 리스너 추가
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     const fetchData = async () => {
       try {
-        const workoutData = await fetch('/api/workouts');
-
-        if (!workoutData.ok) {
-          throw new Error('Failed to fetch workoutData');
+        const workoutResponse = await fetch(
+          `/api/workouts?challengeId=${params.challengeId}`
+        );
+        if (!workoutResponse.ok) {
+          throw new Error("Failed to fetch workout data");
         }
-        const workoutDataResponse = await workoutData.json();
+        const workoutData = await workoutResponse.json();
 
-        // console.log('workoutDataResponse', workoutDataResponse);
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split("T")[0];
 
-        const workOutCount = workoutDataResponse.filter((item: any) => {
-          const createdAt = item.created_at.split('T')[0];
-
-          return createdAt === today;
-        }).length;
-
-        setWorkoutCount(workOutCount);
-
-        // 먼저 오늘 날짜의 기록만 필터링
-        const todaysWorkouts = workoutDataResponse.filter((item: any) => {
-          const createdAt = item.created_at.split('T')[0];
+        // 오늘의 운동 기록 수
+        const todayWorkouts = workoutData.filter((item: any) => {
+          const createdAt = item.created_at?.split("T")[0];
           return createdAt === today;
         });
 
-        const arrWorkout = todaysWorkouts.map((item: any) => {
-          return item.user_id;
-        });
-        const newSet = new Set(arrWorkout);
-        const totalWorkoutUploadMember = newSet.size;
+        setWorkoutCount(todayWorkouts.length);
 
-        setWorkOutCountToday(totalWorkoutUploadMember);
+        // 오늘 운동한 유니크 유저 수
+        const uniqueUsers = new Set(
+          todayWorkouts.map((item: any) => item.user_id)
+        );
+        setWorkOutCountToday(uniqueUsers.size);
 
-        const challengesResponse = await fetch('/api/challenges');
+        // 챌린지 데이터 가져오기
+        const challengesResponse = await fetch("/api/challenges");
         if (!challengesResponse.ok) {
-          throw new Error('Failed to fetch challenges');
+          throw new Error("Failed to fetch challenges");
         }
         const challengesData = await challengesResponse.json();
-        // console.log('challengesData', challengesData);
 
         const sortedChallenges = challengesData.sort(
           (a: Challenges, b: Challenges) => {
@@ -178,37 +171,69 @@ export default function User() {
         }
 
         // 코치 데이터 가져오기
-        const coachResponse = await fetch('/api/coach-info');
+        const coachResponse = await fetch("/api/coach-info");
         if (!coachResponse.ok) {
-          throw new Error('Failed to fetch coach data');
+          throw new Error("Failed to fetch coach data");
         }
         const coachData = await coachResponse.json();
         setCoachData(coachData);
 
         // 어드민 데이터 가져오기
-        const adminResponse = await fetch('/api/admin-users');
+        const adminResponse = await fetch("/api/admin-users");
         if (!adminResponse.ok) {
-          throw new Error('Failed to fetch admin data');
+          throw new Error("Failed to fetch admin data");
         }
         const adminData = await adminResponse.json();
         setAdminData(adminData);
 
         // 데일리레코드(테이블 정보) 가져오기
-        const dailyRecordsresponse = await fetch('/api/challenge-participants');
-        if (!dailyRecordsresponse.ok) {
-          throw new Error('Failed to fetch daily-records data');
-        }
-        const dailyRecordsdata = await dailyRecordsresponse.json();
-        setDailyRecords(dailyRecordsdata);
+        await fetchDailyRecords(1);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-    const mobileSize = () => window.removeEventListener('resize', handleResize);
-    return mobileSize;
-  }, []);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [params.challengeId]);
+
+  const fetchDailyRecords = async (pageNum: number) => {
+    try {
+      setLoading(true);
+      const url = new URL(
+        "/api/challenge-participants",
+        window.location.origin
+      );
+      url.searchParams.append("page", pageNum.toString());
+      url.searchParams.append("limit", "30");
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch daily-records data");
+      }
+      const data = await response.json();
+
+      if (pageNum === 1) {
+        setDailyRecords(data.data);
+      } else {
+        setDailyRecords((prev) => [...prev, ...data.data]);
+      }
+
+      return data.data.length > 0;
+    } catch (error) {
+      console.error("Error fetching daily records:", error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLoadMore = async (nextPage: number) => {
+    const hasMore = await fetchDailyRecords(nextPage);
+    if (hasMore) {
+      setPage(nextPage);
+    }
+  };
 
   useEffect(() => {
     const urlChallengeId = params.challengeId;
@@ -219,11 +244,9 @@ export default function User() {
     ) {
       setSelectedChallengeId(urlChallengeId);
     }
-  }, [challenges]);
-  //console.log('coachData', coachData);
+  }, [challenges, params.challengeId]);
 
   const handleChallengeSelect = (challengeId: string) => {
-    // 선택된 챌린지 찾기
     const selectedChallenge = challenges.find(
       (challenge) => challenge.challenges.id === challengeId
     );
@@ -233,10 +256,11 @@ export default function User() {
     }
   };
 
-  const filteredDailyRecordsbyId = dailyRecords.filter(
-    (record) => record.challenges.id === selectedChallengeId
-  );
-  //console.log('dailyRecords', dailyRecords);
+  const filteredDailyRecordsbyId = Array.isArray(dailyRecords)
+    ? dailyRecords.filter(
+        (record) => record.challenges.id === selectedChallengeId
+      )
+    : [];
 
   const getSelectedChallengeDates = () => {
     const selectedChallenge = challenges.find(
@@ -256,7 +280,7 @@ export default function User() {
         challengeDates.startDate,
         challengeDates.endDate
       )
-    : { progressDays: '0', totalDays: '0' };
+    : { progressDays: "0", totalDays: "0" };
 
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col sm:px-[1rem] md:flex-col md:px-[0.4rem]">
@@ -287,7 +311,7 @@ export default function User() {
             />
             <TotalFeedbackCounts
               counts={`${workOutCountToday}`}
-              total={'24명'}
+              total={"24명"}
               title={
                 <span>
                   오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
@@ -323,7 +347,7 @@ export default function User() {
             />
             <TotalFeedbackCounts
               counts={`${workoutCount}개`}
-              total={''}
+              total={""}
               title={
                 <span>
                   전체 운동 <br className="md:inline sm:hidden lg:hidden" />
@@ -360,35 +384,17 @@ export default function User() {
           </div>
 
           <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:flex sm:flex-col">
-            <TrafficSourceChart />
+            <TrafficSourceChart challengeId={selectedChallengeId} />
             <DailyDietRecord activities={filteredDailyRecordsbyId} />
-            {/* <DailyDietRecordMobile activities={filteredDailyRecordsbyId} /> */}
-            <WorkoutLeaderboeard />
+            <WorkoutLeaderboard challengeId={selectedChallengeId} />
           </div>
-          {/* <div>
-            <Image
-              src={
-                isMobile
-                  ? '/image/graph-example2.png'
-                  : '/image/cardio-graph.png'
-              }
-              width={4000}
-              height={4000}
-              alt={isMobile ? 'graph-example1.png' : 'cardio-graph.png'}
-              className="w-full lg:col-span-3"
-            />
-            {!isMobile && (
-              <Image
-                src="/image/weight-graph.png"
-                width={4000}
-                height={4000}
-                alt=""
-                className="w-full lg:col-span-3"
-              />
-            )}
-          </div> */}
           <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1">
-            <DietTable dailyRecordsData={filteredDailyRecordsbyId} />
+            <DietTable
+              dailyRecordsData={filteredDailyRecordsbyId}
+              challengeId={selectedChallengeId}
+              onLoadMore={handleLoadMore}
+              loading={loading}
+            />
           </div>
         </div>
       </div>

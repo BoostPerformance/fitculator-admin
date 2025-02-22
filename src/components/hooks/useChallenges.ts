@@ -1,5 +1,5 @@
-'use client';
-import { useState } from 'react';
+"use client";
+import { useState, useCallback } from "react";
 // import { Challenges } from '@/types/userPageTypes';
 
 interface Challenges {
@@ -42,24 +42,31 @@ interface Challenges {
   id: string;
 }
 export const useChallenge = () => {
-  const [challenges, setChallenges] = useState<Challenges[]>([]);
-  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
-  const [challengeTitle, setChallengeTitle] = useState('');
+  const [challenges, setChallenges] = useState<Challenges[] | null>(null);
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string>("");
+  const [challengeTitle, setChallengeTitle] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const fetchChallenges = async () => {
+  const fetchChallenges = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await fetch('/api/challenges');
-      if (!response.ok) throw new Error('Failed to fetch challenges');
+      const response = await fetch("/api/challenges");
+      if (!response.ok) throw new Error("Failed to fetch challenges");
 
       const data = await response.json();
       setChallenges(data);
+      setLoading(false);
       return data;
     } catch (error) {
-      console.error('Error fetching challenges:', error);
+      console.error("Error fetching challenges:", error);
+      setLoading(false);
+      throw error;
     }
-  };
+  }, []);
 
   const handleChallengeSelect = (challengeId: string) => {
+    if (!challenges) return;
+
     const selectedChallenge = challenges.find(
       (challenge) => challenge.challenges.id === challengeId
     );
@@ -75,5 +82,6 @@ export const useChallenge = () => {
     challengeTitle,
     fetchChallenges,
     handleChallengeSelect,
+    loading,
   };
 };

@@ -1,18 +1,15 @@
-'use client';
-import { useEffect, useState } from 'react';
-//import Image from 'next/image';
-import TrafficSourceChart from '@/components/graph/trafficSourceChart';
-import DailyDietRecord from '@/components/graph/dailyDietRecord';
-import WorkoutLeaderboeard from '@/components/graph/workoutLeaderboeard';
-import DietTable from '@/components/dietDashboard/dietTable';
-import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
-import Title from '@/components/layout/title';
-import Sidebar from '@/components/fixedBars/sidebar';
-import { useParams } from 'next/navigation';
+"use client";
+import { useEffect, useState } from "react";
+import GraphSection from "@/components/graph/graphSection";
+import DietTable from "@/components/dietDashboard/dietTable";
+import TotalFeedbackCounts from "@/components/totalCounts/totalFeedbackCount";
+import Title from "@/components/layout/title";
+import Sidebar from "@/components/fixedBars/sidebar";
+import { useParams } from "next/navigation";
 import {
   calculateTodayDietUploads,
   calculateTotalDietUploads,
-} from '@/components/statistics/challengeParticipantsDietStatics';
+} from "@/components/statistics/challengeParticipantsDietStatics";
 //import DailyDietRecordMobile from '@/components/graph/dailyDietRecordMobile';
 
 interface AdminUser {
@@ -114,29 +111,30 @@ const calculateChallengeProgress = (startDate: string, endDate: string) => {
 export default function User() {
   const params = useParams() as ParamsType;
   const [workoutCount, setWorkoutCount] = useState([]);
+  const [workoutData, setWorkoutData] = useState<any[]>([]);
   const [workOutCountToday, setWorkOutCountToday] = useState<number>(0);
-  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string>("");
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<any[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [adminData, setAdminData] = useState({
-    admin_role: '',
-    username: '',
+    admin_role: "",
+    username: "",
   });
   const [coachData, setCoachData] = useState<CoachData>({
-    id: '',
-    admin_user_id: '',
-    organization_id: '',
-    organization_name: '',
-    profile_image_url: '',
-    introduction: '',
+    id: "",
+    admin_user_id: "",
+    organization_id: "",
+    organization_name: "",
+    profile_image_url: "",
+    introduction: "",
     specialization: [],
     is_active: false,
-    created_at: '',
-    updated_at: '',
+    created_at: "",
+    updated_at: "",
     admin_users: {
-      email: '',
-      username: '',
+      email: "",
+      username: "",
     },
     challenge_coaches: [],
   });
@@ -150,115 +148,77 @@ export default function User() {
     handleResize();
 
     // 리사이즈 이벤트 리스너 추가
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
-    const fetchData = async () => {
-      try {
-        const workoutData = await fetch('/api/workouts');
+    // 데이터 로딩을 지연시킴
+    const loadData = setTimeout(() => {
+      fetchData();
+    }, 1000);
 
-        if (!workoutData.ok) {
-          throw new Error('Failed to fetch workoutData');
-        }
-        const workoutDataResponse = await workoutData.json();
-
-        //console.log('workoutDataResponse', workoutDataResponse);
-        const today = new Date().toISOString().split('T')[0];
-        //const yesterday = '2025-02-10';
-
-        const workOutCount = workoutDataResponse.filter((item: any) => {
-          const createdAt = item.created_at.split('T')[0];
-
-          return createdAt === today;
-        }).length;
-
-        setWorkoutCount(workOutCount);
-
-        // 먼저 오늘 날짜의 기록만 필터링
-        const todaysWorkouts = workoutDataResponse.filter((item: any) => {
-          const createdAt = item.created_at.split('T')[0];
-          return createdAt === today;
-        });
-
-        const arrWorkout = todaysWorkouts.map((item: any) => {
-          return item.user_id;
-        });
-        const newSet = new Set(arrWorkout);
-        const totalWorkoutUploadMember = newSet.size;
-        // console.log('newSet', newSet.size);
-
-        // // 필터링된 기록에서 고유한 user_id만 추출
-        // const uniqueUsers = new Set(
-        //   todaysWorkouts.map((item: any) => {
-        //     //   console.log('todaysWorkouts item', item);
-        //     return item.user_id;
-        //   })
-        // );
-
-        // // 고유한 사용자 수
-        // const workOutCounting = uniqueUsers.size;
-
-        setWorkOutCountToday(totalWorkoutUploadMember);
-        // console.log('Unique users who worked out today:', workOutCount);
-
-        // 챌린지 데이터 가져오기
-
-        const challengesResponse = await fetch('/api/challenges');
-        if (!challengesResponse.ok) {
-          throw new Error('Failed to fetch challenges');
-        }
-        const challengesData = await challengesResponse.json();
-        // console.log('challengesData', challengesData);
-
-        const sortedChallenges = challengesData.sort(
-          (a: Challenges, b: Challenges) => {
-            return (
-              new Date(b.challenges.start_date).getTime() -
-              new Date(a.challenges.start_date).getTime()
-            );
-          }
-        );
-
-        setChallenges(sortedChallenges);
-        // 첫 번째 챌린지를 기본값으로 설정
-        if (sortedChallenges.length > 0) {
-          setSelectedChallengeId(sortedChallenges[0].challenges.id);
-        }
-
-        // 코치 데이터 가져오기
-        const coachResponse = await fetch('/api/coach-info');
-        if (!coachResponse.ok) {
-          throw new Error('Failed to fetch coach data');
-        }
-        const coachData = await coachResponse.json();
-        setCoachData(coachData);
-
-        // 어드민 데이터 가져오기
-        const adminResponse = await fetch('/api/admin-users');
-        if (!adminResponse.ok) {
-          throw new Error('Failed to fetch admin data');
-        }
-        const adminData = await adminResponse.json();
-        setAdminData(adminData);
-
-        // 데일리레코드(테이블 정보) 가져오기
-        const dailyRecordsresponse = await fetch('/api/challenge-participants');
-        if (!dailyRecordsresponse.ok) {
-          throw new Error('Failed to fetch daily-records data');
-        }
-        const dailyRecordsdata = await dailyRecordsresponse.json();
-
-        // console.log('dailyRecordsdata user-page', dailyRecordsdata);
-
-        setDailyRecords(dailyRecordsdata);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+    const mobileSize = () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(loadData);
     };
-
-    fetchData();
-    const mobileSize = () => window.removeEventListener('resize', handleResize);
     return mobileSize;
   }, []);
+
+  const fetchData = async () => {
+    console.log("🔄 === Fetching User Page Data ===");
+    try {
+      console.log("📥 Fetching challenges data...");
+      const challengesResponse = await fetch("/api/challenges");
+      if (!challengesResponse.ok) {
+        throw new Error("Failed to fetch challenges");
+      }
+      const challengesData = await challengesResponse.json();
+
+      const sortedChallenges = challengesData.sort(
+        (a: Challenges, b: Challenges) => {
+          return (
+            new Date(b.challenges.start_date).getTime() -
+            new Date(a.challenges.start_date).getTime()
+          );
+        }
+      );
+
+      setChallenges(sortedChallenges);
+      if (sortedChallenges.length > 0) {
+        setSelectedChallengeId(sortedChallenges[0].challenges.id);
+      }
+
+      console.log("📥 Fetching coach data...");
+      const coachResponse = await fetch("/api/coach-info");
+      if (!coachResponse.ok) {
+        throw new Error("Failed to fetch coach data");
+      }
+      const coachData = await coachResponse.json();
+      setCoachData(coachData);
+
+      console.log("📥 Fetching admin data...");
+      const adminResponse = await fetch("/api/admin-users");
+      if (!adminResponse.ok) {
+        throw new Error("Failed to fetch admin data");
+      }
+      const adminData = await adminResponse.json();
+      setAdminData(adminData);
+
+      console.log("📥 Fetching daily records data...");
+      const dailyRecordsresponse = await fetch("/api/challenge-participants");
+      if (!dailyRecordsresponse.ok) {
+        throw new Error("Failed to fetch daily-records data");
+      }
+      const dailyRecordsdata = await dailyRecordsresponse.json();
+      setDailyRecords(dailyRecordsdata);
+      console.log("✅ All data fetched successfully");
+    } catch (error) {
+      console.error("❌ Error fetching data:", error);
+      console.error("Error details:", {
+        name: error instanceof Error ? error.name : "Unknown error",
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+    }
+  };
 
   useEffect(() => {
     const urlChallengeId = params.challengeId;
@@ -270,6 +230,50 @@ export default function User() {
       setSelectedChallengeId(urlChallengeId);
     }
   }, [challenges]);
+
+  useEffect(() => {
+    const fetchWorkoutData = async () => {
+      if (!selectedChallengeId) return;
+
+      try {
+        console.log("📥 Fetching workout data...");
+        const workoutData = await fetch(
+          `/api/workouts?challengeId=${selectedChallengeId}`
+        );
+        if (!workoutData.ok) {
+          throw new Error("Failed to fetch workoutData");
+        }
+        const workoutDataResponse = await workoutData.json();
+        setWorkoutData(workoutDataResponse);
+
+        const today = new Date().toISOString().split("T")[0];
+        const workOutCount = workoutDataResponse.filter((item: any) => {
+          const createdAt = item.created_at.split("T")[0];
+          return createdAt === today;
+        }).length;
+
+        setWorkoutCount(workOutCount);
+
+        const todaysWorkouts = workoutDataResponse.filter((item: any) => {
+          const createdAt = item.created_at.split("T")[0];
+          return createdAt === today;
+        });
+
+        const arrWorkout = todaysWorkouts.map((item: any) => item.user_id);
+        const newSet = new Set(arrWorkout);
+        const totalWorkoutUploadMember = newSet.size;
+
+        setWorkOutCountToday(totalWorkoutUploadMember);
+      } catch (error) {
+        console.error("❌ Error fetching workout data:", error);
+        setWorkoutData([]);
+        setWorkoutCount([]);
+        setWorkOutCountToday(0);
+      }
+    };
+
+    fetchWorkoutData();
+  }, [selectedChallengeId]);
   //console.log('coachData', coachData);
   const handleChallengeSelect = (challengeId: string) => {
     // 선택된 챌린지 찾기
@@ -282,9 +286,9 @@ export default function User() {
     }
   };
 
-  const filteredDailyRecordsbyId = dailyRecords.filter(
-    (record) => record.challenges.id === selectedChallengeId
-  );
+  const filteredDailyRecordsbyId = (
+    Array.isArray(dailyRecords) ? dailyRecords : []
+  ).filter((record) => record.challenges.id === selectedChallengeId);
   //console.log('dailyRecords user page', dailyRecords);
 
   const getSelectedChallengeDates = () => {
@@ -305,7 +309,7 @@ export default function User() {
         challengeDates.startDate,
         challengeDates.endDate
       )
-    : { progressDays: '0', totalDays: '0' };
+    : { progressDays: "0", totalDays: "0" };
 
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col sm:px-[1rem] md:flex-col md:px-[0.4rem]">
@@ -336,7 +340,7 @@ export default function User() {
             />
             <TotalFeedbackCounts
               counts={`${workOutCountToday}`}
-              total={'24명'}
+              total={"24명"}
               title={
                 <span>
                   오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
@@ -370,9 +374,9 @@ export default function User() {
               borderColor="border-yellow"
               textColor="text-yellow"
             />
-            <TotalFeedbackCounts
+            {/* <TotalFeedbackCounts
               counts={`${workoutCount}개`}
-              total={''}
+              total={""}
               title={
                 <span>
                   전체 운동 <br className="md:inline sm:hidden lg:hidden" />
@@ -381,8 +385,8 @@ export default function User() {
               }
               borderColor="border-blue-5"
               textColor="text-blue-5"
-            />
-            <TotalFeedbackCounts
+            /> */}
+            {/* <TotalFeedbackCounts
               counts={
                 calculateTotalDietUploads(
                   dailyRecords,
@@ -405,15 +409,13 @@ export default function User() {
               }
               borderColor="border-yellow"
               textColor="text-yellow"
-            />
+            /> */}
           </div>
 
-          <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:flex sm:flex-col">
-            <TrafficSourceChart />
-            <DailyDietRecord activities={filteredDailyRecordsbyId} />
-            {/* <DailyDietRecordMobile activities={filteredDailyRecordsbyId} /> */}
-            <WorkoutLeaderboeard />
-          </div>
+          <GraphSection
+            activities={filteredDailyRecordsbyId}
+            selectedChallengeId={selectedChallengeId}
+          />
           {/* <div>
             <Image
               src={
@@ -437,7 +439,11 @@ export default function User() {
             )}
           </div> */}
           <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1">
-            <DietTable dailyRecordsData={filteredDailyRecordsbyId} />
+            <DietTable
+              dailyRecordsData={filteredDailyRecordsbyId}
+              challengeId={selectedChallengeId}
+              onLoadMore={() => {}}
+            />
           </div>
         </div>
       </div>

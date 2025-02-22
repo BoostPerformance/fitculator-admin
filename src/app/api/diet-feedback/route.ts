@@ -70,10 +70,15 @@
  */
 
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { createClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
 
-// Anthropic client 초기화
+// Supabase & Anthropic clients 초기화
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
@@ -83,36 +88,33 @@ export async function POST(request: Request) {
     const { dailyRecordId } = await request.json();
 
     // 1. 해당 일자의 식단 기록 조회
-    const dailyRecord = await prisma.daily_records.findUnique({
-      where: { id: dailyRecordId },
-      include: {
-        meals: {
-          include: {
-            meal_photos: true,
-          },
-        },
-        challenge_participants: {
-          include: {
-            users: {
-              select: {
-                name: true,
-                gender: true,
-                birth: true,
-                resting_heart_rate: true,
-              },
-            },
-            challenges: {
-              select: {
-                start_date: true,
-                end_date: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const { data: dailyRecord, error: dailyRecordError } = await supabase
+      .from('daily_records')
+      .select(`
+        *,
+        meals (
+          *,
+          meal_photos (*)
+        ),
+        challenge_participants (
+          users (
+            name,
+            gender,
+            birth,
+            resting_heart_rate
+          ),
+          challenges (
+            start_date,
+            end_date
+          )
+        )
+      `)
+      .eq('id', dailyRecordId)
+      .single();
 
-    if (!dailyRecord) {
+    if (dailyRecordError) throw dailyRecordError;
+
+    if (!dailyRecord || !dailyRecord.challenge_participants) {
       return NextResponse.json(
         { error: 'Daily record not found' },
         { status: 404 }
@@ -138,8 +140,13 @@ export async function POST(request: Request) {
       ) + 1;
 
     // 3. 식단 정보를 문자열로 변환
+    interface Meal {
+      meal_type: string;
+      description: string;
+    }
+
     const mealsInfo = dailyRecord.meals
-      .map((meal) => {
+      .map((meal: Meal) => {
         return `${meal.meal_type}: ${meal.description}`;
       })
       .join('\n');
@@ -233,18 +240,33 @@ export async function POST(request: Request) {
         : '';
 
     // 4. 피드백 저장
-    const feedback = await prisma.feedbacks.upsert({
-      where: {
-        daily_record_id: dailyRecordId,
-      },
-      update: {
-        ai_feedback: aiFeedback,
-      },
-      create: {
-        daily_record_id: dailyRecordId,
-        ai_feedback: aiFeedback,
-      },
-    });
+    const { data: existingFeedback } = await supabase
+      .from('feedbacks')
+      .select()
+      .eq('daily_record_id', dailyRecordId)
+      .single();
+
+    let feedback;
+    if (existingFeedback) {
+      const { data: updatedFeedback, error: updateError } = await supabase
+        .from('feedbacks')
+        .update({ ai_feedback: aiFeedback })
+        .eq('daily_record_id', dailyRecordId)
+        .select()
+        .single();
+      
+      if (updateError) throw updateError;
+      feedback = updatedFeedback;
+    } else {
+      const { data: newFeedback, error: insertError } = await supabase
+        .from('feedbacks')
+        .insert({ daily_record_id: dailyRecordId, ai_feedback: aiFeedback })
+        .select()
+        .single();
+      
+      if (insertError) throw insertError;
+      feedback = newFeedback;
+    }
 
     return NextResponse.json(feedback);
   } catch (error) {

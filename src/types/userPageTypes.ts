@@ -6,7 +6,7 @@ export interface AdminUser {
 export interface Challenge {
   id: string;
   title: string;
-  participants: Array<any>;
+  participants: ChallengeParticipant[];
 }
 
 export interface CoachData {
@@ -47,7 +47,7 @@ export interface DailyRecord extends Challenges {
 export interface ChallengeParticipant {
   id: string;
   coach_memo?: string;
-  memo_record_date?: string;
+  memo_updated_at?: string;
   users: {
     id: string;
     name: string;
@@ -65,4 +65,8 @@ export interface ChallengeParticipant {
 
 export interface DietTableProps {
   dailyRecordsData: ChallengeParticipant[];
+  loading?: boolean;
+  challengeId: string;
+  selectedDate?: string;
+  onLoadMore: (page: number) => void;
 }

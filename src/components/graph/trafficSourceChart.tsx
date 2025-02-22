@@ -1,33 +1,59 @@
-import { Doughnut } from 'react-chartjs-2';
+import { useState, useEffect } from "react";
+import { Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
   Legend,
   ChartData,
-} from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+} from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 // ArcElement 등록
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function TrafficSourceChart() {
-  const data: ChartData<'doughnut'> = {
-    labels: ['달리기', 'HIIT', '테니스', '등산', '사이클', '', '', ''],
+interface ChartDataPoint {
+  category: string;
+  percentage: number;
+}
+
+interface TrafficSourceChartProps {
+  challengeId: string;
+}
+
+export default function TrafficSourceChart({
+  challengeId,
+}: TrafficSourceChartProps) {
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `/api/workouts?challengeId=${challengeId}&type=chart`
+        );
+        const data = await response.json();
+        setChartData(data);
+      } catch (error) {
+        console.error("Error fetching workout data:", error);
+      }
+    };
+
+    fetchData();
+  }, [challengeId]);
+
+  const data: ChartData<"doughnut"> = {
+    labels: chartData.map((item: ChartDataPoint) => item.category),
     datasets: [
       {
-        data: [30, 25, 20, 15, 5, 5, 5],
+        data: chartData.map((item: ChartDataPoint) => item.percentage),
         backgroundColor: [
-          '#3FE2FF',
-          '#3E82F1',
-          '#ADB9FF',
-          '#7CF5DD',
-          '#3FE2FF',
-          '#FF9800',
-          '#03A9F4',
-          '#9C27B0',
-          '#009688',
+          "#3FE2FF",
+          "#3E82F1",
+          "#ADB9FF",
+          "#7CF5DD",
+          "#3FE2FF",
         ],
       },
     ],
@@ -42,28 +68,27 @@ export default function TrafficSourceChart() {
         enabled: false,
       },
       datalabels: {
-        color: '#fff',
+        color: "#fff",
         formatter: function (value: number, context: any) {
+          if (value < 5) return null;
           const label = context.chart.data.labels[context.dataIndex];
-          return `${value}%\n ${label}`;
+          return `${value.toFixed(2)}%\n${label}`;
         },
         font: {
           size: 12,
         },
-        align: 'center' as const,
-        anchor: 'center' as const,
+        align: "center" as const,
+        anchor: "center" as const,
       },
     },
-    cutout: '30%',
+    cutout: "30%",
   };
 
-  const exerciseList = [
-    { name: '달리기', percentage: '30%', rank: 1 },
-    { name: 'HIIT', percentage: '25%', rank: 2 },
-    { name: '테니스', percentage: '20%', rank: 3 },
-    { name: '등산', percentage: '15%', rank: 4 },
-    { name: '사이클', percentage: '10%', rank: 5 },
-  ];
+  const exerciseList = chartData.map((item: ChartDataPoint, index: number) => ({
+    name: item.category,
+    percentage: `${item.percentage.toFixed(2)}%`,
+    rank: index + 1,
+  }));
 
   return (
     <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2 w-full">
@@ -82,16 +107,21 @@ export default function TrafficSourceChart() {
               <div>퍼센트</div>
             </div>
             <ul className="space-y-2">
-              {exerciseList.map((exercise, index) => (
-                <li
-                  key={index}
-                  className="flex items-center text-[1rem] text-black"
-                >
-                  <span className="w-6">{exercise.rank}</span>
-                  <span className="flex-1">{exercise.name}</span>
-                  <span className="text-gray-500">{exercise.percentage}</span>
-                </li>
-              ))}
+              {exerciseList.map(
+                (
+                  exercise: { rank: number; name: string; percentage: string },
+                  index: number
+                ) => (
+                  <li
+                    key={index}
+                    className="flex items-center text-[1rem] text-black"
+                  >
+                    <span className="w-6">{exercise.rank}</span>
+                    <span className="flex-1">{exercise.name}</span>
+                    <span className="text-gray-500">{exercise.percentage}</span>
+                  </li>
+                )
+              )}
             </ul>
           </div>
         </div>

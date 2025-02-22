@@ -1,49 +1,88 @@
-import Image from 'next/image';
-import { useState } from 'react';
-import { DietTableProps, ChallengeParticipant } from '@/types/userPageTypes';
-import Modal from '../layout/modal';
+import Image from "next/image";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  DietTableProps,
+  ChallengeParticipant,
+  DailyRecord,
+} from "@/types/userPageTypes";
+import Modal from "../layout/modal";
+import { DietTableSkeleton } from "../layout/skeleton";
 
-// interface CoachMemoData {
-//   participant_id: string;
-//   challenge_id: string;
-//   coach_memo: string;
-//   memo_record_date?: Date;
-// }
-
-const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
+const DietTable: React.FC<DietTableProps> = ({
+  dailyRecordsData,
+  loading,
+  challengeId,
+  selectedDate,
+  onLoadMore,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] =
     useState<ChallengeParticipant | null>(null);
-  const [existCoachMemo, setExistCoachMemo] = useState('');
+  const [existCoachMemo, setExistCoachMemo] = useState("");
+  const [page, setPage] = useState(1);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastRowRef = useRef<HTMLTableRowElement | null>(null);
+
+  // 무한 스크롤을 위한 Intersection Observer 설정
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const target = entries[0];
+      if (target.isIntersecting && !loading && onLoadMore) {
+        setPage((prev) => prev + 1);
+        onLoadMore(page + 1);
+      }
+    },
+    [loading, onLoadMore, page]
+  );
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "20px",
+      threshold: 0.1,
+    });
+    observerRef.current = observer;
+
+    const currentLastRow = lastRowRef.current;
+    if (currentLastRow) {
+      observer.observe(currentLastRow);
+    }
+
+    return () => {
+      if (currentLastRow) {
+        observer.unobserve(currentLastRow);
+      }
+    };
+  }, [handleObserver, dailyRecordsData]);
 
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
-    const today = new Date();
-    const startDate = new Date(participant.challenges.start_date);
-    const endDate = new Date(participant.challenges.end_date);
+    console.log("전체 참가자 데이터:", participant);
+    console.log("daily_records:", participant.daily_records);
 
-    const totalChallengeDays =
-      Math.floor(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-      ) + 1;
+    // 총 daily_record 수
+    const totalRecords = participant.daily_records.length;
+    console.log("총 레코드 수:", totalRecords);
 
-    const daysUntilToday =
-      Math.floor(
-        (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-      ) + 1;
+    // feedbacks가 있는 레코드 수
+    const feedbackCount = participant.daily_records.reduce((count, record) => {
+      console.log("현재 레코드:", record);
+      console.log("현재 레코드의 feedbacks:", record.feedbacks);
 
-    const effectiveDays = today > endDate ? totalChallengeDays : daysUntilToday;
-
-    const feedbackCount = participant.daily_records
-      .map((record) => {
-        const recordDate = new Date(record.record_date);
-        return recordDate <= today && record.feedbacks! !== null ? 1 : 0;
-      })
-      .reduce<number>((sum, current) => sum + current, 0);
+      // feedbacks 객체가 있고 id가 있으면 피드백이 존재하는 것으로 간주
+      if (record.feedbacks && record.feedbacks.id) {
+        console.log("피드백 있음");
+        return count + 1;
+      }
+      console.log("피드백 없음");
+      return count;
+    }, 0);
+    console.log("피드백 있는 레코드 수:", feedbackCount);
 
     return {
       completed: feedbackCount,
-      total: effectiveDays,
-      formatted: `${feedbackCount}/${effectiveDays}`,
+      total: totalRecords,
+      formatted: `${feedbackCount}/${totalRecords}`,
     };
   };
 
@@ -57,20 +96,24 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
     records.forEach((record) => {
       const participantId = record.id;
       if (!groupedData.has(participantId)) {
+        const participant = {
+          id: participantId,
+          users: record.users,
+          challenges: record.challenges,
+          daily_records: record.daily_records,
+          coach_memo: record.coach_memo,
+          memo_updated_at: record.memo_updated_at,
+        };
+
         groupedData.set(participantId, {
-          participant: record,
-          feedbackRatio: calculateFeedbackRatio(record),
+          participant: participant,
+          feedbackRatio: calculateFeedbackRatio(participant),
         });
       }
     });
-    // console.log('records dietTable', records);
 
     return Array.from(groupedData.values());
   };
-
-  // useEffect(() => {
-  //   console.log('participantMemos updated:', participantMemos);
-  // }, [participantMemos]);
 
   const handleCoachMemoSave = (memo: string) => {
     if (!selectedParticipant) return;
@@ -80,7 +123,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
       setSelectedParticipant({
         ...selectedParticipant,
         coach_memo: memo,
-        memo_record_date: new Date().toISOString(),
+        memo_updated_at: new Date().toISOString(),
       });
     }
   };
@@ -88,28 +131,12 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
   const handleModalOpen = (participant: ChallengeParticipant) => {
     setSelectedParticipant(participant);
     setIsModalOpen(true);
-    setExistCoachMemo(participant.coach_memo || '');
-
-    // console.log('participant table', participant);
-
-    // useEffect(() => {
-    //   if (dailyRecordsData && dailyRecordsData.length > 0) {
-    //     const initialMemos = dailyRecordsData.reduce(
-    //       (memos: { [key: string]: string }, participant) => {
-    //         if (participant.coach_memo) {
-    //           memos[participant.id] = participant.coach_memo;
-    //         }
-    //         return memos;
-    //       },
-    //       {}
-    //     );
-    //     console.log('initialMemos', initialMemos);
-
-    //     setParticipantMemos(initialMemos);
-    //   }
-    // }, [dailyRecordsData]);
+    setExistCoachMemo(participant.coach_memo || "");
   };
-  //console.log('dailyRecordsData', dailyRecordsData);
+
+  if (loading) {
+    return <DietTableSkeleton />;
+  }
 
   return (
     <div className="mt-[1.4rem]">
@@ -125,13 +152,12 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
           />
         )}
       </div>
-      ;
       <table className="table-auto w-full bg-white shadow-md rounded-md">
         <thead>
           <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
             <th className="p-[1rem] lg:w-[15%] sm:w-[18%] sm:p-0 sm:pt-[1.4rem]">
               <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="sm:text-0.75-500 sm:p-0">닉네임</div>
+                <div className="sm:text-0.75-500 sm:p-0">ID</div>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -142,7 +168,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
                 </button>
               </div>
             </th>
-            <th className="p-[1rem] lg:w-[15%] sm:w-[18%]  sm:p-0 sm:pt-[1.4rem]">
+            <th className="p-[1rem] lg:w-[15%] sm:w-[18%] sm:p-0 sm:pt-[1.4rem]">
               <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
                 <div className="sm:text-0.75-500 sm:p-0">이름</div>
                 <button>
@@ -155,9 +181,8 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
                 </button>
               </div>
             </th>
-
             <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
-              <div className=" flex justify-center items-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]  sm:p-0">
+              <div className="flex justify-center items-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem] sm:p-0">
                 <div className="sm:text-0.75-500 sm:p-0">코치메모</div>
                 <button>
                   <Image
@@ -175,31 +200,44 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
           </tr>
         </thead>
         <tbody className="text-center">
-          {participants(dailyRecordsData).map((data, index) => {
-            return (
-              <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
-                <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
-                  {data.participant.users?.username}
-                </td>
-                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                  {data.participant.users?.name}
-                </td>
-                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                  <button onClick={() => handleModalOpen(data.participant)}>
-                    {selectedParticipant &&
-                    selectedParticipant.id === data.participant.id
-                      ? selectedParticipant.coach_memo || '코치메모'
-                      : data.participant.coach_memo || '코치메모'}
-                  </button>
-                </td>
-                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                  {data.feedbackRatio.formatted}
-                </td>
-              </tr>
-            );
-          })}
+          {participants(dailyRecordsData).map((data, index, array) => (
+            <tr
+              key={index}
+              className="text-[#6F6F6F]"
+              ref={index === array.length - 1 ? lastRowRef : null}
+            >
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
+                {data.participant.users?.username}
+              </td>
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                {data.participant.users?.name}
+              </td>
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                <button
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleModalOpen(data.participant);
+                  }}
+                >
+                  {selectedParticipant &&
+                  selectedParticipant.id === data.participant.id
+                    ? selectedParticipant.coach_memo || "코치메모"
+                    : data.participant.coach_memo || "코치메모"}
+                </button>
+              </td>
+              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                {data.feedbackRatio.formatted}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
+      {loading && (
+        <div className="w-full text-center py-4">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+        </div>
+      )}
     </div>
   );
 };

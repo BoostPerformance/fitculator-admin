@@ -1,10 +1,10 @@
-'use client';
-import Image from 'next/image';
+"use client";
+import Image from "next/image";
 //import { FaBars } from 'react-icons/fa';
-import LogoutButton from '../buttons/logoutButton';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import LogoutButton from "../buttons/logoutButton";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Challenges {
   challenges: {
@@ -31,8 +31,8 @@ export default function Sidebar({
   coach,
 }: SidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isOpenDropdown, setIsOpenDropdown] = useState(false);
-  const [selectedTitle, setSelectedTitle] = useState<string>('');
+  const [isOpenDropdown, setIsOpenDropdown] = useState(true);
+  const [selectedTitle, setSelectedTitle] = useState<string>("");
   const [userDropdown, setUserDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
@@ -43,6 +43,7 @@ export default function Sidebar({
     );
     if (selectedChallenge) {
       setSelectedTitle(selectedChallenge.challenges.title);
+      setIsOpenDropdown(true); // 챌린지가 선택되었을 때 드롭다운 열기
     }
 
     const handleResize = () => {
@@ -55,10 +56,10 @@ export default function Sidebar({
     handleResize();
 
     // 리사이즈 이벤트 리스너
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [selectedChallengeId, data]);
 
@@ -94,7 +95,7 @@ export default function Sidebar({
       <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]">
         <button
           onClick={handleSidebarOpen}
-          className={`${isMobile ? '' : 'hidden'}`}
+          className={`${isMobile ? "" : "hidden"}`}
         >
           <Image
             src="/svg/hamburger.svg"
@@ -105,7 +106,7 @@ export default function Sidebar({
           />
         </button>
         <div className="flex sm:gap-[0.5rem] lg:gap-[1rem] md:gap-[1rem]">
-          <div>안녕하세요, {coach}님 </div>
+          <div>안녕하세요, {coach} </div>
           <button onClick={handleUserDropdown}>
             <Image
               src="/svg/arrow-down.svg"
@@ -182,8 +183,8 @@ export default function Sidebar({
                           key={`challenge-${index}`}
                           className={` w-[11rem] md:w-[12rem] p-[1rem] text-gray-2 dark:text-white ${
                             selectedTitle === item.challenges.title
-                              ? 'bg-gray-100'
-                              : ''
+                              ? "bg-gray-100"
+                              : ""
                           }`}
                         >
                           <div className="flex flex-col gap-2">
@@ -203,13 +204,16 @@ export default function Sidebar({
                                 alt="subtitle-icon"
                                 className="w-[0.75rem]"
                               />
-                              <Link href={`/user/${item.challenges.id}/diet`}>
-                                <button
-                                  className="lg:text-1-700 md:text-1.125-500 sm:text-1-500"
-                                  onClick={() => handleChallengeClick(item)}
-                                >
-                                  식단
-                                </button>
+                              <Link
+                                href={`/user/${item.challenges.id}/diet`}
+                                onClick={() => {
+                                  setSelectedTitle(item.challenges.title);
+                                  onSelectChallenge(item.challenges.id);
+                                  setIsOpenDropdown(true);
+                                }}
+                                className="lg:text-1-700 md:text-1.125-500 sm:text-1-500"
+                              >
+                                식단
                               </Link>
                             </li>
                             {/* <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">

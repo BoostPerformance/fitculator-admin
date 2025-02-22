@@ -1,9 +1,9 @@
 export type MealType =
-  | 'breakfast'
-  | 'lunch'
-  | 'dinner'
-  | 'snack'
-  | 'supplement';
+  | "breakfast"
+  | "lunch"
+  | "dinner"
+  | "snack"
+  | "supplement";
 
 export interface User {
   id: string;
@@ -30,35 +30,39 @@ export interface ChallengeParticipant {
 export interface Feedbacks {
   id: string;
   ai_feedback?: string;
-  coach_feedback: string;
-  coach_id: string;
-  coach_memo?: string;
+  coach_feedback?: string | null;
+  coach_id?: string;
+  coach_memo?: string | null;
   daily_record_id: string;
   updated_at: string;
   created_at: string;
 }
 
+export interface Photo {
+  id: string;
+  url: string;
+}
+
+export interface Meal {
+  id: string;
+  description: string;
+  meal_time: string;
+  meal_photos?: Photo[];
+}
+
 export interface DailyRecords {
   id: string;
   record_date: string;
-  meals: Meals[];
-  feedbacks: Feedbacks;
+  feedback: Feedbacks | null;
+  meals: {
+    breakfast: Meal[];
+    lunch: Meal[];
+    dinner: Meal[];
+    snack: Meal[];
+    supplement: Meal[];
+  };
   updated_at: string;
   created_at: string;
-}
-
-export interface Meals {
-  id: string;
-  updated_at: string;
-  description: string;
-  meal_type: MealType;
-  meal_time: string;
-}
-
-interface MealDetail {
-  description: string;
-  updated_at: string;
-  meal_time: string;
 }
 
 export interface ProcessedMeal {
@@ -70,16 +74,19 @@ export interface ProcessedMeal {
     name: string;
   };
   daily_records: DailyRecords;
-  meals: Record<MealType, MealDetail>;
   record_date: string;
 }
 
 export interface DietDetailTableProps {
   dietDetailItems: ProcessedMeal[];
   selectedDate: string;
+  loading?: boolean;
+  onLoadMore?: (page: number) => void;
+  hasMore?: boolean;
 }
 
 export interface MobildDieDetailTableProps {
   dietDetailItems: ProcessedMeal[];
   selectedDate: string;
+  loading?: boolean;
 }

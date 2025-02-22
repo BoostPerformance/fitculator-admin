@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCoachMemo } from '@/components/hooks/useCoachMemo';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCoachMemo } from "@/components/hooks/useCoachMemo";
 
 interface ModalProps {
   onClose: () => void;
@@ -8,7 +8,7 @@ interface ModalProps {
   challengeId?: string;
   serviceUserId: string;
   coach_memo?: string;
-  memo_record_date?: Date;
+  memo_updated_at?: Date;
   onSave?: (memo: string) => void; // onSave prop 추가
 }
 
@@ -18,12 +18,12 @@ export default function Modal({
   challengeId,
   serviceUserId,
   coach_memo,
-  // memo_record_date,
+  // memo_updated_at,
   onSave,
 }: ModalProps) {
   const [coachMemo, setCoachMemo] = useState(coach_memo);
   // const [memoDate, setMemoDate] = useState<Date | null>(
-  //   memo_record_date || null
+  //   memo_updated_at || null
   // );
 
   const router = useRouter();
@@ -51,8 +51,8 @@ export default function Modal({
       await saveCoachMemo({
         participant_id: participantId!,
         challenge_id: challengeId!,
-        coach_memo: coachMemo || '',
-        // memo_record_date: memoDate,
+        coach_memo: coachMemo || "",
+        // memo_updated_at: memoDate,
         serviceUserId: serviceUserId,
       });
 
@@ -60,15 +60,15 @@ export default function Modal({
 
       if (onSave) {
         // console.log('coachMemo', coachMemo);
-        onSave(coachMemo || '');
+        onSave(coachMemo || "");
       }
 
       // 성공 시 페이지 새로고침
       router.refresh();
       onClose();
     } catch (err) {
-      console.error('Error submitting coach memo:', err);
-      alert('메모 저장 중 오류가 발생했습니다.');
+      console.error("Error submitting coach memo:", err);
+      alert("메모 저장 중 오류가 발생했습니다.");
     }
   };
 

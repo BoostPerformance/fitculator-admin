@@ -1,6 +1,7 @@
-import React from 'react';
+import React from "react";
+import { useRouter, useParams } from "next/navigation";
 
-const days = ['월', '화', '수', '목', '금', '토', '일'];
+const days = ["월", "화", "수", "목", "금", "토", "일"];
 interface DailyRecord {
   id: string;
   record_date: string;
@@ -16,7 +17,7 @@ interface ChallengeParticipant {
   users: {
     id: string;
     name: string;
-    display_name: string;
+    username: string;
   };
   challenges: {
     id: string;
@@ -29,13 +30,15 @@ interface ChallengeParticipant {
 }
 
 const DailyDietRecordMobile = ({ activities }: any) => {
+  const router = useRouter();
+  const params = useParams();
   const getWeekDates = (startDate: string) => {
     const start = new Date(startDate);
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
-      dates.push(date.toISOString().split('T')[0]);
+      dates.push(date.toISOString().split("T")[0]);
     }
     return dates;
   };
@@ -101,11 +104,36 @@ const DailyDietRecordMobile = ({ activities }: any) => {
                             activity.daily_records,
                             date
                           );
+                          const dailyRecord = activity.daily_records.find(
+                            (record: DailyRecord) => record.record_date === date
+                          );
                           return (
                             <div
                               key={idx}
-                              className={`w-[1.25rem] h-[1.25rem] rounded flex items-center justify-center
-                          ${hasRecord ? 'bg-[#FAAA16]' : 'bg-gray-100'}`}
+                              className={`w-[1.25rem] h-[1.25rem] rounded flex items-center justify-center cursor-pointer
+                          ${hasRecord ? "bg-[#FAAA16]" : "bg-gray-100"}`}
+                              onClick={async () => {
+                                try {
+                                  const currentDailyRecordId =
+                                    params.dailyRecordId as string;
+
+                                  const response = await fetch(
+                                    `/api/daily-records?date=${date}&currentDailyRecordId=${currentDailyRecordId}`
+                                  );
+                                  const data = await response.json();
+
+                                  if (data) {
+                                    router.push(
+                                      `/user/${activity.challenges.id}/diet/${data.id}/${date}`
+                                    );
+                                  }
+                                } catch (error) {
+                                  console.error(
+                                    "Error fetching daily record:",
+                                    error
+                                  );
+                                }
+                              }}
                             />
                           );
                         })}
