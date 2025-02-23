@@ -152,27 +152,27 @@ const DietDetaileTable = ({
               <th className="w-[6%] p-3">
                 <div className="flex items-center justify-start gap-1">
                   <span className="text-sm">ID</span>
-                  <button>
+                  {/* <button>
                     <Image
                       src="/svg/arrow-down.svg"
                       width={10}
                       height={10}
                       alt="arrow-down"
                     />
-                  </button>
+                  </button> */}
                 </div>
               </th>
               <th className="w-[4%] p-3">
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-sm">이름</span>
-                  <button>
+                  {/* <button>
                     <Image
                       src="/svg/arrow-down.svg"
                       width={10}
                       height={10}
                       alt="arrow-down"
                     />
-                  </button>
+                  </button> */}
                 </div>
               </th>
               <th className="w-[17%] p-3">
@@ -193,18 +193,19 @@ const DietDetaileTable = ({
               <th className="w-[11%] p-3">
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-sm text-center">
-                    피드백 &nbsp;
+                    피드백
+                    <br /> &nbsp;
                     <br className="lg:hidden md:inline" />
                     업데이트
                   </span>
-                  <button>
+                  {/* <button>
                     <Image
                       src="/svg/arrow-down.svg"
                       width={10}
                       height={10}
                       alt="arrow-down"
                     />
-                  </button>
+                  </button> */}
                 </div>
               </th>
               <th className="w-[8%] p-3">

@@ -72,7 +72,7 @@ const DailyDietRecordMobile = ({ activities }: any) => {
   };
 
   return (
-    <div className="bg-white sm:p-6 md:p-6 rounded-lg p-3 lg:py-7 col-span-3 pl-8  md:flex-col md:items-center lg:hidden md:hidden sm:block">
+    <div className="bg-white sm:p-6 md:p-6 rounded-lg p-3 lg:py-7 col-span-3 pl-8  md:flex-col md:items-center lg:hidden md:hidden sm:block shadow-[0_0_12px_0_rgba(121,120,132,0.15)]">
       <h2 className="text-xl font-medium mb-6 text-gray-600 text-left">
         일별 식단 기록 현황
       </h2>

@@ -58,37 +58,38 @@ const WeeklyDietRecord = ({
   };
 
   return (
-    <div className="w-full bg-white rounded-lg p-4 mt-4">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <Image
-            src="/svg/subtitle-icon.svg"
-            width={24}
-            height={24}
-            alt="subtitle icon"
-          />
-          <h2 className="text-lg font-bold">식단 기록 현황</h2>
-        </div>
-        <div className="grid grid-cols-7 gap-2">
-          {weekDates.map((date, i) => (
-            <div
-              key={i}
-              className={`aspect-square ${
-                hasRecordForDate(date) ? "bg-[#FAAA16]" : "bg-gray-100"
-              } rounded-lg`}
-              title={`${date} ${
-                hasRecordForDate(date) ? "식단 기록 있음" : "식단 기록 없음"
-              }`}
-            ></div>
-          ))}
-        </div>
-        <div className="grid grid-cols-7 text-xs text-center">
-          {["월", "화", "수", "목", "금", "토", "일"].map((day, i) => (
-            <div key={i}>{day}</div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <div></div>
+    // <div className="w-full bg-white rounded-lg p-4 mt-4">
+    //   <div className="flex flex-col gap-4">
+    //     <div className="flex items-center gap-2">
+    //       <Image
+    //         src="/svg/subtitle-icon.svg"
+    //         width={24}
+    //         height={24}
+    //         alt="subtitle icon"
+    //       />
+    //       <h2 className="text-lg font-bold">식단 기록 현황</h2>
+    //     </div>
+    //     <div className="grid grid-cols-7 gap-2">
+    //       {weekDates.map((date, i) => (
+    //         <div
+    //           key={i}
+    //           className={`aspect-square ${
+    //             hasRecordForDate(date) ? "bg-[#FAAA16]" : "bg-gray-100"
+    //           } rounded-lg`}
+    //           title={`${date} ${
+    //             hasRecordForDate(date) ? "식단 기록 있음" : "식단 기록 없음"
+    //           }`}
+    //         ></div>
+    //       ))}
+    //     </div>
+    //     <div className="grid grid-cols-7 text-xs text-center">
+    //       {["월", "화", "수", "목", "금", "토", "일"].map((day, i) => (
+    //         <div key={i}>{day}</div>
+    //       ))}
+    //     </div>
+    //   </div>
+    // </div>
   );
 };
 

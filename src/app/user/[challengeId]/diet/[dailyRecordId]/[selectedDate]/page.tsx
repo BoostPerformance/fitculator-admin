@@ -1,11 +1,10 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { DietPageSkeleton } from "@/components/layout/skeleton";
 import DailyDietRecordMobile from "@/components/graph/dailyDietRecordMobile";
 import { useRouter } from "next/navigation";
 import TextBox from "@/components/textBox";
 import Title from "@/components/layout/title";
-import TotalFeedbackCounts from "@/components/totalCounts/totalFeedbackCount";
 import MealPhotoLayout from "@/components/layout/mealPhotoLayout";
 import { useParams } from "next/navigation";
 import Sidebar from "@/components/fixedBars/sidebar";
@@ -168,7 +167,6 @@ export default function SelectedDate() {
         // 식단 데이터 처리
         const processedMeal = {
           recordDate: data.record_date,
-          upload_days_count: data.upload_days_count,
           meals: {
             breakfast: {
               ...DEFAULT_MEAL,
@@ -410,24 +408,6 @@ export default function SelectedDate() {
     router.push(`/user/${params.challengeId}/diet?date=${params.selectedDate}`);
   };
 
-  const metrics = useMemo(() => {
-    const startDate = new Date("2025-02-10");
-    const today = new Date();
-    const koreanToday = new Date(today.getTime() + 9 * 60 * 60 * 1000); // UTC+9 변환
-
-    const totalDays = Math.ceil(
-      (koreanToday.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    // API response의 upload_days_count 사용
-    const uploadCount = filteredDailyMeals[0]?.upload_days_count || 0;
-
-    return {
-      total: totalDays,
-      count: uploadCount,
-    };
-  }, [filteredDailyMeals]);
-
   const displayMeals =
     filteredDailyMeals.length > 0
       ? filteredDailyMeals
@@ -486,14 +466,6 @@ export default function SelectedDate() {
                 const userName = filteredDailyMeals[0]?.user?.name;
                 return `${userName || "사용자"}님의 식단현황`;
               })()}
-            />
-
-            <TotalFeedbackCounts
-              counts={metrics.count.toString()}
-              total={metrics.total.toString() + "일"}
-              borderColor="border-[#FDB810]"
-              textColor="text-[#FDB810]"
-              title="총 식단 업로드"
             />
           </div>
 
