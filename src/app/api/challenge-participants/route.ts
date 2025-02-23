@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,12 +18,12 @@ export async function GET(request: Request) {
     //   )`);
 
     const { searchParams } = new URL(request.url);
-    const page = Number(searchParams.get("page")) || 1;
-    const limit = Number(searchParams.get("limit")) || 30;
+    const page = Number(searchParams.get('page')) || 1;
+    const limit = Number(searchParams.get('limit')) || 30;
     const start = (page - 1) * limit;
     const end = start + limit - 1;
 
-    console.log("[challenge-participants API] Pagination params:", {
+    console.log('[challenge-participants API] Pagination params:', {
       page,
       limit,
       start,
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 
     // 기본 정보만 먼저 가져오기
     const { data: participants, error: participantsError } = await supabase
-      .from("challenge_participants")
+      .from('challenge_participants')
       .select(
         `
         id,
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
       `
       )
       .range(start, end)
-      .order("created_at", { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (participantsError) {
       throw participantsError;
@@ -64,9 +64,9 @@ export async function GET(request: Request) {
     const participantsWithRecords = await Promise.all(
       participants.map(async (participant) => {
         const { count } = await supabase
-          .from("daily_records")
-          .select("*", { count: "exact", head: true })
-          .eq("participant_id", participant.id);
+          .from('daily_records')
+          .select('*', { count: 'exact', head: true })
+          .eq('participant_id', participant.id);
 
         return {
           ...participant,
@@ -77,8 +77,8 @@ export async function GET(request: Request) {
 
     // 전체 개수 가져오기
     const { count } = await supabase
-      .from("challenge_participants")
-      .select("*", { count: "exact", head: true });
+      .from('challenge_participants')
+      .select('*', { count: 'exact', head: true });
 
     return NextResponse.json({
       data: participantsWithRecords,
@@ -90,10 +90,10 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Error fetching Data", error);
+    console.error('Error fetching Data', error);
     return NextResponse.json(
       {
-        error: "failed to fetch data",
+        error: 'failed to fetch data',
       },
       { status: 500 }
     );

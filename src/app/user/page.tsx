@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Loading from "@/components/layout/loading";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Loading from '@/components/layout/loading';
 
 export default function User() {
   const router = useRouter();
@@ -11,9 +11,9 @@ export default function User() {
   useEffect(() => {
     const fetchFirstChallenge = async () => {
       try {
-        const response = await fetch("/api/challenges");
+        const response = await fetch('/api/challenges');
         if (!response.ok) {
-          throw new Error("챌린지 정보를 가져오는데 실패했습니다");
+          throw new Error('Failed to fetch challenges');
         }
         const challengesData = await response.json();
 
@@ -27,14 +27,14 @@ export default function User() {
 
           await router.push(`/user/${sortedChallenges[0].challenges.id}`);
         } else {
-          throw new Error("참여 중인 챌린지가 없습니다");
+          throw new Error('참여 중인 챌린지가 없습니다');
         }
       } catch (error) {
-        console.error("Error fetching first challenge:", error);
+        console.error('Error fetching first challenge:', error);
         alert(
           error instanceof Error
             ? error.message
-            : "알 수 없는 오류가 발생했습니다"
+            : '알 수 없는 오류가 발생했습니다'
         );
       } finally {
         setIsLoading(false);

@@ -1,14 +1,14 @@
-import React from "react";
-import { ChallengeParticipant } from "@/types/userPageTypes";
+import React from 'react';
+import { ChallengeParticipant } from '@/types/userPageTypes';
 
-const days = ["월", "화", "수", "목", "금", "토", "일"];
+const days = ['월', '화', '수', '목', '금', '토', '일'];
 
 const DailyDietRecord = ({
   activities,
 }: {
   activities: ChallengeParticipant[];
 }) => {
-  console.log("DailyDietRecord activities:", activities);
+  console.log('DailyDietRecord activities:', activities);
   const getMondayOfCurrentWeek = () => {
     const today = new Date();
     const day = today.getDay();
@@ -45,7 +45,7 @@ const DailyDietRecord = ({
     for (let i = 0; i < 7; i++) {
       const date = new Date(weekStart);
       date.setDate(weekStart.getDate() + i);
-      dates.push(date.toISOString().split("T")[0]);
+      dates.push(date.toISOString().split('T')[0]);
     }
     return dates;
   };
@@ -85,7 +85,7 @@ const DailyDietRecord = ({
 
     // 해당 날짜의 daily_record를 찾음
     const dailyRecord = activity.daily_records.find((record) => {
-      const recordDateStr = record.record_date.split("T")[0];
+      const recordDateStr = record.record_date.split('T')[0];
       return recordDateStr === date;
     });
 
@@ -96,7 +96,7 @@ const DailyDietRecord = ({
 
     // meals 배열에 description이 있는 항목이 하나라도 있는지 확인
     return dailyRecord.meals.some(
-      (meal) => meal.description && meal.description.trim() !== ""
+      (meal) => meal.description && meal.description.trim() !== ''
     );
   };
 
@@ -151,7 +151,7 @@ const DailyDietRecord = ({
                 {/* 사용자 이름 */}
                 <div className="col-span-1">
                   <span className="text-gray-700 text-0.625-500">
-                    {activity.users.name.split(" ")[0]}
+                    {activity.users.name.split(' ')[0]}
                   </span>
                 </div>
 
@@ -164,8 +164,8 @@ const DailyDietRecord = ({
                           className={`w-[1.2rem] h-[1.2rem] rounded-[0.2rem]
                         ${
                           hasRecordForDate(date, activity)
-                            ? "bg-[#FAAA16]"
-                            : "bg-gray-100"
+                            ? 'bg-[#FAAA16]'
+                            : 'bg-gray-100'
                         }`}
                         />
                       </div>
