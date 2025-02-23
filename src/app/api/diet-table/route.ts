@@ -8,13 +8,13 @@ const supabase = createClient(
 
 export async function GET(request: Request) {
   try {
-    const url = new URL(request.url);
-    const date = url.searchParams.get("date");
-    const userId = url.searchParams.get("userId");
-    const challengeId = url.searchParams.get("challengeId");
+    const { searchParams } = new URL(request.url);
+    const date = searchParams.get("date");
+    const userId = searchParams.get("userId");
+    const challengeId = searchParams.get("challengeId");
 
     console.log("[diet-table API] Received request:", {
-      url: url.toString(),
+      url: request.url,
       params: {
         date,
         userId,
@@ -31,8 +31,8 @@ export async function GET(request: Request) {
 
     // 데일리 레코드와 관련 데이터 가져오기
     // 페이지네이션 파라미터 추가
-    const page = parseInt(url.searchParams.get("page") || "1");
-    const limit = parseInt(url.searchParams.get("limit") || "10");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
     const start = (page - 1) * limit;
 
     // 필요한 컬럼만 선택적으로 가져오기

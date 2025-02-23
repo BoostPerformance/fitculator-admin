@@ -17,10 +17,9 @@ export async function GET(request: Request) {
     //   name,
     //   )`);
 
-    // URL 파라미터 파싱
-    const url = new URL(request.url);
-    const page = Number(url.searchParams.get("page")) || 1;
-    const limit = Number(url.searchParams.get("limit")) || 30;
+    const { searchParams } = new URL(request.url);
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Number(searchParams.get("limit")) || 30;
     const start = (page - 1) * limit;
     const end = start + limit - 1;
 
