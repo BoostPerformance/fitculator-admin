@@ -110,8 +110,8 @@ const TextBox = ({
           readOnly={readOnly}
           onChange={handleChange}
         />
-        <div className="flex gap-[1rem] w-[19.625rem] sm:w-[17rem]">
-          <div className="flex relative sm:justify-center sm:gap-[1.4rem] w-full justify-end">
+        <div className="flex gap-[1rem] w-[19.625rem] sm:w-full">
+          <div className="flex relative sm:justify-center sm:gap-[1.4rem] w-full">
             <button
               className={`${Btn1className} rounded-md text-0.875-400 mt-[0.5rem] ${
                 button2 ? "lg:w-[9.3125rem]" : "w-full"

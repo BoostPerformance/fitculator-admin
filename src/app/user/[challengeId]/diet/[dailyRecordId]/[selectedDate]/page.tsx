@@ -466,7 +466,7 @@ export default function SelectedDate() {
       />
 
       <div className="md:px-[1rem]">
-        <div className="flex-1 py-[2rem]">
+        <div className="flex-1 py-[2rem] sm:pt-[0rem]">
           <div className="sm:px-[1rem] max-w-[400px]">
             <button
               className="mb-4 text-gray-400 font-bold hover:font-extrabold cursor-pointer"
@@ -550,99 +550,55 @@ export default function SelectedDate() {
             {/* <h2 className="text-[1.5rem] font-bold sm:pl-[1rem] pb-[1rem]">
               {dailyMeal.recordDate}
             </h2> */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:px-4 px-4">
+              {(
+                ["breakfast", "lunch", "dinner", "snack", "supplement"] as const
+              ).map((mealType) => {
+                const formatRecordDate = dailyMeal.meals[mealType]?.meal_time
+                  ? (() => {
+                      const utcDate = new Date(
+                        dailyMeal.meals[mealType]?.meal_time || ""
+                      );
+                      const date = new Date(utcDate.getTime());
 
-            {mobileSize ? (
-              <DailyDietRecordMobile
-                activities={[
-                  {
-                    users: {
-                      name: dailyMeal.user?.name || "사용자",
-                      id: dailyMeal.user?.id || "",
-                      username: dailyMeal.user?.username || "",
-                    },
-                    challenges: {
-                      id: params.challengeId,
-                      title: challengeTitle,
-                      start_date: challengePeriods.start_date,
-                      end_date: challengePeriods.end_date,
-                      challenge_type: "diet",
-                    },
-                    daily_records: allDailyMeals.map((meal) => ({
-                      id: params.dailyRecordId,
-                      record_date: meal.recordDate,
-                      feedbacks: meal.feedbacks.coach_feedback
-                        ? [
-                            {
-                              id: "1",
-                              coach_feedback: meal.feedbacks.coach_feedback,
-                              created_at: new Date().toISOString(),
-                            },
-                          ]
-                        : [],
-                    })),
-                  },
-                ]}
-              />
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:px-4 px-4">
-                {(
-                  [
-                    "breakfast",
-                    "lunch",
-                    "dinner",
-                    "snack",
-                    "supplement",
-                  ] as const
-                ).map((mealType) => {
-                  const formatRecordDate = dailyMeal.meals[mealType]?.meal_time
-                    ? (() => {
-                        const utcDate = new Date(
-                          dailyMeal.meals[mealType]?.meal_time || ""
-                        );
-                        const date = new Date(utcDate.getTime());
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(
+                        2,
+                        "0"
+                      );
+                      const day = String(date.getDate()).padStart(2, "0");
+                      const hours = String(date.getHours()).padStart(2, "0");
+                      const minutes = String(date.getMinutes()).padStart(
+                        2,
+                        "0"
+                      );
 
-                        const year = date.getFullYear();
-                        const month = String(date.getMonth() + 1).padStart(
-                          2,
-                          "0"
-                        );
-                        const day = String(date.getDate()).padStart(2, "0");
-                        const hours = String(date.getHours()).padStart(2, "0");
-                        const minutes = String(date.getMinutes()).padStart(
-                          2,
-                          "0"
-                        );
+                      return `식사 시간: ${year}-${month}-${day} ${hours}:${minutes}`;
+                    })()
+                  : "";
 
-                        return `식사 시간: ${year}-${month}-${day} ${hours}:${minutes}`;
-                      })()
-                    : "";
-
-                  return (
-                    <MealPhotoLayout
-                      key={mealType}
-                      title={
-                        mealType === "breakfast"
-                          ? "아침"
-                          : mealType === "lunch"
-                          ? "점심"
-                          : mealType === "dinner"
-                          ? "저녁"
-                          : mealType === "snack"
-                          ? "간식"
-                          : "영양제"
-                      }
-                      src={dailyMeal.meals[mealType]?.mealPhotos || []}
-                      descriptions={
-                        dailyMeal.meals[mealType]?.description || ""
-                      }
-                      time={formatRecordDate}
-                      onAddComment={() => console.log("comment area")}
-                    />
-                  );
-                })}
-              </div>
-            )}
-
+                return (
+                  <MealPhotoLayout
+                    key={mealType}
+                    title={
+                      mealType === "breakfast"
+                        ? "아침"
+                        : mealType === "lunch"
+                        ? "점심"
+                        : mealType === "dinner"
+                        ? "저녁"
+                        : mealType === "snack"
+                        ? "간식"
+                        : "영양제"
+                    }
+                    src={dailyMeal.meals[mealType]?.mealPhotos || []}
+                    descriptions={dailyMeal.meals[mealType]?.description || ""}
+                    time={formatRecordDate}
+                    onAddComment={() => console.log("comment area")}
+                  />
+                );
+              })}
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4 mt-8">
               <TextBox
                 title="AI 분석 결과"
