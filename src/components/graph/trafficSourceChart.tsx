@@ -99,7 +99,7 @@ export default function TrafficSourceChart({
   }));
 
   return (
-    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2 h-[50rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100">
+    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2 h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100">
       <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
         인기운동
       </h2>
@@ -113,9 +113,9 @@ export default function TrafficSourceChart({
             <div className="flex justify-between text-gray-7 sm:py-[1rem] mb-4">
               <div className="flex">
                 <span className="w-6"></span>
-                <span className="flex-1">운동종목</span>
+                <span className="flex-1 font-medium text-[14px]">운동종목</span>
               </div>
-              <div>비율</div>
+              <div className="font-medium text-[14px]">비율</div>
             </div>
             <ul className="space-y-4">
               {exerciseList.map(
@@ -124,11 +124,13 @@ export default function TrafficSourceChart({
                   index: number
                 ) => (
                   <li key={index} className="flex items-center text-[1rem]">
-                    <span className="w-6 text-[#6F6F6F]">{exercise.rank}</span>
-                    <span className="flex-1 text-[#6F6F6F]">
+                    <span className="w-6 font-medium text-[14px] text-[#6F6F6F]">
+                      {exercise.rank}
+                    </span>
+                    <span className="flex-1 font-medium text-[14px] text-[#6F6F6F]">
                       {exercise.name}
                     </span>
-                    <span className="text-[#6F6F6F]">
+                    <span className="font-medium text-[14px] text-[#6F6F6F]">
                       {exercise.percentage}
                     </span>
                   </li>

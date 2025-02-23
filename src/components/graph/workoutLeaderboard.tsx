@@ -104,7 +104,7 @@ export default function WorkoutLeaderboard({
   }, [challengeId, period]); // period 상태가 변경될 때마다 데이터 다시 불러오기
 
   return (
-    <div className="col-span-2 bg-white dark:bg-blue-3 rounded-[0.625rem] p-[1.25rem] h-[50rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100 shadow">
+    <div className="col-span-2 bg-white dark:bg-blue-3 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100 shadow">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold dark:text-gray-5 text-[#6F6F6F] pt-1 pl-1">
           운동 리더보드
@@ -135,14 +135,14 @@ export default function WorkoutLeaderboard({
       <div className="space-y-4">
         {leaderboardData.map((entry) => (
           <div key={entry.user_id} className="flex items-center gap-4">
-            <span className="w-8 text-center font-bold text-[#6F6F6F]">
+            <span className="w-6 text-center font-bold text-[#6F6F6F] text-[14px]">
               {entry.rank}
             </span>
             <div className="flex-1 flex items-center gap-2">
-              <span className="font-medium text-[#6F6F6F] w-[80px]">
+              <span className="font-medium text-[#6F6F6F] w-[70px] text-[14px]">
                 {entry.user_name.split(" ")[0]}
               </span>
-              <div className="w-[100px] bg-gray-200 rounded-full h-2 relative">
+              <div className="w-[100px] sm:w-[60px] bg-gray-200 rounded-full h-2 relative">
                 <div
                   className="h-2 rounded-full transition-all duration-300"
                   style={{
@@ -166,7 +166,7 @@ export default function WorkoutLeaderboard({
                 )}
               </div>
               <div className="flex items-center gap-1 w-[80px] justify-end">
-                <span className="text-sm text-[#6F6F6F]">
+                <span className="text-[14px] sm:text-[12px] text-[#6F6F6F]">
                   {entry.total_points.toFixed(2)}pt
                 </span>
               </div>
