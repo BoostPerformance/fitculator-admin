@@ -99,7 +99,7 @@ export default function TrafficSourceChart({
   }));
 
   return (
-    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2 w-[360px] h-[600px] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100">
+    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2 h-[50rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100">
       <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
         인기운동
       </h2>

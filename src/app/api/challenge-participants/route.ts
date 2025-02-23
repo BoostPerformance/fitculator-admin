@@ -63,37 +63,14 @@ export async function GET(request: Request) {
     // 각 참가자의 최근 daily record만 가져오기
     const participantsWithRecords = await Promise.all(
       participants.map(async (participant) => {
-        const { data: latestRecord } = await supabase
+        const { count } = await supabase
           .from("daily_records")
-          .select(
-            `
-            id,
-            record_date,
-            meals (
-              id,
-              meal_type,
-              description,
-              updated_at
-            ),
-            feedbacks: daily_record_id (
-              id,
-              coach_feedback,
-              ai_feedback,
-              coach_id,
-              daily_record_id,
-              coach_memo,
-              updated_at
-            )
-          `
-          )
-          .eq("participant_id", participant.id)
-          .order("record_date", { ascending: false })
-          .limit(1)
-          .single();
+          .select("*", { count: "exact", head: true })
+          .eq("participant_id", participant.id);
 
         return {
           ...participant,
-          daily_records: latestRecord ? [latestRecord] : [],
+          daily_records_count: count || 0,
         };
       })
     );

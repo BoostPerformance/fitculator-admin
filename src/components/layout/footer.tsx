@@ -1,4 +1,4 @@
-import DarkModeButton from '@/components/buttons/darkModeButton';
+import DarkModeButton from "@/components/buttons/darkModeButton";
 
 interface HeaderProps {
   btnClassName?: string;
@@ -7,8 +7,7 @@ interface HeaderProps {
 export default function Footer({ btnClassName }: HeaderProps) {
   return (
     <footer
-      className={`p-[2rem] w-full flex justify-center dark:bg-blue-4 bg-white h-[10rem] bottom-0
-      `}
+      className={`p-[1rem] w-full flex justify-center dark:bg-blue-4 bg-white bottom-0 z-50`}
     >
       <DarkModeButton className={btnClassName} />
     </footer>

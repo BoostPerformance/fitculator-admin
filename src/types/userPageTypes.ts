@@ -75,5 +75,5 @@ export interface DietTableProps {
   loading?: boolean;
   challengeId: string;
   selectedDate?: string;
-  onLoadMore: (page: number) => void;
+  onLoadMore?: (page: number) => void;
 }

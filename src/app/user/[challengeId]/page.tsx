@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Footer from "@/components/layout/footer";
 import Image from "next/image";
-import TrafficSourceChart from "@/components/graph/trafficSourceChart";
 import LogoutButton from "@/components/buttons/logoutButton";
+import TrafficSourceChart from "@/components/graph/trafficSourceChart";
 import DailyDietRecord from "@/components/graph/dailyDietRecord";
 import WorkoutLeaderboard from "@/components/graph/workoutLeaderboard";
 import DietTable from "@/components/dietDashboard/dietTable";
@@ -90,9 +91,12 @@ export default function User() {
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>("");
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true); // 초기 로딩 상태를 true로 설정
+  const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [todayDietUploads, setTodayDietUploads] = useState<{
+    counts: string;
+    total: string;
+  } | null>(null);
   const [userDropdown, setUserDropdown] = useState(false);
   const [adminData, setAdminData] = useState({
     admin_role: "",
@@ -116,15 +120,28 @@ export default function User() {
     challenge_coaches: [],
   });
 
+  // 오늘 식단 업로드 수 조회
+  const fetchTodayDietUploads = async (challengeId: string) => {
+    try {
+      const response = await fetch(
+        `/api/diet-uploads?challengeId=${challengeId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch diet uploads");
+      }
+      const data = await response.json();
+      setTodayDietUploads(data);
+    } catch (error) {
+      console.error("Error fetching diet uploads:", error);
+    }
+  };
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
     };
 
-    // 초기 설정
     handleResize();
-
-    // 리사이즈 이벤트 리스너 추가
     window.addEventListener("resize", handleResize);
 
     const fetchData = async () => {
@@ -222,13 +239,6 @@ export default function User() {
     }
   };
 
-  const handleLoadMore = async (nextPage: number) => {
-    const hasMore = await fetchDailyRecords(nextPage);
-    if (hasMore) {
-      setPage(nextPage);
-    }
-  };
-
   useEffect(() => {
     const urlChallengeId = params.challengeId;
 
@@ -240,25 +250,24 @@ export default function User() {
     }
   }, [challenges, params.challengeId]);
 
-  // 챌린지 ID가 변경될 때마다 운동 업로드 멤버 수 업데이트
+  // 챌린지 ID가 변경될 때마다 운동 및 식단 업로드 멤버 수 업데이트
   useEffect(() => {
-    const fetchWorkoutCount = async () => {
-      try {
-        const response = await fetch(
-          `/api/workouts?type=today-count&challengeId=${selectedChallengeId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch workout count");
-        }
-        const data = await response.json();
-        setWorkOutCountToday(data.count);
-      } catch (error) {
-        console.error("Error fetching workout count:", error);
-      }
-    };
-
     if (selectedChallengeId) {
-      fetchWorkoutCount();
+      fetchTodayDietUploads(selectedChallengeId);
+      // 운동 업로드 수 조회
+      fetch(`/api/workouts?type=today-count&challengeId=${selectedChallengeId}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch workout count");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setWorkOutCountToday(data.count);
+        })
+        .catch((error) => {
+          console.error("Error fetching workout count:", error);
+        });
     }
   }, [selectedChallengeId]);
 
@@ -277,6 +286,8 @@ export default function User() {
         (record) => record.challenges.id === selectedChallengeId
       )
     : [];
+
+  console.log("filteredDailyRecordsbyId:", filteredDailyRecordsbyId);
 
   const getSelectedChallengeDates = () => {
     const selectedChallenge = challenges.find(
@@ -304,7 +315,7 @@ export default function User() {
   }
 
   return (
-    <div className="bg-white-1 dark:bg-blue-4 flex flex-col h-screen overflow-hidden sm:px-[1rem] md:px-[0.4rem]">
+    <div className="bg-white-1 dark:bg-blue-4 flex flex-col min-h-screen sm:px-[1rem] md:px-[0.4rem]">
       <div className="flex justify-end pr-[2rem]">
         <div className="flex items-center gap-2">
           {/* <div className="text-gray-700">안녕하세요, {adminData.username}</div>
@@ -333,8 +344,8 @@ export default function User() {
           coach={adminData.username}
           selectedChallengeId={selectedChallengeId}
         />
-        <main className="flex-1 overflow-auto">
-          <div className="pt-[2rem]">
+        <main className="flex-1 overflow-y-auto">
+          <div className="pt-[2rem] pb-[2rem]">
             <div className="flex items-center justify-between px-1 pr-8">
               <Title
                 title={
@@ -392,20 +403,8 @@ export default function User() {
                 textColor="text-blue-5"
               />
               <TotalFeedbackCounts
-                counts={
-                  calculateTodayDietUploads(
-                    dailyRecords,
-                    challenges,
-                    selectedChallengeId
-                  ).counts
-                }
-                total={
-                  calculateTodayDietUploads(
-                    dailyRecords,
-                    challenges,
-                    selectedChallengeId
-                  ).total
-                }
+                counts={todayDietUploads?.counts || "0"}
+                total={todayDietUploads?.total || "0명"}
                 title={
                   <span>
                     오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
@@ -422,17 +421,17 @@ export default function User() {
               <DailyDietRecord activities={filteredDailyRecordsbyId} />
               <WorkoutLeaderboard challengeId={selectedChallengeId} />
             </div>
-            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1 px-1 pr-8">
+            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem] sm:pt-[2rem] bg-white-1 px-1 pr-8">
               <DietTable
                 dailyRecordsData={filteredDailyRecordsbyId}
                 challengeId={selectedChallengeId}
-                onLoadMore={handleLoadMore}
                 loading={loading}
               />
             </div>
           </div>
         </main>
       </div>
+      <Footer btnClassName="fixed bottom-8 right-8" />
     </div>
   );
 }

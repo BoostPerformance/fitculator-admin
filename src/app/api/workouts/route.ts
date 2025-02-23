@@ -25,7 +25,12 @@ export async function GET(request: Request) {
         );
       }
 
-      const today = new Date().toISOString().split("T")[0];
+      const now = new Date();
+      const today = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+      )
+        .toISOString()
+        .split("T")[0];
       console.log("📅 Checking workouts for date:", today);
 
       // 챌린지 참가자 목록 조회
@@ -51,7 +56,18 @@ export async function GET(request: Request) {
         .select("user_id")
         .in("user_id", participantIds)
         .gte("timestamp", today)
-        .lte("timestamp", today + "T23:59:59");
+        .lt(
+          "timestamp",
+          new Date(
+            Date.UTC(
+              now.getUTCFullYear(),
+              now.getUTCMonth(),
+              now.getUTCDate() + 1
+            )
+          )
+            .toISOString()
+            .split("T")[0]
+        );
 
       if (workoutsError) {
         console.error("❌ Error fetching workouts:", workoutsError);
@@ -117,18 +133,17 @@ export async function GET(request: Request) {
     let startStr: string, endStr: string;
 
     if (period === "weekly") {
-      // 이번 주 월요일과 일요일 계산 (한국 시간)
+      // 이번 주 월요일과 일요일 계산 (UTC 기준)
       const now = new Date();
-      const koreaTime = new Date(now.getTime() + 9 * 60 * 60000); // UTC+9
-      const day = koreaTime.getDay();
-      const date = koreaTime.getDate();
-      const year = koreaTime.getFullYear();
-      const month = String(koreaTime.getMonth() + 1).padStart(2, "0");
+      const day = now.getUTCDay();
+      const date = now.getUTCDate();
+      const year = now.getUTCFullYear();
+      const month = String(now.getUTCMonth() + 1).padStart(2, "0");
 
       // 이번 주 월요일 날짜 계산
       const mondayDate = date - (day === 0 ? 6 : day - 1);
       const mondayMonth =
-        mondayDate < 1 ? String(koreaTime.getMonth()).padStart(2, "0") : month;
+        mondayDate < 1 ? String(now.getUTCMonth()).padStart(2, "0") : month;
       startStr = `${year}-${mondayMonth}-${String(
         Math.abs(mondayDate)
       ).padStart(2, "0")}`;
@@ -137,7 +152,7 @@ export async function GET(request: Request) {
       const sundayDate = date + (day === 0 ? 0 : 7 - day);
       const sundayMonth =
         sundayDate > 31
-          ? String(koreaTime.getMonth() + 2).padStart(2, "0")
+          ? String(now.getUTCMonth() + 2).padStart(2, "0")
           : month;
       endStr = `${year}-${sundayMonth}-${String(sundayDate).padStart(2, "0")}`;
     } else {
@@ -253,7 +268,20 @@ export async function GET(request: Request) {
 
       // 기간에 따른 필터 추가
       console.log("📊 조회 기간:", startStr, "~", endStr);
-      query = query.gte("timestamp", startStr).lte("timestamp", endStr);
+      query = query
+        .gte("timestamp", startStr)
+        .lt(
+          "timestamp",
+          new Date(
+            Date.UTC(
+              parseInt(endStr.split("-")[0]),
+              parseInt(endStr.split("-")[1]) - 1,
+              parseInt(endStr.split("-")[2]) + 1
+            )
+          )
+            .toISOString()
+            .split("T")[0]
+        );
 
       const { data: workoutData, error: workoutError } = await query;
       console.log("📊 조회된 운동 데이터 수:", workoutData?.length || 0);

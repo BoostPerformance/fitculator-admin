@@ -1,6 +1,5 @@
 import Image from "next/image";
-import { useState, useRef, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   DietTableProps,
   ChallengeParticipant,
@@ -14,69 +13,34 @@ const DietTable: React.FC<DietTableProps> = ({
   loading,
   challengeId,
   selectedDate,
-  onLoadMore,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] =
     useState<ChallengeParticipant | null>(null);
   const [existCoachMemo, setExistCoachMemo] = useState("");
-  const [page, setPage] = useState(1);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const lastRowRef = useRef<HTMLTableRowElement | null>(null);
-
-  // 무한 스크롤을 위한 Intersection Observer 설정
-  const handleObserver = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
-      const target = entries[0];
-      if (target.isIntersecting && !loading && onLoadMore) {
-        setPage((prev) => prev + 1);
-        onLoadMore(page + 1);
-      }
-    },
-    [loading, onLoadMore, page]
-  );
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(handleObserver, {
-      root: null,
-      rootMargin: "20px",
-      threshold: 0.1,
-    });
-    observerRef.current = observer;
-
-    const currentLastRow = lastRowRef.current;
-    if (currentLastRow) {
-      observer.observe(currentLastRow);
-    }
-
-    return () => {
-      if (currentLastRow) {
-        observer.unobserve(currentLastRow);
-      }
-    };
-  }, [handleObserver, dailyRecordsData]);
 
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
     console.log("전체 참가자 데이터:", participant);
     console.log("daily_records:", participant.daily_records);
 
     // 총 daily_record 수
-    const totalRecords = participant.daily_records.length;
+    const totalRecords = participant.daily_records?.length || 0;
     console.log("총 레코드 수:", totalRecords);
 
     // feedbacks가 있는 레코드 수
-    const feedbackCount = participant.daily_records.reduce((count, record) => {
-      console.log("현재 레코드:", record);
-      console.log("현재 레코드의 feedbacks:", record.feedbacks);
+    const feedbackCount =
+      participant.daily_records?.reduce((count, record) => {
+        console.log("현재 레코드:", record);
+        console.log("현재 레코드의 feedbacks:", record.feedbacks);
 
-      // feedbacks 객체가 있고 id가 있으면 피드백이 존재하는 것으로 간주
-      if (record.feedbacks && record.feedbacks.id) {
-        console.log("피드백 있음");
-        return count + 1;
-      }
-      console.log("피드백 없음");
-      return count;
-    }, 0);
+        // feedbacks 객체가 있고 id가 있으면 피드백이 존재하는 것으로 간주
+        if (record.feedbacks && record.feedbacks.id) {
+          console.log("피드백 있음");
+          return count + 1;
+        }
+        console.log("피드백 없음");
+        return count;
+      }, 0) || 0;
     console.log("피드백 있는 레코드 수:", feedbackCount);
 
     return {
@@ -112,20 +76,20 @@ const DietTable: React.FC<DietTableProps> = ({
       }
     });
 
-    // Convert Map to array and sort by name and feedback status
+    // Convert Map to array and sort by total records count and name
     return Array.from(groupedData.values()).sort((a, b) => {
-      // First sort by name
+      // First sort by total records count (큰 수가 위로)
+      const totalA = a.feedbackRatio.total;
+      const totalB = b.feedbackRatio.total;
+
+      if (totalA !== totalB) {
+        return totalB - totalA; // 내림차순 정렬
+      }
+
+      // If total records are equal, sort by name
       const nameA = a.participant.users?.name || "";
       const nameB = b.participant.users?.name || "";
-      const nameComparison = nameA.localeCompare(nameB);
-
-      if (nameComparison !== 0) return nameComparison;
-
-      // If names are equal, sort by feedback status (미작성 first)
-      const feedbackRatioA = a.feedbackRatio.completed / a.feedbackRatio.total;
-      const feedbackRatioB = b.feedbackRatio.completed / b.feedbackRatio.total;
-
-      return feedbackRatioA - feedbackRatioB; // 미작성(낮은 비율)이 위로
+      return nameA.localeCompare(nameB);
     });
   };
 
@@ -154,6 +118,7 @@ const DietTable: React.FC<DietTableProps> = ({
 
   return (
     <div className="mt-[1.4rem]">
+      {/* <div className="mb-4 text-lg font-semibold">총 업로드</div> */}
       <div className="absolute items-center justify-center">
         {isModalOpen && selectedParticipant && (
           <Modal
@@ -214,12 +179,8 @@ const DietTable: React.FC<DietTableProps> = ({
           </tr>
         </thead>
         <tbody className="text-center">
-          {participants(dailyRecordsData).map((data, index, array) => (
-            <tr
-              key={index}
-              className="text-[#6F6F6F]"
-              ref={index === array.length - 1 ? lastRowRef : null}
-            >
+          {participants(dailyRecordsData).map((data, index) => (
+            <tr key={index} className="text-[#6F6F6F]">
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
                 {data.participant.users?.username}
               </td>

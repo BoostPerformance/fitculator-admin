@@ -201,31 +201,6 @@ export const useDietData = (
         : null,
     });
 
-    const dailyRecord: DailyRecords = {
-      id: record.id,
-      record_date: record.record_date,
-      feedback:
-        record.feedbacks && record.feedbacks.coach_feedback
-          ? {
-              id: record.feedbacks.id,
-              coach_feedback: record.feedbacks.coach_feedback,
-              coach_memo: record.feedbacks.coach_memo,
-              daily_record_id: record.id,
-              updated_at: record.feedbacks.updated_at,
-              created_at: record.feedbacks.created_at,
-            }
-          : null,
-      meals: {
-        breakfast: record.meals.breakfast || [],
-        lunch: record.meals.lunch || [],
-        dinner: record.meals.dinner || [],
-        snack: record.meals.snack || [],
-        supplement: record.meals.supplement || [],
-      },
-      updated_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-    };
-
     return {
       challenge_id: challengeId,
       challenges: {
@@ -240,22 +215,52 @@ export const useDietData = (
         username: record.challenge_participants.users.username,
         name: record.challenge_participants.users.name,
       },
-      daily_records: dailyRecord,
+      daily_records: {
+        id: record.id,
+        record_date: record.record_date,
+        feedback:
+          record.feedbacks && record.feedbacks.coach_feedback
+            ? {
+                id: record.feedbacks.id,
+                coach_feedback: record.feedbacks.coach_feedback,
+                coach_memo: record.feedbacks.coach_memo,
+                daily_record_id: record.id,
+                updated_at: record.feedbacks.updated_at,
+                created_at: record.feedbacks.created_at,
+              }
+            : null,
+        meals: {
+          breakfast: record.meals.breakfast || [],
+          lunch: record.meals.lunch || [],
+          dinner: record.meals.dinner || [],
+          snack: record.meals.snack || [],
+          supplement: record.meals.supplement || [],
+        },
+        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      },
       record_date: record.record_date,
     };
   });
 
+  // 사용자별 업로드 수 계산
+  const userUploadCounts = dietRecords.reduce((acc, record) => {
+    const userId = record.challenge_participants.id;
+    acc[userId] = (acc[userId] || 0) + 1;
+    return acc;
+  }, {} as { [key: string]: number });
+
   // 데이터 정렬
   const sortedRecords = [...processedRecords].sort((a, b) => {
-    // 피드백 상태 확인 (미작성이 위로)
-    const hasFeedbackA = !!a.daily_records.feedback?.coach_feedback?.trim();
-    const hasFeedbackB = !!b.daily_records.feedback?.coach_feedback?.trim();
+    // 먼저 총 업로드 수로 정렬 (많은 순)
+    const uploadsA = userUploadCounts[a.user.id] || 0;
+    const uploadsB = userUploadCounts[b.user.id] || 0;
 
-    if (hasFeedbackA !== hasFeedbackB) {
-      return hasFeedbackA ? 1 : -1; // 미작성(false)이 위로
+    if (uploadsA !== uploadsB) {
+      return uploadsB - uploadsA; // 내림차순
     }
 
-    // 피드백 상태가 같은 경우 이름으로 정렬
+    // 업로드 수가 같은 경우 이름으로 정렬
     const nameA = a.user.name || "";
     const nameB = b.user.name || "";
     return nameA.localeCompare(nameB);

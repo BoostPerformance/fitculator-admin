@@ -89,7 +89,7 @@ const DailyDietRecordMobile = ({ activities }: any) => {
                   </div>
                 ))}
               </div>
-              <div className="text-gray-500 sm:hidden">총 업로드 현황</div>
+              <div className="text-gray-500 sm:hidden">총 업로드</div>
             </div>
           </div>
 
