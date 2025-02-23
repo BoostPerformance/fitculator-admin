@@ -24,7 +24,6 @@ export interface CoachData {
 }
 
 export interface Challenges {
-  challenge_id: string;
   challenges: {
     id: string;
     title: string;
@@ -33,9 +32,17 @@ export interface Challenges {
   };
 }
 
-export interface DailyRecord extends Challenges {
+export interface Meal {
+  description: string;
+  id: string;
+  meal_type: string;
+  updated_at: string;
+}
+
+export interface DailyRecord {
   id: string;
   record_date: string;
+  meals?: Meal[];
   feedbacks?: {
     coach_feedback: string;
     created_at: string;

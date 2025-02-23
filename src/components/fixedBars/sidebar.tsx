@@ -105,43 +105,7 @@ export default function Sidebar({
             className={` w-[1.5rem] dark:invert`}
           />
         </button>
-        <div className="flex sm:gap-[0.5rem] lg:gap-[1rem] md:gap-[1rem]">
-          <div>안녕하세요, {coach} </div>
-          <button onClick={handleUserDropdown}>
-            <Image
-              src="/svg/arrow-down.svg"
-              width={30}
-              height={30}
-              alt="logo"
-              className={` w-[1rem] dark:invert lg:w-[0.8rem]`}
-            />
-          </button>
-        </div>
       </div>
-      {userDropdown && (
-        <div className="z-50 sm:top-full sm:absolute flex justify-end px-[2rem] p-[1rem] sm:right-1 items-start flex-col text-gray-10 text-1-700 gap-[0.5rem] bg-white drop-shadow-md lg:absolute lg:left-[0.5rem] rounded-[0.5rem] lg:w-[14rem] sm:w-[14rem] sm:items-end lg:items-end md:right-[1rem] md:w-[10rem] md:items-end ">
-          {/* <div className="hover:bg-gray-3 ">전체회원 정보보기</div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="122"
-            height="2"
-            viewBox="0 0 122 2"
-            fill="none"
-          >
-            <path d="M0 1H122" stroke="#E1E1E1" />
-          </svg> */}
-          <LogoutButton />
-          {/* <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="122"
-            height="2"
-            viewBox="0 0 122 2"
-            fill="none"
-          >
-            <path d="M0 1H122" stroke="#E1E1E1" />
-          </svg> */}
-        </div>
-      )}
 
       {(isSidebarOpen || !isMobile) && (
         <div
@@ -181,11 +145,7 @@ export default function Sidebar({
                       {data.map((item: any, index: number) => (
                         <div
                           key={`challenge-${index}`}
-                          className={` w-[11rem] md:w-[12rem] p-[1rem] text-gray-2 dark:text-white ${
-                            selectedTitle === item.challenges.title
-                              ? "bg-gray-100"
-                              : ""
-                          }`}
+                          className="w-[11rem] md:w-[12rem] p-[1rem] text-gray-2 dark:text-white"
                         >
                           <div className="flex flex-col gap-2">
                             <button

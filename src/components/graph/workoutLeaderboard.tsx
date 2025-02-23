@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface WorkoutLeaderboardProps {
   challengeId: string;
 }
+
+type Period = "weekly" | "all";
 
 interface LeaderboardEntry {
   user_id: string;
@@ -28,12 +31,24 @@ export default function WorkoutLeaderboard({
     []
   );
   const [maxPoints, setMaxPoints] = useState(0);
+  const [period, setPeriod] = useState<Period>("weekly");
 
   useEffect(() => {
     async function fetchLeaderboardData() {
       try {
+        const now = new Date();
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+        console.log(
+          `리더보드 조회기간: ${
+            period === "weekly"
+              ? `${weekAgo.toISOString()} ~ ${now.toISOString()}`
+              : `전체 기간 (~ ${now.toISOString()})`
+          }`
+        );
+
         const response = await fetch(
-          `/api/workouts?challengeId=${challengeId}`
+          `/api/workouts?challengeId=${challengeId}&period=${period}`
         );
         if (!response.ok) {
           throw new Error("운동 데이터 가져오기 실패");
@@ -86,33 +101,74 @@ export default function WorkoutLeaderboard({
     if (challengeId) {
       fetchLeaderboardData();
     }
-  }, [challengeId]);
+  }, [challengeId, period]); // period 상태가 변경될 때마다 데이터 다시 불러오기
 
   return (
-    <div className="col-span-2 bg-white dark:bg-blue-3 rounded-[0.625rem] p-[1.25rem]">
-      <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
-        운동 리더보드
-      </h2>
+    <div className="col-span-2 bg-white dark:bg-blue-3 rounded-[0.625rem] p-[1.25rem] w-[360px] h-[600px] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100 shadow">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold dark:text-gray-5 text-[#6F6F6F] pt-3">
+          운동 리더보드
+        </h2>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setPeriod("weekly")}
+            className={`px-3 py-1 rounded-full text-sm ${
+              period === "weekly"
+                ? "bg-blue-5 text-white"
+                : "bg-gray-100 text-gray-600"
+            }`}
+          >
+            주간
+          </button>
+          <button
+            onClick={() => setPeriod("all")}
+            className={`px-3 py-1 rounded-full text-sm ${
+              period === "all"
+                ? "bg-blue-5 text-white"
+                : "bg-gray-100 text-gray-600"
+            }`}
+          >
+            전체
+          </button>
+        </div>
+      </div>
       <div className="space-y-4">
         {leaderboardData.map((entry) => (
           <div key={entry.user_id} className="flex items-center gap-4">
-            <span className="w-8 text-center font-bold">{entry.rank}</span>
-            <div className="flex-1">
-              <div className="flex justify-between mb-1">
-                <span className="font-medium">{entry.user_name}</span>
-                <span className="text-sm text-gray-600">
-                  {entry.total_points.toFixed(2)}pt
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+            <span className="w-8 text-center font-bold text-[#6F6F6F]">
+              {entry.rank}
+            </span>
+            <div className="flex-1 flex items-center gap-2">
+              <span className="font-medium text-[#6F6F6F] w-[80px]">
+                {entry.user_name.split(" ")[0]}
+              </span>
+              <div className="w-[100px] bg-gray-200 rounded-full h-2 relative">
                 <div
-                  className="bg-blue-5 h-2 rounded-full transition-all duration-300"
+                  className="h-2 rounded-full transition-all duration-300"
                   style={{
-                    width: `${((entry.total_points / maxPoints) * 100).toFixed(
-                      2
+                    width: `${Math.min(
+                      (entry.total_points / 100) * 100,
+                      100
                     )}%`,
+                    background:
+                      "linear-gradient(90deg, #FF007A 0%, #FF70AC 100%)",
                   }}
                 />
+                {entry.total_points >= 100 && (
+                  <div className="absolute -right-2 -top-2">
+                    <Image
+                      src="/svg/fire.svg"
+                      alt="fire"
+                      width={15}
+                      height={20}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-1 w-[80px] justify-end">
+                <span className="text-sm text-[#6F6F6F]">
+                  {entry.total_points.toFixed(2)}pt
+                </span>
               </div>
             </div>
           </div>

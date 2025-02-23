@@ -217,77 +217,91 @@ const DietDetaileTable = ({
             </tr>
           </thead>
           <tbody>
-            {dietDetailItems.map((dietDetailTableItem, index) => (
-              <tr
-                key={index}
-                ref={index === dietDetailItems.length - 1 ? lastRowRef : null}
-                className="text-[#6F6F6F] hover:bg-[#F4F6FC] cursor-pointer border-gray-13 border-b-[0.1rem]"
-                onClick={() =>
-                  router.push(
-                    `/user/${dietDetailTableItem.challenge_id}/diet/${dietDetailTableItem.daily_records.id}/${selectedDate}`
-                  )
-                }
-              >
-                <td className="p-3 sm:text-sm w-[3%]">
-                  <div className="truncate ">
-                    {dietDetailTableItem.user.username}
-                  </div>
-                </td>
-                <td className="p-3 sm:text-sm  w-[3%]">
-                  <div className="truncate">
-                    {dietDetailTableItem.user.name}
-                  </div>
-                </td>
-                <td className="p-3 sm:text-sm">
-                  <div className="line-clamp-3">
-                    {dietDetailTableItem.daily_records.meals.breakfast[0]
-                      ?.description || ""}
-                  </div>
-                </td>
-                <td className="p-3 sm:text-sm">
-                  <div className="line-clamp-3">
-                    {dietDetailTableItem.daily_records.meals.lunch[0]
-                      ?.description || ""}
-                  </div>
-                </td>
-                <td className="p-3 sm:text-sm">
-                  <div className="line-clamp-3">
-                    {dietDetailTableItem.daily_records.meals.dinner[0]
-                      ?.description || ""}
-                  </div>
-                </td>
-                <td className="p-3 sm:text-sm">
-                  <div className="line-clamp-2">
-                    {dietDetailTableItem.daily_records.meals.snack[0]
-                      ?.description || ""}
-                  </div>
-                </td>
-                <td className="p-3 sm:text-sm">
-                  <div className="line-clamp-2">
-                    {dietDetailTableItem.daily_records.meals.supplement[0]
-                      ?.description || ""}
-                  </div>
-                </td>
-                <td className="p-3 sm:text-sm">
-                  {(() => {
-                    console.log("피드백 시간 데이터:", {
-                      feedback: dietDetailTableItem.daily_records.feedback,
-                      updated_at:
+            {dietDetailItems
+              .filter((item) => {
+                // meal 데이터가 하나라도 있는지 확인
+                const meals = item.daily_records.meals;
+                return (
+                  meals.breakfast[0]?.description ||
+                  meals.lunch[0]?.description ||
+                  meals.dinner[0]?.description ||
+                  meals.snack[0]?.description ||
+                  meals.supplement[0]?.description
+                );
+              })
+              .map((dietDetailTableItem, index) => (
+                <tr
+                  key={index}
+                  ref={index === dietDetailItems.length - 1 ? lastRowRef : null}
+                  className="text-[#6F6F6F] hover:bg-[#F4F6FC] cursor-pointer border-gray-13 border-b-[0.1rem]"
+                  onClick={() =>
+                    router.push(
+                      `/user/${dietDetailTableItem.challenge_id}/diet/${dietDetailTableItem.daily_records.id}/${selectedDate}`
+                    )
+                  }
+                >
+                  <td className="p-3 sm:text-sm w-[3%]">
+                    <div className="truncate ">
+                      {dietDetailTableItem.user.username}
+                    </div>
+                  </td>
+                  <td className="p-3 sm:text-sm  w-[3%]">
+                    <div className="truncate">
+                      {dietDetailTableItem.user.name}
+                    </div>
+                  </td>
+                  <td className="p-3 sm:text-sm">
+                    <div className="line-clamp-3">
+                      {dietDetailTableItem.daily_records.meals.breakfast[0]
+                        ?.description || ""}
+                    </div>
+                  </td>
+                  <td className="p-3 sm:text-sm">
+                    <div className="line-clamp-3">
+                      {dietDetailTableItem.daily_records.meals.lunch[0]
+                        ?.description || ""}
+                    </div>
+                  </td>
+                  <td className="p-3 sm:text-sm">
+                    <div className="line-clamp-3">
+                      {dietDetailTableItem.daily_records.meals.dinner[0]
+                        ?.description || ""}
+                    </div>
+                  </td>
+                  <td className="p-3 sm:text-sm">
+                    <div className="line-clamp-2">
+                      {dietDetailTableItem.daily_records.meals.snack[0]
+                        ?.description || ""}
+                    </div>
+                  </td>
+                  <td className="p-3 sm:text-sm">
+                    <div className="line-clamp-2">
+                      {dietDetailTableItem.daily_records.meals.supplement[0]
+                        ?.description || ""}
+                    </div>
+                  </td>
+                  <td className="p-3 sm:text-sm">
+                    {(() => {
+                      console.log("피드백 시간 데이터:", {
+                        feedback: dietDetailTableItem.daily_records.feedback,
+                        updated_at:
+                          dietDetailTableItem.daily_records.feedback
+                            ?.updated_at,
+                        created_at:
+                          dietDetailTableItem.daily_records.feedback
+                            ?.created_at,
+                      });
+                      return formatDateTime(
                         dietDetailTableItem.daily_records.feedback?.updated_at,
-                      created_at:
-                        dietDetailTableItem.daily_records.feedback?.created_at,
-                    });
-                    return formatDateTime(
-                      dietDetailTableItem.daily_records.feedback?.updated_at,
-                      dietDetailTableItem.daily_records.feedback?.created_at
-                    );
-                  })()}
-                </td>
-                <td className="p-4 lg:p-6 sm:text-sm text-center">
-                  {isfeedback(dietDetailTableItem.daily_records.feedback)}
-                </td>
-              </tr>
-            ))}
+                        dietDetailTableItem.daily_records.feedback?.created_at
+                      );
+                    })()}
+                  </td>
+                  <td className="p-4 lg:p-6 sm:text-sm text-center">
+                    {isfeedback(dietDetailTableItem.daily_records.feedback)}
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
         {loading && hasMore && (

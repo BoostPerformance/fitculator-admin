@@ -245,15 +245,31 @@ export const useDietData = (
     };
   });
 
+  // 데이터 정렬
+  const sortedRecords = [...processedRecords].sort((a, b) => {
+    // 피드백 상태 확인 (미작성이 위로)
+    const hasFeedbackA = !!a.daily_records.feedback?.coach_feedback?.trim();
+    const hasFeedbackB = !!b.daily_records.feedback?.coach_feedback?.trim();
+
+    if (hasFeedbackA !== hasFeedbackB) {
+      return hasFeedbackA ? 1 : -1; // 미작성(false)이 위로
+    }
+
+    // 피드백 상태가 같은 경우 이름으로 정렬
+    const nameA = a.user.name || "";
+    const nameB = b.user.name || "";
+    return nameA.localeCompare(nameB);
+  });
+
   // 변환된 데이터 로깅
-  console.log("[useDietData] Processed records:", {
-    firstProcessedRecord: processedRecords[0],
-    totalProcessed: processedRecords.length,
-    allProcessedRecords: processedRecords,
+  console.log("[useDietData] Processed and sorted records:", {
+    firstProcessedRecord: sortedRecords[0],
+    totalProcessed: sortedRecords.length,
+    allProcessedRecords: sortedRecords,
   });
 
   return {
-    dietRecords: processedRecords,
+    dietRecords: sortedRecords,
     challenges,
     adminData,
     loading,

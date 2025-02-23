@@ -11,6 +11,76 @@ const supabase = createClient(
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const type = url.searchParams.get("type") || "leaderboard";
+
+  // 오늘 운동한 멤버 수를 가져오는 새로운 타입 추가
+  if (type === "today-count") {
+    try {
+      const challengeId = url.searchParams.get("challengeId");
+      if (!challengeId) {
+        return NextResponse.json(
+          { error: "Challenge ID is required" },
+          { status: 400 }
+        );
+      }
+
+      const today = new Date().toISOString().split("T")[0];
+      console.log("📅 Checking workouts for date:", today);
+
+      // 챌린지 참가자 목록 조회
+      const { data: participants, error: participantsError } = await supabase
+        .from("challenge_participants")
+        .select("service_user_id")
+        .eq("challenge_id", challengeId);
+
+      if (participantsError) {
+        console.error("❌ Error fetching participants:", participantsError);
+        return NextResponse.json(
+          { error: "Failed to fetch participants" },
+          { status: 500 }
+        );
+      }
+
+      const participantIds = participants?.map((p) => p.service_user_id) || [];
+      console.log("📊 Total participants:", participantIds.length);
+
+      // 오늘 운동한 유저 조회
+      const { data: workouts, error: workoutsError } = await supabase
+        .from("workouts")
+        .select("user_id")
+        .in("user_id", participantIds)
+        .gte("timestamp", today)
+        .lte("timestamp", today + "T23:59:59");
+
+      if (workoutsError) {
+        console.error("❌ Error fetching workouts:", workoutsError);
+        return NextResponse.json(
+          { error: "Failed to fetch workouts" },
+          { status: 500 }
+        );
+      }
+
+      // 중복 제거하여 실제 운동한 유저 수 계산
+      const uniqueUsers = new Set(workouts?.map((w) => w.user_id) || []);
+      console.log("📊 Today's workout stats:", {
+        workoutUsers: uniqueUsers.size,
+        totalParticipants: participantIds.length,
+      });
+
+      return NextResponse.json({
+        count: uniqueUsers.size,
+        total: participantIds.length,
+      });
+    } catch (error) {
+      console.error("Error in today-count:", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+    }
+  }
+
   console.log("🔄 === Workouts API Request Start ===");
   try {
     console.log("🔍 Getting server session...");
@@ -24,9 +94,61 @@ export async function GET(request: Request) {
 
     console.log("🔍 Executing workouts query...");
 
-    // Get challengeId from query params
+    // Get challengeId and period from query params
     const url = new URL(request.url);
     let challengeId = url.searchParams.get("challengeId");
+    const period = url.searchParams.get("period") || "weekly";
+
+    // Get challenge dates
+    const { data: challenge, error: challengeError } = await supabase
+      .from("challenges")
+      .select("start_date, end_date")
+      .eq("id", challengeId)
+      .single();
+
+    if (challengeError) {
+      console.error("❌ Error getting challenge:", challengeError);
+      return NextResponse.json(
+        { error: "Failed to fetch challenge" },
+        { status: 500 }
+      );
+    }
+
+    let startStr: string, endStr: string;
+
+    if (period === "weekly") {
+      // 이번 주 월요일과 일요일 계산 (한국 시간)
+      const now = new Date();
+      const koreaTime = new Date(now.getTime() + 9 * 60 * 60000); // UTC+9
+      const day = koreaTime.getDay();
+      const date = koreaTime.getDate();
+      const year = koreaTime.getFullYear();
+      const month = String(koreaTime.getMonth() + 1).padStart(2, "0");
+
+      // 이번 주 월요일 날짜 계산
+      const mondayDate = date - (day === 0 ? 6 : day - 1);
+      const mondayMonth =
+        mondayDate < 1 ? String(koreaTime.getMonth()).padStart(2, "0") : month;
+      startStr = `${year}-${mondayMonth}-${String(
+        Math.abs(mondayDate)
+      ).padStart(2, "0")}`;
+
+      // 이번 주 일요일 날짜 계산
+      const sundayDate = date + (day === 0 ? 0 : 7 - day);
+      const sundayMonth =
+        sundayDate > 31
+          ? String(koreaTime.getMonth() + 2).padStart(2, "0")
+          : month;
+      endStr = `${year}-${sundayMonth}-${String(sundayDate).padStart(2, "0")}`;
+    } else {
+      // 챌린지 전체 기간
+      startStr = challenge.start_date;
+      endStr = challenge.end_date;
+    }
+
+    console.log("\n📅 리더보드 조회 기간:");
+    console.log("시작:", startStr);
+    console.log("종료:", endStr);
 
     // challengeId가 없는 경우 코치 확인
     if (!challengeId) {
@@ -114,19 +236,27 @@ export async function GET(request: Request) {
 
     if (type === "leaderboard") {
       // Get workouts with user information for leaderboard
-      const { data: workoutData, error: workoutError } = await supabase
+      let query = supabase
         .from("workouts")
         .select(
           `
           id,
           user_id,
           points,
+          timestamp,
           users (
             name
           )
         `
         )
         .in("user_id", participantIds);
+
+      // 기간에 따른 필터 추가
+      console.log("📊 조회 기간:", startStr, "~", endStr);
+      query = query.gte("timestamp", startStr).lte("timestamp", endStr);
+
+      const { data: workoutData, error: workoutError } = await query;
+      console.log("📊 조회된 운동 데이터 수:", workoutData?.length || 0);
 
       if (workoutError) {
         console.error("❌ Supabase query error:", workoutError);
@@ -210,6 +340,13 @@ export async function GET(request: Request) {
           percentage: (points / totalPoints) * 100,
         }))
         .sort((a, b) => b.percentage - a.percentage);
+
+      // 데이터가 없는 경우 기본 데이터 반환
+      if (chartData.length === 0) {
+        return NextResponse.json([
+          { category: "데이터 없음", percentage: 100 },
+        ]);
+      }
 
       return NextResponse.json(chartData);
     }

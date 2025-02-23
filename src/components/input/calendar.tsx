@@ -1,5 +1,5 @@
-import { CalendarProps } from '@/types/calendar';
-import calendarUtils from '../utils/calendarUtils';
+import { CalendarProps } from "@/types/calendar";
+import calendarUtils from "../utils/calendarUtils";
 
 export default function Calendar({
   handlePrevMonth,
@@ -17,26 +17,26 @@ export default function Calendar({
     date: Date;
     isCurrentMonth: boolean;
   }) => {
-    if (!dayInfo.isCurrentMonth) return 'bg-gray-9 text-white';
+    if (!dayInfo.isCurrentMonth) return "bg-gray-9 text-white";
 
     const currentDateStr = calendarUtils.formatDate(dayInfo.date);
     const selectedDateStr = selectedDate;
 
     if (selectedDateStr === currentDateStr) {
-      return 'bg-[#FAAA16] text-white hover:bg-amber-500';
+      return "bg-[#FAAA16] text-white hover:bg-amber-500";
     }
 
     if (isInChallengeRange(dayInfo.date)) {
-      return 'bg-[#FAAA16] text-white';
+      return "bg-[#FAAA16] text-white";
     }
 
-    return 'bg-white text-gray-4 hover:bg-gray-3';
+    return "bg-white text-gray-4 hover:bg-gray-3";
   };
 
   return (
     <>
       <div
-        className={`${CalenderclassName}  z-10 mt-2 bg-white rounded-lg shadow-lg p-[1.375rem] h-[21.9375rem] w-[19.25rem] sm:top-[4rem] sm:h-[24.5rem] sm:w-[22rem]`}
+        className={`${CalenderclassName}  z-10 mt-2 bg-white rounded-[0.125rem] shadow-lg pt-[2rem] pb-[1rem] px-[1.375rem] h-[21.9375rem] w-[19.25rem] sm:top-[4rem] sm:h-[24.5rem] sm:w-[22rem]`}
       >
         {/* 월 네비게이션 */}
         <div className="flex items-center justify-between mb-4">
@@ -67,7 +67,7 @@ export default function Calendar({
               key={index}
               onClick={() => handleDateClick(dayInfo.date)}
               className={`
-              aspect-square flex items-center justify-center rounded-[0.25rem] text-0.75-500
+              aspect-square flex items-center justify-center rounded-[0.125rem] text-0.75-500
               transition-colors duration-200 w-[2rem] sm:w-[2.5rem]
               ${getButtonStyles(dayInfo)}
             `}

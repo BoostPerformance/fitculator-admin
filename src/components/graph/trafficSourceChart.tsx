@@ -34,9 +34,16 @@ export default function TrafficSourceChart({
           `/api/workouts?challengeId=${challengeId}&type=chart`
         );
         const data = await response.json();
-        setChartData(data);
+        // 데이터가 배열인지 확인
+        if (Array.isArray(data)) {
+          setChartData(data);
+        } else {
+          console.error("Invalid data format:", data);
+          setChartData([{ category: "데이터 없음", percentage: 100 }]);
+        }
       } catch (error) {
         console.error("Error fetching workout data:", error);
+        setChartData([{ category: "데이터 없음", percentage: 100 }]);
       }
     };
 
@@ -44,10 +51,10 @@ export default function TrafficSourceChart({
   }, [challengeId]);
 
   const data: ChartData<"doughnut"> = {
-    labels: chartData.map((item: ChartDataPoint) => item.category),
+    labels: chartData?.map((item: ChartDataPoint) => item.category) || [],
     datasets: [
       {
-        data: chartData.map((item: ChartDataPoint) => item.percentage),
+        data: chartData?.map((item: ChartDataPoint) => item.percentage) || [],
         backgroundColor: [
           "#3FE2FF",
           "#3E82F1",
@@ -72,6 +79,7 @@ export default function TrafficSourceChart({
         formatter: function (value: number, context: any) {
           if (value < 5) return null;
           const label = context.chart.data.labels[context.dataIndex];
+          if (value < 6) return `${value.toFixed(2)}%`;
           return `${value.toFixed(2)}%\n${label}`;
         },
         font: {
@@ -91,7 +99,7 @@ export default function TrafficSourceChart({
   }));
 
   return (
-    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2 w-full">
+    <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 col-span-2 w-[360px] h-[600px] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100">
       <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
         인기운동
       </h2>
@@ -102,23 +110,27 @@ export default function TrafficSourceChart({
 
         <div className="w-full gap-[2rem]">
           <div className="lg:px-[2rem] border-t border-gray-200 pt-4 sm:px-[3rem]">
-            <div className="flex justify-between text-gray-7 sm:py-[1rem]">
-              <div className="sm:px-[1rem]">운동종목</div>
-              <div>퍼센트</div>
+            <div className="flex justify-between text-gray-7 sm:py-[1rem] mb-4">
+              <div className="flex">
+                <span className="w-6"></span>
+                <span className="flex-1">운동종목</span>
+              </div>
+              <div>비율</div>
             </div>
-            <ul className="space-y-2">
+            <ul className="space-y-4">
               {exerciseList.map(
                 (
                   exercise: { rank: number; name: string; percentage: string },
                   index: number
                 ) => (
-                  <li
-                    key={index}
-                    className="flex items-center text-[1rem] text-black"
-                  >
-                    <span className="w-6">{exercise.rank}</span>
-                    <span className="flex-1">{exercise.name}</span>
-                    <span className="text-gray-500">{exercise.percentage}</span>
+                  <li key={index} className="flex items-center text-[1rem]">
+                    <span className="w-6 text-[#6F6F6F]">{exercise.rank}</span>
+                    <span className="flex-1 text-[#6F6F6F]">
+                      {exercise.name}
+                    </span>
+                    <span className="text-[#6F6F6F]">
+                      {exercise.percentage}
+                    </span>
                   </li>
                 )
               )}

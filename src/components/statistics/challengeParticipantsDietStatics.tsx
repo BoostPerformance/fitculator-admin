@@ -1,50 +1,8 @@
-interface Meal {
-  description: string;
-  id: string;
-  meal_type: string;
-  updated_at: string;
-}
-
-interface DailyRecord {
-  id: string;
-  record_date: string;
-  meals?: Meal[];
-  feedbacks: {
-    coach_feedback: string;
-    created_at: string;
-    id: string;
-  }[];
-}
-
-interface ChallengeParticipant {
-  id: string;
-  users: {
-    id: string;
-    name: string;
-    username: string;
-  };
-  challenges: {
-    id: string;
-    title: string;
-    end_date: string;
-    start_date: string;
-    challenge_type: string;
-  };
-  daily_records: DailyRecord[];
-}
-
-interface Challenge {
-  challenges: {
-    id: string;
-    title: string;
-    start_date: string;
-    end_date: string;
-  };
-}
+import { ChallengeParticipant, Challenges } from "@/types/userPageTypes";
 
 export const calculateTodayDietUploads = (
   dailyRecords: ChallengeParticipant[],
-  challenges: Challenge[],
+  challenges: Challenges[],
   selectedChallengeId: string
 ) => {
   const selectedChallenge = challenges.find(
@@ -97,7 +55,7 @@ export const calculateTodayDietUploads = (
 
 export const calculateTotalDietUploads = (
   dailyRecords: ChallengeParticipant[],
-  challenges: Challenge[],
+  challenges: Challenges[],
   selectedChallengeId: string
 ) => {
   const selectedChallenge = challenges.find(

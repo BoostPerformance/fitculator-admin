@@ -1,6 +1,9 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import TrafficSourceChart from "@/components/graph/trafficSourceChart";
+import LogoutButton from "@/components/buttons/logoutButton";
 import DailyDietRecord from "@/components/graph/dailyDietRecord";
 import WorkoutLeaderboard from "@/components/graph/workoutLeaderboard";
 import DietTable from "@/components/dietDashboard/dietTable";
@@ -8,6 +11,7 @@ import TotalFeedbackCounts from "@/components/totalCounts/totalFeedbackCount";
 import Title from "@/components/layout/title";
 import Sidebar from "@/components/fixedBars/sidebar";
 import { useParams } from "next/navigation";
+import { ChallengeDashboardSkeleton } from "@/components/layout/skeleton";
 import {
   calculateTodayDietUploads,
   calculateTotalDietUploads,
@@ -87,8 +91,9 @@ export default function User() {
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<any[]>([]);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // 초기 로딩 상태를 true로 설정
   const [isMobile, setIsMobile] = useState(false);
+  const [userDropdown, setUserDropdown] = useState(false);
   const [adminData, setAdminData] = useState({
     admin_role: "",
     username: "",
@@ -124,29 +129,16 @@ export default function User() {
 
     const fetchData = async () => {
       try {
-        const workoutResponse = await fetch(
-          `/api/workouts?challengeId=${params.challengeId}`
+        setLoading(true); // 데이터 로딩 시작
+        // 오늘 운동한 멤버 수 조회
+        const workoutCountResponse = await fetch(
+          `/api/workouts?type=today-count&challengeId=${params.challengeId}`
         );
-        if (!workoutResponse.ok) {
-          throw new Error("Failed to fetch workout data");
+        if (!workoutCountResponse.ok) {
+          throw new Error("Failed to fetch workout count");
         }
-        const workoutData = await workoutResponse.json();
-
-        const today = new Date().toISOString().split("T")[0];
-
-        // 오늘의 운동 기록 수
-        const todayWorkouts = workoutData.filter((item: any) => {
-          const createdAt = item.created_at?.split("T")[0];
-          return createdAt === today;
-        });
-
-        setWorkoutCount(todayWorkouts.length);
-
-        // 오늘 운동한 유니크 유저 수
-        const uniqueUsers = new Set(
-          todayWorkouts.map((item: any) => item.user_id)
-        );
-        setWorkOutCountToday(uniqueUsers.size);
+        const workoutCountData = await workoutCountResponse.json();
+        setWorkOutCountToday(workoutCountData.count);
 
         // 챌린지 데이터 가져오기
         const challengesResponse = await fetch("/api/challenges");
@@ -190,6 +182,8 @@ export default function User() {
         await fetchDailyRecords(1);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // 데이터 로딩 완료
       }
     };
 
@@ -246,6 +240,28 @@ export default function User() {
     }
   }, [challenges, params.challengeId]);
 
+  // 챌린지 ID가 변경될 때마다 운동 업로드 멤버 수 업데이트
+  useEffect(() => {
+    const fetchWorkoutCount = async () => {
+      try {
+        const response = await fetch(
+          `/api/workouts?type=today-count&challengeId=${selectedChallengeId}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch workout count");
+        }
+        const data = await response.json();
+        setWorkOutCountToday(data.count);
+      } catch (error) {
+        console.error("Error fetching workout count:", error);
+      }
+    };
+
+    if (selectedChallengeId) {
+      fetchWorkoutCount();
+    }
+  }, [selectedChallengeId]);
+
   const handleChallengeSelect = (challengeId: string) => {
     const selectedChallenge = challenges.find(
       (challenge) => challenge.challenges.id === challengeId
@@ -282,121 +298,140 @@ export default function User() {
       )
     : { progressDays: "0", totalDays: "0" };
 
-  return (
-    <div className="bg-white-1 dark:bg-blue-4 flex gap-[1rem] h-screen overflow-hidden sm:flex-col sm:px-[1rem] md:flex-col md:px-[0.4rem]">
-      <Sidebar
-        data={challenges}
-        onSelectChallenge={handleChallengeSelect}
-        coach={adminData.username}
-        selectedChallengeId={selectedChallengeId}
-      />
-      <div className="flex-1 overflow-auto">
-        <div className="pt-[2rem]">
-          <div className="pl-[1rem]">
-            <Title
-              title={
-                coachData &&
-                `${coachData.organization_name} ${adminData.username} ${adminData.admin_role}`
-              }
-            />
-          </div>
-          <div className="flex gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-3">
-            <TotalFeedbackCounts
-              counts={progress.progressDays}
-              total={`${progress.totalDays}일`}
-              title="진행현황"
-              borderColor="border-green"
-              textColor="text-green"
-              grids="col-span-2"
-            />
-            <TotalFeedbackCounts
-              counts={`${workOutCountToday}`}
-              total={"24명"}
-              title={
-                <span>
-                  오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
-                  업로드 멤버
-                </span>
-              }
-              borderColor="border-blue-5"
-              textColor="text-blue-5"
-            />
-            <TotalFeedbackCounts
-              counts={
-                calculateTodayDietUploads(
-                  dailyRecords,
-                  challenges,
-                  selectedChallengeId
-                ).counts
-              }
-              total={
-                calculateTodayDietUploads(
-                  dailyRecords,
-                  challenges,
-                  selectedChallengeId
-                ).total
-              }
-              title={
-                <span>
-                  오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
-                  업로드 멤버
-                </span>
-              }
-              borderColor="border-yellow"
-              textColor="text-yellow"
-            />
-            <TotalFeedbackCounts
-              counts={`${workoutCount}개`}
-              total={""}
-              title={
-                <span>
-                  전체 운동 <br className="md:inline sm:hidden lg:hidden" />
-                  업로드 수
-                </span>
-              }
-              borderColor="border-blue-5"
-              textColor="text-blue-5"
-            />
-            <TotalFeedbackCounts
-              counts={
-                calculateTotalDietUploads(
-                  dailyRecords,
-                  challenges,
-                  selectedChallengeId
-                ).counts
-              }
-              total={
-                calculateTotalDietUploads(
-                  dailyRecords,
-                  challenges,
-                  selectedChallengeId
-                ).total
-              }
-              title={
-                <span>
-                  전체 식단 <br className="md:inline sm:hidden lg:hidden" />
-                  업로드 수
-                </span>
-              }
-              borderColor="border-yellow"
-              textColor="text-yellow"
-            />
-          </div>
+  // 로딩 중일 때 스켈레톤 UI 표시
+  if (loading) {
+    return <ChallengeDashboardSkeleton />;
+  }
 
-          <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:flex sm:flex-col">
-            <TrafficSourceChart challengeId={selectedChallengeId} />
-            <DailyDietRecord activities={filteredDailyRecordsbyId} />
-            <WorkoutLeaderboard challengeId={selectedChallengeId} />
-          </div>
-          <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1">
-            <DietTable
-              dailyRecordsData={filteredDailyRecordsbyId}
-              challengeId={selectedChallengeId}
-              onLoadMore={handleLoadMore}
-              loading={loading}
-            />
-          </div>
+  return (
+    <div className="bg-white-1 dark:bg-blue-4 flex flex-col h-screen overflow-hidden sm:px-[1rem] md:px-[0.4rem]">
+      <div className="flex justify-end pr-[2rem]">
+        <div className="flex items-center gap-2">
+          {/* <div className="text-gray-700">안녕하세요, {adminData.username}</div>
+          <div className="relative">
+            <button onClick={() => setUserDropdown(!userDropdown)}>
+              <Image
+                src="/svg/arrow-down.svg"
+                width={20}
+                height={20}
+                alt="arrow-down"
+                className="w-[0.8rem]"
+              />
+            </button>
+            {userDropdown && (
+              <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px]">
+                <LogoutButton />
+              </div>
+            )}
+          </div> */}
         </div>
+      </div>
+      <div className="flex gap-[1rem] flex-1 sm:flex-col md:flex-col">
+        <Sidebar
+          data={challenges}
+          onSelectChallenge={handleChallengeSelect}
+          coach={adminData.username}
+          selectedChallengeId={selectedChallengeId}
+        />
+        <main className="flex-1 overflow-auto">
+          <div className="pt-[2rem]">
+            <div className="flex items-center justify-between px-1 pr-8">
+              <Title
+                title={
+                  challenges.find(
+                    (challenge) =>
+                      challenge.challenges.id === selectedChallengeId
+                  )?.challenges.title || ""
+                }
+              />
+              <div className="flex items-center gap-2">
+                <div className="text-gray-500">
+                  안녕하세요, {adminData.username} !
+                </div>
+                <div className="relative">
+                  <button onClick={() => setUserDropdown(!userDropdown)}>
+                    <Image
+                      src="/svg/arrow-down.svg"
+                      width={20}
+                      height={20}
+                      alt="arrow-down"
+                      className="w-[0.8rem]"
+                    />
+                  </button>
+                  {userDropdown && (
+                    <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px]">
+                      <LogoutButton />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-1 px-1 pr-8 sm:grid-cols-1">
+              <TotalFeedbackCounts
+                counts={progress.progressDays}
+                total={`${progress.totalDays}일`}
+                title="진행현황"
+                borderColor="border-green"
+                textColor="text-green"
+              />
+              <TotalFeedbackCounts
+                counts={`${workOutCountToday}`}
+                total={`${
+                  dailyRecords.filter(
+                    (record) => record.challenges.id === selectedChallengeId
+                  ).length
+                }명`}
+                title={
+                  <span>
+                    오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
+                    업로드 멤버
+                  </span>
+                }
+                borderColor="border-blue-5"
+                textColor="text-blue-5"
+              />
+              <TotalFeedbackCounts
+                counts={
+                  calculateTodayDietUploads(
+                    dailyRecords,
+                    challenges,
+                    selectedChallengeId
+                  ).counts
+                }
+                total={
+                  calculateTodayDietUploads(
+                    dailyRecords,
+                    challenges,
+                    selectedChallengeId
+                  ).total
+                }
+                title={
+                  <span>
+                    오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
+                    업로드 멤버
+                  </span>
+                }
+                borderColor="border-yellow"
+                textColor="text-yellow"
+              />
+            </div>
+
+            <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:flex sm:flex-col px-1 pr-8">
+              <TrafficSourceChart challengeId={selectedChallengeId} />
+              <DailyDietRecord activities={filteredDailyRecordsbyId} />
+              <WorkoutLeaderboard challengeId={selectedChallengeId} />
+            </div>
+            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[3rem] sm:pt-[2rem] bg-white-1 px-1 pr-8">
+              <DietTable
+                dailyRecordsData={filteredDailyRecordsbyId}
+                challengeId={selectedChallengeId}
+                onLoadMore={handleLoadMore}
+                loading={loading}
+              />
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );

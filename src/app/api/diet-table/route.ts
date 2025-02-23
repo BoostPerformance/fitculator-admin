@@ -148,11 +148,11 @@ export async function GET(request: Request) {
         feedbackData = record.feedbacks;
       }
 
-      console.log("[diet-table API] Processed feedback data:", {
-        recordId: record.id,
-        originalFeedback: record.feedbacks,
-        processedFeedback: feedbackData,
-      });
+      // console.log("[diet-table API] Processed feedback data:", {
+      //   recordId: record.id,
+      //   originalFeedback: record.feedbacks,
+      //   processedFeedback: feedbackData,
+      // });
 
       return {
         ...record,
@@ -208,7 +208,7 @@ export async function GET(request: Request) {
             }
             acc[mealType].push({
               id: meal.id,
-              description: meal.description,
+              description: meal.description?.trim() || "",
               meal_time: meal.meal_time,
               meal_photos: mealPhotos,
             });

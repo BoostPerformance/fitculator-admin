@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { DietPageSkeleton } from "@/components/layout/skeleton";
 import { useParams, useSearchParams } from "next/navigation";
 import Sidebar from "@/components/fixedBars/sidebar";
 import { useDietData } from "@/components/hooks/useDietData";
@@ -8,6 +9,7 @@ import { DietContent } from "@/components/dietDashboard/dietContent";
 import { useResponsive } from "@/components/hooks/useResponsive";
 import { useChallenge } from "@/components/hooks/useChallenges";
 import { processMeals } from "@/components/utils/processMeals";
+import Title from "@/components/layout/title";
 
 export default function DietItem() {
   const params = useParams();
@@ -68,8 +70,8 @@ export default function DietItem() {
     return <div className="p-4 text-red-500">{challengeError}</div>;
   }
 
-  if (challengesLoading) {
-    return <div className="p-4">챌린지 정보를 불러오는 중...</div>;
+  if (challengesLoading || dietLoading) {
+    return <DietPageSkeleton />;
   }
 
   if (!challenges) {
@@ -84,15 +86,48 @@ export default function DietItem() {
         selectedChallengeId={params.challengeId as string}
       />
       <div className="flex-1 p-4">
-        {dietLoading ? (
-          <div className="p-4">데이터를 불러오는 중...</div>
-        ) : dietError ? (
+        <div className="px-8 pt-4">
+          <div className="text-gray-2 text-1.25-700">
+            {challenges?.find((c) => c.challenges.id === params.challengeId)
+              ?.challenges.title || ""}
+          </div>
+          <Title title="식단 현황" />
+        </div>
+        {dietError ? (
           <div className="p-4 text-red-500">{dietError}</div>
         ) : !dietRecords || dietRecords.length === 0 ? (
           <div className="p-4">식단 기록이 없습니다.</div>
         ) : (
           <>
-            <DietStatistics processedMeals={dietRecords} />
+            <div className="mt-6">
+              <DietStatistics
+                processedMeals={dietRecords}
+                selectedChallengeId={params.challengeId as string}
+                selectedDate={selectedDate}
+                dailyRecords={challenges
+                  ?.filter(
+                    (challenge) =>
+                      challenge.challenges.id === params.challengeId
+                  )
+                  .flatMap((challenge) =>
+                    challenge.challenges.challenge_participants.map(
+                      (participant) => ({
+                        id: challenge.challenges.id,
+                        users: {
+                          id: participant.service_user_id || "",
+                          name: "",
+                          username: "",
+                        },
+                        challenges: {
+                          ...challenge.challenges,
+                          challenge_type: "diet",
+                        },
+                        daily_records: [],
+                      })
+                    )
+                  )}
+              />
+            </div>
             <DietContent
               selectedDate={selectedDate}
               onDateChange={setSelectedDate}

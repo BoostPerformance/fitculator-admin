@@ -112,7 +112,21 @@ const DietTable: React.FC<DietTableProps> = ({
       }
     });
 
-    return Array.from(groupedData.values());
+    // Convert Map to array and sort by name and feedback status
+    return Array.from(groupedData.values()).sort((a, b) => {
+      // First sort by name
+      const nameA = a.participant.users?.name || "";
+      const nameB = b.participant.users?.name || "";
+      const nameComparison = nameA.localeCompare(nameB);
+
+      if (nameComparison !== 0) return nameComparison;
+
+      // If names are equal, sort by feedback status (미작성 first)
+      const feedbackRatioA = a.feedbackRatio.completed / a.feedbackRatio.total;
+      const feedbackRatioB = b.feedbackRatio.completed / b.feedbackRatio.total;
+
+      return feedbackRatioA - feedbackRatioB; // 미작성(낮은 비율)이 위로
+    });
   };
 
   const handleCoachMemoSave = (memo: string) => {

@@ -1,6 +1,6 @@
 // TextBox.tsx
-import Image from 'next/image';
-import React, { useRef, useState, useEffect } from 'react';
+import Image from "next/image";
+import React, { useRef, useState, useEffect } from "react";
 
 interface TextBoxProps {
   title: string;
@@ -8,7 +8,7 @@ interface TextBoxProps {
   placeholder?: string;
   button1?: string;
   button2?: string;
-  svg1: string;
+  svg1?: string;
   svg2?: string;
   onClick1?: () => void;
   onClick2?: () => void;
@@ -24,7 +24,7 @@ interface TextBoxProps {
 const TextBox = ({
   title,
   placeholder,
-  value = '',
+  value = "",
   button1,
   button2,
   svg1,
@@ -70,7 +70,7 @@ const TextBox = ({
           setCopyMessage(false);
         }, 5000);
       } catch (err) {
-        console.error('복사 실패:', err);
+        console.error("복사 실패:", err);
       }
     }
   };
@@ -93,7 +93,7 @@ const TextBox = ({
         <div
           className={`absolute top-[0.5rem] left-[10rem] bg-green-100 text-green-800 text-1-500 p-[0.5rem] rounded-[0.5rem] 
           transform transition-opacity duration-500 ease-in-out
-          ${copyMessage ? 'opacity-100' : 'opacity-0'}`}
+          ${copyMessage ? "opacity-100" : "opacity-0"}`}
         >
           텍스트가 복사되었습니다.
         </div>
@@ -105,7 +105,7 @@ const TextBox = ({
           placeholder={placeholder}
           value={isFeedbackMode ? localValue : value}
           className={`border p-2 w-full rounded-md text-0.875-400 h-[20rem] ${
-            readOnly ? 'bg-gray-100 cursor-not-allowed' : ''
+            readOnly ? "bg-gray-100 cursor-not-allowed" : ""
           }`}
           readOnly={readOnly}
           onChange={handleChange}
@@ -114,24 +114,26 @@ const TextBox = ({
           <div className="flex relative sm:justify-center sm:gap-[1.4rem] w-full justify-end">
             <button
               className={`${Btn1className} rounded-md text-0.875-400 mt-[0.5rem] ${
-                button2 ? 'lg:w-[9.3125rem]' : 'w-full'
+                button2 ? "lg:w-[9.3125rem]" : "w-full"
               } sm:w-full md:w-full h-[2.5rem]`}
               onClick={handleButtonClick}
             >
               {button1}
             </button>
-            <Image
-              src={svg1}
-              alt="icon"
-              width={17}
-              height={17}
-              className={`absolute top-[1.2rem] ${
-                button2
-                  ? 'lg:right-[5.3rem] lg:top-[1.2rem] sm:left-[2rem]'
-                  : 'lg:right-[11.5rem] lg:top-[1.3rem] sm:left-[6rem] sm:top-[1.3rem]'
-              } w-4 h-4`}
-              onClick={handleButtonClick}
-            />
+            {button1 && svg1 && (
+              <Image
+                src={svg1}
+                alt="icon"
+                width={17}
+                height={17}
+                className={`absolute top-[1.2rem] ${
+                  button2
+                    ? "lg:right-[5.3rem] lg:top-[1.2rem] sm:left-[2rem]"
+                    : "lg:right-[11.5rem] lg:top-[1.3rem] sm:left-[6rem] sm:top-[1.3rem]"
+                } w-4 h-4`}
+                onClick={handleButtonClick}
+              />
+            )}
           </div>
           {button2 && (
             <div className="flex relative justify-center w-1/2">

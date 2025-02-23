@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import { DietPageSkeleton } from "@/components/layout/skeleton";
 import DailyDietRecordMobile from "@/components/graph/dailyDietRecordMobile";
 import { useRouter } from "next/navigation";
 import TextBox from "@/components/textBox";
@@ -13,6 +14,7 @@ import { DailyMealData } from "@/types/dietItemContainerTypes";
 import calendarUtils from "@/components/utils/calendarUtils";
 import DateInput from "@/components/input/dateInput";
 import { useFeedback } from "@/components/hooks/useFeedback";
+import { useChallenge } from "@/components/hooks/useChallenges";
 
 interface CustomAlertProps {
   message: string;
@@ -71,6 +73,11 @@ export default function SelectedDate() {
   const router = useRouter();
   const params = useParams() as PageParams;
   const { saveFeedback } = useFeedback();
+  const { fetchChallenges, challenges } = useChallenge();
+
+  useEffect(() => {
+    fetchChallenges();
+  }, [fetchChallenges]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [copyMessage, setCopyMessage] = useState(false);
@@ -408,10 +415,9 @@ export default function SelectedDate() {
     const today = new Date();
     const koreanToday = new Date(today.getTime() + 9 * 60 * 60 * 1000); // UTC+9 변환
 
-    const totalDays =
-      Math.ceil(
-        (koreanToday.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-      ) + 1;
+    const totalDays = Math.ceil(
+      (koreanToday.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     // API response의 upload_days_count 사용
     const uploadCount = filteredDailyMeals[0]?.upload_days_count || 0;
@@ -428,11 +434,7 @@ export default function SelectedDate() {
       : [DEFAULT_DAILY_MEAL(recordDate)];
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        로딩 중...
-      </div>
-    );
+    return <DietPageSkeleton />;
   }
 
   return (
@@ -453,15 +455,25 @@ export default function SelectedDate() {
       />
 
       <Sidebar
-        data={[]} // 챌린지 데이터는 별도의 API로 관리
-        onSelectChallenge={() => {}}
-        onSelectChallengeTitle={() => {}}
+        data={challenges || []}
+        onSelectChallenge={(id: string) => {
+          router.push(`/user/${id}`);
+        }}
+        onSelectChallengeTitle={(id: string) => {
+          router.push(`/user/${id}`);
+        }}
         coach={orgName.username}
       />
 
       <div className="md:px-[1rem]">
-        <div className="flex-1 py-[3rem]">
-          <div className="sm:px-[1rem]">
+        <div className="flex-1 py-[2rem]">
+          <div className="sm:px-[1rem] max-w-[400px]">
+            <button
+              className="mb-4 text-gray-400 font-bold hover:font-extrabold cursor-pointer"
+              onClick={handleBack}
+            >
+              ← 목록으로
+            </button>
             <div className="flex">
               <div className="text-gray-2 text-1.25-700">
                 {orgName.organization_name}&nbsp;
@@ -478,7 +490,7 @@ export default function SelectedDate() {
 
             <TotalFeedbackCounts
               counts={metrics.count.toString()}
-              total={metrics.total.toString()}
+              total={metrics.total.toString() + "일"}
               borderColor="border-[#FDB810]"
               textColor="text-[#FDB810]"
               title="총 식단 업로드"
@@ -487,31 +499,28 @@ export default function SelectedDate() {
 
           {mobileSize ? (
             <div className="flex items-center justify-center flex-col">
-              <button
-                className="p-4 drop-shadow-md hover:bg-gray-13 rounded-md border-[0.1rem]"
-                onClick={handleBack}
-              >
-                ← 뒤로가기
-              </button>
               <Calendar
                 handlePrevMonth={handlePrevMonth}
                 handleNextMonth={handleNextMonth}
                 currentDate={currentDate}
                 weekdays={weekdays}
                 handleDateClick={handleDateClick}
-                isInChallengeRange={() => true} // 챌린지 기간 체크는 별도 로직으로 관리
+                isInChallengeRange={(date) => {
+                  if (
+                    !challengePeriods.start_date ||
+                    !challengePeriods.end_date
+                  )
+                    return false;
+                  const startDate = new Date(challengePeriods.start_date);
+                  const endDate = new Date(challengePeriods.end_date);
+                  return date >= startDate && date <= endDate;
+                }}
                 CalenderclassName="sm:w-[90%]"
                 selectedDate={recordDate}
               />
             </div>
           ) : (
-            <div className="flex sm:justify-center sm:items-center pt-[1rem] gap-[1rem]">
-              <button
-                className="p-4 drop-shadow-md hover:bg-gray-13 rounded-md border-[0.1rem]"
-                onClick={handleBack}
-              >
-                ← 뒤로가기
-              </button>
+            <div className="flex sm:justify-center sm:items-center pt-[2rem] gap-[1rem]">
               <DateInput
                 onChange={async (newDate: string) => {
                   try {
@@ -539,9 +548,9 @@ export default function SelectedDate() {
 
         {displayMeals.map((dailyMeal) => (
           <div key={dailyMeal.recordDate} className="relative mb-[2rem]">
-            <h2 className="text-[1.5rem] font-bold sm:pl-[1rem] pb-[1rem]">
+            {/* <h2 className="text-[1.5rem] font-bold sm:pl-[1rem] pb-[1rem]">
               {dailyMeal.recordDate}
-            </h2>
+            </h2> */}
 
             {mobileSize ? (
               <DailyDietRecordMobile
@@ -639,17 +648,11 @@ export default function SelectedDate() {
               <TextBox
                 title="AI 분석 결과"
                 value={dailyMeal.feedbacks.ai_feedback}
-                placeholder="결과생성 버튼을 눌러주세요."
-                button1="생성"
+                placeholder="아직 AI 분석 진행 전 이에요."
                 button2="복사"
                 onClick2={() => handleCopy(dailyMeal.feedbacks.ai_feedback)}
-                onClick1={handleGenerateAnalyse}
                 readOnly={true}
-                svg1="/image/createIcon.png"
                 svg2="/svg/copyIcon.svg"
-                Btn1className={`${
-                  isDisable ? "disabled bg-gray-1" : ""
-                } bg-[#F89A1B] text-white`}
                 Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
                 copyIcon
               />
