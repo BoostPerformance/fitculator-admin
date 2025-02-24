@@ -129,8 +129,8 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
         <thead>
           <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
             <th className="p-[1rem] lg:w-[15%] sm:w-[18%] sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="sm:text-0.75-500 sm:p-0">닉네임</div>
+              <div className="relative flex justify-between items-center sm:flex-col sm:gap-[1rem] sm:justify-center">
+                <div className="sm:text-0.75-500 sm:p-0">ID</div>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -142,7 +142,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
               </div>
             </th>
             <th className="p-[1rem] lg:w-[15%] sm:w-[18%]  sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
+              <div className="relative flex justify-between items-center sm:flex-col sm:gap-[1rem] sm:justify-center">
                 <div className="sm:text-0.75-500 sm:p-0">이름</div>
                 <button>
                   <Image
@@ -156,8 +156,8 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
             </th>
 
             <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
-              <div className=" flex justify-center items-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]  sm:p-0">
-                <div className="sm:text-0.75-500 sm:p-0">코치메모</div>
+              <div className="flex justify-between items-center sm:flex-col sm:gap-[1rem] sm:justify-center sm:p-0">
+                <div className="sm:text-0.75-500 sm:p-0">코치 메모</div>
                 <button>
                   <Image
                     src="/svg/arrow-down.svg"
@@ -168,7 +168,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
                 </button>
               </div>
             </th>
-            <th className="p-[1rem] w-[20%] lg:pl-[1rem] sm:p-0 sm:text-0.75-500 text-center">
+            <th className="p-[1rem] lg:w-[20%] sm:p-0 sm:text-0.75-500 text-center">
               피드백 수
             </th>
           </tr>
@@ -177,13 +177,13 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
           {participants(dailyRecordsData).map((data, index) => {
             return (
               <tr key={index} className="text-[#6F6F6F] hover:bg-[#F4F6FC]">
-                <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
+                <td className="p-[1rem] text-left sm:text-center sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
                   {data.participant.users?.username}
                 </td>
-                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                <td className="p-[1rem] text-left sm:text-center sm:text-0.625-500 sm:p-0">
                   {data.participant.users?.name}
                 </td>
-                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                <td className="p-[1rem] text-left sm:text-center sm:text-0.625-500 sm:p-0">
                   <button onClick={() => handleModalOpen(data.participant)}>
                     {selectedParticipant &&
                     selectedParticipant.id === data.participant.id
@@ -191,7 +191,7 @@ const DietTable: React.FC<DietTableProps> = ({ dailyRecordsData }) => {
                       : data.participant.coach_memo || '코치메모'}
                   </button>
                 </td>
-                <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
+                <td className="p-[1rem] text-center sm:text-0.625-500 sm:p-0">
                   {data.feedbackRatio.formatted}
                 </td>
               </tr>
