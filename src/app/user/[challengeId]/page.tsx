@@ -259,12 +259,12 @@ export default function User() {
 
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex h-screen  sm:flex-col md:flex-col md:px-[0.4rem]">
-      <Sidebar
+      {/* <Sidebar
         data={challenges}
         onSelectChallenge={handleChallengeSelect}
         coach={adminData.username}
         selectedChallengeId={selectedChallengeId}
-      />
+      /> */}
       <div className="w-full px-[2.125rem] sm:px-[1rem]">
         <div className="pt-[1.25rem]">
           <div className="mb-[1.25rem]">

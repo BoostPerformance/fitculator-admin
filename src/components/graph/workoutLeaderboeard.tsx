@@ -17,11 +17,11 @@ const WorkoutLeaderboeard = () => {
   ];
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm dark:bg-gray-8 col-span-2 h-[31.25rem]">
+    <div className="bg-white p-[1rem] rounded-lg shadow-sm dark:bg-gray-8 col-span-2 max-h-[31.25rem] overflow-scroll scrollbar-hide">
       <h2 className="text-[#6F6F6F] text-lg font-semibold mb-6 dark:text-gray-5">
         운동리더보드
       </h2>
-      <div className="overflow-y-auto max-h-96 dark:text-gray-5">
+      <div className="h-full dark:text-gray-5">
         {leaderboardData.map((item, index) => (
           <WorkoutLeaderboardItem
             key={index}

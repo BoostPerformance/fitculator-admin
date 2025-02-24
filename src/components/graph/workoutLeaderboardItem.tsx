@@ -18,14 +18,15 @@ const WorkoutLeaderboardItem = ({
   const progressWidth = (score / 100) * 100;
 
   return (
-    <div className="flex items-center gap-4 mb-4">
-      <div className="w-6">{rank}</div>
-      <div className="flex items-center gap-2">
-        <span>{name}</span>
+    <div className="flex items-center gap-2 mb-4">
+      <div className="w-[1.25rem]">{rank}</div>
+      <div className="flex items-center gap-2 max-w-[1.875rem] whitespace-nowrap overflow-x-auto scrollbar-hide">
+        <span className="w-[1.875rem]">{name}</span>
       </div>
 
       <div className="flex-1 relative">
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        {/* <div className="lg:max-w-[5.625rem] h-2 bg-gray-100 rounded-full overflow-hidden"> */}
+        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
           <div
             className={`h-full bg-gradient-to-r ${
               score > 100
@@ -50,7 +51,7 @@ const WorkoutLeaderboardItem = ({
         </div>
       </div>
 
-      <div className="w-20 text-right">{score}</div>
+      <div className="lg:w-[3rem] md:w-[2.5rem] sm:w-[2.5rem] text-right flex-grow-0 flex-shrink">{score}</div>
     </div>
   );
 };
