@@ -89,6 +89,8 @@ export default function Sidebar({
     router.push(`/user/${challenge.challenges.id}`);
   };
 
+  console.log(data);
+
   return (
     <div className="lg:w-[18.75rem] lg:h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
       {/* <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]"> */}
@@ -165,35 +167,55 @@ export default function Sidebar({
         <div
           className={`sm:w-full sm:flex sm:items-center sm:justify-center z-50 md:w-full md:items-center md:flex md:border md:justify-start lg:w-full`}
         >
-          <nav className=" flex flex-col gap-[2rem] items-start md:w-[18rem] sm:items-center md:py-[1rem] md:pb-[2rem]">
-            <ul className="w-full">
-              <li className="w-full border-b-[0.1rem] border-gray-13">
-                <button
-                  onClick={handleDropdown}
-                  className="w-full flex items-center justify-between lg:text-1.25-900  py-[0.8rem] sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500 cursor-pointer"
+          <nav className="gap-[2rem] items-start md:w-[18rem] sm:items-center md:py-[1rem] md:pb-[2rem]">
+            <ul>
+              <li
+                className="w-full border-b-[0.1rem] border-gray-13  items-center justify-between lg:text-1.5-900  py-[0.8rem] sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500 cursor-pointer"
+                onClick={handleDropdown}
+              >
+                <div
+                  role="group"
+                  aria-label="챌린지 메뉴"
+                  className="flex flex-row justify-between align-middle"
                 >
                   챌린지
-                  <Image
-                    src={
-                      isOpenDropdown
-                        ? `/svg/arrow-down.svg`
-                        : `/svg/arrow-up.svg`
-                    }
-                    width={30}
-                    height={30}
-                    alt="arrow-down "
-                    className="w-[1rem] lg:w-[0.8rem]"
-                    onClick={handleDropdown}
-                  />
-                </button>
-                {isOpenDropdown && (
-                  <ul>
-                    <li>ㄴ식단</li>
-                    <li>ㄴ운동</li>
+                  <button className="w-[1rem] lg:w-[0.8rem]">
+                    <Image
+                      src={
+                        !isOpenDropdown
+                          ? `/svg/arrow-up.svg`
+                          : `/svg/arrow-down.svg`
+                      }
+                      width={30}
+                      height={30}
+                      alt="드롭다운 아이콘"
+                    />
+                  </button>
+                </div>
+
+                {!isOpenDropdown && (
+                  <ul className="text-1.25-700 text-gray-2">
+                    <li onClick={handleDropdown}>
+                      {/* 글씨 옆에 플러스 버튼 */}
+                      F45 을지로 챌린지
+                      {isOpenDropdown && (
+                        <ul>
+                          {/* 현재 페이지에 따라서 글씨 색상 변하게 */}
+                          {/* 챌린지 별 아이디도 있어야 할 것 같은데..? */}
+                          {/* 글씨 크기 좀 더 작게게 */}
+                          <li>
+                            <Link href={`/user/932899/diet`}>ㄴ식단</Link>
+                          </li>
+                          <li>
+                            <Link href={`/user/2398492/exercise`}>ㄴ운동</Link>
+                          </li>
+                        </ul>
+                      )}
+                    </li>
+                    <li>핏다챌</li>
                   </ul>
                 )}
               </li>
-              <li>핏다챌</li>
             </ul>
           </nav>
         </div>
