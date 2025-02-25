@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/layout/loading";
 
 export default function User() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchFirstChallenge = async () => {
       try {
         const response = await fetch("/api/challenges");
         if (!response.ok) {
-          throw new Error("Failed to fetch challenges");
+          throw new Error("챌린지 정보를 가져오는데 실패했습니다");
         }
         const challengesData = await response.json();
 
@@ -23,15 +25,24 @@ export default function User() {
               new Date(a.challenges.start_date).getTime()
           );
 
-          router.push(`/user/${sortedChallenges[0].challenges.id}`);
+          await router.push(`/user/${sortedChallenges[0].challenges.id}`);
+        } else {
+          throw new Error("참여 중인 챌린지가 없습니다");
         }
       } catch (error) {
         console.error("Error fetching first challenge:", error);
+        alert(
+          error instanceof Error
+            ? error.message
+            : "알 수 없는 오류가 발생했습니다"
+        );
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchFirstChallenge();
   }, [router]);
 
-  return null; // 리다이렉션 중에는 아무것도 렌더링하지 않음
+  return isLoading ? <Loading ismessage={true} /> : null;
 }

@@ -345,7 +345,7 @@ export default function User() {
           selectedChallengeId={selectedChallengeId}
         />
         <main className="flex-1 overflow-y-auto">
-          <div className="pt-[2rem] pb-[2rem]">
+          <div className="pt-[2rem] pb-[2rem] sm:pt-0 sm:pl-5">
             <div className="flex items-center justify-between px-1 pr-8">
               <Title
                 title={
@@ -431,7 +431,7 @@ export default function User() {
           </div>
         </main>
       </div>
-      <Footer btnClassName="fixed bottom-8 right-8" />
+      <Footer />
     </div>
   );
 }
