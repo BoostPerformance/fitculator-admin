@@ -114,7 +114,7 @@ export default function Sidebar({
   });
 
   return (
-    <div className="lg:w-[18.75rem] lg:h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
+    <div className="lg:w-[18.75rem] sm:h-screen lg:h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
       {/* <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]"> */}
       <div className="flex justify-start gap-[0.5rem] pt-[2.25rem] sm:pt-[0rem]">
         {/* <Image src="/svg/logo_light.svg" width={30} height={30} alt="logo" /> */}
@@ -216,7 +216,7 @@ export default function Sidebar({
                                   식단
                                 </div>
                               </li>
-                              <li>
+                              {/* <li>
                                 <div
                                   className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
                                   onClick={() => {
@@ -227,7 +227,7 @@ export default function Sidebar({
                                 >
                                   운동
                                 </div>
-                              </li>
+                              </li> */}
                             </ul>
                           )}
                         </li>
