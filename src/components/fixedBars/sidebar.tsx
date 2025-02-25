@@ -21,6 +21,7 @@ interface SidebarProps {
   onSelectChallengeTitle?: (challengeId: string) => void;
   coach?: string;
   selectedChallengeId?: string;
+  username?: string;
 }
 
 export default function Sidebar({
@@ -29,6 +30,7 @@ export default function Sidebar({
   onSelectChallengeTitle,
   selectedChallengeId,
   coach,
+  username,
 }: SidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpenDropdown, setIsOpenDropdown] = useState(true);
@@ -37,6 +39,7 @@ export default function Sidebar({
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
 
+  // 선택된 챌린지 변경 시 타이틀 업데이트
   useEffect(() => {
     const selectedChallenge = data.find(
       (item) => item.challenges.id === selectedChallengeId
@@ -45,11 +48,21 @@ export default function Sidebar({
       setSelectedTitle(selectedChallenge.challenges.title);
       setIsOpenDropdown(true); // 챌린지가 선택되었을 때 드롭다운 열기
     }
+  }, [selectedChallengeId, data]);
 
+  // 화면 크기 변경 감지
+  useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 1025;
       setIsMobile(mobile);
-      setIsSidebarOpen(!mobile); // 모바일이 아닐 때는 열려있게
+      if (mobile) {
+        // 모바일일 때는 사이드바는 닫혀있고, 챌린지 드롭다운은 열려있게
+        setIsSidebarOpen(false);
+        setIsOpenDropdown(true);
+      } else {
+        // 데스크톱일 때는 사이드바 열려있게
+        setIsSidebarOpen(true);
+      }
     };
 
     // 초기 실행
@@ -61,7 +74,7 @@ export default function Sidebar({
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [selectedChallengeId, data]);
+  }, []);
 
   const handleDropdown = () => {
     return setIsOpenDropdown(!isOpenDropdown);
@@ -69,9 +82,12 @@ export default function Sidebar({
 
   const handleSidebarOpen = () => {
     setIsSidebarOpen(!isSidebarOpen);
+    setUserDropdown(false);
+    setIsOpenDropdown(true); // 챌린지 메뉴 자동으로 펼치기
 
-    if (!isSidebarOpen) {
-      setUserDropdown(false);
+    // 선택된 챌린지가 있다면 하위 메뉴도 자동으로 펼치기
+    if (selectedChallengeId) {
+      onSelectChallenge(selectedChallengeId);
     }
   };
 
@@ -90,115 +106,144 @@ export default function Sidebar({
     router.push(`/user/${challenge.challenges.id}`);
   };
 
+  console.log("챌린지 데이터:", {
+    전체데이터: data,
+    데이터길이: data?.length,
+    첫번째챌린지: data?.[0]?.challenges,
+    선택된챌린지ID: selectedChallengeId,
+  });
+
   return (
-    <div className="sm:relative top-0 z-40">
-      <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]">
+    <div className="lg:w-[18.75rem] lg:h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
+      {/* <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]"> */}
+      <div className="flex justify-start gap-[0.5rem] pt-[2.25rem] sm:pt-[0rem]">
+        {/* <Image src="/svg/logo_light.svg" width={30} height={30} alt="logo" /> */}
+        <Image
+          src="/svg/logo_text_light.svg"
+          width={120}
+          height={30}
+          alt="logo_text"
+          className={`${isMobile ? "hidden" : ""}`}
+        />
+      </div>
+      <div className="flex justify-between items-center py-[1.25rem] sm:px-4 lg:px-0 lg:gap-[1rem]">
         <button
           onClick={handleSidebarOpen}
           className={`${isMobile ? "" : "hidden"}`}
         >
           <Image
-            src="/svg/hamburger.svg"
+            src={isSidebarOpen ? "/svg/close.svg" : "/svg/hamburger.svg"}
             width={30}
             height={30}
-            alt="logo"
-            className={` w-[1.5rem] dark:invert`}
+            alt={isSidebarOpen ? "close menu" : "open menu"}
+            className={`w-[1.5rem] dark:invert`}
           />
         </button>
+        <div className="flex items-center gap-2 absolute right-4 top-4">
+          <div className="flex items-center gap-2 sm:flex md:flex lg:hidden">
+            <div className="text-gray-500 text-sm whitespace-nowrap">
+              안녕하세요, {username} !
+            </div>
+            <button onClick={handleUserDropdown} className="flex items-center">
+              <Image
+                src="/svg/arrow-down.svg"
+                width={20}
+                height={20}
+                alt="arrow-down"
+                className="w-[0.8rem]"
+              />
+            </button>
+            {userDropdown && (
+              <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px]">
+                <LogoutButton />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-
       {(isSidebarOpen || !isMobile) && (
         <div
-          className={` bg-white drop-shadow-sm dark:bg-blue-4 sm:w-full sm:flex sm:items-center sm:justify-center lg:h-full z-50 md:w-full md:items-center md:flex md:border lg:w-[15rem] md:justify-start`}
+          className={`sm:w-full sm:flex sm:items-center sm:justify-center z-50 md:w-full md:items-center md:flex md:border md:justify-start lg:w-full`}
         >
-          <div className=" flex flex-col gap-[2rem] items-start py-[3rem] lg:w-[15rem] md:w-[18rem] p-[2.3rem] sm:items-center md:py-[1rem]  md:pb-[2rem]">
-            <nav className="w-full">
-              <div className="relative">
-                <button
+          <nav className="w-full gap-[2rem] items-start sm:items-center md:py-[1rem] md:pb-[2rem] px-4">
+            <ul>
+              <li className="w-full items-center justify-between text-1.5-900">
+                <div
+                  role="group"
+                  aria-label="챌린지 메뉴"
+                  className="flex flex-row justify-between align-middle cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-4"
                   onClick={handleDropdown}
-                  className="w-[11rem] flex items-center justify-between lg:text-1.25-900 border-b-[0.1rem] border-gray-13 py-[0.8rem] sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500 cursor-pointer"
                 >
                   챌린지
-                  {isOpenDropdown ? (
+                  <button className="w-[1rem] lg:w-[0.8rem]">
                     <Image
-                      src="/svg/arrow-down.svg"
-                      width={20}
+                      src={
+                        !isOpenDropdown
+                          ? `/svg/arrow-up.svg`
+                          : `/svg/arrow-down.svg`
+                      }
+                      width={30}
                       height={30}
-                      alt="arrow-down "
-                      className="w-[1rem] lg:w-[0.8rem]"
-                      onClick={handleDropdown}
+                      alt="드롭다운 아이콘"
                     />
-                  ) : (
-                    <Image
-                      src="/svg/arrow-up.svg"
-                      width={20}
-                      height={30}
-                      alt="arrow-up "
-                      className="w-[1rem]  lg:w-[0.8rem]"
-                      onClick={handleDropdown}
-                    />
-                  )}
-                </button>
+                  </button>
+                </div>
+
                 {isOpenDropdown && (
-                  <div className="relative lg:relative md:fixed md:left-0 md:right-0 md:bg-white md:w-full md:z-50 md:mt-0 sm:h-screen sm:w-full sm:gap-[1rem] sm:justify-center sm:text-1.125-500">
-                    <div className=" md:flex md:flex-col md:items-start md:pl-6">
-                      {data.map((item: any, index: number) => (
-                        <div
-                          key={`challenge-${index}`}
-                          className="w-[11rem] md:w-[12rem] p-[1rem] text-gray-2 dark:text-white"
-                        >
-                          <div className="flex flex-col gap-2">
-                            <button
-                              className="lg:text-1-700 text-left hover:bg-gray-3"
-                              onClick={() => handleChallengeClick(item)}
-                            >
-                              {item.challenges.title}
-                            </button>
+                  <ul className="text-1.25-700 text-gray-2 mt-4 flex flex-col gap-2">
+                    {data && data.length > 0 ? (
+                      data.map((challenge, index) => (
+                        <li key={challenge.challenges.id}>
+                          <div
+                            className="block cursor-pointer py-2 px-8 rounded hover:bg-gray-100 dark:hover:bg-blue-3"
+                            onClick={() => handleChallengeClick(challenge)}
+                          >
+                            <span className="font-medium">
+                              {challenge.challenges.title || "제목 없음"}
+                            </span>
                           </div>
-                          <ul className="flex flex-col gap-[0.3rem] py-[0.7rem]">
-                            <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
-                              <Image
-                                src="/svg/subtitle-icon.svg"
-                                width={20}
-                                height={30}
-                                alt="subtitle-icon"
-                                className="w-[0.75rem]"
-                              />
-                              <Link
-                                href={`/user/${item.challenges.id}/diet`}
-                                onClick={() => {
-                                  setSelectedTitle(item.challenges.title);
-                                  onSelectChallenge(item.challenges.id);
-                                  setIsOpenDropdown(true);
-                                }}
-                                className="lg:text-1-700 md:text-1.125-500 sm:text-1-500"
-                              >
-                                식단
-                              </Link>
-                            </li>
-                            {/* <li className="flex items-center gap-[0.5rem] px-[1rem] hover:bg-gray-3 text-1.25-700 sm:text-0.875-700">
-                              <Image
-                                src="/svg/subtitle-icon.svg"
-                                width={20}
-                                height={30}
-                                alt="subtitle-icon"
-                                className="w-[0.75rem]"
-                              />
-                              <Link
-                                href={`/user/${item.challenges.id}/exercise`}
-                              >
-                                운동
-                              </Link>
-                            </li> */}
-                          </ul>
+                          {selectedChallengeId === challenge.challenges.id && (
+                            <ul className="mt-2 ml-2 border-l-2 border-gray-100 dark:border-blue-3">
+                              <li>
+                                <div
+                                  className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
+                                  onClick={() => {
+                                    router.push(
+                                      `/user/${challenge.challenges.id}/diet`
+                                    );
+                                  }}
+                                >
+                                  식단
+                                </div>
+                              </li>
+                              <li>
+                                <div
+                                  className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
+                                  onClick={() => {
+                                    router.push(
+                                      `/user/${challenge.challenges.id}/exercise`
+                                    );
+                                  }}
+                                >
+                                  운동
+                                </div>
+                              </li>
+                            </ul>
+                          )}
+                        </li>
+                      ))
+                    ) : (
+                      <li>
+                        <div className="py-2 px-3 text-gray-400">
+                          챌린지가 없습니다
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                      </li>
+                    )}
+                  </ul>
                 )}
-              </div>
-            </nav>
-          </div>
+              </li>
+            </ul>
+          </nav>
         </div>
       )}
     </div>

@@ -173,7 +173,7 @@ const DietTable: React.FC<DietTableProps> = ({
                 </button>
               </div>
             </th>
-            <th className="p-[1rem] w-[20%] lg:pl-[1rem] sm:p-0 sm:text-0.75-500 text-center">
+            <th className="p-[1rem] lg:w-[20%] sm:p-0 sm:text-0.75-500 text-center">
               피드백 수
             </th>
           </tr>

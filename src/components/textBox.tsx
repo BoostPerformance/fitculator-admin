@@ -12,7 +12,7 @@ interface TextBoxProps {
   svg2?: string;
   onClick1?: () => void;
   onClick2?: () => void;
-  onSave?: (feedback: string) => Promise<void>; // date 파라미터 제거
+  onSave?: (feedback: string) => Promise<void>;
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   Btn1className?: string;
   Btn2className?: string;
@@ -76,24 +76,26 @@ const TextBox = ({
   };
 
   return (
-    <div className="mt-[2rem] p-[1rem] border rounded-md relative lg:w-full lg:h-[30rem] sm:min-w-[23rem]">
+    <div className="mt-[2rem] p-[1rem] relative lg:px-0 lg:w-full lg:h-[30rem] sm:min-w-[23rem]">
       <h4 className="text-1.375-700 font-semibold mb-2 flex items-center">
         {title}
-        <button className="ml-2 text-[1rem]" onClick={handleCopy}>
-          <Image
-            src="/svg/copyIcon.svg"
-            alt="copy icon"
-            width={17}
-            height={17}
-            className="w-4 h-4"
-          />
-        </button>
+        {copyIcon && (
+          <button className="ml-2 text-[1rem]" onClick={handleCopy}>
+            <Image
+              src="/svg/copyIcon-gray.svg"
+              alt="copy icon"
+              width={17}
+              height={17}
+              className="w-4 h-4"
+            />
+          </button>
+        )}
       </h4>
-      {copyIcon && (
+
+      {copyMessage && copyIcon && (
         <div
-          className={`absolute top-[0.5rem] left-[10rem] bg-green-100 text-green-800 text-1-500 p-[0.5rem] rounded-[0.5rem] 
-          transform transition-opacity duration-500 ease-in-out
-          ${copyMessage ? "opacity-100" : "opacity-0"}`}
+          className="absolute top-[0.5rem] left-[10rem] bg-green-100 text-green-800 text-1-500 p-[0.5rem] rounded-[0.5rem] 
+          transform transition-opacity duration-500 ease-in-out opacity-100"
         >
           텍스트가 복사되었습니다.
         </div>
@@ -110,50 +112,40 @@ const TextBox = ({
           readOnly={readOnly}
           onChange={handleChange}
         />
-        <div className="flex gap-[1rem] w-[19.625rem] sm:w-full">
-          <div className="flex relative sm:justify-center sm:gap-[1.4rem] w-full">
-            <button
-              className={`${Btn1className} rounded-md text-0.875-400 mt-[0.5rem] ${
-                button2 ? "lg:w-[9.3125rem]" : "w-full"
-              } sm:w-full md:w-full h-[2.5rem]`}
-              onClick={handleButtonClick}
-            >
-              {button1}
-            </button>
-            {button1 && svg1 && (
+
+        <div className="flex gap-[0.625rem] mt-[0.75rem] sm:w-full">
+          <button
+            className={`${Btn1className} flex flex-row gap-1 justify-center items-center rounded-md text-0.875-400 w-[9.3125rem] p-[0.375rem] sm:w-full`}
+            onClick={handleButtonClick}
+          >
+            {svg1 && (
               <Image
                 src={svg1}
                 alt="icon"
-                width={17}
-                height={17}
-                className={`absolute top-[1.2rem] ${
-                  button2
-                    ? "lg:right-[5.3rem] lg:top-[1.2rem] sm:left-[2rem]"
-                    : "lg:right-[11.5rem] lg:top-[1.3rem] sm:left-[6rem] sm:top-[1.3rem]"
-                } w-4 h-4`}
-                onClick={handleButtonClick}
+                width={16}
+                height={16}
+                className="w-4 h-4"
               />
             )}
-          </div>
+            {button1}
+          </button>
+
           {button2 && (
-            <div className="flex relative justify-center w-1/2">
-              <button
-                className={`${Btn2className} rounded-md text-0.875-400 mt-[0.5rem] w-[9.3125rem] h-[2.5rem]`}
-                onClick={onClick2}
-              >
-                {button2}
-              </button>
+            <button
+              className={`${Btn2className} flex flex-row gap-1 justify-center items-center rounded-md text-0.875-400 w-[149px] sm:w-full`}
+              onClick={onClick2}
+            >
               {svg2 && (
                 <Image
                   src={svg2}
                   alt="icon"
                   width={17}
                   height={17}
-                  className="absolute top-[1.2rem] left-[2.4rem] w-4 h-4"
-                  onClick={onClick2}
+                  className="w-4 h-4"
                 />
               )}
-            </div>
+              {button2}
+            </button>
           )}
         </div>
       </div>

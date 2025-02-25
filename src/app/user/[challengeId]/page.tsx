@@ -10,7 +10,6 @@ import WorkoutLeaderboard from "@/components/graph/workoutLeaderboard";
 import DietTable from "@/components/dietDashboard/dietTable";
 import TotalFeedbackCounts from "@/components/totalCounts/totalFeedbackCount";
 import Title from "@/components/layout/title";
-import Sidebar from "@/components/fixedBars/sidebar";
 import { useParams } from "next/navigation";
 import { ChallengeDashboardSkeleton } from "@/components/layout/skeleton";
 import {
@@ -316,37 +315,10 @@ export default function User() {
 
   return (
     <div className="bg-white-1 dark:bg-blue-4 flex flex-col min-h-screen sm:px-[1rem] md:px-[0.4rem]">
-      <div className="flex justify-end pr-[2rem]">
-        <div className="flex items-center gap-2">
-          {/* <div className="text-gray-700">안녕하세요, {adminData.username}</div>
-          <div className="relative">
-            <button onClick={() => setUserDropdown(!userDropdown)}>
-              <Image
-                src="/svg/arrow-down.svg"
-                width={20}
-                height={20}
-                alt="arrow-down"
-                className="w-[0.8rem]"
-              />
-            </button>
-            {userDropdown && (
-              <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px]">
-                <LogoutButton />
-              </div>
-            )}
-          </div> */}
-        </div>
-      </div>
       <div className="flex gap-[1rem] flex-1 sm:flex-col md:flex-col">
-        <Sidebar
-          data={challenges}
-          onSelectChallenge={handleChallengeSelect}
-          coach={adminData.username}
-          selectedChallengeId={selectedChallengeId}
-        />
         <main className="flex-1 overflow-y-auto">
-          <div className="pt-[2rem] pb-[2rem] sm:pt-0 sm:pl-5">
-            <div className="flex items-center justify-between px-1 pr-8">
+          <div className="pt-[2rem] pb-[2rem] sm:pt-0">
+            <div className="px-4 sm:px-4 relative">
               <Title
                 title={
                   challenges.find(
@@ -355,30 +327,9 @@ export default function User() {
                   )?.challenges.title || ""
                 }
               />
-              <div className="flex items-center gap-2">
-                <div className="text-gray-500">
-                  안녕하세요, {adminData.username} !
-                </div>
-                <div className="relative">
-                  <button onClick={() => setUserDropdown(!userDropdown)}>
-                    <Image
-                      src="/svg/arrow-down.svg"
-                      width={20}
-                      height={20}
-                      alt="arrow-down"
-                      className="w-[0.8rem]"
-                    />
-                  </button>
-                  {userDropdown && (
-                    <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px]">
-                      <LogoutButton />
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-1 px-1 pr-8 sm:grid-cols-1">
+            <div className="grid grid-cols-3 gap-1 px-4 sm:px-4 sm:grid-cols-1 sm:mt-4">
               <TotalFeedbackCounts
                 counts={progress.progressDays}
                 total={`${progress.totalDays}일`}
@@ -416,12 +367,12 @@ export default function User() {
               />
             </div>
 
-            <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:flex sm:flex-col px-1 pr-8">
+            <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4">
               <TrafficSourceChart challengeId={selectedChallengeId} />
               <DailyDietRecord activities={filteredDailyRecordsbyId} />
               <WorkoutLeaderboard challengeId={selectedChallengeId} />
             </div>
-            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem] sm:pt-[2rem] bg-white-1 px-1 pr-8">
+            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem] sm:pt-4 bg-white-1 px-4 sm:px-4">
               <DietTable
                 dailyRecordsData={filteredDailyRecordsbyId}
                 challengeId={selectedChallengeId}

@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { DietPageSkeleton } from "@/components/layout/skeleton";
 import { useParams, useSearchParams } from "next/navigation";
-import Sidebar from "@/components/fixedBars/sidebar";
 import { useDietData } from "@/components/hooks/useDietData";
 import { DietStatistics } from "@/components/statistics/dietStatistics";
 import { DietContent } from "@/components/dietDashboard/dietContent";
@@ -79,72 +78,59 @@ export default function DietItem() {
   }
 
   return (
-    <div className="flex">
-      <Sidebar
-        data={challenges || []}
-        onSelectChallenge={handleSelectChallenge}
-        selectedChallengeId={params.challengeId as string}
-      />
-      <div className="flex-1 p-4">
-        <div className="px-8 pt-4">
-          <div className="text-gray-2 text-1.25-700">
-            {challenges?.find((c) => c.challenges.id === params.challengeId)
-              ?.challenges.title || ""}
-          </div>
-          <Title title="식단 현황" />
+    <div className="flex-1 p-4 sm:p-0">
+      <div className="px-8 pt-4 sm:px-4 sm:pt-0">
+        <div className="text-gray-2 text-1.25-700">
+          {challenges?.find((c) => c.challenges.id === params.challengeId)
+            ?.challenges.title || ""}
         </div>
-        {dietError ? (
-          <div className="p-4 text-red-500">{dietError}</div>
-        ) : !dietRecords || dietRecords.length === 0 ? (
-          <div className="p-4">식단 기록이 없습니다.</div>
-        ) : (
-          <>
-            <div className="mt-6">
-              <DietStatistics
-                processedMeals={dietRecords}
-                selectedChallengeId={params.challengeId as string}
-                selectedDate={selectedDate}
-                dailyRecords={challenges
-                  ?.filter(
-                    (challenge) =>
-                      challenge.challenges.id === params.challengeId
-                  )
-                  .flatMap((challenge) =>
-                    challenge.challenges.challenge_participants.map(
-                      (participant) => ({
-                        id: challenge.challenges.id,
-                        users: {
-                          id: participant.service_user_id || "",
-                          name: "",
-                          username: "",
-                        },
-                        challenges: {
-                          ...challenge.challenges,
-                          challenge_type: "diet",
-                        },
-                        daily_records: [],
-                      })
-                    )
-                  )}
-              />
-            </div>
-            <DietContent
-              selectedDate={selectedDate}
-              onDateChange={setSelectedDate}
-              challengeDates={{
-                startDate: dietRecords[0]?.daily_records.record_date || "",
-                endDate:
-                  dietRecords[dietRecords.length - 1]?.daily_records
-                    .record_date || "",
-              }}
-              filteredByDate={dietRecords}
-              mobileSize={isMobile}
-              loading={dietLoading}
-              challengeId={params.challengeId as string}
-            />
-          </>
-        )}
+        <Title title="식단 현황" />
       </div>
+      {dietError && <div className="p-4 text-red-500">{dietError}</div>}
+      <div className="mt-6">
+        <DietStatistics
+          processedMeals={dietRecords}
+          selectedChallengeId={params.challengeId as string}
+          selectedDate={selectedDate}
+          dailyRecords={challenges
+            ?.filter(
+              (challenge) => challenge.challenges.id === params.challengeId
+            )
+            .flatMap((challenge) =>
+              challenge.challenges.challenge_participants.map(
+                (participant) => ({
+                  id: challenge.challenges.id,
+                  users: {
+                    id: participant.service_user_id || "",
+                    name: "",
+                    username: "",
+                  },
+                  challenges: {
+                    ...challenge.challenges,
+                    challenge_type: "diet",
+                  },
+                  daily_records: [],
+                })
+              )
+            )}
+        />
+      </div>
+      <DietContent
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        challengeDates={{
+          startDate:
+            challenges?.find((c) => c.challenges.id === params.challengeId)
+              ?.challenges.start_date || "",
+          endDate:
+            challenges?.find((c) => c.challenges.id === params.challengeId)
+              ?.challenges.end_date || "",
+        }}
+        filteredByDate={dietRecords}
+        mobileSize={isMobile}
+        loading={dietLoading}
+        challengeId={params.challengeId as string}
+      />
     </div>
   );
 }

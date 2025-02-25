@@ -10,7 +10,7 @@ export interface DailyMealData {
   meals: {
     [key: string]: {
       description: string;
-      mealPhotos: PhotoData[];
+      meal_photos: PhotoData[];
       updatedAt: string;
       meal_time: string;
     };

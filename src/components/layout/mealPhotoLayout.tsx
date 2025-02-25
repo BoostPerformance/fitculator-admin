@@ -172,10 +172,14 @@ const MealPhotoLayout = ({
         />
       )}
       <div>
-        <h3 className="text-center mb-2 text-base font-semibold">{title}</h3>
-        {renderPhotos()}
-        <div className="mt-2 text-sm text-gray-600">{time}</div>
-        <div className="text-sm mt-1 whitespace-pre-wrap">{descriptions}</div>
+        <h3 className="lg:mb-[2.125rem] sm:mb-[0.5rem] text-base font-semibold">
+          {title}
+        </h3>
+        <div className="lg:px-[0.625rem]">
+          {renderPhotos()}
+          <div className="mt-2 text-sm text-gray-600">{time}</div>
+          <div className="text-sm mt-1">{descriptions}</div>
+        </div>
       </div>
       {/* <div className="flex justify-center mt-4">
         <button

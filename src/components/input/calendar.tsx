@@ -66,10 +66,16 @@ export default function Calendar({
             <button
               key={index}
               onClick={() => handleDateClick(dayInfo.date)}
+              disabled={!isInChallengeRange(dayInfo.date)}
               className={`
               aspect-square flex items-center justify-center rounded-[0.125rem] text-0.75-500
               transition-colors duration-200 w-[2rem] sm:w-[2.5rem]
               ${getButtonStyles(dayInfo)}
+              ${
+                !isInChallengeRange(dayInfo.date)
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }
             `}
             >
               {dayInfo.date.getDate()}

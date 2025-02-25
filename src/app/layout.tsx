@@ -1,8 +1,8 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import React from "react";
-import RootProvider from "@/components/providers/root-provider";
 import { Metadata, Viewport } from "next";
+import ClientProviders from "@/components/providers/client-providers";
 
 const pretendard = localFont({
   src: "../fonts/PretendardVariable.woff2",
@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scrollbar-hide" suppressHydrationWarning>
       <body className={`${pretendard.variable} font-pretendard`}>
-        <RootProvider>{children}</RootProvider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

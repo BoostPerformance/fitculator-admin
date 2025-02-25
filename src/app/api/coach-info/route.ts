@@ -24,7 +24,7 @@ export async function GET() {
       .select("id, admin_role, organization_id, username")
       .eq("email", session.user.email)
       .single();
-
+    // console.log("adminUser", adminUser);
     if (adminError) {
       throw adminError;
     }

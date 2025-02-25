@@ -128,8 +128,8 @@ export default function MobileChart({
         {dietDetailItems.map((meal: ProcessedMeal, index: number) => {
           // console.log('dietDetailItems', dietDetailItems);
           return (
-            <div className="pt-[2rem]" key={meal.user.id || index}>
-              <button
+            <div className="pt-[2rem] sm:pt-[0rem]" key={meal.user.id || index}>
+              {/* <button
                 onClick={() =>
                   router.push(
                     `/user/${meal.challenge_id}/diet/${meal.user.id}/${selectedDate}`
@@ -138,7 +138,7 @@ export default function MobileChart({
                 className="text-[#6F6F6F] text-1.125-500 bg-gray-8 p-2 rounded-[0.5rem]"
               >
                 피드백 남기기 →
-              </button>
+              </button> */}
               <div
                 onClick={() =>
                   router.push(
