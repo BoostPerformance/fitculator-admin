@@ -8,15 +8,17 @@ const DailyDietRecord = ({
 }: {
   activities: ChallengeParticipant[];
 }) => {
-  console.log('DailyDietRecord activities:', activities);
+  //console.log('DailyDietRecord activities:', activities);
+  // 현재 주의 월요일을 구하는 함수
   const getMondayOfCurrentWeek = () => {
     const today = new Date();
-    const day = today.getDay();
+    const day = today.getDay(); // 0은 일요일, 1은 월요일, ..., 6은 토요일
     // 일요일이 0이므로, 월요일부터 시작하도록 조정
     const diff = today.getDate() - (day === 0 ? 6 : day - 1);
     return new Date(today.setDate(diff));
   };
 
+  // 보여줄 주의 날짜들을 구하는 함수
   const getWeekDates = (
     challengeStartDate: string,
     challengeEndDate: string
@@ -26,28 +28,142 @@ const DailyDietRecord = ({
     const today = new Date();
     let weekStart;
 
-    // 챌린지가 종료된 경우
-    if (today > end) {
+    // 1. 오늘이 챌린지 기간 전인 경우 - 챌린지 첫 주를 보여줌
+    if (today < start) {
+      weekStart = new Date(start);
+      // 챌린지 시작일의 요일에 따라 해당 주의 월요일을 찾음
+      const startDay = weekStart.getDay();
+      weekStart.setDate(
+        weekStart.getDate() - (startDay === 0 ? 6 : startDay - 1)
+      );
+
+      // 만약 계산된 월요일이 챌린지 시작일보다 이전이면, 챌린지 시작일을 사용
+      if (weekStart < start) {
+        weekStart = new Date(start);
+      }
+    }
+    // 2. 오늘이 챌린지 기간 후인 경우 - 챌린지 마지막 주를 보여줌
+    else if (today > end) {
       // 마지막 주의 월요일을 구함
       weekStart = new Date(end);
-      weekStart.setDate(end.getDate() - ((end.getDay() + 6) % 7));
-    } else {
-      // 진행 중인 경우 현재 주의 월요일
+      const endDay = weekStart.getDay();
+      // 해당 주의 월요일로 이동
+      weekStart.setDate(weekStart.getDate() - (endDay === 0 ? 6 : endDay - 1));
+    }
+    // 3. 오늘이 챌린지 기간 중인 경우 - 오늘이 포함된 주를 보여줌
+    else {
       weekStart = getMondayOfCurrentWeek();
+
+      // 만약 계산된 월요일이 챌린지 시작일보다 이전이면, 챌린지 시작일을 사용
+      if (weekStart < start) {
+        weekStart = new Date(start);
+      }
     }
 
-    // 챌린지 시작일 이전인 경우
-    if (today < start) {
-      weekStart = start;
-    }
-
+    // 선택된 주의 7일을 배열로 반환
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(weekStart);
       date.setDate(weekStart.getDate() + i);
       dates.push(date.toISOString().split('T')[0]);
     }
+
     return dates;
+  };
+
+  // 해당 날짜에 기록이 있는지 확인하는 함수 (디버깅 로그 추가)
+  const hasRecordForDate = (date: string, activity: ChallengeParticipant) => {
+    // 사용자 이름 가져오기 (디버깅용)
+    const userName = activity.users.name;
+
+    // 날짜가 챌린지 기간을 벗어났는지 확인
+    const recordDate = new Date(date);
+    const today = new Date();
+    const challengeStart = new Date(activity.challenges.start_date);
+    const challengeEnd = new Date(activity.challenges.end_date);
+
+    // console.log(
+    //   `[${userName}] 날짜 확인: ${date}, 챌린지 기간: ${
+    //     challengeStart.toISOString().split('T')[0]
+    //   } ~ ${challengeEnd.toISOString().split('T')[0]}`
+    // );
+
+    // 챌린지 기간 밖의 날짜는 항상 false 반환 (시작일 이전이거나 종료일 이후)
+    if (recordDate < challengeStart || recordDate > challengeEnd) {
+      console.log(`[${userName}] ${date} - 챌린지 기간 밖 (false 반환)`);
+      return false;
+    }
+
+    // 미래 날짜는 false 반환
+    if (recordDate > today) {
+      console.log(`[${userName}] ${date} - 미래 날짜 (false 반환)`);
+      return false;
+    }
+
+    // daily_records가 존재하는지 확인
+    if (!activity.daily_records || activity.daily_records.length === 0) {
+      console.log(`[${userName}] ${date} - daily_records 없음 (false 반환)`);
+      return false;
+    }
+
+    // console.log(
+    //   `[${userName}] ${date} - daily_records 길이: ${activity.daily_records.length}`
+    // );
+
+    // 모든 daily_records의 날짜 출력 (데이터 확인용)
+    const allDates = activity.daily_records.map((record) => {
+      const recordDateStr =
+        typeof record.record_date === 'string'
+          ? record.record_date.split('T')[0]
+          : new Date(record.record_date).toISOString().split('T')[0];
+      return recordDateStr;
+    });
+
+    //  console.log(`[${userName}] 모든 기록 날짜:`, allDates);
+
+    // 해당 날짜의 daily_record를 찾음
+    const dailyRecord = activity.daily_records.find((record) => {
+      // record.record_date가 문자열이든 Date 객체든 처리할 수 있도록 함
+      const recordDateStr =
+        typeof record.record_date === 'string'
+          ? record.record_date.split('T')[0]
+          : new Date(record.record_date).toISOString().split('T')[0];
+
+      return recordDateStr === date;
+    });
+
+    if (!dailyRecord) {
+      console.log(`[${userName}] ${date} - 해당 날짜의 기록 없음 (false 반환)`);
+      return false;
+    }
+
+    // daily_record가 있고, meals 배열이 있는지 확인
+    if (
+      !dailyRecord.meals ||
+      !Array.isArray(dailyRecord.meals) ||
+      dailyRecord.meals.length === 0
+    ) {
+      console.log(
+        `[${userName}] ${date} - meals 데이터 없음 (false 반환), dailyRecord:`,
+        dailyRecord
+      );
+      return false;
+    }
+
+    // meals 정보 자세히 출력
+    //  console.log(`[${userName}] ${date} - meals 데이터:`, dailyRecord.meals);
+
+    // meals 배열에 description이 있는 항목이 하나라도 있는지 확인
+    const hasMealWithDescription = dailyRecord.meals.some(
+      (meal) => meal.description && meal.description.trim() !== ''
+    );
+
+    // console.log(
+    //   `[${userName}] ${date} - 결과: ${
+    //     hasMealWithDescription ? '기록 있음 (true)' : '유효한 기록 없음 (false)'
+    //   }`
+    // );
+    return hasMealWithDescription;
   };
 
   const calculateChallengeDays = (startDate: string, endDate: string) => {
@@ -65,39 +181,6 @@ const DailyDietRecord = ({
         (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
       );
     }
-  };
-
-  const hasRecordForDate = (date: string, activity: ChallengeParticipant) => {
-    // 날짜가 챌린지 기간을 벗어났는지 확인
-    const recordDate = new Date(date);
-    const today = new Date();
-    const challengeStart = new Date(activity.challenges.start_date);
-
-    // 챌린지 시작일 이전이거나 미래 날짜는 false 반환
-    if (recordDate < challengeStart || recordDate > today) {
-      return false;
-    }
-
-    // daily_records가 존재하는지 확인
-    if (!activity.daily_records) {
-      return false;
-    }
-
-    // 해당 날짜의 daily_record를 찾음
-    const dailyRecord = activity.daily_records.find((record) => {
-      const recordDateStr = record.record_date.split('T')[0];
-      return recordDateStr === date;
-    });
-
-    // daily_record가 있고, meals 배열이 있는지 확인
-    if (!dailyRecord?.meals) {
-      return false;
-    }
-
-    // meals 배열에 description이 있는 항목이 하나라도 있는지 확인
-    return dailyRecord.meals.some(
-      (meal) => meal.description && meal.description.trim() !== ''
-    );
   };
 
   return (

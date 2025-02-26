@@ -55,6 +55,7 @@ export interface ChallengeParticipant {
   id: string;
   coach_memo?: string;
   memo_updated_at?: string;
+  service_user_id: string;
   users: {
     id: string;
     name: string;

@@ -1,21 +1,22 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Footer from "@/components/layout/footer";
-import Image from "next/image";
-import LogoutButton from "@/components/buttons/logoutButton";
-import TrafficSourceChart from "@/components/graph/trafficSourceChart";
-import DailyDietRecord from "@/components/graph/dailyDietRecord";
-import WorkoutLeaderboard from "@/components/graph/workoutLeaderboard";
-import DietTable from "@/components/dietDashboard/dietTable";
-import TotalFeedbackCounts from "@/components/totalCounts/totalFeedbackCount";
-import Title from "@/components/layout/title";
-import { useParams } from "next/navigation";
-import { ChallengeDashboardSkeleton } from "@/components/layout/skeleton";
+import { useEffect, useState } from 'react';
+import Footer from '@/components/layout/footer';
+import Image from 'next/image';
+import LogoutButton from '@/components/buttons/logoutButton';
+import TrafficSourceChart from '@/components/graph/trafficSourceChart';
+import DailyDietRecord from '@/components/graph/dailyDietRecord';
+import WorkoutLeaderboard from '@/components/graph/workoutLeaderboard';
+import DietTable from '@/components/dietDashboard/dietTable';
+import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
+import Title from '@/components/layout/title';
+import Sidebar from '@/components/fixedBars/sidebar';
+import { useParams } from 'next/navigation';
+import { ChallengeDashboardSkeleton } from '@/components/layout/skeleton';
 import {
   calculateTodayDietUploads,
   calculateTotalDietUploads,
-} from "@/components/statistics/challengeParticipantsDietStatics";
+} from '@/components/statistics/challengeParticipantsDietStatics';
 
 interface AdminUser {
   email: string;
@@ -87,7 +88,7 @@ export default function User() {
   const params = useParams() as ParamsType;
   const [workoutCount, setWorkoutCount] = useState(0);
   const [workOutCountToday, setWorkOutCountToday] = useState<number>(0);
-  const [selectedChallengeId, setSelectedChallengeId] = useState<string>("");
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,23 +99,23 @@ export default function User() {
   } | null>(null);
   const [userDropdown, setUserDropdown] = useState(false);
   const [adminData, setAdminData] = useState({
-    admin_role: "",
-    username: "",
+    admin_role: '',
+    username: '',
   });
   const [coachData, setCoachData] = useState<CoachData>({
-    id: "",
-    admin_user_id: "",
-    organization_id: "",
-    organization_name: "",
-    profile_image_url: "",
-    introduction: "",
+    id: '',
+    admin_user_id: '',
+    organization_id: '',
+    organization_name: '',
+    profile_image_url: '',
+    introduction: '',
     specialization: [],
     is_active: false,
-    created_at: "",
-    updated_at: "",
+    created_at: '',
+    updated_at: '',
     admin_users: {
-      email: "",
-      username: "",
+      email: '',
+      username: '',
     },
     challenge_coaches: [],
   });
@@ -126,12 +127,12 @@ export default function User() {
         `/api/diet-uploads?challengeId=${challengeId}`
       );
       if (!response.ok) {
-        throw new Error("Failed to fetch diet uploads");
+        throw new Error('Failed to fetch diet uploads');
       }
       const data = await response.json();
       setTodayDietUploads(data);
     } catch (error) {
-      console.error("Error fetching diet uploads:", error);
+      console.error('Error fetching diet uploads:', error);
     }
   };
 
@@ -141,7 +142,7 @@ export default function User() {
     };
 
     handleResize();
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
 
     const fetchData = async () => {
       try {
@@ -151,15 +152,15 @@ export default function User() {
           `/api/workouts?type=today-count&challengeId=${params.challengeId}`
         );
         if (!workoutCountResponse.ok) {
-          throw new Error("Failed to fetch workout count");
+          throw new Error('Failed to fetch workout count');
         }
         const workoutCountData = await workoutCountResponse.json();
         setWorkOutCountToday(workoutCountData.count);
 
         // 챌린지 데이터 가져오기
-        const challengesResponse = await fetch("/api/challenges");
+        const challengesResponse = await fetch('/api/challenges');
         if (!challengesResponse.ok) {
-          throw new Error("Failed to fetch challenges");
+          throw new Error('Failed to fetch challenges');
         }
         const challengesData = await challengesResponse.json();
 
@@ -179,17 +180,17 @@ export default function User() {
         }
 
         // 코치 데이터 가져오기
-        const coachResponse = await fetch("/api/coach-info");
+        const coachResponse = await fetch('/api/coach-info');
         if (!coachResponse.ok) {
-          throw new Error("Failed to fetch coach data");
+          throw new Error('Failed to fetch coach data');
         }
         const coachData = await coachResponse.json();
         setCoachData(coachData);
 
         // 어드민 데이터 가져오기
-        const adminResponse = await fetch("/api/admin-users");
+        const adminResponse = await fetch('/api/admin-users');
         if (!adminResponse.ok) {
-          throw new Error("Failed to fetch admin data");
+          throw new Error('Failed to fetch admin data');
         }
         const adminData = await adminResponse.json();
         setAdminData(adminData);
@@ -197,29 +198,30 @@ export default function User() {
         // 데일리레코드(테이블 정보) 가져오기
         await fetchDailyRecords(1);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false); // 데이터 로딩 완료
       }
     };
 
     fetchData();
-    return () => window.removeEventListener("resize", handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [params.challengeId]);
 
   const fetchDailyRecords = async (pageNum: number) => {
     try {
       setLoading(true);
       const url = new URL(
-        "/api/challenge-participants",
+        '/api/challenge-participants',
         window.location.origin
       );
-      url.searchParams.append("page", pageNum.toString());
-      url.searchParams.append("limit", "30");
+      url.searchParams.append('page', pageNum.toString());
+      url.searchParams.append('limit', '30');
+      url.searchParams.append('with_records', 'true');
 
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error("Failed to fetch daily-records data");
+        throw new Error('Failed to fetch daily-records data');
       }
       const data = await response.json();
 
@@ -231,7 +233,7 @@ export default function User() {
 
       return data.data.length > 0;
     } catch (error) {
-      console.error("Error fetching daily records:", error);
+      console.error('Error fetching daily records:', error);
       return false;
     } finally {
       setLoading(false);
@@ -257,7 +259,7 @@ export default function User() {
       fetch(`/api/workouts?type=today-count&challengeId=${selectedChallengeId}`)
         .then((response) => {
           if (!response.ok) {
-            throw new Error("Failed to fetch workout count");
+            throw new Error('Failed to fetch workout count');
           }
           return response.json();
         })
@@ -265,7 +267,7 @@ export default function User() {
           setWorkOutCountToday(data.count);
         })
         .catch((error) => {
-          console.error("Error fetching workout count:", error);
+          console.error('Error fetching workout count:', error);
         });
     }
   }, [selectedChallengeId]);
@@ -286,7 +288,7 @@ export default function User() {
       )
     : [];
 
-  console.log("filteredDailyRecordsbyId:", filteredDailyRecordsbyId);
+  console.log('filteredDailyRecordsbyId:', filteredDailyRecordsbyId);
 
   const getSelectedChallengeDates = () => {
     const selectedChallenge = challenges.find(
@@ -306,7 +308,7 @@ export default function User() {
         challengeDates.startDate,
         challengeDates.endDate
       )
-    : { progressDays: "0", totalDays: "0" };
+    : { progressDays: '0', totalDays: '0' };
 
   // 로딩 중일 때 스켈레톤 UI 표시
   if (loading) {
@@ -324,7 +326,7 @@ export default function User() {
                   challenges.find(
                     (challenge) =>
                       challenge.challenges.id === selectedChallengeId
-                  )?.challenges.title || ""
+                  )?.challenges.title || ''
                 }
               />
             </div>
@@ -354,8 +356,8 @@ export default function User() {
                 textColor="text-blue-5"
               />
               <TotalFeedbackCounts
-                counts={todayDietUploads?.counts || "0"}
-                total={todayDietUploads?.total || "0명"}
+                counts={todayDietUploads?.counts || '0'}
+                total={todayDietUploads?.total || '0명'}
                 title={
                   <span>
                     오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
