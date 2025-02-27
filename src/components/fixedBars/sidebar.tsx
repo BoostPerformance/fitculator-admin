@@ -167,7 +167,7 @@ export default function Sidebar({
         >
           <nav className="w-full gap-[2rem] items-start sm:items-center md:py-[1rem] md:pb-[2rem] px-4">
             <ul>
-              <li className="w-full items-center justify-between text-1.5-900">
+              <li className="w-full items-center justify-between text-1.5-700">
                 <div
                   role="group"
                   aria-label="챌린지 메뉴"
@@ -190,12 +190,12 @@ export default function Sidebar({
                 </div>
 
                 {isOpenDropdown && (
-                  <ul className="text-1.25-700 text-gray-2 mt-4 flex flex-col gap-2">
+                  <ul className="font-medium text-1.25-700 text-gray-1 mt-4 flex flex-col gap-2">
                     {data && data.length > 0 ? (
                       data.map((challenge, index) => (
                         <li key={challenge.challenges.id}>
                           <div
-                            className="block cursor-pointer py-2 px-8 rounded hover:bg-gray-100 dark:hover:bg-blue-3"
+                            className="font-medium block cursor-pointer py-2 pl-4 rounded hover:bg-gray-100 dark:hover:bg-blue-3"
                             onClick={() => handleChallengeClick(challenge)}
                           >
                             <span className="font-medium">
