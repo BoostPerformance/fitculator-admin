@@ -1,19 +1,20 @@
-"use client";
-import { useState, useEffect, useMemo } from "react";
-import { DietPageSkeleton } from "@/components/layout/skeleton";
-import DailyDietRecordMobile from "@/components/graph/dailyDietRecordMobile";
-import { useRouter } from "next/navigation";
-import TextBox from "@/components/textBox";
-import Title from "@/components/layout/title";
-import TotalFeedbackCounts from "@/components/totalCounts/totalFeedbackCount";
-import MealPhotoLayout from "@/components/layout/mealPhotoLayout";
-import { useParams } from "next/navigation";
-import Calendar from "@/components/input/calendar";
-import { DailyMealData } from "@/types/dietItemContainerTypes";
-import calendarUtils from "@/components/utils/calendarUtils";
-import DateInput from "@/components/input/dateInput";
-import { useFeedback } from "@/components/hooks/useFeedback";
-import { useChallenge } from "@/components/hooks/useChallenges";
+'use client';
+import { useState, useEffect, useMemo } from 'react';
+import { DietPageSkeleton } from '@/components/layout/skeleton';
+import DailyDietRecordMobile from '@/components/graph/dailyDietRecordMobile';
+import { useRouter } from 'next/navigation';
+import TextBox from '@/components/textBox';
+import Title from '@/components/layout/title';
+import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
+import MealPhotoLayout from '@/components/layout/mealPhotoLayout';
+import { useParams } from 'next/navigation';
+import Calendar from '@/components/input/calendar';
+import { DailyMealData } from '@/types/dietItemContainerTypes';
+import calendarUtils from '@/components/utils/calendarUtils';
+import DateInput from '@/components/input/dateInput';
+import { useFeedback } from '@/components/hooks/useFeedback';
+import { useChallenge } from '@/components/hooks/useChallenges';
+import logger from '@/lib/logger';
 
 interface CustomAlertProps {
   message: string;
@@ -46,10 +47,10 @@ type PageParams = {
 };
 
 const DEFAULT_MEAL = {
-  description: "",
+  description: '',
   meal_photos: [],
-  updatedAt: "",
-  meal_time: "",
+  updatedAt: '',
+  meal_time: '',
 };
 
 const DEFAULT_DAILY_MEAL = (date: string) => ({
@@ -62,8 +63,8 @@ const DEFAULT_DAILY_MEAL = (date: string) => ({
     supplement: { ...DEFAULT_MEAL },
   },
   feedbacks: {
-    coach_feedback: "",
-    ai_feedback: "",
+    coach_feedback: '',
+    ai_feedback: '',
   },
   user: undefined,
 });
@@ -84,29 +85,29 @@ export default function SelectedDate() {
     [key: string]: string;
   }>({});
   const [isDisable, setIsDisable] = useState(false);
-  const [challengeTitle, setChallengeTitle] = useState("");
-  const [recordDate, setRecordDate] = useState(params.selectedDate || "");
+  const [challengeTitle, setChallengeTitle] = useState('');
+  const [recordDate, setRecordDate] = useState(params.selectedDate || '');
   const [orgName, setOrgName] = useState({
-    username: "코치님",
-    organization_name: "F45 을지로 챌린지",
+    username: '코치님',
+    organization_name: 'F45 을지로 챌린지',
   });
   const [mobileSize, setMobileSize] = useState(true);
   const [challengePeriods, setChallengePeriods] = useState({
-    start_date: "",
-    end_date: "",
+    start_date: '',
+    end_date: '',
   });
   const [currentDate, setCurrentDate] = useState(new Date());
   const [allDailyMeals, setAllDailyMeals] = useState<DailyMealData[]>([]);
   const [filteredDailyMeals, setFilteredDailyMeals] = useState<DailyMealData[]>(
     []
   );
-  const weekdays = ["월", "화", "수", "목", "금", "토", "일"];
+  const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
   useEffect(() => {
     const handleResize = () => setMobileSize(window.innerWidth <= 640);
     handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
@@ -126,10 +127,10 @@ export default function SelectedDate() {
         const response = await fetch(
           `/api/meals?date=${params.selectedDate}&dailyRecordId=${params.dailyRecordId}`,
           {
-            method: "GET",
+            method: 'GET',
             headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-cache",
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache',
             },
           }
         );
@@ -141,7 +142,7 @@ export default function SelectedDate() {
             organization: {
               name: orgName.organization_name,
             },
-            title: challengeTitle || "챌린지",
+            title: challengeTitle || '챌린지',
             start_date: challengePeriods.start_date,
             end_date: challengePeriods.end_date,
           },
@@ -153,8 +154,8 @@ export default function SelectedDate() {
             supplement: [{ ...DEFAULT_MEAL }],
           },
           feedbacks: {
-            coach_feedback: "",
-            ai_feedback: "",
+            coach_feedback: '',
+            ai_feedback: '',
           },
           user: undefined,
         };
@@ -170,10 +171,10 @@ export default function SelectedDate() {
                 ...responseData.challenge,
               },
             };
-            console.log("API Response:", responseData);
+            logger.debug('API Response:', responseData);
           }
         } else {
-          console.error("Failed to fetch data");
+          logger.error('Failed to fetch data');
         }
 
         if (!isMounted) {
@@ -182,13 +183,13 @@ export default function SelectedDate() {
 
         // 조직 정보 설정
         setOrgName({
-          username: "코치님",
+          username: '코치님',
           organization_name:
             data.challenge?.organization?.name || orgName.organization_name,
         });
 
         // 챌린지 정보 설정
-        setChallengeTitle(data.challenge?.title || "챌린지");
+        setChallengeTitle(data.challenge?.title || '챌린지');
         setChallengePeriods({
           start_date: data.challenge?.start_date || challengePeriods.start_date,
           end_date: data.challenge?.end_date || challengePeriods.end_date,
@@ -201,82 +202,82 @@ export default function SelectedDate() {
           meals: {
             breakfast: {
               ...DEFAULT_MEAL,
-              description: data.meals?.breakfast?.[0]?.description || "",
-              meal_time: data.meals?.breakfast?.[0]?.meal_time || "",
+              description: data.meals?.breakfast?.[0]?.description || '',
+              meal_time: data.meals?.breakfast?.[0]?.meal_time || '',
               meal_photos: (data.meals?.breakfast?.[0]?.meal_photos || []).map(
                 (photo: any) => ({
-                  id: photo.id || "",
-                  meal_id: "",
-                  photo_url: photo.url || "",
+                  id: photo.id || '',
+                  meal_id: '',
+                  photo_url: photo.url || '',
                   created_at: new Date().toISOString(),
                 })
               ),
             },
             lunch: {
               ...DEFAULT_MEAL,
-              description: data.meals?.lunch?.[0]?.description || "",
-              meal_time: data.meals?.lunch?.[0]?.meal_time || "",
+              description: data.meals?.lunch?.[0]?.description || '',
+              meal_time: data.meals?.lunch?.[0]?.meal_time || '',
               meal_photos: (data.meals?.lunch?.[0]?.meal_photos || []).map(
                 (photo: any) => ({
-                  id: photo.id || "",
-                  meal_id: "",
-                  photo_url: photo.url || "",
+                  id: photo.id || '',
+                  meal_id: '',
+                  photo_url: photo.url || '',
                   created_at: new Date().toISOString(),
                 })
               ),
             },
             dinner: {
               ...DEFAULT_MEAL,
-              description: data.meals?.dinner?.[0]?.description || "",
-              meal_time: data.meals?.dinner?.[0]?.meal_time || "",
+              description: data.meals?.dinner?.[0]?.description || '',
+              meal_time: data.meals?.dinner?.[0]?.meal_time || '',
               meal_photos: (data.meals?.dinner?.[0]?.meal_photos || []).map(
                 (photo: any) => ({
-                  id: photo.id || "",
-                  meal_id: "",
-                  photo_url: photo.url || "",
+                  id: photo.id || '',
+                  meal_id: '',
+                  photo_url: photo.url || '',
                   created_at: new Date().toISOString(),
                 })
               ),
             },
             snack: {
               ...DEFAULT_MEAL,
-              description: data.meals?.snack?.[0]?.description || "",
-              meal_time: data.meals?.snack?.[0]?.meal_time || "",
+              description: data.meals?.snack?.[0]?.description || '',
+              meal_time: data.meals?.snack?.[0]?.meal_time || '',
               meal_photos: (data.meals?.snack?.[0]?.meal_photos || []).map(
                 (photo: any) => ({
-                  id: photo.id || "",
-                  meal_id: "",
-                  photo_url: photo.url || "",
+                  id: photo.id || '',
+                  meal_id: '',
+                  photo_url: photo.url || '',
                   created_at: new Date().toISOString(),
                 })
               ),
             },
             supplement: {
               ...DEFAULT_MEAL,
-              description: data.meals?.supplement?.[0]?.description || "",
-              meal_time: data.meals?.supplement?.[0]?.meal_time || "",
+              description: data.meals?.supplement?.[0]?.description || '',
+              meal_time: data.meals?.supplement?.[0]?.meal_time || '',
               meal_photos: (data.meals?.supplement?.[0]?.meal_photos || []).map(
                 (photo: any) => ({
-                  id: photo.id || "",
-                  meal_id: "",
-                  photo_url: photo.url || "",
+                  id: photo.id || '',
+                  meal_id: '',
+                  photo_url: photo.url || '',
                   created_at: new Date().toISOString(),
                 })
               ),
             },
           },
           feedbacks: {
-            coach_feedback: data.feedbacks?.coach_feedback || "",
-            ai_feedback: data.feedbacks?.ai_feedback || "",
+            coach_feedback: data.feedbacks?.coach_feedback || '',
+            ai_feedback: data.feedbacks?.ai_feedback || '',
           },
           user: data.user,
         };
 
-        console.log("Processed Meal:", processedMeal);
+        logger.debug('Processed Meal:', processedMeal);
         setAllDailyMeals([processedMeal]);
         setFilteredDailyMeals([processedMeal]);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        logger.error('Error fetching data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -289,7 +290,7 @@ export default function SelectedDate() {
   }, [params.selectedDate, params.dailyRecordId, params.challengeId]);
 
   const metrics = useMemo(() => {
-    const startDate = new Date("2025-02-10");
+    const startDate = new Date('2025-02-10');
     const today = new Date();
     const koreanToday = new Date(today.getTime() + 9 * 60 * 60 * 1000); // UTC+9 변환
 
@@ -309,7 +310,7 @@ export default function SelectedDate() {
   const handleSaveFeedback = async (feedback: string) => {
     try {
       if (!recordDate) {
-        console.error("No record date selected");
+        logger.error('No record date selected');
         return;
       }
 
@@ -344,7 +345,7 @@ export default function SelectedDate() {
         setShowAlert(false);
       }, 3000);
     } catch (error) {
-      console.error("Failed to save feedback:", error);
+      logger.error('Failed to save feedback:', error);
     }
   };
 
@@ -378,7 +379,7 @@ export default function SelectedDate() {
 
   const handleDateClick = async (date: Date) => {
     if (!isDateValid(date)) {
-      alert("선택할 수 없는 날짜입니다.");
+      alert('선택할 수 없는 날짜입니다.');
       return;
     }
 
@@ -396,7 +397,7 @@ export default function SelectedDate() {
         );
       }
     } catch (error) {
-      console.error("Error fetching daily record:", error);
+      logger.error('Error fetching daily record:', error);
     }
   };
 
@@ -422,10 +423,10 @@ export default function SelectedDate() {
     try {
       setIsDisable(true);
 
-      const response = await fetch("/api/diet-feedback", {
-        method: "POST",
+      const response = await fetch('/api/diet-feedback', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           dailyRecordId: params.dailyRecordId,
@@ -433,7 +434,7 @@ export default function SelectedDate() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate AI feedback");
+        throw new Error('Failed to generate AI feedback');
       }
 
       const feedback = await response.json();
@@ -459,7 +460,7 @@ export default function SelectedDate() {
         setShowAlert(false);
       }, 3000);
     } catch (error) {
-      console.error("Error generating AI feedback:", error);
+      logger.error('Error generating AI feedback:', error);
     } finally {
       setIsDisable(false);
     }
@@ -475,7 +476,7 @@ export default function SelectedDate() {
         setShowAlert(false);
       }, 3000);
     } catch (err) {
-      console.error("복사 실패:", err);
+      logger.error('복사 실패:', err);
     }
   };
 
@@ -506,10 +507,10 @@ export default function SelectedDate() {
       <CustomAlert
         message={
           copyMessage
-            ? "복사가 완료되었습니다."
+            ? '복사가 완료되었습니다.'
             : isDisable
-            ? "피드백 작성 중입니다..."
-            : "피드백 작성이 완료되었습니다."
+            ? '피드백 작성 중입니다...'
+            : '피드백 작성이 완료되었습니다.'
         }
         isVisible={showAlert || copyMessage}
         onClose={() => {
@@ -537,12 +538,12 @@ export default function SelectedDate() {
             <Title
               title={(() => {
                 const userName = filteredDailyMeals[0]?.user?.name;
-                return `${userName || "사용자"}님의 식단현황`;
+                return `${userName || '사용자'}님의 식단현황`;
               })()}
             />
             <TotalFeedbackCounts
               counts={metrics.count.toString()}
-              total={metrics.total.toString() + "일"}
+              total={metrics.total.toString() + '일'}
               borderColor="border-[#FDB810]"
               textColor="text-[#FDB810]"
               title="총 식단 업로드"
@@ -591,7 +592,7 @@ export default function SelectedDate() {
                 onChange={async (newDate: string) => {
                   const selectedDate = new Date(newDate);
                   if (!isDateValid(selectedDate)) {
-                    alert("선택할 수 없는 날짜입니다.");
+                    alert('선택할 수 없는 날짜입니다.');
                     return;
                   }
 
@@ -607,7 +608,7 @@ export default function SelectedDate() {
                       );
                     }
                   } catch (error) {
-                    console.error("Error fetching daily record:", error);
+                    logger.error('Error fetching daily record:', error);
                   }
                 }}
                 selectedDate={recordDate}
@@ -622,49 +623,49 @@ export default function SelectedDate() {
           <div key={dailyMeal.recordDate} className="relative mb-[2rem]">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:px-4 px-4">
               {(
-                ["breakfast", "lunch", "dinner", "snack", "supplement"] as const
+                ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
               ).map((mealType) => {
                 const formatRecordDate = dailyMeal.meals[mealType]?.meal_time
                   ? (() => {
                       const utcDate = new Date(
-                        dailyMeal.meals[mealType]?.meal_time || ""
+                        dailyMeal.meals[mealType]?.meal_time || ''
                       );
                       const date = new Date(utcDate.getTime());
 
                       const year = date.getFullYear();
                       const month = String(date.getMonth() + 1).padStart(
                         2,
-                        "0"
+                        '0'
                       );
-                      const day = String(date.getDate()).padStart(2, "0");
-                      const hours = String(date.getHours()).padStart(2, "0");
+                      const day = String(date.getDate()).padStart(2, '0');
+                      const hours = String(date.getHours()).padStart(2, '0');
                       const minutes = String(date.getMinutes()).padStart(
                         2,
-                        "0"
+                        '0'
                       );
 
                       return `식사 시간: ${year}-${month}-${day} ${hours}:${minutes}`;
                     })()
-                  : "";
+                  : '';
 
                 return (
                   <MealPhotoLayout
                     key={mealType}
                     title={
-                      mealType === "breakfast"
-                        ? "아침"
-                        : mealType === "lunch"
-                        ? "점심"
-                        : mealType === "dinner"
-                        ? "저녁"
-                        : mealType === "snack"
-                        ? "간식"
-                        : "영양제"
+                      mealType === 'breakfast'
+                        ? '아침'
+                        : mealType === 'lunch'
+                        ? '점심'
+                        : mealType === 'dinner'
+                        ? '저녁'
+                        : mealType === 'snack'
+                        ? '간식'
+                        : '영양제'
                     }
                     src={dailyMeal.meals[mealType]?.meal_photos || []}
-                    descriptions={dailyMeal.meals[mealType]?.description || ""}
+                    descriptions={dailyMeal.meals[mealType]?.description || ''}
                     time={formatRecordDate}
-                    onAddComment={() => console.log("comment area")}
+                    onAddComment={() => console.log('comment area')}
                   />
                 );
               })}
@@ -677,7 +678,7 @@ export default function SelectedDate() {
                 button2="복사"
                 onClick2={() => handleCopy(dailyMeal.feedbacks.ai_feedback)}
                 readOnly={true}
-                svg2="/svg/copyIcon.svg"
+                svg2="/svg/copyIcon-orange.svg"
                 Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
                 copyIcon
               />
@@ -687,7 +688,7 @@ export default function SelectedDate() {
                 value={
                   feedbacksByDate[dailyMeal.recordDate] !== undefined
                     ? feedbacksByDate[dailyMeal.recordDate]
-                    : dailyMeal.feedbacks.coach_feedback || ""
+                    : dailyMeal.feedbacks.coach_feedback || ''
                 }
                 placeholder="피드백을 작성하세요."
                 button1="남기기"
