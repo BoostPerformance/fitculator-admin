@@ -171,14 +171,13 @@ const DietStatistics = ({
 
   return (
     <>
-      <div className="flex flex-col gap-[0.625rem] overflow-x-auto sm:grid sm:grid-cols-2 sm:grid-rows-2 px-[2rem] pb-[3rem] sm:px-[0.5rem]">
+      <div className="flex flex-row gap-[0.625rem] overflow-x-auto sm:flex sm:flex-col sm:gap-[0.3rem] sm:justify-between px-[2rem] pb-[3rem] sm:px-0">
         {/* <TotalFeedbackCounts
         counts={`${totalMealUploads}개`}
         title="오늘 식단 업로드 수"
         // TODO: 원래 "전체 식단 업로드 수"에서 변경
         borderColor="border-blue-500"
         textColor="text-blue-500"
-        grids="col-span-2"
       /> */}
 
         <TotalFeedbackCounts
@@ -187,7 +186,6 @@ const DietStatistics = ({
           title="오늘 식단 업로드"
           borderColor="border-green"
           textColor="text-green"
-          grids="col-span-2"
         />
 
         <TotalFeedbackCounts
@@ -196,7 +194,6 @@ const DietStatistics = ({
           title="피드백 미작성"
           borderColor="border-[#FDB810]"
           textColor="text-[#FDB810]"
-          grids="col-span-2"
         />
       </div>
       <WeeklyDietRecord dailyRecords={dailyRecords} />
