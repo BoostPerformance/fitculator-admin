@@ -29,7 +29,7 @@ export const useFeedback = () => {
       }
 
       const result = await response.json();
-      console.log('저장된 피드백 데이터:', result);
+      //  console.log('저장된 피드백 데이터:', result);
       return result;
     } catch (err) {
       setError(

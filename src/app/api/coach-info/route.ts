@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { getServerSession } from "next-auth/next";
-import { Coach, ChallengeCoachData, CoachData } from "@/types/coachTypes";
-import { ChallengeParticipant } from "@/types/challengeTypes";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { getServerSession } from 'next-auth/next';
+import { Coach, ChallengeCoachData, CoachData } from '@/types/coachTypes';
+import { ChallengeParticipant } from '@/types/challengeTypes';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,13 +16,13 @@ export async function GET() {
     const session = await getServerSession();
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const { data: adminUser, error: adminError } = await supabase
-      .from("admin_users")
-      .select("id, admin_role, organization_id, username")
-      .eq("email", session.user.email)
+      .from('admin_users')
+      .select('id, admin_role, organization_id, username')
+      .eq('email', session.user.email)
       .single();
     // console.log("adminUser", adminUser);
     if (adminError) {
@@ -30,14 +30,14 @@ export async function GET() {
     }
 
     // 코치가 아닌 경우 기본 정보만 반환
-    if (adminUser.admin_role !== "coach") {
+    if (adminUser.admin_role !== 'coach') {
       return NextResponse.json({
         username: adminUser.username,
         admin_role: adminUser.admin_role,
       });
     }
     const { data: coach, error: coachError } = await supabase
-      .from("coaches")
+      .from('coaches')
       .select(
         `
     id,
@@ -64,7 +64,7 @@ export async function GET() {
     )
   `
       )
-      .eq("admin_user_id", adminUser.id)
+      .eq('admin_user_id', adminUser.id)
       .single();
 
     if (coachError) {
@@ -90,20 +90,20 @@ export async function GET() {
     }
 
     // 데이터 변환 시도 전 타입 체크
-    console.log("=== Type Checks ===");
-    console.log(
-      "Is challenge_coaches array?",
-      Array.isArray(coach.challenge_coaches)
-    );
-    console.log("challenge_coaches length:", coach?.challenge_coaches?.length);
+    // console.log("=== Type Checks ===");
+    // console.log(
+    //   "Is challenge_coaches array?",
+    //   Array.isArray(coach.challenge_coaches)
+    // );
+    // console.log("challenge_coaches length:", coach?.challenge_coaches?.length);
 
     // 받아온 데이터 구조 변환 (Coach 타입에 맞춤)
     const formattedData: CoachData = {
       id: coach.id,
       admin_user_id: coach.admin_user_id,
       organization_id: coach.organization_id,
-      organization_name: coach.admin_users?.[0]?.organizations?.[0]?.name || "",
-      username: coach.admin_users?.[0]?.username || "",
+      organization_name: coach.admin_users?.[0]?.organizations?.[0]?.name || '',
+      username: coach.admin_users?.[0]?.username || '',
       profile_image_url: coach.profile_image_url,
       challenges: (coach.challenge_coaches || []).flatMap(
         (cc: { challenges: any }) => {
@@ -121,7 +121,7 @@ export async function GET() {
             }));
           }
           // challenges가 단일 객체인 경우
-          if (cc.challenges && typeof cc.challenges === "object") {
+          if (cc.challenges && typeof cc.challenges === 'object') {
             return [
               {
                 id: cc.challenges.id,
@@ -143,10 +143,10 @@ export async function GET() {
 
     return NextResponse.json(formattedData);
   } catch (error) {
-    console.error("Error fetching Data", error);
+    console.error('Error fetching Data', error);
     return NextResponse.json(
       {
-        error: "failed to fetch data",
+        error: 'failed to fetch data',
       },
       { status: 500 }
     );

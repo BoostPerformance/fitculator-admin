@@ -26,13 +26,13 @@ export async function GET(request: Request) {
     const end = start + limit - 1;
     const withRecords = searchParams.get('with_records') === 'true';
 
-    console.log('[challenge-participants API] Pagination params:', {
-      page,
-      limit,
-      start,
-      end,
-      withRecords,
-    });
+    // console.log('[challenge-participants API] Pagination params:', {
+    //   page,
+    //   limit,
+    //   start,
+    //   end,
+    //   withRecords,
+    // });
 
     // 기본 정보만 먼저 가져오기
     const { data: participants, error: participantsError } = await supabase

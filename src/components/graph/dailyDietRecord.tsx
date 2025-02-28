@@ -133,7 +133,7 @@ const DailyDietRecord = ({
     });
 
     if (!dailyRecord) {
-      console.log(`[${userName}] ${date} - 해당 날짜의 기록 없음 (false 반환)`);
+      //  console.log(`[${userName}] ${date} - 해당 날짜의 기록 없음 (false 반환)`);
       return false;
     }
 
@@ -143,10 +143,10 @@ const DailyDietRecord = ({
       !Array.isArray(dailyRecord.meals) ||
       dailyRecord.meals.length === 0
     ) {
-      console.log(
-        `[${userName}] ${date} - meals 데이터 없음 (false 반환), dailyRecord:`,
-        dailyRecord
-      );
+      // console.log(
+      //   `[${userName}] ${date} - meals 데이터 없음 (false 반환), dailyRecord:`,
+      //   dailyRecord
+      // );
       return false;
     }
 

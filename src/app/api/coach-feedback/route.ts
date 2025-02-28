@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       .eq('admin_user_id', adminUser?.id)
       .single();
 
-    console.log('coach정보', coach);
+    //  console.log('coach정보', coach);
     const body = await req.json();
 
     if (!body.daily_record_id) {
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
         .from('feedbacks')
         .update({
           coach_feedback: body.coach_feedback || '',
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('daily_record_id', body.daily_record_id)
         .select()
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
           coach_id: coach?.id,
           coach_feedback: body.coach_feedback || '',
           ai_feedback: '',
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .select()
         .single();

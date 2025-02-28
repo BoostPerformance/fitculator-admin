@@ -1,11 +1,11 @@
-"use client";
-import { useState, useEffect } from "react";
+'use client';
+import { useState, useEffect } from 'react';
 import {
   ProcessedMeal,
   Challenges,
   ChallengeParticipant,
   DailyRecords,
-} from "@/types/dietDetaileTableTypes";
+} from '@/types/dietDetaileTableTypes';
 
 interface DietRecord {
   id: string;
@@ -82,8 +82,8 @@ export const useDietData = (
   const [totalCount, setTotalCount] = useState(0);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [adminData, setAdminData] = useState({
-    admin_role: "",
-    username: "",
+    admin_role: '',
+    username: '',
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,12 +99,12 @@ export const useDietData = (
 
         // Promise.all을 사용하여 병렬로 데이터 가져오기
         const [challengesResponse, adminResponse] = await Promise.all([
-          fetch("/api/challenges"),
-          fetch("/api/admin-users"),
+          fetch('/api/challenges'),
+          fetch('/api/admin-users'),
         ]);
 
         if (!challengesResponse.ok || !adminResponse.ok) {
-          throw new Error("Failed to fetch initial data");
+          throw new Error('Failed to fetch initial data');
         }
 
         const [challengeData, adminData] = await Promise.all([
@@ -116,8 +116,8 @@ export const useDietData = (
         setAdminData(adminData);
         setError(null);
       } catch (error) {
-        console.error("Error fetching initial data:", error);
-        setError("초기 데이터를 불러오는데 실패했습니다.");
+        console.error('Error fetching initial data:', error);
+        setError('초기 데이터를 불러오는데 실패했습니다.');
       } finally {
         setIsInitialLoading(false);
       }
@@ -133,31 +133,31 @@ export const useDietData = (
 
       try {
         setLoading(true);
-        const url = new URL("/api/diet-table", window.location.origin);
-        url.searchParams.append("challengeId", challengeId);
-        url.searchParams.append("page", page.toString());
+        const url = new URL('/api/diet-table', window.location.origin);
+        url.searchParams.append('challengeId', challengeId);
+        url.searchParams.append('page', page.toString());
         url.searchParams.append(
-          "limit",
+          'limit',
           page === 1 ? initialLimit.toString() : limit.toString()
         );
 
         if (selectedDate) {
-          url.searchParams.append("date", selectedDate);
+          url.searchParams.append('date', selectedDate);
         }
 
         const response = await fetch(url);
         if (!response.ok) {
-          throw new Error("Failed to fetch diet records");
+          throw new Error('Failed to fetch diet records');
         }
 
         const data: DietResponse = await response.json();
 
         // 받아온 데이터 로깅
-        console.log("[useDietData] Raw API response:", {
-          firstRecord: data.data[0],
-          totalCount: data.count,
-          allRecords: data.data,
-        });
+        // console.log("[useDietData] Raw API response:", {
+        //   firstRecord: data.data[0],
+        //   totalCount: data.count,
+        //   allRecords: data.data,
+        // });
 
         // 첫 페이지에서 데이터가 30개 이하면 모두 불러오기
         if (page === 1) {
@@ -171,8 +171,8 @@ export const useDietData = (
         }
         setError(null);
       } catch (error) {
-        console.error("Error fetching diet data:", error);
-        setError("식단 데이터를 불러오는데 실패했습니다.");
+        console.error('Error fetching diet data:', error);
+        setError('식단 데이터를 불러오는데 실패했습니다.');
       } finally {
         setLoading(false);
       }
@@ -183,31 +183,31 @@ export const useDietData = (
 
   // 데이터 변환
   const processedRecords = dietRecords.map((record): ProcessedMeal => {
-    console.log("[useDietData] Processing record:", record);
+    //  console.log("[useDietData] Processing record:", record);
 
     const challenge = challenges.find(
       (c) => c.challenges.id === challengeId
     )?.challenges;
 
-    console.log("[useDietData] Processing record feedbacks:", {
-      recordId: record.id,
-      feedbacks: record.feedbacks,
-      feedbackData: record.feedbacks
-        ? {
-            id: record.feedbacks.id,
-            coach_feedback: record.feedbacks.coach_feedback,
-            coach_memo: record.feedbacks.coach_memo,
-          }
-        : null,
-    });
+    // console.log("[useDietData] Processing record feedbacks:", {
+    //   recordId: record.id,
+    //   feedbacks: record.feedbacks,
+    //   feedbackData: record.feedbacks
+    //     ? {
+    //         id: record.feedbacks.id,
+    //         coach_feedback: record.feedbacks.coach_feedback,
+    //         coach_memo: record.feedbacks.coach_memo,
+    //       }
+    //     : null,
+    // });
 
     return {
       challenge_id: challengeId,
       challenges: {
         id: challengeId,
-        title: challenge?.title || "",
-        start_date: challenge?.start_date || "",
-        end_date: challenge?.end_date || "",
+        title: challenge?.title || '',
+        start_date: challenge?.start_date || '',
+        end_date: challenge?.end_date || '',
         challenge_participants: [],
       },
       user: {
@@ -261,17 +261,17 @@ export const useDietData = (
     }
 
     // 업로드 수가 같은 경우 이름으로 정렬
-    const nameA = a.user.name || "";
-    const nameB = b.user.name || "";
+    const nameA = a.user.name || '';
+    const nameB = b.user.name || '';
     return nameA.localeCompare(nameB);
   });
 
   // 변환된 데이터 로깅
-  console.log("[useDietData] Processed and sorted records:", {
-    firstProcessedRecord: sortedRecords[0],
-    totalProcessed: sortedRecords.length,
-    allProcessedRecords: sortedRecords,
-  });
+  // console.log("[useDietData] Processed and sorted records:", {
+  //   firstProcessedRecord: sortedRecords[0],
+  //   totalProcessed: sortedRecords.length,
+  //   allProcessedRecords: sortedRecords,
+  // });
 
   return {
     dietRecords: sortedRecords,

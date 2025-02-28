@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface WorkoutLeaderboardProps {
   challengeId: string;
 }
 
-type Period = "weekly" | "all";
+type Period = 'weekly' | 'all';
 
 interface LeaderboardEntry {
   user_id: string;
@@ -31,7 +31,7 @@ export default function WorkoutLeaderboard({
     []
   );
   const [maxPoints, setMaxPoints] = useState(0);
-  const [period, setPeriod] = useState<Period>("weekly");
+  const [period, setPeriod] = useState<Period>('weekly');
 
   useEffect(() => {
     async function fetchLeaderboardData() {
@@ -39,19 +39,19 @@ export default function WorkoutLeaderboard({
         const now = new Date();
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-        console.log(
-          `리더보드 조회기간: ${
-            period === "weekly"
-              ? `${weekAgo.toISOString()} ~ ${now.toISOString()}`
-              : `전체 기간 (~ ${now.toISOString()})`
-          }`
-        );
+        // console.log(
+        //   `리더보드 조회기간: ${
+        //     period === "weekly"
+        //       ? `${weekAgo.toISOString()} ~ ${now.toISOString()}`
+        //       : `전체 기간 (~ ${now.toISOString()})`
+        //   }`
+        // );
 
         const response = await fetch(
           `/api/workouts?challengeId=${challengeId}&period=${period}`
         );
         if (!response.ok) {
-          throw new Error("운동 데이터 가져오기 실패");
+          throw new Error('운동 데이터 가져오기 실패');
         }
         const workouts: WorkoutData[] = await response.json();
 
@@ -65,7 +65,7 @@ export default function WorkoutLeaderboard({
             if (!acc[userId]) {
               acc[userId] = {
                 points: 0,
-                name: workout.user?.name || "알 수 없음",
+                name: workout.user?.name || '알 수 없음',
               };
             }
             acc[userId].points += workout.points || 0;
@@ -94,7 +94,7 @@ export default function WorkoutLeaderboard({
         );
         setMaxPoints(maxPoints || 1);
       } catch (error) {
-        console.error("리더보드 데이터 가져오기 실패:", error);
+        console.error('리더보드 데이터 가져오기 실패:', error);
       }
     }
 
@@ -111,21 +111,21 @@ export default function WorkoutLeaderboard({
         </h2>
         <div className="flex gap-2">
           <button
-            onClick={() => setPeriod("weekly")}
+            onClick={() => setPeriod('weekly')}
             className={`px-3 py-1 rounded-full text-sm ${
-              period === "weekly"
-                ? "bg-blue-5 text-white"
-                : "bg-gray-100 text-gray-600"
+              period === 'weekly'
+                ? 'bg-blue-5 text-white'
+                : 'bg-gray-100 text-gray-600'
             }`}
           >
             주간
           </button>
           <button
-            onClick={() => setPeriod("all")}
+            onClick={() => setPeriod('all')}
             className={`px-3 py-1 rounded-full text-sm ${
-              period === "all"
-                ? "bg-blue-5 text-white"
-                : "bg-gray-100 text-gray-600"
+              period === 'all'
+                ? 'bg-blue-5 text-white'
+                : 'bg-gray-100 text-gray-600'
             }`}
           >
             전체
@@ -140,7 +140,7 @@ export default function WorkoutLeaderboard({
             </span>
             <div className="flex-1 flex items-center gap-2">
               <span className="font-medium text-[#6F6F6F] w-[70px] text-[14px]">
-                {entry.user_name.split(" ")[0]}
+                {entry.user_name.split(' ')[0]}
               </span>
               <div className="w-[100px] sm:w-[60px] bg-gray-200 rounded-full h-2 relative">
                 <div
@@ -151,7 +151,7 @@ export default function WorkoutLeaderboard({
                       100
                     )}%`,
                     background:
-                      "linear-gradient(90deg, #FF007A 0%, #FF70AC 100%)",
+                      'linear-gradient(90deg, #FF007A 0%, #FF70AC 100%)',
                   }}
                 />
                 {entry.total_points >= 100 && (
