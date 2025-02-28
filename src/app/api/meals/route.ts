@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 interface Organization {
   id: string;
@@ -12,7 +12,7 @@ interface Challenge {
   id: string;
   title: string;
   organization_id: string;
-  challenge_type: "diet" | "exercise" | "diet_and_exercise";
+  challenge_type: 'diet' | 'exercise' | 'diet_and_exercise';
   description?: string;
   start_date: string;
   end_date: string;
@@ -32,9 +32,9 @@ interface ChallengeParticipant {
   service_user_id: string;
   challenge_id: string;
   assigned_coach_id?: string;
-  status: "active" | "completed" | "dropped";
+  status: 'active' | 'completed' | 'dropped';
   users?: User;
-  challenges?: {
+  challenge?: {
     title: string;
     start_date: string;
     end_date: string;
@@ -50,7 +50,7 @@ interface MealPhoto {
 interface Meal {
   id: string;
   daily_record_id: string;
-  meal_type: "breakfast" | "lunch" | "dinner" | "snack" | "supplement";
+  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'supplement';
   description: string;
   meal_time: string;
   meal_photos?: MealPhoto[];
@@ -104,8 +104,8 @@ type Database = {
   };
 };
 
-export const dynamic = "force-dynamic"; // Next.js 캐싱 비활성화
-export const fetchCache = "force-no-store"; // fetch 캐싱 비활성화
+export const dynamic = 'force-dynamic'; // Next.js 캐싱 비활성화
+export const fetchCache = 'force-no-store'; // fetch 캐싱 비활성화
 export const revalidate = 0; // 재검증 비활성화
 
 const supabase = createClient<Database>(
@@ -151,44 +151,44 @@ interface QueryResult {
 }
 
 export async function GET(request: Request) {
-  console.log("🔄 === Meals API Request Start ===");
+  //('🔄 === Meals API Request Start ===');
   try {
     const requestUrl = new URL(request.url);
-    const timestamp = requestUrl.searchParams.get("t") || Date.now();
-    const date = requestUrl.searchParams.get("date");
-    const dailyRecordId = requestUrl.searchParams.get("dailyRecordId");
+    const timestamp = requestUrl.searchParams.get('t') || Date.now();
+    const date = requestUrl.searchParams.get('date');
+    const dailyRecordId = requestUrl.searchParams.get('dailyRecordId');
 
-    console.log("📥 Request parameters:", {
-      url: request.url,
-      timestamp,
-      date,
-      dailyRecordId,
-    });
+    // console.log('📥 Request parameters:', {
+    //   url: request.url,
+    //   timestamp,
+    //   date,
+    //   dailyRecordId,
+    // });
 
     if (!dailyRecordId || !date) {
-      throw new Error("Daily Record ID and date are required");
+      throw new Error('Daily Record ID and date are required');
     }
 
-    console.log("🔍 Searching for daily record with:", {
-      dailyRecordId,
-      date,
-    });
+    // console.log('🔍 Searching for daily record with:', {
+    //   dailyRecordId,
+    //   date,
+    // });
 
     // 1. daily_record_id로 participant_id 조회
     const { data: dailyRecord, error: dailyRecordError } = await supabase
-      .from("daily_records")
-      .select("participant_id")
-      .eq("id", dailyRecordId)
+      .from('daily_records')
+      .select('participant_id')
+      .eq('id', dailyRecordId)
       .single();
 
     if (dailyRecordError) throw dailyRecordError;
-    if (!dailyRecord) throw new Error("Daily record not found");
+    if (!dailyRecord) throw new Error('Daily record not found');
 
     const participantId = dailyRecord.participant_id;
 
     // 2. participant_id로 모든 필요한 정보 조회
     const { data: participantData, error: participantError } = await supabase
-      .from("challenge_participants")
+      .from('challenge_participants')
       .select(
         `
         id,
@@ -206,14 +206,14 @@ export async function GET(request: Request) {
         )
       `
       )
-      .eq("id", participantId)
+      .eq('id', participantId)
       .single();
 
     if (participantError) throw participantError;
 
     // 3. 해당 daily record의 meals 조회
     const { data: meals, error: mealsError } = await supabase
-      .from("meals")
+      .from('meals')
       .select(
         `
         id,
@@ -226,24 +226,24 @@ export async function GET(request: Request) {
         )
       `
       )
-      .eq("daily_record_id", dailyRecordId);
+      .eq('daily_record_id', dailyRecordId);
 
     if (mealsError) throw mealsError;
 
     // 4. 피드백 조회
     const { data: feedback, error: feedbackError } = await supabase
-      .from("feedbacks")
-      .select("coach_feedback, ai_feedback")
-      .eq("daily_record_id", dailyRecordId)
+      .from('feedbacks')
+      .select('coach_feedback, ai_feedback')
+      .eq('daily_record_id', dailyRecordId)
       .single();
 
-    if (feedbackError && feedbackError.code !== "PGRST116") throw feedbackError;
+    if (feedbackError && feedbackError.code !== 'PGRST116') throw feedbackError;
 
     // 5. 식단 업로드 일수 조회
     const { count: uploadDaysCount, error: countError } = await supabase
-      .from("daily_records")
-      .select("*", { count: "exact" })
-      .eq("participant_id", participantId);
+      .from('daily_records')
+      .select('*', { count: 'exact' })
+      .eq('participant_id', participantId);
 
     if (countError) throw countError;
 
@@ -251,7 +251,7 @@ export async function GET(request: Request) {
     const groupedMeals = {
       breakfast:
         meals
-          .filter((m) => m.meal_type === "breakfast")
+          .filter((m) => m.meal_type === 'breakfast')
           .map((m) => ({
             id: m.id,
             description: m.description,
@@ -264,7 +264,7 @@ export async function GET(request: Request) {
           })) || [],
       lunch:
         meals
-          .filter((m) => m.meal_type === "lunch")
+          .filter((m) => m.meal_type === 'lunch')
           .map((m) => ({
             id: m.id,
             description: m.description,
@@ -277,7 +277,7 @@ export async function GET(request: Request) {
           })) || [],
       dinner:
         meals
-          .filter((m) => m.meal_type === "dinner")
+          .filter((m) => m.meal_type === 'dinner')
           .map((m) => ({
             id: m.id,
             description: m.description,
@@ -290,7 +290,7 @@ export async function GET(request: Request) {
           })) || [],
       snack:
         meals
-          .filter((m) => m.meal_type === "snack")
+          .filter((m) => m.meal_type === 'snack')
           .map((m) => ({
             id: m.id,
             description: m.description,
@@ -303,7 +303,7 @@ export async function GET(request: Request) {
           })) || [],
       supplement:
         meals
-          .filter((m) => m.meal_type === "supplement")
+          .filter((m) => m.meal_type === 'supplement')
           .map((m) => ({
             id: m.id,
             description: m.description,
@@ -321,55 +321,55 @@ export async function GET(request: Request) {
       id: dailyRecordId,
       record_date: date,
       user: participantData.users,
-      challenge: participantData.challenge?.[0]
+      challenge: participantData.challenge // 배열 참조 제거
         ? {
-            title: participantData.challenge[0].title,
-            start_date: participantData.challenge[0].start_date,
-            end_date: participantData.challenge[0].end_date,
-            organization: participantData.challenge[0].organization || null,
+            title: participantData.challenge.title,
+            start_date: participantData.challenge.start_date,
+            end_date: participantData.challenge.end_date,
+            organization: participantData.challenge.organization || null,
           }
         : null,
       feedbacks: feedback || {
-        coach_feedback: "",
-        ai_feedback: "",
+        coach_feedback: '',
+        ai_feedback: '',
       },
       upload_days_count: uploadDaysCount || 0,
       meals: groupedMeals,
     };
 
-    console.log("✅ Transformed data ready");
+    console.log('✅ Transformed data ready');
 
     return new NextResponse(JSON.stringify(transformedData), {
       headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-        Pragma: "no-cache",
-        Expires: "-1",
-        "X-Request-Time": timestamp.toString(),
-        "Surrogate-Control": "no-store",
-        Vary: "*",
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        Pragma: 'no-cache',
+        Expires: '-1',
+        'X-Request-Time': timestamp.toString(),
+        'Surrogate-Control': 'no-store',
+        Vary: '*',
       },
     });
   } catch (error) {
-    console.error("❌ === Meals API Error ===");
-    console.error("Error details:", {
-      name: error instanceof Error ? error.name : "Unknown error",
+    console.error('❌ === Meals API Error ===');
+    console.error('Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       timestamp: new Date().toISOString(),
     });
 
     return NextResponse.json(
       {
-        error: "Failed to fetch meals",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to fetch meals',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       {
         status: 500,
         headers: {
-          "Cache-Control":
-            "no-store, no-cache, must-revalidate, proxy-revalidate",
-          Pragma: "no-cache",
-          Expires: "0",
+          'Cache-Control':
+            'no-store, no-cache, must-revalidate, proxy-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
         },
       }
     );

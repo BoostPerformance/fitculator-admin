@@ -1,12 +1,12 @@
-import Image from "next/image";
-import { useState } from "react";
+import Image from 'next/image';
+import { useState } from 'react';
 import {
   DietTableProps,
   ChallengeParticipant,
   DailyRecord,
-} from "@/types/userPageTypes";
-import Modal from "../layout/modal";
-import { DietTableSkeleton } from "../layout/skeleton";
+} from '@/types/userPageTypes';
+import Modal from '../layout/modal';
+import { DietTableSkeleton } from '../layout/skeleton';
 
 const DietTable: React.FC<DietTableProps> = ({
   dailyRecordsData,
@@ -17,31 +17,31 @@ const DietTable: React.FC<DietTableProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] =
     useState<ChallengeParticipant | null>(null);
-  const [existCoachMemo, setExistCoachMemo] = useState("");
+  const [existCoachMemo, setExistCoachMemo] = useState('');
 
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
-    console.log("전체 참가자 데이터:", participant);
-    console.log("daily_records:", participant.daily_records);
+    // console.log("전체 참가자 데이터:", participant);
+    // console.log("daily_records:", participant.daily_records);
 
     // 총 daily_record 수
     const totalRecords = participant.daily_records?.length || 0;
-    console.log("총 레코드 수:", totalRecords);
+    // console.log("총 레코드 수:", totalRecords);
 
     // feedbacks가 있는 레코드 수
     const feedbackCount =
       participant.daily_records?.reduce((count, record) => {
-        console.log("현재 레코드:", record);
-        console.log("현재 레코드의 feedbacks:", record.feedbacks);
+        // console.log("현재 레코드:", record);
+        // console.log("현재 레코드의 feedbacks:", record.feedbacks);
 
         // feedbacks 객체가 있고 id가 있으면 피드백이 존재하는 것으로 간주
         if (record.feedbacks && record.feedbacks.id) {
-          console.log("피드백 있음");
+          //  console.log("피드백 있음");
           return count + 1;
         }
-        console.log("피드백 없음");
+        //   console.log("피드백 없음");
         return count;
       }, 0) || 0;
-    console.log("피드백 있는 레코드 수:", feedbackCount);
+    //  console.log("피드백 있는 레코드 수:", feedbackCount);
 
     return {
       completed: feedbackCount,
@@ -67,6 +67,7 @@ const DietTable: React.FC<DietTableProps> = ({
           daily_records: record.daily_records,
           coach_memo: record.coach_memo,
           memo_updated_at: record.memo_updated_at,
+          service_user_id: record.service_user_id,
         };
 
         groupedData.set(participantId, {
@@ -87,8 +88,8 @@ const DietTable: React.FC<DietTableProps> = ({
       }
 
       // If total records are equal, sort by name
-      const nameA = a.participant.users?.name || "";
-      const nameB = b.participant.users?.name || "";
+      const nameA = a.participant.users?.name || '';
+      const nameB = b.participant.users?.name || '';
       return nameA.localeCompare(nameB);
     });
   };
@@ -109,7 +110,7 @@ const DietTable: React.FC<DietTableProps> = ({
   const handleModalOpen = (participant: ChallengeParticipant) => {
     setSelectedParticipant(participant);
     setIsModalOpen(true);
-    setExistCoachMemo(participant.coach_memo || "");
+    setExistCoachMemo(participant.coach_memo || '');
   };
 
   if (loading) {
@@ -197,8 +198,8 @@ const DietTable: React.FC<DietTableProps> = ({
                 >
                   {selectedParticipant &&
                   selectedParticipant.id === data.participant.id
-                    ? selectedParticipant.coach_memo || "코치메모"
-                    : data.participant.coach_memo || "코치메모"}
+                    ? selectedParticipant.coach_memo || '코치메모'
+                    : data.participant.coach_memo || '코치메모'}
                 </button>
               </td>
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0">

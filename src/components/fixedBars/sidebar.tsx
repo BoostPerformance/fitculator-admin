@@ -1,10 +1,10 @@
-"use client";
-import Image from "next/image";
+'use client';
+import Image from 'next/image';
 //import { FaBars } from 'react-icons/fa';
-import LogoutButton from "../buttons/logoutButton";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import LogoutButton from '../buttons/logoutButton';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Challenges {
   challenges: {
@@ -34,7 +34,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpenDropdown, setIsOpenDropdown] = useState(true);
-  const [selectedTitle, setSelectedTitle] = useState<string>("");
+  const [selectedTitle, setSelectedTitle] = useState<string>('');
   const [userDropdown, setUserDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
@@ -69,10 +69,10 @@ export default function Sidebar({
     handleResize();
 
     // 리사이즈 이벤트 리스너
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -106,12 +106,12 @@ export default function Sidebar({
     router.push(`/user/${challenge.challenges.id}`);
   };
 
-  console.log("챌린지 데이터:", {
-    전체데이터: data,
-    데이터길이: data?.length,
-    첫번째챌린지: data?.[0]?.challenges,
-    선택된챌린지ID: selectedChallengeId,
-  });
+  // console.log("챌린지 데이터:", {
+  //   전체데이터: data,
+  //   데이터길이: data?.length,
+  //   첫번째챌린지: data?.[0]?.challenges,
+  //   선택된챌린지ID: selectedChallengeId,
+  // });
 
   return (
     <div className="lg:w-[18.75rem] sm:h-screen lg:h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
@@ -123,19 +123,19 @@ export default function Sidebar({
           width={120}
           height={30}
           alt="logo_text"
-          className={`${isMobile ? "hidden" : ""}`}
+          className={`${isMobile ? 'hidden' : ''}`}
         />
       </div>
       <div className="flex justify-between items-center py-[1.25rem] sm:px-4 lg:px-0 lg:gap-[1rem]">
         <button
           onClick={handleSidebarOpen}
-          className={`${isMobile ? "" : "hidden"}`}
+          className={`${isMobile ? '' : 'hidden'}`}
         >
           <Image
-            src={isSidebarOpen ? "/svg/close.svg" : "/svg/hamburger.svg"}
+            src={isSidebarOpen ? '/svg/close.svg' : '/svg/hamburger.svg'}
             width={30}
             height={30}
-            alt={isSidebarOpen ? "close menu" : "open menu"}
+            alt={isSidebarOpen ? 'close menu' : 'open menu'}
             className={`w-[1.5rem] dark:invert`}
           />
         </button>
@@ -199,7 +199,7 @@ export default function Sidebar({
                             onClick={() => handleChallengeClick(challenge)}
                           >
                             <span className="font-medium">
-                              {challenge.challenges.title || "제목 없음"}
+                              {challenge.challenges.title || '제목 없음'}
                             </span>
                           </div>
                           {selectedChallengeId === challenge.challenges.id && (

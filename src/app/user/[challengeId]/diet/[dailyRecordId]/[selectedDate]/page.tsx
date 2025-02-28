@@ -162,6 +162,7 @@ export default function SelectedDate() {
 
         if (response.ok) {
           const responseData = await response.json();
+
           if (responseData) {
             data = {
               ...data,
@@ -173,6 +174,7 @@ export default function SelectedDate() {
             };
             logger.debug('API Response:', responseData);
           }
+          console.log('responseData', responseData);
         } else {
           logger.error('Failed to fetch data');
         }
@@ -194,6 +196,11 @@ export default function SelectedDate() {
           start_date: data.challenge?.start_date || challengePeriods.start_date,
           end_date: data.challenge?.end_date || challengePeriods.end_date,
         });
+        // console.log('챌린지 기간 설정:', {
+        //   start_date: data.challenge?.start_date,
+        //   end_date: data.challenge?.end_date,
+        //   challengePeriods,
+        // });
 
         // 식단 데이터 처리
         const processedMeal = {
@@ -368,6 +375,14 @@ export default function SelectedDate() {
       ? new Date(challengePeriods.end_date)
       : null;
 
+    console.log('챌린지 기간 체크:', {
+      date,
+      startDate,
+      endDate,
+      isBeforeStart: startDate && date < startDate,
+      isAfterEnd: endDate && date > endDate,
+    });
+
     if (startDate && endDate) {
       if (date < startDate || date > endDate) {
         return false;
@@ -501,6 +516,7 @@ export default function SelectedDate() {
   if (isLoading) {
     return <DietPageSkeleton />;
   }
+  console.log('challengePeriods.start_date', challengePeriods);
 
   return (
     <div className="flex sm:flex-col md:flex-col gap-[1rem] sm:bg-[#E4E9FF] sm:min-w-[24rem]">
