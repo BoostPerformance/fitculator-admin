@@ -174,7 +174,7 @@ export default function SelectedDate() {
             };
             logger.debug('API Response:', responseData);
           }
-          console.log('responseData', responseData);
+          // console.log('responseData', responseData);
         } else {
           logger.error('Failed to fetch data');
         }
@@ -196,82 +196,78 @@ export default function SelectedDate() {
           start_date: data.challenge?.start_date || challengePeriods.start_date,
           end_date: data.challenge?.end_date || challengePeriods.end_date,
         });
-        // console.log('챌린지 기간 설정:', {
-        //   start_date: data.challenge?.start_date,
-        //   end_date: data.challenge?.end_date,
-        //   challengePeriods,
-        // });
 
         // 식단 데이터 처리
         const processedMeal = {
           recordDate: data.record_date,
           upload_days_count: data.upload_days_count,
           meals: {
-            breakfast: {
-              ...DEFAULT_MEAL,
-              description: data.meals?.breakfast?.[0]?.description || '',
-              meal_time: data.meals?.breakfast?.[0]?.meal_time || '',
-              meal_photos: (data.meals?.breakfast?.[0]?.meal_photos || []).map(
-                (photo: any) => ({
-                  id: photo.id || '',
-                  meal_id: '',
-                  photo_url: photo.url || '',
-                  created_at: new Date().toISOString(),
-                })
-              ),
-            },
-            lunch: {
-              ...DEFAULT_MEAL,
-              description: data.meals?.lunch?.[0]?.description || '',
-              meal_time: data.meals?.lunch?.[0]?.meal_time || '',
-              meal_photos: (data.meals?.lunch?.[0]?.meal_photos || []).map(
-                (photo: any) => ({
-                  id: photo.id || '',
-                  meal_id: '',
-                  photo_url: photo.url || '',
-                  created_at: new Date().toISOString(),
-                })
-              ),
-            },
-            dinner: {
-              ...DEFAULT_MEAL,
-              description: data.meals?.dinner?.[0]?.description || '',
-              meal_time: data.meals?.dinner?.[0]?.meal_time || '',
-              meal_photos: (data.meals?.dinner?.[0]?.meal_photos || []).map(
-                (photo: any) => ({
-                  id: photo.id || '',
-                  meal_id: '',
-                  photo_url: photo.url || '',
-                  created_at: new Date().toISOString(),
-                })
-              ),
-            },
-            snack: {
-              ...DEFAULT_MEAL,
-              description: data.meals?.snack?.[0]?.description || '',
-              meal_time: data.meals?.snack?.[0]?.meal_time || '',
-              meal_photos: (data.meals?.snack?.[0]?.meal_photos || []).map(
-                (photo: any) => ({
-                  id: photo.id || '',
-                  meal_id: '',
-                  photo_url: photo.url || '',
-                  created_at: new Date().toISOString(),
-                })
-              ),
-            },
-            supplement: {
-              ...DEFAULT_MEAL,
-              description: data.meals?.supplement?.[0]?.description || '',
-              meal_time: data.meals?.supplement?.[0]?.meal_time || '',
-              meal_photos: (data.meals?.supplement?.[0]?.meal_photos || []).map(
-                (photo: any) => ({
-                  id: photo.id || '',
-                  meal_id: '',
-                  photo_url: photo.url || '',
-                  created_at: new Date().toISOString(),
-                })
-              ),
-            },
+            breakfast: Array.isArray(data.meals?.breakfast)
+              ? data.meals.breakfast.map((meal: any) => ({
+                  ...DEFAULT_MEAL,
+                  description: meal?.description || '',
+                  meal_time: meal?.meal_time || '',
+                  meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
+                    id: photo.id || '',
+                    meal_id: '',
+                    photo_url: photo.url || '',
+                    created_at: new Date().toISOString(),
+                  })),
+                }))
+              : [{ ...DEFAULT_MEAL }],
+            lunch: Array.isArray(data.meals?.lunch)
+              ? data.meals.lunch.map((meal: any) => ({
+                  ...DEFAULT_MEAL,
+                  description: meal?.description || '',
+                  meal_time: meal?.meal_time || '',
+                  meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
+                    id: photo.id || '',
+                    meal_id: '',
+                    photo_url: photo.url || '',
+                    created_at: new Date().toISOString(),
+                  })),
+                }))
+              : [{ ...DEFAULT_MEAL }],
+            dinner: Array.isArray(data.meals?.dinner)
+              ? data.meals.dinner.map((meal: any) => ({
+                  ...DEFAULT_MEAL,
+                  description: meal?.description || '',
+                  meal_time: meal?.meal_time || '',
+                  meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
+                    id: photo.id || '',
+                    meal_id: '',
+                    photo_url: photo.url || '',
+                    created_at: new Date().toISOString(),
+                  })),
+                }))
+              : [{ ...DEFAULT_MEAL }],
+            snack: Array.isArray(data.meals?.snack)
+              ? data.meals.snack.map((meal) => ({
+                  ...DEFAULT_MEAL,
+                  description: meal?.description || '',
+                  meal_time: meal?.meal_time || '',
+                  meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
+                    id: photo.id || '',
+                    meal_id: '',
+                    photo_url: photo.url || '',
+                    created_at: new Date().toISOString(),
+                  })),
+                }))
+              : [{ ...DEFAULT_MEAL }],
+
+            supplement: Array.isArray(data.meals?.supplement)
+              ? data.meals.supplement.map((meal: any) => ({
+                  ...DEFAULT_MEAL,
+                  description: meal?.description || '',
+                  meal_time: meal?.meal_time || '',
+                  meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
+                    id: photo.id || '',
+                    meal_id: '',
+                    photo_url: photo.url || '',
+                    created_at: new Date().toISOString(),
+                  })),
+                }))
+              : [{ ...DEFAULT_MEAL }],
           },
           feedbacks: {
             coach_feedback: data.feedbacks?.coach_feedback || '',
@@ -283,6 +279,7 @@ export default function SelectedDate() {
         logger.debug('Processed Meal:', processedMeal);
         setAllDailyMeals([processedMeal]);
         setFilteredDailyMeals([processedMeal]);
+        // console.log('processedMeal', processedMeal);
       } catch (error) {
         logger.error('Error fetching data:', error);
       } finally {
@@ -375,13 +372,13 @@ export default function SelectedDate() {
       ? new Date(challengePeriods.end_date)
       : null;
 
-    console.log('챌린지 기간 체크:', {
-      date,
-      startDate,
-      endDate,
-      isBeforeStart: startDate && date < startDate,
-      isAfterEnd: endDate && date > endDate,
-    });
+    // console.log('챌린지 기간 체크:', {
+    //   date,
+    //   startDate,
+    //   endDate,
+    //   isBeforeStart: startDate && date < startDate,
+    //   isAfterEnd: endDate && date > endDate,
+    // });
 
     if (startDate && endDate) {
       if (date < startDate || date > endDate) {
@@ -516,7 +513,7 @@ export default function SelectedDate() {
   if (isLoading) {
     return <DietPageSkeleton />;
   }
-  console.log('challengePeriods.start_date', challengePeriods);
+  //  console.log('challengePeriods.start_date', challengePeriods);
 
   return (
     <div className="flex sm:flex-col md:flex-col gap-[1rem] sm:bg-[#E4E9FF] sm:min-w-[24rem]">
@@ -641,28 +638,9 @@ export default function SelectedDate() {
               {(
                 ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
               ).map((mealType) => {
-                const formatRecordDate = dailyMeal.meals[mealType]?.meal_time
-                  ? (() => {
-                      const utcDate = new Date(
-                        dailyMeal.meals[mealType]?.meal_time || ''
-                      );
-                      const date = new Date(utcDate.getTime());
-
-                      const year = date.getFullYear();
-                      const month = String(date.getMonth() + 1).padStart(
-                        2,
-                        '0'
-                      );
-                      const day = String(date.getDate()).padStart(2, '0');
-                      const hours = String(date.getHours()).padStart(2, '0');
-                      const minutes = String(date.getMinutes()).padStart(
-                        2,
-                        '0'
-                      );
-
-                      return `식사 시간: ${year}-${month}-${day} ${hours}:${minutes}`;
-                    })()
-                  : '';
+                const mealItems = Array.isArray(dailyMeal.meals[mealType])
+                  ? dailyMeal.meals[mealType]
+                  : [dailyMeal.meals[mealType]]; // 배열이 아니면 배열로 변환
 
                 return (
                   <MealPhotoLayout
@@ -678,10 +656,8 @@ export default function SelectedDate() {
                         ? '간식'
                         : '영양제'
                     }
-                    src={dailyMeal.meals[mealType]?.meal_photos || []}
-                    descriptions={dailyMeal.meals[mealType]?.description || ''}
-                    time={formatRecordDate}
-                    onAddComment={() => console.log('comment area')}
+                    mealItems={mealItems}
+                    // onAddComment={() => console.log('comment area')}
                   />
                 );
               })}

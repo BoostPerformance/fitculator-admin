@@ -4,16 +4,22 @@ export interface PhotoData {
   photo_url: string;
   created_at: string;
 }
+export interface MealItem {
+  description: string;
+  meal_photos: PhotoData[];
+  updatedAt: string;
+  meal_time: string;
+}
 
 export interface DailyMealData {
   recordDate: string;
   meals: {
-    [key: string]: {
-      description: string;
-      meal_photos: PhotoData[];
-      updatedAt: string;
-      meal_time: string;
-    };
+    breakfast: MealItem[];
+    lunch: MealItem[];
+    dinner: MealItem[];
+    snack: MealItem[];
+    supplement: MealItem[];
+    [key: string]: MealItem[]; // 추가적인 식사 유형을 위한 인덱스 시그니처
   };
   feedbacks: {
     coach_feedback?: string;
@@ -55,7 +61,7 @@ export interface UserData {
 export interface Meals {
   id: string;
   daily_record_id: string;
-  meal_type: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
+  meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
   description: string;
   meal_photos: [string];
   updated_at: string;

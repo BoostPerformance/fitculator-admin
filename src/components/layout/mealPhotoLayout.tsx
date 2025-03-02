@@ -1,5 +1,5 @@
-import { useState } from "react";
-
+import { useState } from 'react';
+import Image from 'next/image';
 interface PhotoData {
   id: string;
   meal_id: string;
@@ -7,11 +7,16 @@ interface PhotoData {
   created_at: string;
 }
 
+export interface MealItem {
+  description: string;
+  meal_photos: PhotoData[];
+  updatedAt: string;
+  meal_time: string;
+}
+
 interface MealPhotoLayoutProps {
   title: string;
-  src: PhotoData[];
-  descriptions: string;
-  time: string;
+  mealItems: MealItem[];
   onAddComment?: () => void;
 }
 
@@ -33,11 +38,13 @@ const ImageModal = ({ imageUrl, onClose }: ImageModalProps) => {
         >
           ✕
         </button>
-        <img
+        <Image
           src={imageUrl}
           alt="확대된 이미지"
           className="max-w-full max-h-[80vh] object-contain"
           onClick={(e) => e.stopPropagation()}
+          width={900}
+          height={900}
         />
       </div>
     </div>
@@ -45,12 +52,56 @@ const ImageModal = ({ imageUrl, onClose }: ImageModalProps) => {
 };
 
 const MealPhotoLayout = ({
-  title = "식단",
-  src = [],
-  descriptions = "",
-  time = "",
+  title = '식단',
+  mealItems = [],
+  onAddComment,
 }: MealPhotoLayoutProps) => {
-  const filteredPhotos = src?.filter(Boolean) || [];
+  const [currentItemIndex, setCurrentItemIndex] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const currentItem = mealItems[currentItemIndex] || {
+    description: '',
+    meal_photos: [],
+    updatedAt: '',
+    meal_time: '',
+  };
+
+  // 현재 항목의 사진 목록을 필터링합니다
+  const filteredPhotos = currentItem.meal_photos?.filter(Boolean) || [];
+
+  const goToPrevItem = () => {
+    if (mealItems.length <= 1) return;
+    const isFirstItem = currentItemIndex === 0;
+    const newIndex = isFirstItem ? mealItems.length - 1 : currentItemIndex - 1;
+    setCurrentItemIndex(newIndex);
+  };
+
+  // 다음 항목으로 이동
+  const goToNextItem = () => {
+    if (mealItems.length <= 1) return;
+    const isLastItem = currentItemIndex === mealItems.length - 1;
+    const newIndex = isLastItem ? 0 : currentItemIndex + 1;
+    setCurrentItemIndex(newIndex);
+  };
+
+  const formatMealTime = (timeString?: string) => {
+    if (!timeString) return '';
+
+    try {
+      const utcDate = new Date(timeString);
+      const date = new Date(utcDate.getTime());
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      return `식사 시간: ${year}-${month}-${day} ${hours}:${minutes}`;
+    } catch (e) {
+      return timeString;
+    }
+  };
 
   // const timeToIOS = new Date(time).toISOString().split('T')[0];
   // console.log(timeToIOS);
@@ -59,8 +110,6 @@ const MealPhotoLayout = ({
       <div className="text-gray-400 text-sm">식단이미지 없음</div>
     </div>
   );
-
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const handleImageClick = (imageUrl: string) => {
     setSelectedImage(imageUrl);
@@ -77,10 +126,12 @@ const MealPhotoLayout = ({
           className="w-full h-32 overflow-hidden rounded-lg cursor-pointer"
           onClick={() => handleImageClick(filteredPhotos[0].photo_url)}
         >
-          <img
+          <Image
             src={filteredPhotos[0].photo_url}
             alt="meal image"
             className="w-full h-full object-cover"
+            width={100}
+            height={100}
           />
         </div>
       );
@@ -95,10 +146,12 @@ const MealPhotoLayout = ({
               className="overflow-hidden rounded-lg cursor-pointer"
               onClick={() => handleImageClick(photo.photo_url)}
             >
-              <img
+              <Image
                 src={photo.photo_url}
                 alt={`meal-${index}`}
                 className="w-full h-full object-cover"
+                width={100}
+                height={100}
               />
             </div>
           ))}
@@ -113,30 +166,36 @@ const MealPhotoLayout = ({
             className="row-span-2 overflow-hidden rounded-lg cursor-pointer"
             onClick={() => handleImageClick(filteredPhotos[0].photo_url)}
           >
-            <img
+            <Image
               src={filteredPhotos[0].photo_url}
               alt="meal-large"
               className="w-full h-full object-cover"
+              width={100}
+              height={100}
             />
           </div>
           <div
             className="overflow-hidden rounded-lg cursor-pointer"
             onClick={() => handleImageClick(filteredPhotos[1].photo_url)}
           >
-            <img
+            <Image
               src={filteredPhotos[1].photo_url}
               alt="meal-small-1"
               className="w-full h-full object-cover"
+              width={100}
+              height={100}
             />
           </div>
           <div
             className="overflow-hidden rounded-lg cursor-pointer"
             onClick={() => handleImageClick(filteredPhotos[2].photo_url)}
           >
-            <img
+            <Image
               src={filteredPhotos[2].photo_url}
               alt="meal-small-2"
               className="w-full h-full object-cover"
+              width={100}
+              height={100}
             />
           </div>
         </div>
@@ -152,10 +211,12 @@ const MealPhotoLayout = ({
             className="overflow-hidden rounded-lg cursor-pointer"
             onClick={() => handleImageClick(photo.photo_url)}
           >
-            <img
+            <Image
               src={photo.photo_url}
               alt={`meal-${index}`}
               className="w-full h-full object-cover"
+              width={100}
+              height={100}
             />
           </div>
         ))}
@@ -177,10 +238,34 @@ const MealPhotoLayout = ({
         </h3>
         <div className="lg:px-[0.625rem]">
           {renderPhotos()}
-          <div className="mt-2 text-sm text-gray-600">{time}</div>
-          <div className="text-sm mt-1">{descriptions}</div>
+          {currentItem.meal_time && (
+            <div className="mt-2 text-sm text-gray-600">
+              {formatMealTime(currentItem.meal_time)}
+            </div>
+          )}
+          <div className="text-sm mt-1">
+            {currentItem.description || '내용이 없습니다.'}
+          </div>
         </div>
       </div>
+
+      {mealItems.length > 1 && (
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={goToPrevItem}
+            className="px-3 py-1 text-sm rounded  hover:bg-blue-50 transition-colors"
+          >
+            ← 이전
+          </button>
+
+          <button
+            onClick={goToNextItem}
+            className="px-3 py-1 text-sm rounded  hover:bg-blue-50 transition-colors"
+          >
+            다음 →
+          </button>
+        </div>
+      )}
       {/* <div className="flex justify-center mt-4">
         <button
           className="text-gray-500 hover:text-gray-700"

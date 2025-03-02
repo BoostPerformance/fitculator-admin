@@ -316,6 +316,22 @@ export async function GET(request: Request) {
           })) || [],
     };
 
+    interface ParticipantData {
+      id: string;
+      users: {
+        name: string;
+      }[];
+      challenge: {
+        title: string;
+        start_date: Date;
+        end_date: Date;
+        organization: {
+          id: string;
+          name: string;
+        }[];
+      }[];
+    }
+
     // 최종 데이터 변환
     const transformedData = {
       id: dailyRecordId,
