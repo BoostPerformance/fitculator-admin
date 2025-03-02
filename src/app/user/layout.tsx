@@ -1,8 +1,8 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import Sidebar from "@/components/fixedBars/sidebar";
-import LogoutButton from "@/components/buttons/logoutButton";
+'use client';
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Sidebar from '@/components/fixedBars/sidebar';
+import LogoutButton from '@/components/buttons/logoutButton';
 
 interface Challenges {
   challenges: {
@@ -19,45 +19,45 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   const [challenges, setChallenges] = useState<Challenges[]>([]);
-  const [adminData, setAdminData] = useState({ admin_role: "", username: "" });
-  const [selectedChallengeId, setSelectedChallengeId] = useState<string>("");
+  const [adminData, setAdminData] = useState({ admin_role: '', username: '' });
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [userDropdown, setUserDropdown] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // 관리자 정보 가져오기
-        const adminResponse = await fetch("/api/admin-users");
+        const adminResponse = await fetch('/api/admin-users');
         if (!adminResponse.ok) {
-          throw new Error("Failed to fetch admin data");
+          throw new Error('Failed to fetch admin data');
         }
         const adminData = await adminResponse.json();
-        console.log("받아온 관리자 데이터:", adminData);
-        setAdminData({
-          admin_role: adminData.admin_role || "",
-          username: adminData.username || "",
-        });
+        // console.log('받아온 관리자 데이터:', adminData);
+        // setAdminData({
+        //   admin_role: adminData.admin_role || '',
+        //   username: adminData.username || '',
+        // });
 
         // 챌린지 데이터 가져오기
-        const challengesResponse = await fetch("/api/challenges");
+        const challengesResponse = await fetch('/api/challenges');
         if (!challengesResponse.ok) {
-          throw new Error("Failed to fetch challenges");
+          throw new Error('Failed to fetch challenges');
         }
         const challengesData = await challengesResponse.json();
-        console.log("받아온 챌린지 데이터:", {
-          원본데이터: challengesData,
-          데이터타입: typeof challengesData,
-          배열여부: Array.isArray(challengesData),
-          첫번째항목: challengesData[0],
-        });
+        // console.log("받아온 챌린지 데이터:", {
+        //   원본데이터: challengesData,
+        //   데이터타입: typeof challengesData,
+        //   배열여부: Array.isArray(challengesData),
+        //   첫번째항목: challengesData[0],
+        // });
 
         if (Array.isArray(challengesData) && challengesData.length > 0) {
           // API 응답 구조에 맞게 데이터 변환
           const formattedChallenges = challengesData.map((challenge: any) => {
-            console.log("처리 중인 챌린지:", challenge);
+            // console.log('처리 중인 챌린지:', challenge);
 
             // 챌린지 데이터의 모든 키 출력
-            console.log("챌린지 원본 데이터의 키:", Object.keys(challenge));
+            // console.log('챌린지 원본 데이터의 키:', Object.keys(challenge));
 
             // 챌린지 데이터 추출 시도
             let challengeData;
@@ -84,13 +84,13 @@ export default function UserLayout({
               end_date = challenge.end_date;
             }
 
-            console.log("변환된 챌린지:", {
-              id,
-              title,
-              start_date,
-              end_date,
-              원본: challenge,
-            });
+            // console.log('변환된 챌린지:', {
+            //   id,
+            //   title,
+            //   start_date,
+            //   end_date,
+            //   원본: challenge,
+            // });
 
             return {
               challenges: {
@@ -101,14 +101,14 @@ export default function UserLayout({
               },
             };
           });
-          console.log("변환된 챌린지 데이터:", formattedChallenges);
+          // console.log('변환된 챌린지 데이터:', formattedChallenges);
           setChallenges(formattedChallenges);
         } else {
-          console.log("챌린지 데이터가 없거나 올바른 형식이 아님");
+          // console.log('챌린지 데이터가 없거나 올바른 형식이 아님');
           setChallenges([]);
         }
       } catch (error) {
-        console.error("데이터 가져오기 실패:", error);
+        console.error('데이터 가져오기 실패:', error);
       }
     };
 
