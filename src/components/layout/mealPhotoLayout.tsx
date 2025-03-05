@@ -56,10 +56,18 @@ const MealPhotoLayout = ({
   mealItems = [],
   onAddComment,
 }: MealPhotoLayoutProps) => {
+  // mealItems를 시간순으로 정렬 (이른 시간 -> 늦은 시간)
+  const sortedMealItems = [...mealItems].sort((a, b) => {
+    // meal_time을 기준으로 정렬
+    const timeA = new Date(a.meal_time).getTime();
+    const timeB = new Date(b.meal_time).getTime();
+    return timeA - timeB; // 오름차순 정렬 (이른 시간 -> 늦은 시간)
+    // 내림차순 정렬(최신순)을 원한다면 return timeB - timeA; 로 변경
+  });
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const currentItem = mealItems[currentItemIndex] || {
+  const currentItem = sortedMealItems[currentItemIndex] || {
     description: '',
     meal_photos: [],
     updatedAt: '',
@@ -75,7 +83,6 @@ const MealPhotoLayout = ({
     const newIndex = isFirstItem ? mealItems.length - 1 : currentItemIndex - 1;
 
     setCurrentItemIndex(newIndex);
-    console.log(newIndex);
   };
 
   // 다음 항목으로 이동
@@ -245,7 +252,7 @@ const MealPhotoLayout = ({
               {formatMealTime(currentItem.meal_time)}
             </div>
           )}
-          <div className="text-sm mt-1">
+          <div className="text-sm mt-1 min-h-[5rem]">
             {currentItem.description || '내용이 없습니다.'}
           </div>
         </div>
@@ -265,7 +272,7 @@ const MealPhotoLayout = ({
             ← 이전
           </button>
           <div>
-            {currentItemIndex + 1} /{mealItems.length}
+            {currentItemIndex + 1} /{sortedMealItems.length}
           </div>
           <button
             onClick={goToNextItem}
