@@ -73,6 +73,7 @@ const MealPhotoLayout = ({
     if (mealItems.length <= 1) return;
     const isFirstItem = currentItemIndex === 0;
     const newIndex = isFirstItem ? mealItems.length - 1 : currentItemIndex - 1;
+
     setCurrentItemIndex(newIndex);
   };
 
@@ -253,14 +254,25 @@ const MealPhotoLayout = ({
         <div className="flex justify-between mt-4">
           <button
             onClick={goToPrevItem}
-            className="px-3 py-1 text-sm rounded  hover:bg-blue-50 transition-colors"
+            disabled={currentItemIndex === 0}
+            className={`px-3 py-1 text-sm rounded transition-colors ${
+              currentItemIndex === 0
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'hover:bg-blue-50'
+            }`}
           >
             ← 이전
           </button>
-
+          <div>
+            {currentItemIndex + 1} /{mealItems.length}
+          </div>
           <button
             onClick={goToNextItem}
-            className="px-3 py-1 text-sm rounded  hover:bg-blue-50 transition-colors"
+            className={`px-3 py-1 text-sm rounded transition-colors ${
+              currentItemIndex === mealItems.length - 1
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'hover:bg-blue-50'
+            }`}
           >
             다음 →
           </button>
