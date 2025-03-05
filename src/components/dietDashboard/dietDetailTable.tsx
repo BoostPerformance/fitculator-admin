@@ -56,13 +56,13 @@ const DietDetaileTable = ({
   }, [handleObserver, dietDetailItems]);
   const router = useRouter();
   const isfeedback = (feedback: Feedbacks | null) => {
-    console.log('피드백 상태 체크:', {
-      feedback,
-      coach_feedback: feedback?.coach_feedback,
-      feedback_exists: !!feedback,
-      feedback_type: typeof feedback?.coach_feedback,
-      feedback_length: feedback?.coach_feedback?.length,
-    });
+    // console.log('피드백 상태 체크:', {
+    //   feedback,
+    //   coach_feedback: feedback?.coach_feedback,
+    //   feedback_exists: !!feedback,
+    //   feedback_type: typeof feedback?.coach_feedback,
+    //   feedback_length: feedback?.coach_feedback?.length,
+    // });
 
     // feedback 객체가 존재하고 coach_feedback이 빈 문자열이 아닌 경우 완료로 표시
     const hasFeedback =

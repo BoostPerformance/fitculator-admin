@@ -1,10 +1,11 @@
-import Image from "next/image";
+import Image from 'next/image';
 import {
   MobildDieDetailTableProps,
   ProcessedMeal,
-} from "@/types/dietDetaileTableTypes";
-import { useRouter } from "next/navigation";
-import { MobileChartSkeleton } from "./layout/skeleton";
+} from '@/types/dietDetaileTableTypes';
+import { useRouter } from 'next/navigation';
+import { MobileChartSkeleton } from './layout/skeleton';
+import { Feedbacks } from '@/types/dietDetaileTableTypes';
 
 export default function MobileChart({
   dietDetailItems,
@@ -17,7 +18,7 @@ export default function MobileChart({
   }
 
   const isMealUploaded = (mealName: string) => {
-    return mealName !== "" ? (
+    return mealName !== '' ? (
       <>
         <Image
           src="/svg/check-orange.svg"
@@ -38,26 +39,27 @@ export default function MobileChart({
     );
   };
 
-  const isfeedback = (feedback: string | null | undefined) => {
-    console.log("피드백 데이터:", {
-      rawFeedback: feedback,
-      type: typeof feedback,
-      isEmpty: feedback === "",
-      isNull: feedback === null,
-      isUndefined: feedback === undefined,
-      length: feedback?.length,
-      trimmedLength: feedback?.trim().length,
-    });
+  const isfeedback = (feedback: Feedbacks | null) => {
+    // console.log('피드백 데이터:', {
+    //   rawFeedback: feedback,
+    //   type: typeof feedback,
+    //   isEmpty: feedback === '',
+    //   isNull: feedback === null,
+    //   isUndefined: feedback === undefined,
+    //   length: feedback?.length,
+    //   trimmedLength: feedback?.trim().length,
+    // });
 
     // 피드백이 존재하고, 공백이 아닌 문자가 하나라도 있는 경우에만 완료로 표시
-    const hasFeedback = Boolean(feedback?.trim().length);
+    const hasFeedback =
+      !!feedback?.coach_feedback && feedback.coach_feedback.trim().length > 0;
     return (
       <div
         className={`py-[0.375rem] px-[0.625rem] ${
-          hasFeedback ? "bg-[#13BE6E]" : "bg-red-500"
+          hasFeedback ? 'bg-[#13BE6E]' : 'bg-red-500'
         } text-white rounded-[0.3rem] text-0.875-500`}
       >
-        <div>{hasFeedback ? "완료" : "미작성"}</div>
+        <div>{hasFeedback ? '완료' : '미작성'}</div>
       </div>
     );
   };
@@ -71,8 +73,8 @@ export default function MobileChart({
         return <div></div>;
       }
 
-      let updatedDisplay = "날짜 정보 없음";
-      let createdDisplay = "날짜 정보 없음";
+      let updatedDisplay = '날짜 정보 없음';
+      let createdDisplay = '날짜 정보 없음';
 
       // updated_at 처리
       if (feedback_updated_at) {
@@ -80,9 +82,9 @@ export default function MobileChart({
         if (!isNaN(date.getTime())) {
           // 유효한 날짜인지 확인
           const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-          const formattedDate = kstDate.toISOString().split("T")[0];
-          const hours = String(kstDate.getHours()).padStart(2, "0");
-          const minutes = String(kstDate.getMinutes()).padStart(2, "0");
+          const formattedDate = kstDate.toISOString().split('T')[0];
+          const hours = String(kstDate.getHours()).padStart(2, '0');
+          const minutes = String(kstDate.getMinutes()).padStart(2, '0');
           updatedDisplay = `${formattedDate} ${hours}:${minutes}`;
         }
       }
@@ -95,11 +97,11 @@ export default function MobileChart({
           const koreanTime = new Date(
             created_date.getTime() + 9 * 60 * 60 * 1000
           );
-          const CreatedformattedDate = koreanTime.toISOString().split("T")[0];
-          const created_hours = String(koreanTime.getHours()).padStart(2, "0");
+          const CreatedformattedDate = koreanTime.toISOString().split('T')[0];
+          const created_hours = String(koreanTime.getHours()).padStart(2, '0');
           const created_minutes = String(koreanTime.getMinutes()).padStart(
             2,
-            "0"
+            '0'
           );
           createdDisplay = `${CreatedformattedDate} ${created_hours}:${created_minutes}`;
         }
@@ -110,13 +112,12 @@ export default function MobileChart({
 
       return (
         <div className="whitespace-nowrap">
-          {displayTime.split(" ")[0]}
-          <br />
-          {displayTime.split(" ")[1]}
+          {displayTime.split(' ')[0]}&nbsp;
+          {displayTime.split(' ')[1]}
         </div>
       );
     } catch (error) {
-      console.error("Date formatting error:", error);
+      console.error('Date formatting error:', error);
       return <div>날짜 정보 없음</div>;
     }
   };
@@ -167,28 +168,28 @@ export default function MobileChart({
                   >
                     <td>
                       {isMealUploaded(
-                        meal.daily_records.meals.breakfast[0]?.description || ""
+                        meal.daily_records.meals.breakfast[0]?.description || ''
                       )}
                     </td>
                     <td>
                       {isMealUploaded(
-                        meal.daily_records.meals.lunch[0]?.description || ""
+                        meal.daily_records.meals.lunch[0]?.description || ''
                       )}
                     </td>
                     <td>
                       {isMealUploaded(
-                        meal.daily_records.meals.dinner[0]?.description || ""
+                        meal.daily_records.meals.dinner[0]?.description || ''
                       )}
                     </td>
                     <td>
                       {isMealUploaded(
-                        meal.daily_records.meals.snack[0]?.description || ""
+                        meal.daily_records.meals.snack[0]?.description || ''
                       )}
                     </td>
                     <td>
                       {isMealUploaded(
                         meal.daily_records.meals.supplement[0]?.description ||
-                          ""
+                          ''
                       )}
                     </td>
                   </tr>
@@ -198,11 +199,11 @@ export default function MobileChart({
                 className="w-full text-center pt-[2rem]"
                 onClick={() =>
                   router.push(
-                    `/user/${meal.challenge_id}/diet/${meal.user.id}/${selectedDate}`
+                    `/user/${meal.challenge_id}/diet/${meal.daily_records.id}/${selectedDate}`
                   )
                 }
               >
-                {isfeedback(meal.daily_records.feedback?.coach_feedback)}
+                {isfeedback(meal.daily_records.feedback)}
               </div>
               <div>
                 {formatDateTime(

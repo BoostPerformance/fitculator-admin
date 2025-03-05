@@ -89,8 +89,8 @@ export default function SelectedDate() {
   const [challengeTitle, setChallengeTitle] = useState('');
   const [recordDate, setRecordDate] = useState(params.selectedDate || '');
   const [orgName, setOrgName] = useState({
-    username: '코치님',
-    organization_name: 'F45 을지로 챌린지',
+    username: '',
+    organization_name: '',
   });
   const [mobileSize, setMobileSize] = useState(true);
   const [challengePeriods, setChallengePeriods] = useState({
@@ -105,9 +105,14 @@ export default function SelectedDate() {
   const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
   useEffect(() => {
-    const handleResize = () => setMobileSize(window.innerWidth <= 640);
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 640;
+      // console.log(`화면 크기 변경: ${window.innerWidth}px, 모바일=${isMobile}`);
+      setMobileSize(window.innerWidth <= 640);
+    };
     handleResize();
     window.addEventListener('resize', handleResize);
+
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -125,6 +130,11 @@ export default function SelectedDate() {
           return;
         }
 
+        // console.log(`API 호출 시작: 모바일 상태 = ${mobileSize}`);
+        // console.log(
+        //   `파라미터: 날짜=${params.selectedDate}, 일일기록ID=${params.dailyRecordId}`
+        // );
+
         const response = await fetch(
           `/api/meals?date=${params.selectedDate}&dailyRecordId=${params.dailyRecordId}`,
           {
@@ -135,7 +145,10 @@ export default function SelectedDate() {
             },
           }
         );
+        // console.log(`API 응답 상태: ${response.status} ${response.statusText}`);
 
+        // console.log('response meals', response);
+        // console.log(params);
         let data = {
           record_date: params.selectedDate,
           upload_days_count: 0,
@@ -190,6 +203,7 @@ export default function SelectedDate() {
           organization_name:
             data.challenge?.organization?.name || orgName.organization_name,
         });
+        // console.log(orgName);
 
         // 챌린지 정보 설정
         setChallengeTitle(data.challenge?.title || '챌린지');
@@ -391,12 +405,15 @@ export default function SelectedDate() {
   };
 
   const handleDateClick = async (date: Date) => {
+    // console.log(`날짜 클릭: ${date}, 유효성=${isDateValid(date)}`);
+
     if (!isDateValid(date)) {
       alert('선택할 수 없는 날짜입니다.');
       return;
     }
 
     const formattedDate = calendarUtils.formatDate(date);
+    // console.log(`형식화된 날짜: ${formattedDate}`);
 
     try {
       const response = await fetch(
@@ -534,10 +551,10 @@ export default function SelectedDate() {
           }}
         />
 
-        <div className="md:px-[1rem]">
-          <div className="flex-1 py-[2rem] sm:pt-[0rem]">
-            <div className="sm:px-[1rem] max-w-[400px]">
-              <div className="flex">
+        <div className="md:px-[1rem] ">
+          <div className="flex-1 py-[2rem] sm:pt-0 ">
+            <div className="sm:flex sm:flex-col sm:gap-4 sm:px-[1rem] max-w-[400px] ">
+              <div className="flex sm:pt-[1rem]">
                 <div className="text-gray-2 text-1.25-700">
                   {orgName.organization_name}&nbsp;
                 </div>
@@ -552,6 +569,7 @@ export default function SelectedDate() {
                   return `${userName || '사용자'}님의 식단현황`;
                 })()}
               />
+
               <TotalFeedbackCounts
                 counts={metrics.count.toString()}
                 total={metrics.total.toString() + '일'}
@@ -644,7 +662,7 @@ export default function SelectedDate() {
                 ).map((mealType) => {
                   const mealItems = Array.isArray(dailyMeal.meals[mealType])
                     ? dailyMeal.meals[mealType]
-                    : [dailyMeal.meals[mealType]]; // 배열이 아니면 배열로 변환
+                    : [dailyMeal.meals[mealType]];
 
                   return (
                     <MealPhotoLayout
@@ -701,7 +719,7 @@ export default function SelectedDate() {
                 />
               </div>
               <button
-                className="mb-4 text-gray-400 font-bold hover:font-extrabold cursor-pointer"
+                className="mb-4 text-gray-400 font-bold hover:font-extrabold cursor-pointer sm:px-[2rem]"
                 onClick={handleBack}
               >
                 ← 목록으로

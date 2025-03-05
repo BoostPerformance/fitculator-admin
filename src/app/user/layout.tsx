@@ -157,7 +157,7 @@ export default function UserLayout({
           selectedChallengeId={selectedChallengeId}
           username={adminData.username}
         />
-        <main className="flex-1 px-[1rem] py-[1.25rem] bg-white-1 dark:bg-blue-4">
+        <main className="flex-1 px-[1rem] py-[1.25rem] sm:px-0 sm:py-0 bg-white-1 dark:bg-blue-4">
           {children}
         </main>
       </div>

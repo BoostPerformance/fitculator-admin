@@ -7,7 +7,7 @@ interface HeaderProps {
 export default function Footer({ btnClassName }: HeaderProps) {
   return (
     <footer
-      className={`p-[1rem] w-full flex justify-center dark:bg-blue-4 bg-white sm:bg-[#E4E9FF] bottom-0 z-50`}
+      className={`p-[1rem] w-full flex justify-center dark:bg-blue-4 bg-white sm:bg-white-1 bottom-0 z-50`}
     >
       <DarkModeButton className={btnClassName} />
     </footer>

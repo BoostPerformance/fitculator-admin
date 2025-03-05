@@ -234,7 +234,7 @@ const MealPhotoLayout = ({
   };
 
   return (
-    <div className="w-full flex flex-col justify-between h-full">
+    <div className="w-full flex flex-col justify-between h-full ">
       {selectedImage && (
         <ImageModal
           imageUrl={selectedImage}
@@ -242,7 +242,7 @@ const MealPhotoLayout = ({
         />
       )}
       <div>
-        <h3 className="lg:mb-[2.125rem] sm:mb-[0.5rem] text-base font-semibold">
+        <h3 className="lg:mb-[2.125rem] sm:mb-[0.5rem] text-base font-semibold sm:mt-[1rem]">
           {title}
         </h3>
         <div className="lg:px-[0.625rem]">
@@ -252,7 +252,7 @@ const MealPhotoLayout = ({
               {formatMealTime(currentItem.meal_time)}
             </div>
           )}
-          <div className="text-sm mt-1 min-h-[5rem]">
+          <div className="text-sm mt-1 lg:min-h-[5rem] sm:min-h-[3rem]">
             {currentItem.description || '내용이 없습니다.'}
           </div>
         </div>

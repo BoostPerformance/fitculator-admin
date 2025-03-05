@@ -231,11 +231,11 @@ export async function GET(request: Request) {
       };
     });
 
-    console.log('[diet-table API] Transformed records:', {
-      firstRecord: transformedRecords?.[0],
-      firstRecordMeals: transformedRecords?.[0]?.meals,
-      totalRecords: transformedRecords?.length,
-    });
+    // console.log('[diet-table API] Transformed records:', {
+    //   firstRecord: transformedRecords?.[0],
+    //   firstRecordMeals: transformedRecords?.[0]?.meals,
+    //   totalRecords: transformedRecords?.length,
+    // });
 
     return NextResponse.json({
       data: transformedRecords,

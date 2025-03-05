@@ -352,6 +352,7 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('❌ === Meals API Error ===');
+    console.error(error);
     console.error('Error details:', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),

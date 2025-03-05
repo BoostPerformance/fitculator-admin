@@ -219,7 +219,7 @@ export async function GET(request: Request) {
       );
     }
 
-    console.log('📥 Participants count:', participants?.length || 0);
+    // console.log('📥 Participants count:', participants?.length || 0);
 
     // If no participants, return empty array
     if (!participants || participants.length === 0) {
@@ -228,7 +228,7 @@ export async function GET(request: Request) {
     }
 
     const participantIds = participants.map((p) => p.service_user_id);
-    console.log('🔍 Fetching workouts for participants:', participantIds);
+    // console.log('🔍 Fetching workouts for participants:', participantIds);
 
     // Get workout types first to get CARDIO type ID
     const { data: workoutTypes, error: typesError } = await supabase
