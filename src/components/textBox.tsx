@@ -1,6 +1,6 @@
 // TextBox.tsx
-import Image from "next/image";
-import React, { useRef, useState, useEffect } from "react";
+import Image from 'next/image';
+import React, { useRef, useState, useEffect } from 'react';
 
 interface TextBoxProps {
   title: string;
@@ -24,7 +24,7 @@ interface TextBoxProps {
 const TextBox = ({
   title,
   placeholder,
-  value = "",
+  value = '',
   button1,
   button2,
   svg1,
@@ -70,14 +70,14 @@ const TextBox = ({
           setCopyMessage(false);
         }, 5000);
       } catch (err) {
-        console.error("복사 실패:", err);
+        console.error('복사 실패:', err);
       }
     }
   };
 
   return (
-    <div className="mt-[2rem] p-[1rem] relative lg:px-0 lg:w-full lg:h-[30rem] sm:min-w-[23rem]">
-      <h4 className="text-1.375-700 font-semibold mb-2 flex items-center">
+    <div className="mt-[2rem] p-[1rem] relative lg:px-0 lg:w-full lg:h-[28rem] sm:min-w-[23rem] sm:dark:text-white">
+      <h4 className="text-1.375-700 font-semibold mb-2 flex items-center ">
         {title}
         {copyIcon && (
           <button className="ml-2 text-[1rem]" onClick={handleCopy}>
@@ -106,8 +106,8 @@ const TextBox = ({
           ref={textareaRef}
           placeholder={placeholder}
           value={isFeedbackMode ? localValue : value}
-          className={`border p-2 w-full rounded-md text-0.875-400 h-[20rem] ${
-            readOnly ? "bg-gray-100 cursor-not-allowed" : ""
+          className={`border p-2 w-full rounded-md text-0.875-400 h-[20rem] dark:bg-white dark:text-black ${
+            readOnly ? 'bg-gray-100 cursor-not-allowed' : ''
           }`}
           readOnly={readOnly}
           onChange={handleChange}

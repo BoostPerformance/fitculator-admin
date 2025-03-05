@@ -141,7 +141,10 @@ export default function Sidebar({
         </button>
         <div className="flex items-center gap-2 absolute right-4 top-4">
           <div className="flex items-center gap-2 sm:flex md:flex lg:hidden">
-            <div className="text-gray-500 text-sm whitespace-nowrap">
+            <div
+              className="text-gray-500 text-sm whitespace-nowrap sm:dark:text-gray-8"
+              onClick={handleUserDropdown}
+            >
               안녕하세요, {username} !
             </div>
             <button onClick={handleUserDropdown} className="flex items-center">
@@ -154,7 +157,7 @@ export default function Sidebar({
               />
             </button>
             {userDropdown && (
-              <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px]">
+              <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px] ">
                 <LogoutButton />
               </div>
             )}
@@ -198,7 +201,7 @@ export default function Sidebar({
                             className="font-medium block cursor-pointer py-2 pl-4 rounded hover:bg-gray-100 dark:hover:bg-blue-3"
                             onClick={() => handleChallengeClick(challenge)}
                           >
-                            <span className="font-medium">
+                            <span className="font-medium dark:text-white">
                               {challenge.challenges.title || '제목 없음'}
                             </span>
                           </div>
@@ -206,7 +209,7 @@ export default function Sidebar({
                             <ul className="mt-2 ml-2 border-l-2 border-gray-100 dark:border-blue-3">
                               <li>
                                 <div
-                                  className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
+                                  className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
                                   onClick={() => {
                                     router.push(
                                       `/user/${challenge.challenges.id}/diet`

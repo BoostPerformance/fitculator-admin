@@ -288,7 +288,7 @@ export default function User() {
       )
     : [];
 
-  console.log('filteredDailyRecordsbyId:', filteredDailyRecordsbyId);
+  //console.log('filteredDailyRecordsbyId:', filteredDailyRecordsbyId);
 
   const getSelectedChallengeDates = () => {
     const selectedChallenge = challenges.find(

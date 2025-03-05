@@ -15,6 +15,7 @@ import DateInput from '@/components/input/dateInput';
 import { useFeedback } from '@/components/hooks/useFeedback';
 import { useChallenge } from '@/components/hooks/useChallenges';
 import logger from '@/lib/logger';
+import Footer from '@/components/layout/footer';
 
 interface CustomAlertProps {
   message: string;
@@ -516,189 +517,200 @@ export default function SelectedDate() {
   //  console.log('challengePeriods.start_date', challengePeriods);
 
   return (
-    <div className="flex sm:flex-col md:flex-col gap-[1rem] sm:bg-[#E4E9FF] sm:min-w-[24rem]">
-      <CustomAlert
-        message={
-          copyMessage
-            ? '복사가 완료되었습니다.'
-            : isDisable
-            ? '피드백 작성 중입니다...'
-            : '피드백 작성이 완료되었습니다.'
-        }
-        isVisible={showAlert || copyMessage}
-        onClose={() => {
-          setShowAlert(false);
-          setCopyMessage(false);
-        }}
-      />
+    <div>
+      <div className="flex sm:flex-col md:flex-col gap-[1rem] sm:bg-[#E4E9FF] sm:dark:bg-[#181c32] sm:dark:bg-none sm:min-w-[24rem]">
+        <CustomAlert
+          message={
+            copyMessage
+              ? '복사가 완료되었습니다.'
+              : isDisable
+              ? '피드백 작성 중입니다...'
+              : '피드백 작성이 완료되었습니다.'
+          }
+          isVisible={showAlert || copyMessage}
+          onClose={() => {
+            setShowAlert(false);
+            setCopyMessage(false);
+          }}
+        />
 
-      <div className="md:px-[1rem]">
-        <div className="flex-1 py-[2rem] sm:pt-[0rem]">
-          <div className="sm:px-[1rem] max-w-[400px]">
-            <button
-              className="mb-4 text-gray-400 font-bold hover:font-extrabold cursor-pointer"
-              onClick={handleBack}
-            >
-              ← 목록으로
-            </button>
-            <div className="flex">
-              <div className="text-gray-2 text-1.25-700">
-                {orgName.organization_name}&nbsp;
+        <div className="md:px-[1rem]">
+          <div className="flex-1 py-[2rem] sm:pt-[0rem]">
+            <div className="sm:px-[1rem] max-w-[400px]">
+              <div className="flex">
+                <div className="text-gray-2 text-1.25-700">
+                  {orgName.organization_name}&nbsp;
+                </div>
+                <div className="text-gray-2 text-1.25-700">
+                  {challengeTitle}
+                </div>
               </div>
-              <div className="text-gray-2 text-1.25-700">{challengeTitle}</div>
-            </div>
 
-            <Title
-              title={(() => {
-                const userName = filteredDailyMeals[0]?.user?.name;
-                return `${userName || '사용자'}님의 식단현황`;
-              })()}
-            />
-            <TotalFeedbackCounts
-              counts={metrics.count.toString()}
-              total={metrics.total.toString() + '일'}
-              borderColor="border-[#FDB810]"
-              textColor="text-[#FDB810]"
-              title="총 식단 업로드"
-            />
-          </div>
-
-          {mobileSize ? (
-            <div className="flex items-center justify-center flex-col">
-              <Calendar
-                handlePrevMonth={handlePrevMonth}
-                handleNextMonth={handleNextMonth}
-                currentDate={currentDate}
-                weekdays={weekdays}
-                handleDateClick={handleDateClick}
-                isInChallengeRange={(date) => {
-                  const now = new Date();
-                  const koreaTime = new Date(
-                    now.getTime() + 9 * 60 * 60 * 1000
-                  );
-                  koreaTime.setHours(0, 0, 0, 0);
-
-                  // 미래 날짜 체크
-                  if (date > koreaTime) {
-                    return false;
-                  }
-
-                  // 챌린지 기간 체크
-                  if (
-                    !challengePeriods.start_date ||
-                    !challengePeriods.end_date
-                  ) {
-                    return false;
-                  }
-
-                  const startDate = new Date(challengePeriods.start_date);
-                  const endDate = new Date(challengePeriods.end_date);
-                  return date >= startDate && date <= endDate;
-                }}
-                CalenderclassName="sm:w-[90%]"
-                selectedDate={recordDate}
+              <Title
+                title={(() => {
+                  const userName = filteredDailyMeals[0]?.user?.name;
+                  return `${userName || '사용자'}님의 식단현황`;
+                })()}
+              />
+              <TotalFeedbackCounts
+                counts={metrics.count.toString()}
+                total={metrics.total.toString() + '일'}
+                borderColor="border-[#FDB810]"
+                textColor="text-[#FDB810]"
+                title="총 식단 업로드"
               />
             </div>
-          ) : (
-            <div className="flex sm:justify-center sm:items-center pt-[2rem] gap-[1rem]">
-              <DateInput
-                onChange={async (newDate: string) => {
-                  const selectedDate = new Date(newDate);
-                  if (!isDateValid(selectedDate)) {
-                    alert('선택할 수 없는 날짜입니다.');
-                    return;
-                  }
 
-                  try {
-                    const response = await fetch(
-                      `/api/daily-records?date=${newDate}&currentDailyRecordId=${params.dailyRecordId}`
+            {mobileSize ? (
+              <div className="flex items-center justify-center flex-col">
+                <Calendar
+                  handlePrevMonth={handlePrevMonth}
+                  handleNextMonth={handleNextMonth}
+                  currentDate={currentDate}
+                  weekdays={weekdays}
+                  handleDateClick={handleDateClick}
+                  isInChallengeRange={(date) => {
+                    const now = new Date();
+                    const koreaTime = new Date(
+                      now.getTime() + 9 * 60 * 60 * 1000
                     );
-                    const data = await response.json();
+                    koreaTime.setHours(0, 0, 0, 0);
 
-                    if (data) {
-                      router.push(
-                        `/user/${params.challengeId}/diet/${data.id}/${newDate}`
+                    // 미래 날짜 체크
+                    if (date > koreaTime) {
+                      return false;
+                    }
+
+                    // 챌린지 기간 체크
+                    if (
+                      !challengePeriods.start_date ||
+                      !challengePeriods.end_date
+                    ) {
+                      return false;
+                    }
+
+                    const startDate = new Date(challengePeriods.start_date);
+                    const endDate = new Date(challengePeriods.end_date);
+                    return date >= startDate && date <= endDate;
+                  }}
+                  CalenderclassName="sm:w-[90%]"
+                  selectedDate={recordDate}
+                />
+              </div>
+            ) : (
+              <div className="flex sm:justify-center sm:items-center pt-[2rem] gap-[1rem]">
+                <DateInput
+                  onChange={async (newDate: string) => {
+                    const selectedDate = new Date(newDate);
+                    if (!isDateValid(selectedDate)) {
+                      alert('선택할 수 없는 날짜입니다.');
+                      return;
+                    }
+
+                    try {
+                      const response = await fetch(
+                        `/api/daily-records?date=${newDate}&currentDailyRecordId=${params.dailyRecordId}`
                       );
+                      const data = await response.json();
+
+                      if (data) {
+                        router.push(
+                          `/user/${params.challengeId}/diet/${data.id}/${newDate}`
+                        );
+                      }
+                    } catch (error) {
+                      logger.error('Error fetching daily record:', error);
                     }
-                  } catch (error) {
-                    logger.error('Error fetching daily record:', error);
-                  }
-                }}
-                selectedDate={recordDate}
-                challengeStartDate={challengePeriods.start_date}
-                challengeEndDate={challengePeriods.end_date}
-              />
-            </div>
-          )}
-        </div>
-
-        {displayMeals.map((dailyMeal) => (
-          <div key={dailyMeal.recordDate} className="relative mb-[2rem]">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:px-4 px-4">
-              {(
-                ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
-              ).map((mealType) => {
-                const mealItems = Array.isArray(dailyMeal.meals[mealType])
-                  ? dailyMeal.meals[mealType]
-                  : [dailyMeal.meals[mealType]]; // 배열이 아니면 배열로 변환
-
-                return (
-                  <MealPhotoLayout
-                    key={mealType}
-                    title={
-                      mealType === 'breakfast'
-                        ? '아침'
-                        : mealType === 'lunch'
-                        ? '점심'
-                        : mealType === 'dinner'
-                        ? '저녁'
-                        : mealType === 'snack'
-                        ? '간식'
-                        : '영양제'
-                    }
-                    mealItems={mealItems}
-                    // onAddComment={() => console.log('comment area')}
-                  />
-                );
-              })}
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4 mt-8">
-              <TextBox
-                title="AI 분석 결과"
-                value={dailyMeal.feedbacks.ai_feedback}
-                placeholder="아직 AI 분석 진행 전 이에요."
-                button2="복사"
-                onClick2={() => handleCopy(dailyMeal.feedbacks.ai_feedback)}
-                readOnly={true}
-                svg2="/svg/copyIcon-orange.svg"
-                Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
-                copyIcon
-              />
-
-              <TextBox
-                title="코치 피드백"
-                value={
-                  feedbacksByDate[dailyMeal.recordDate] !== undefined
-                    ? feedbacksByDate[dailyMeal.recordDate]
-                    : dailyMeal.feedbacks.coach_feedback || ''
-                }
-                placeholder="피드백을 작성하세요."
-                button1="남기기"
-                Btn1className="bg-[#BDBDBD] text-white"
-                svg1="/svg/send.svg"
-                onChange={(e) =>
-                  handleFeedbackChange(dailyMeal.recordDate, e.target.value)
-                }
-                onSave={async (feedback) => {
-                  await handleSaveFeedback(feedback);
-                }}
-                isFeedbackMode={true}
-                copyIcon
-              />
-            </div>
+                  }}
+                  selectedDate={recordDate}
+                  challengeStartDate={challengePeriods.start_date}
+                  challengeEndDate={challengePeriods.end_date}
+                />
+              </div>
+            )}
           </div>
-        ))}
+
+          {displayMeals.map((dailyMeal) => (
+            <div key={dailyMeal.recordDate} className="relative mb-[2rem]">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:px-4 px-4">
+                {(
+                  [
+                    'breakfast',
+                    'lunch',
+                    'dinner',
+                    'snack',
+                    'supplement',
+                  ] as const
+                ).map((mealType) => {
+                  const mealItems = Array.isArray(dailyMeal.meals[mealType])
+                    ? dailyMeal.meals[mealType]
+                    : [dailyMeal.meals[mealType]]; // 배열이 아니면 배열로 변환
+
+                  return (
+                    <MealPhotoLayout
+                      key={mealType}
+                      title={
+                        mealType === 'breakfast'
+                          ? '아침'
+                          : mealType === 'lunch'
+                          ? '점심'
+                          : mealType === 'dinner'
+                          ? '저녁'
+                          : mealType === 'snack'
+                          ? '간식'
+                          : '영양제'
+                      }
+                      mealItems={mealItems}
+                      // onAddComment={() => console.log('comment area')}
+                    />
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4 mt-8">
+                <TextBox
+                  title="AI 분석 결과"
+                  value={dailyMeal.feedbacks.ai_feedback}
+                  placeholder="아직 AI 분석 진행 전 이에요."
+                  button2="복사"
+                  onClick2={() => handleCopy(dailyMeal.feedbacks.ai_feedback)}
+                  readOnly={true}
+                  svg2="/svg/copyIcon-orange.svg"
+                  Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
+                  copyIcon
+                />
+
+                <TextBox
+                  title="코치 피드백"
+                  value={
+                    feedbacksByDate[dailyMeal.recordDate] !== undefined
+                      ? feedbacksByDate[dailyMeal.recordDate]
+                      : dailyMeal.feedbacks.coach_feedback || ''
+                  }
+                  placeholder="피드백을 작성하세요."
+                  button1="남기기"
+                  Btn1className="bg-green text-white"
+                  svg1="/svg/send.svg"
+                  onChange={(e) =>
+                    handleFeedbackChange(dailyMeal.recordDate, e.target.value)
+                  }
+                  onSave={async (feedback) => {
+                    await handleSaveFeedback(feedback);
+                  }}
+                  isFeedbackMode={true}
+                  copyIcon
+                />
+              </div>
+              <button
+                className="mb-4 text-gray-400 font-bold hover:font-extrabold cursor-pointer"
+                onClick={handleBack}
+              >
+                ← 목록으로
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

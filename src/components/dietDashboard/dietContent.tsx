@@ -1,9 +1,9 @@
-import { ProcessedMeal } from "@/types/dietDetaileTableTypes";
-import DietDetaileTable from "@/components/dietDashboard/dietDetailTable";
-import MobileChart from "@/components/mobileChart";
-import DateInput from "@/components/input/dateInput";
-import { useState } from "react";
-import { useDietData } from "../hooks/useDietData";
+import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
+import DietDetaileTable from '@/components/dietDashboard/dietDetailTable';
+import MobileChart from '@/components/mobileChart';
+import DateInput from '@/components/input/dateInput';
+import { useState } from 'react';
+import { useDietData } from '../hooks/useDietData';
 
 interface DietContentProps {
   selectedDate: string;
@@ -35,15 +35,15 @@ export const DietContent = ({
   );
 
   // 데이터 로깅
-  console.log("[DietContent] Current data:", {
-    challengeId,
-    selectedDate,
-    page,
-    recordsCount: dietRecords.length,
-    firstRecord: dietRecords[0],
-    loading,
-    hasMore,
-  });
+  // console.log("[DietContent] Current data:", {
+  //   challengeId,
+  //   selectedDate,
+  //   page,
+  //   recordsCount: dietRecords.length,
+  //   firstRecord: dietRecords[0],
+  //   loading,
+  //   hasMore,
+  // });
 
   const handleLoadMore = (nextPage: number) => {
     if (!loading && hasMore) {

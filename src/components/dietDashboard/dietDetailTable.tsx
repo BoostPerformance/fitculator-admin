@@ -1,9 +1,9 @@
-"use client";
-import { useState, useEffect, useCallback, useRef } from "react";
-import Image from "next/image";
-import { DietDetailTableProps, Feedbacks } from "@/types/dietDetaileTableTypes";
-import { useRouter } from "next/navigation";
-import { DietTableSkeleton } from "../layout/skeleton";
+'use client';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import Image from 'next/image';
+import { DietDetailTableProps, Feedbacks } from '@/types/dietDetaileTableTypes';
+import { useRouter } from 'next/navigation';
+import { DietTableSkeleton } from '../layout/skeleton';
 
 const DietDetaileTable = ({
   dietDetailItems,
@@ -38,7 +38,7 @@ const DietDetaileTable = ({
   useEffect(() => {
     const observer = new IntersectionObserver(handleObserver, {
       root: null,
-      rootMargin: "20px",
+      rootMargin: '20px',
       threshold: 0.1,
     });
     observerRef.current = observer;
@@ -56,7 +56,7 @@ const DietDetaileTable = ({
   }, [handleObserver, dietDetailItems]);
   const router = useRouter();
   const isfeedback = (feedback: Feedbacks | null) => {
-    console.log("피드백 상태 체크:", {
+    console.log('피드백 상태 체크:', {
       feedback,
       coach_feedback: feedback?.coach_feedback,
       feedback_exists: !!feedback,
@@ -70,10 +70,10 @@ const DietDetaileTable = ({
     return (
       <div
         className={`py-[0.375rem] px-[0.625rem] ${
-          hasFeedback ? "bg-[#13BE6E]" : "bg-red-500"
+          hasFeedback ? 'bg-[#13BE6E]' : 'bg-red-500'
         } text-white rounded-[0.3rem] text-0.875-500 whitespace-nowrap`}
       >
-        <div>{hasFeedback ? "완료" : "미작성"}</div>
+        <div>{hasFeedback ? '완료' : '미작성'}</div>
       </div>
     );
   };
@@ -88,8 +88,8 @@ const DietDetaileTable = ({
         return <div></div>;
       }
 
-      let updatedDisplay = "날짜 정보 없음";
-      let createdDisplay = "날짜 정보 없음";
+      let updatedDisplay = '날짜 정보 없음';
+      let createdDisplay = '날짜 정보 없음';
 
       // updated_at 처리
       if (feedback_updated_at) {
@@ -97,9 +97,9 @@ const DietDetaileTable = ({
         if (!isNaN(date.getTime())) {
           // 유효한 날짜인지 확인
           const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-          const formattedDate = kstDate.toISOString().split("T")[0];
-          const hours = String(kstDate.getHours()).padStart(2, "0");
-          const minutes = String(kstDate.getMinutes()).padStart(2, "0");
+          const formattedDate = kstDate.toISOString().split('T')[0];
+          const hours = String(kstDate.getHours()).padStart(2, '0');
+          const minutes = String(kstDate.getMinutes()).padStart(2, '0');
           updatedDisplay = `${formattedDate} ${hours}:${minutes}`;
         }
       }
@@ -112,11 +112,11 @@ const DietDetaileTable = ({
           const koreanTime = new Date(
             created_date.getTime() + 9 * 60 * 60 * 1000
           );
-          const CreatedformattedDate = koreanTime.toISOString().split("T")[0];
-          const created_hours = String(koreanTime.getHours()).padStart(2, "0");
+          const CreatedformattedDate = koreanTime.toISOString().split('T')[0];
+          const created_hours = String(koreanTime.getHours()).padStart(2, '0');
           const created_minutes = String(koreanTime.getMinutes()).padStart(
             2,
-            "0"
+            '0'
           );
           createdDisplay = `${CreatedformattedDate} ${created_hours}:${created_minutes}`;
         }
@@ -127,13 +127,13 @@ const DietDetaileTable = ({
 
       return (
         <div className="whitespace-nowrap">
-          {displayTime.split(" ")[0]}
+          {displayTime.split(' ')[0]}
           <br />
-          {displayTime.split(" ")[1]}
+          {displayTime.split(' ')[1]}
         </div>
       );
     } catch (error) {
-      console.error("Date formatting error:", error);
+      console.error('Date formatting error:', error);
       return <div>날짜 정보 없음</div>;
     }
   };
@@ -144,7 +144,7 @@ const DietDetaileTable = ({
   return (
     <div className="mt-6 overflow-x-auto w-full">
       <div className="min-w-[1000px] max-w-full">
-        {" "}
+        {' '}
         {/* 컨테이너 추가 */}
         <table className="w-full bg-white shadow-md rounded-md border border-gray-200">
           <thead>
@@ -254,44 +254,44 @@ const DietDetaileTable = ({
                   <td className="p-3 sm:text-sm">
                     <div className="line-clamp-3">
                       {dietDetailTableItem.daily_records.meals.breakfast[0]
-                        ?.description || ""}
+                        ?.description || ''}
                     </div>
                   </td>
                   <td className="p-3 sm:text-sm">
                     <div className="line-clamp-3">
                       {dietDetailTableItem.daily_records.meals.lunch[0]
-                        ?.description || ""}
+                        ?.description || ''}
                     </div>
                   </td>
                   <td className="p-3 sm:text-sm">
                     <div className="line-clamp-3">
                       {dietDetailTableItem.daily_records.meals.dinner[0]
-                        ?.description || ""}
+                        ?.description || ''}
                     </div>
                   </td>
                   <td className="p-3 sm:text-sm">
                     <div className="line-clamp-2">
                       {dietDetailTableItem.daily_records.meals.snack[0]
-                        ?.description || ""}
+                        ?.description || ''}
                     </div>
                   </td>
                   <td className="p-3 sm:text-sm">
                     <div className="line-clamp-2">
                       {dietDetailTableItem.daily_records.meals.supplement[0]
-                        ?.description || ""}
+                        ?.description || ''}
                     </div>
                   </td>
                   <td className="p-3 sm:text-sm">
                     {(() => {
-                      console.log("피드백 시간 데이터:", {
-                        feedback: dietDetailTableItem.daily_records.feedback,
-                        updated_at:
-                          dietDetailTableItem.daily_records.feedback
-                            ?.updated_at,
-                        created_at:
-                          dietDetailTableItem.daily_records.feedback
-                            ?.created_at,
-                      });
+                      // console.log("피드백 시간 데이터:", {
+                      //   feedback: dietDetailTableItem.daily_records.feedback,
+                      //   updated_at:
+                      //     dietDetailTableItem.daily_records.feedback
+                      //       ?.updated_at,
+                      //   created_at:
+                      //     dietDetailTableItem.daily_records.feedback
+                      //       ?.created_at,
+                      // });
                       return formatDateTime(
                         dietDetailTableItem.daily_records.feedback?.updated_at,
                         dietDetailTableItem.daily_records.feedback?.created_at

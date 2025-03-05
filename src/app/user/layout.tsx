@@ -33,10 +33,10 @@ export default function UserLayout({
         }
         const adminData = await adminResponse.json();
         // console.log('받아온 관리자 데이터:', adminData);
-        // setAdminData({
-        //   admin_role: adminData.admin_role || '',
-        //   username: adminData.username || '',
-        // });
+        setAdminData({
+          admin_role: adminData.admin_role || '',
+          username: adminData.username || '',
+        });
 
         // 챌린지 데이터 가져오기
         const challengesResponse = await fetch('/api/challenges');

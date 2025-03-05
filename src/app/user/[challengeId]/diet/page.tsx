@@ -1,25 +1,25 @@
-"use client";
-import { useState, useEffect } from "react";
-import { DietPageSkeleton } from "@/components/layout/skeleton";
-import { useParams, useSearchParams } from "next/navigation";
-import { useDietData } from "@/components/hooks/useDietData";
-import { DietStatistics } from "@/components/statistics/dietStatistics";
-import { DietContent } from "@/components/dietDashboard/dietContent";
-import { useResponsive } from "@/components/hooks/useResponsive";
-import { useChallenge } from "@/components/hooks/useChallenges";
-import { processMeals } from "@/components/utils/processMeals";
-import Title from "@/components/layout/title";
+'use client';
+import { useState, useEffect } from 'react';
+import { DietPageSkeleton } from '@/components/layout/skeleton';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useDietData } from '@/components/hooks/useDietData';
+import { DietStatistics } from '@/components/statistics/dietStatistics';
+import { DietContent } from '@/components/dietDashboard/dietContent';
+import { useResponsive } from '@/components/hooks/useResponsive';
+import { useChallenge } from '@/components/hooks/useChallenges';
+import { processMeals } from '@/components/utils/processMeals';
+import Title from '@/components/layout/title';
 
 export default function DietItem() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const urlDate = searchParams.get("date");
-  const today = new Date().toISOString().split("T")[0];
-  console.log("[Diet Page] Date info:", {
-    today,
-    urlDate,
-    currentTime: new Date().toISOString(),
-  });
+  const urlDate = searchParams.get('date');
+  const today = new Date().toISOString().split('T')[0];
+  // console.log("[Diet Page] Date info:", {
+  //   today,
+  //   urlDate,
+  //   currentTime: new Date().toISOString(),
+  // });
   const [selectedDate, setSelectedDate] = useState<string>(urlDate || today);
   const {
     dietRecords,
@@ -33,7 +33,7 @@ export default function DietItem() {
     fetchChallenges,
     loading: challengesLoading,
   } = useChallenge();
-  const [selectedChallengeId, setSelectedChallengeId] = useState<string>("");
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challengeError, setChallengeError] = useState<string | null>(null);
 
   const handleSelectChallenge = (challengeId: string) => {
@@ -46,8 +46,8 @@ export default function DietItem() {
         await fetchChallenges();
         setChallengeError(null);
       } catch (err) {
-        setChallengeError("챌린지 정보를 불러오는데 실패했습니다.");
-        console.error("Failed to fetch challenges:", err);
+        setChallengeError('챌린지 정보를 불러오는데 실패했습니다.');
+        console.error('Failed to fetch challenges:', err);
       }
     };
     loadChallenges();
@@ -58,9 +58,9 @@ export default function DietItem() {
       setSelectedDate(urlDate);
       const row = document.querySelector(`[data-date="${urlDate}"]`);
       if (row) {
-        row.scrollIntoView({ behavior: "smooth", block: "center" });
-        row.classList.add("bg-yellow-50");
-        setTimeout(() => row.classList.remove("bg-yellow-50"), 3000);
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        row.classList.add('bg-yellow-50');
+        setTimeout(() => row.classList.remove('bg-yellow-50'), 3000);
       }
     }
   }, [urlDate]);
@@ -82,7 +82,7 @@ export default function DietItem() {
       <div className="px-8 pt-4 sm:px-4 sm:pt-0">
         <div className="text-gray-2 text-1.25-700">
           {challenges?.find((c) => c.challenges.id === params.challengeId)
-            ?.challenges.title || ""}
+            ?.challenges.title || ''}
         </div>
         <Title title="식단 현황" />
       </div>
@@ -101,13 +101,13 @@ export default function DietItem() {
                 (participant) => ({
                   id: challenge.challenges.id,
                   users: {
-                    id: participant.service_user_id || "",
-                    name: "",
-                    username: "",
+                    id: participant.service_user_id || '',
+                    name: '',
+                    username: '',
                   },
                   challenges: {
                     ...challenge.challenges,
-                    challenge_type: "diet",
+                    challenge_type: 'diet',
                   },
                   daily_records: [],
                 })
@@ -121,10 +121,10 @@ export default function DietItem() {
         challengeDates={{
           startDate:
             challenges?.find((c) => c.challenges.id === params.challengeId)
-              ?.challenges.start_date || "",
+              ?.challenges.start_date || '',
           endDate:
             challenges?.find((c) => c.challenges.id === params.challengeId)
-              ?.challenges.end_date || "",
+              ?.challenges.end_date || '',
         }}
         filteredByDate={dietRecords}
         mobileSize={isMobile}

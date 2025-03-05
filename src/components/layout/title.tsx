@@ -8,8 +8,8 @@ const Title = ({
   className?: string;
 }) => {
   return (
-    <div className={`flex flex-col gap-2 ${className || ""}`}>
-      <h1 className="sm:text-1.5-700 lg:text-1.75-700 font-bold text-gray-900 dark:text-white">
+    <div className={`flex flex-col gap-2 ${className || ''}`}>
+      <h1 className="sm:text-1.5-700 lg:text-1.75-700 font-bold text-gray-900 dark:text-white ">
         {title}
       </h1>
       {subtitle && (

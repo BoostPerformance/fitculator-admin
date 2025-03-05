@@ -96,13 +96,13 @@ const DailyDietRecord = ({
 
     // 미래 날짜는 false 반환
     if (recordDate > today) {
-      console.log(`[${userName}] ${date} - 미래 날짜 (false 반환)`);
+      // console.log(`[${userName}] ${date} - 미래 날짜 (false 반환)`);
       return false;
     }
 
     // daily_records가 존재하는지 확인
     if (!activity.daily_records || activity.daily_records.length === 0) {
-      console.log(`[${userName}] ${date} - daily_records 없음 (false 반환)`);
+      // console.log(`[${userName}] ${date} - daily_records 없음 (false 반환)`);
       return false;
     }
 

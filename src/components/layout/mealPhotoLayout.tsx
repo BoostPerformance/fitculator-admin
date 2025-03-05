@@ -75,6 +75,7 @@ const MealPhotoLayout = ({
     const newIndex = isFirstItem ? mealItems.length - 1 : currentItemIndex - 1;
 
     setCurrentItemIndex(newIndex);
+    console.log(newIndex);
   };
 
   // 다음 항목으로 이동
@@ -240,7 +241,7 @@ const MealPhotoLayout = ({
         <div className="lg:px-[0.625rem]">
           {renderPhotos()}
           {currentItem.meal_time && (
-            <div className="mt-2 text-sm text-gray-600">
+            <div className="mt-2 text-sm text-gray-600 dark:text-white">
               {formatMealTime(currentItem.meal_time)}
             </div>
           )}
