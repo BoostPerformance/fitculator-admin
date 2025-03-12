@@ -178,26 +178,26 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   // 챌린지 정보 가져오기
   const fetchChallengeInfo = async () => {
     try {
-      console.log(`챌린지 정보 요청: /api/challenges?id=${challengeId}`);
+      // console.log(`챌린지 정보 요청: /api/challenges?id=${challengeId}`);
       const response = await fetch(`/api/challenges?id=${challengeId}`);
 
       if (!response.ok) {
-        console.error(`챌린지 정보 불러오기 실패: ${response.status}`);
+        // console.error(`챌린지 정보 불러오기 실패: ${response.status}`);
         throw new Error('챌린지 정보를 가져오는데 실패했습니다');
       }
 
       const data = await response.json();
-      console.log('받아온 챌린지 정보:', data);
+      // console.log('받아온 챌린지 정보:', data);
 
       // 응답이 배열인 경우 첫 번째 항목 사용
       const challengeInfo = Array.isArray(data) ? data[0] : data;
-      console.log('challengeInfo', challengeInfo);
+      //  console.log('challengeInfo', challengeInfo);
       if (
         !challengeInfo ||
         !challengeInfo.challenges.start_date ||
         !challengeInfo.challenges.end_date
       ) {
-        console.warn('챌린지 기간 정보가 유효하지 않음');
+        //    console.warn('챌린지 기간 정보가 유효하지 않음');
         throw new Error('챌린지 시작일과 종료일 정보가 없습니다');
       }
 
@@ -295,7 +295,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
           throw new Error('챌린지 날짜를 파싱할 수 없습니다');
         }
 
-        console.log('주차 생성에 사용할 날짜:', { startDate, endDate });
+        //   console.log('주차 생성에 사용할 날짜:', { startDate, endDate });
 
         if (endDate < startDate) {
           console.warn('종료일이 시작일보다 빠름, 순서 교체');
@@ -303,10 +303,10 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
         }
 
         const allWeeks = generateWeekRanges(startDate, endDate);
-        console.log('생성된 주차:', allWeeks);
+        //     console.log('생성된 주차:', allWeeks);
 
         const allWeekLabels = allWeeks.map((week) => week.label);
-        console.log('모든 주차 레이블:', allWeekLabels);
+        //     console.log('모든 주차 레이블:', allWeekLabels);
 
         if (allWeekLabels.length === 0) {
           throw new Error('주차 데이터를 생성할 수 없습니다');
@@ -315,9 +315,9 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
         setWeekLabels(allWeekLabels);
 
         // 3. 운동 데이터 API 호출
-        console.log(
-          `API 요청: /api/workouts?type=weekly-chart&challengeId=${challengeId}`
-        );
+        // console.log(
+        //   `API 요청: /api/workouts?type=weekly-chart&challengeId=${challengeId}`
+        // );
 
         const workoutResponse = await fetch(
           `/api/workouts?type=weekly-chart&challengeId=${challengeId}`
@@ -328,7 +328,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
         }
 
         const workoutData = await workoutResponse.json();
-        console.log('API 응답 데이터:', workoutData);
+        // console.log('API 응답 데이터:', workoutData);
 
         if (!workoutData) {
           throw new Error('API 응답 데이터가 없습니다');

@@ -25,7 +25,7 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log('🔍 Getting weekly workout data for challenge:', challengeId);
+      // console.log('🔍 Getting weekly workout data for challenge:', challengeId);
 
       // 1. 챌린지 참가자 목록 조회
       const { data: participants, error: participantsError } = await supabase
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
 
       const participantIds = participants?.map((p) => p.service_user_id) || [];
       if (participantIds.length === 0) {
-        console.log('⚠️ No participants found for this challenge');
+        // console.log('⚠️ No participants found for this challenge');
         // 참가자가 없는 경우 빈 데이터 반환
         return NextResponse.json({
           cardio: [],
@@ -67,10 +67,10 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log('📅 Challenge period:', {
-        start_date: challenge.start_date,
-        end_date: challenge.end_date,
-      });
+      // console.log('📅 Challenge period:', {
+      //   start_date: challenge.start_date,
+      //   end_date: challenge.end_date,
+      // });
 
       // 3. 주별 데이터 구성을 위한 날짜 계산
       const weeks = generateWeekRanges(
@@ -78,9 +78,9 @@ export async function GET(request: Request) {
         new Date(challenge.end_date)
       );
 
-      console.log(
-        `📊 Generated ${weeks.length} weeks for the challenge period`
-      );
+      // console.log(
+      //   `📊 Generated ${weeks.length} weeks for the challenge period`
+      // );
 
       // 4. 사용자 정보 조회
       const { data: users, error: usersError } = await supabase
@@ -162,7 +162,7 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log(`📊 Total workouts found: ${workoutsData?.length || 0}`);
+      // console.log(`📊 Total workouts found: ${workoutsData?.length || 0}`);
 
       // 8. 데이터 가공
       const result = processWeeklyWorkoutData(
@@ -207,7 +207,7 @@ export async function GET(request: Request) {
       )
         .toISOString()
         .split('T')[0];
-      console.log('📅 Checking workouts for date:', today);
+      // console.log('📅 Checking workouts for date:', today);
 
       // 챌린지 참가자 목록 조회
       const { data: participants, error: participantsError } = await supabase
@@ -224,7 +224,7 @@ export async function GET(request: Request) {
       }
 
       const participantIds = participants?.map((p) => p.service_user_id) || [];
-      console.log('📊 Total participants:', participantIds.length);
+      // console.log('📊 Total participants:', participantIds.length);
 
       // 오늘 운동한 유저 조회
       const { data: workouts, error: workoutsError } = await supabase
@@ -255,10 +255,10 @@ export async function GET(request: Request) {
 
       // 중복 제거하여 실제 운동한 유저 수 계산
       const uniqueUsers = new Set(workouts?.map((w) => w.user_id) || []);
-      console.log("📊 Today's workout stats:", {
-        workoutUsers: uniqueUsers.size,
-        totalParticipants: participantIds.length,
-      });
+      // console.log("📊 Today's workout stats:", {
+      //   workoutUsers: uniqueUsers.size,
+      //   totalParticipants: participantIds.length,
+      // });
 
       return NextResponse.json({
         count: uniqueUsers.size,
@@ -273,18 +273,18 @@ export async function GET(request: Request) {
     }
   }
 
-  console.log('🔄 === Workouts API Request Start ===');
+  // console.log('🔄 === Workouts API Request Start ===');
   try {
-    console.log('🔍 Getting server session...');
+    // console.log('🔍 Getting server session...');
     const session = (await getServerSession(authOptions)) as Session;
-    console.log('📥 Session:', session?.user?.email || 'No session');
+    // console.log('📥 Session:', session?.user?.email || 'No session');
 
     if (!session?.user?.email) {
       console.log('❌ Not authenticated');
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    console.log('🔍 Executing workouts query...');
+    // console.log('🔍 Executing workouts query...');
 
     // Get challengeId and period from query params
     const url = new URL(request.url);
@@ -337,9 +337,9 @@ export async function GET(request: Request) {
       endStr = challenge.end_date;
     }
 
-    console.log('\n📅 리더보드 조회 기간:');
-    console.log('시작:', startStr);
-    console.log('종료:', endStr);
+    // console.log('\n📅 리더보드 조회 기간:');
+    // console.log('시작:', startStr);
+    // console.log('종료:', endStr);
 
     // challengeId가 없는 경우 코치 확인
     if (!challengeId) {
@@ -364,13 +364,13 @@ export async function GET(request: Request) {
           // 담당 챌린지가 하나인 경우
           if (coachData.challenge_coaches.length === 1) {
             challengeId = coachData.challenge_coaches[0].challenge_id;
-            console.log("📥 Using coach's challenge ID:", challengeId);
+            // console.log("📥 Using coach's challenge ID:", challengeId);
           }
         }
       }
     }
 
-    console.log('📥 Challenge ID:', challengeId);
+    // console.log('📥 Challenge ID:', challengeId);
 
     if (!challengeId) {
       console.log('❌ Challenge ID is missing');
@@ -443,7 +443,7 @@ export async function GET(request: Request) {
         .in('user_id', participantIds);
 
       // 기간에 따른 필터 추가
-      console.log('📊 조회 기간:', startStr, '~', endStr);
+      // console.log('📊 조회 기간:', startStr, '~', endStr);
       query = query
         .gte('timestamp', startStr)
         .lt(
@@ -460,7 +460,7 @@ export async function GET(request: Request) {
         );
 
       const { data: workoutData, error: workoutError } = await query;
-      console.log('📊 조회된 운동 데이터 수:', workoutData?.length || 0);
+      // console.log('📊 조회된 운동 데이터 수:', workoutData?.length || 0);
 
       if (workoutError) {
         console.error('❌ Supabase query error at workoutData:', workoutError);
