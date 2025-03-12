@@ -17,6 +17,7 @@ import {
   calculateTodayDietUploads,
   calculateTotalDietUploads,
 } from '@/components/statistics/challengeParticipantsDietStatics';
+import WeeklyWorkoutChart from '@/components/graph/WeeklyWorkoutChart';
 
 interface AdminUser {
   email: string;
@@ -374,6 +375,7 @@ export default function User() {
               <DailyDietRecord activities={filteredDailyRecordsbyId} />
               <WorkoutLeaderboard challengeId={selectedChallengeId} />
             </div>
+            <WeeklyWorkoutChart challengeId={selectedChallengeId} />
             <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem] sm:pt-4 bg-white-1 px-4 sm:px-4">
               <DietTable
                 dailyRecordsData={filteredDailyRecordsbyId}
