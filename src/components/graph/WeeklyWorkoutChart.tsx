@@ -178,26 +178,21 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   // 챌린지 정보 가져오기
   const fetchChallengeInfo = async () => {
     try {
-      // console.log(`챌린지 정보 요청: /api/challenges?id=${challengeId}`);
       const response = await fetch(`/api/challenges?id=${challengeId}`);
 
       if (!response.ok) {
-        // console.error(`챌린지 정보 불러오기 실패: ${response.status}`);
         throw new Error('챌린지 정보를 가져오는데 실패했습니다');
       }
 
       const data = await response.json();
-      // console.log('받아온 챌린지 정보:', data);
 
       // 응답이 배열인 경우 첫 번째 항목 사용
       const challengeInfo = Array.isArray(data) ? data[0] : data;
-      //  console.log('challengeInfo', challengeInfo);
       if (
         !challengeInfo ||
         !challengeInfo.challenges.start_date ||
         !challengeInfo.challenges.end_date
       ) {
-        //    console.warn('챌린지 기간 정보가 유효하지 않음');
         throw new Error('챌린지 시작일과 종료일 정보가 없습니다');
       }
 
@@ -295,18 +290,13 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
           throw new Error('챌린지 날짜를 파싱할 수 없습니다');
         }
 
-        //   console.log('주차 생성에 사용할 날짜:', { startDate, endDate });
-
         if (endDate < startDate) {
           console.warn('종료일이 시작일보다 빠름, 순서 교체');
           [startDate, endDate] = [endDate, startDate];
         }
 
         const allWeeks = generateWeekRanges(startDate, endDate);
-        //     console.log('생성된 주차:', allWeeks);
-
         const allWeekLabels = allWeeks.map((week) => week.label);
-        //     console.log('모든 주차 레이블:', allWeekLabels);
 
         if (allWeekLabels.length === 0) {
           throw new Error('주차 데이터를 생성할 수 없습니다');
@@ -315,10 +305,6 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
         setWeekLabels(allWeekLabels);
 
         // 3. 운동 데이터 API 호출
-        // console.log(
-        //   `API 요청: /api/workouts?type=weekly-chart&challengeId=${challengeId}`
-        // );
-
         const workoutResponse = await fetch(
           `/api/workouts?type=weekly-chart&challengeId=${challengeId}`
         );
@@ -328,7 +314,6 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
         }
 
         const workoutData = await workoutResponse.json();
-        // console.log('API 응답 데이터:', workoutData);
 
         if (!workoutData) {
           throw new Error('API 응답 데이터가 없습니다');
@@ -410,8 +395,10 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   // 로딩 중 표시
   if (loading) {
     return (
-      <div className="col-span-6 bg-white p-6 shadow rounded-lg flex items-center justify-center h-64">
-        <p className="text-gray-500">데이터를 불러오는 중...</p>
+      <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 bg-white p-4 md:p-6 shadow rounded-lg flex items-center justify-center h-40 md:h-64">
+        <p className="text-gray-500 text-sm md:text-base">
+          데이터를 불러오는 중...
+        </p>
       </div>
     );
   }
@@ -419,15 +406,17 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   // 오류 표시
   if (error) {
     return (
-      <div className="col-span-6 bg-white p-6 shadow rounded-lg flex flex-col items-center justify-center h-64">
-        <p className="text-red-500 mb-4">{error}</p>
+      <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 bg-white p-4 md:p-6 shadow rounded-lg flex flex-col items-center justify-center h-40 md:h-64">
+        <p className="text-red-500 mb-2 md:mb-4 text-sm md:text-base">
+          {error}
+        </p>
         <button
           onClick={() => {
             setLoading(true);
             setError(null);
             setTimeout(() => window.location.reload(), 100);
           }}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-3 py-1 md:px-4 md:py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
         >
           다시 시도
         </button>
@@ -438,104 +427,194 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   // 주차 데이터가 없는 경우
   if (weekLabels.length === 0) {
     return (
-      <div className="col-span-6 bg-white p-6 shadow rounded-lg flex items-center justify-center h-64">
-        <p className="text-gray-500">주차 데이터를 생성할 수 없습니다.</p>
+      <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 bg-white p-4 md:p-6 shadow rounded-lg flex items-center justify-center h-40 md:h-64">
+        <p className="text-gray-500 text-sm md:text-base">
+          주차 데이터를 생성할 수 없습니다.
+        </p>
       </div>
     );
   }
+
+  // 차트 너비 계산 (주차별로 최소 150px 할당)
+  const calculateChartWidth = () => {
+    const minWidth = 100; // 최소 너비(%)
+    const perWeekWidth = 150; // 주당 픽셀 너비
+    return Math.max(minWidth, weekLabels.length * perWeekWidth);
+  };
+
+  // 주차 데이터가 너무 많아 가로 스크롤이 필요한지 확인
+  const needsHorizontalScroll = weekLabels.length > 3;
 
   // X축 도메인 계산 (마지막 주의 끝까지 표시)
   const xAxisDomain = [0, weekLabels.length - 1 + 1];
 
   return (
-    <div className="col-span-6 space-y-6">
+    <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 space-y-4 md:space-y-6">
       {/* 유산소 운동 차트 */}
-      <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8">
-        <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
+      <div className="bg-white p-3 md:p-4 shadow rounded-lg dark:bg-gray-8 overflow-hidden">
+        <h2 className="text-base md:text-lg font-semibold mb-2 md:mb-4 dark:text-gray-5 text-[#6F6F6F] pt-2 md:pt-3">
           주별 유산소 운동량
         </h2>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-              <CartesianGrid
-                horizontal={true}
-                vertical={false}
-                strokeDasharray="3 3"
-              />
-              <XAxis
-                type="number"
-                dataKey={(data) => xAxisCalculator(data)}
-                domain={xAxisDomain}
-                ticks={weekLabels.map((_, i) => i + 0.5)} // 각 주의 중앙
-                tickFormatter={(value) => {
-                  const weekIndex = Math.floor(value);
-                  return weekLabels[weekIndex] || '';
+        <div className="overflow-x-auto pb-4">
+          <div
+            className="h-[200px] sm:h-[250px] md:h-[300px]"
+            style={{
+              width: `${Math.max(100, weekLabels.length * 150)}px`,
+              minWidth: '100%',
+            }}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart
+                margin={{
+                  top: 10,
+                  right: needsHorizontalScroll ? 30 : 10,
+                  bottom: 20,
+                  left: 10,
+                  ...(window.innerWidth >= 768
+                    ? {
+                        top: 20,
+                        right: needsHorizontalScroll ? 40 : 20,
+                        bottom: 20,
+                        left: 20,
+                      }
+                    : {}),
                 }}
-                allowDecimals={true}
-                interval={0}
-              />
-              <YAxis dataKey="y" name="운동량" domain={[0, 'auto']} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-
-              {/* 주간 구분선 (각 주의 시작) */}
-              {weekLabels.map((_, i) => (
-                <ReferenceLine
-                  key={`week-${i}`}
-                  x={i}
-                  stroke="#ccc"
-                  strokeWidth={1}
+              >
+                <CartesianGrid
+                  horizontal={true}
+                  vertical={false}
+                  strokeDasharray="3 3"
                 />
-              ))}
+                <XAxis
+                  type="number"
+                  dataKey={(data) => xAxisCalculator(data)}
+                  domain={xAxisDomain}
+                  ticks={weekLabels.map((_, i) => i + 0.5)} // 각 주의 중앙
+                  tickFormatter={(value) => {
+                    const weekIndex = Math.floor(value);
+                    // 모바일에서는 짧은 형식으로 표시 (예: 02.10)
+                    if (window.innerWidth < 640) {
+                      const weekLabel = weekLabels[weekIndex] || '';
+                      return weekLabel.split('-')[0] || '';
+                    }
+                    return weekLabels[weekIndex] || '';
+                  }}
+                  allowDecimals={true}
+                  interval={0}
+                  tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
+                />
+                <YAxis
+                  dataKey="y"
+                  name="운동량"
+                  domain={[0, 'auto']}
+                  tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend
+                  wrapperStyle={{
+                    fontSize: window.innerWidth < 640 ? 10 : 12,
+                    marginTop: window.innerWidth < 640 ? 0 : 10,
+                  }}
+                />
 
-              {renderScatters(cardioData)}
-            </ScatterChart>
-          </ResponsiveContainer>
+                {/* 주간 구분선 (각 주의 시작) */}
+                {weekLabels.map((_, i) => (
+                  <ReferenceLine
+                    key={`week-${i}`}
+                    x={i}
+                    stroke="#ccc"
+                    strokeWidth={1}
+                  />
+                ))}
+
+                {renderScatters(cardioData)}
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
       {/* 근력 운동 차트 */}
-      <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 border border-blue-200">
-        <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
+      <div className="bg-white p-3 md:p-4 shadow rounded-lg dark:bg-gray-8 border border-blue-200 overflow-hidden">
+        <h2 className="text-base md:text-lg font-semibold mb-2 md:mb-4 dark:text-gray-5 text-[#6F6F6F] pt-2 md:pt-3">
           주별 근력 운동량
         </h2>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-              <CartesianGrid
-                horizontal={true}
-                vertical={false}
-                strokeDasharray="3 3"
-              />
-              <XAxis
-                type="number"
-                dataKey={(data) => xAxisCalculator(data)}
-                domain={xAxisDomain}
-                ticks={weekLabels.map((_, i) => i + 0.5)} // 각 주의 중앙
-                tickFormatter={(value) => {
-                  const weekIndex = Math.floor(value);
-                  return weekLabels[weekIndex] || '';
+        <div className="overflow-x-auto pb-4">
+          <div
+            className="h-[200px] sm:h-[250px] md:h-[300px]"
+            style={{
+              width: `${Math.max(100, weekLabels.length * 150)}px`,
+              minWidth: '100%',
+            }}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart
+                margin={{
+                  top: 10,
+                  right: needsHorizontalScroll ? 30 : 10,
+                  bottom: 20,
+                  left: 10,
+                  ...(window.innerWidth >= 768
+                    ? {
+                        top: 20,
+                        right: needsHorizontalScroll ? 40 : 20,
+                        bottom: 20,
+                        left: 20,
+                      }
+                    : {}),
                 }}
-                allowDecimals={true}
-                interval={0}
-              />
-              <YAxis dataKey="y" name="운동량" domain={[0, 2.5]} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-
-              {/* 주간 구분선 (각 주의 시작) */}
-              {weekLabels.map((_, i) => (
-                <ReferenceLine
-                  key={`week-${i}`}
-                  x={i}
-                  stroke="#ccc"
-                  strokeWidth={1}
+              >
+                <CartesianGrid
+                  horizontal={true}
+                  vertical={false}
+                  strokeDasharray="3 3"
                 />
-              ))}
+                <XAxis
+                  type="number"
+                  dataKey={(data) => xAxisCalculator(data)}
+                  domain={xAxisDomain}
+                  ticks={weekLabels.map((_, i) => i + 0.5)} // 각 주의 중앙
+                  tickFormatter={(value) => {
+                    const weekIndex = Math.floor(value);
+                    // 모바일에서는 짧은 형식으로 표시 (예: 02.10)
+                    if (window.innerWidth < 640) {
+                      const weekLabel = weekLabels[weekIndex] || '';
+                      return weekLabel.split('-')[0] || '';
+                    }
+                    return weekLabels[weekIndex] || '';
+                  }}
+                  allowDecimals={true}
+                  interval={0}
+                  tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
+                />
+                <YAxis
+                  dataKey="y"
+                  name="운동량"
+                  domain={[0, 2.5]}
+                  tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend
+                  wrapperStyle={{
+                    fontSize: window.innerWidth < 640 ? 10 : 12,
+                    marginTop: window.innerWidth < 640 ? 0 : 10,
+                  }}
+                />
 
-              {renderScatters(strengthData)}
-            </ScatterChart>
-          </ResponsiveContainer>
+                {/* 주간 구분선 (각 주의 시작) */}
+                {weekLabels.map((_, i) => (
+                  <ReferenceLine
+                    key={`week-${i}`}
+                    x={i}
+                    stroke="#ccc"
+                    strokeWidth={1}
+                  />
+                ))}
+
+                {renderScatters(strengthData)}
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>
