@@ -40,6 +40,12 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
 }) => {
   const [cardioData, setCardioData] = useState<ChartDataPoint[]>([]);
   const [strengthData, setStrengthData] = useState<ChartDataPoint[]>([]);
+  const [weeklyCardioData, setWeeklyCardioData] = useState<ChartDataPoint[]>(
+    []
+  );
+  const [weeklyStrengthData, setWeeklyStrengthData] = useState<
+    ChartDataPoint[]
+  >([]);
   const [userColors, setUserColors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,6 +128,64 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
     }
 
     return weeks;
+  };
+
+  // 개별 데이터 포인트를 주간 누적 데이터로 집계하는 함수
+  const aggregateWeeklyData = (data: ChartDataPoint[]): ChartDataPoint[] => {
+    if (!data || data.length === 0) return [];
+
+    // 주차별, 사용자별 데이터 그룹화
+    const weeklyUserTotals: Record<
+      string,
+      Record<string, { total: number; userId: string }>
+    > = {};
+
+    data.forEach((item) => {
+      const week = item.x;
+      const user = item.user;
+      const userId = item.userId;
+      const value = item.y;
+
+      if (!weeklyUserTotals[week]) {
+        weeklyUserTotals[week] = {};
+      }
+
+      if (!weeklyUserTotals[week][user]) {
+        weeklyUserTotals[week][user] = { total: 0, userId };
+      }
+
+      weeklyUserTotals[week][user].total += value;
+    });
+
+    // 주차별, 사용자별 누적 데이터 생성 (jitter 효과 적용)
+    const aggregatedData: ChartDataPoint[] = [];
+
+    Object.entries(weeklyUserTotals).forEach(([week, users]) => {
+      // 한 주 내에서 사용자 수에 따라 적절한 jitter 범위 결정
+      const userCount = Object.keys(users).length;
+
+      Object.entries(users).forEach(([userName, userData], index) => {
+        // jitter 효과: 주 안에서 랜덤하게 위치 설정 (0.2~0.8 범위에서)
+        // 같은 사용자는 항상 같은 패턴으로 배치되도록 사용자 이름에서 시드값 생성
+        const nameSeed = userName
+          .split('')
+          .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+        // pseudorandom 위치 생성 (사용자 이름 기반)
+        const pseudoRandom = ((nameSeed * 9301 + 49297) % 233280) / 233280;
+        const position = 0.2 + pseudoRandom * 0.6; // 0.2~0.8 사이로 제한
+
+        aggregatedData.push({
+          x: week,
+          y: userData.total,
+          user: userName,
+          userId: userData.userId,
+          position: position, // jitter 효과 적용된 위치
+        });
+      });
+    });
+
+    return aggregatedData;
   };
 
   // 타임스탬프 정보를 기반으로 일자(day of month) 및 주 내 위치 계산
@@ -248,7 +312,9 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
       return (
         <div className="bg-white p-2 border border-gray-200 shadow-md rounded text-xs">
           <p className="font-bold">{dateText}</p>
-          <p className="text-gray-700">{`${data.user}: ${data.y}`}</p>
+          <p className="text-gray-700">{`${data.user}: ${data.y.toFixed(
+            1
+          )}`}</p>
           {data.timestamp && (
             <p className="text-gray-500 text-xs">
               {new Date(data.timestamp).toLocaleTimeString('ko-KR', {
@@ -343,6 +409,10 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
 
         setCardioData(cardioWithDates);
         setStrengthData(strengthWithDates);
+
+        // 6. 주간 누적 데이터 계산
+        setWeeklyCardioData(aggregateWeeklyData(cardioWithDates));
+        setWeeklyStrengthData(aggregateWeeklyData(strengthWithDates));
       } catch (err) {
         console.error('데이터 로딩 오류:', err);
         setError(
@@ -527,7 +597,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                   />
                 ))}
 
-                {renderScatters(cardioData)}
+                {renderScatters(weeklyCardioData)}
               </ScatterChart>
             </ResponsiveContainer>
           </div>
@@ -590,7 +660,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                 <YAxis
                   dataKey="y"
                   name="운동량"
-                  domain={[0, 2.5]}
+                  domain={[0, 'auto']}
                   tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
                 />
                 <Tooltip content={<CustomTooltip />} />
@@ -611,7 +681,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                   />
                 ))}
 
-                {renderScatters(strengthData)}
+                {renderScatters(weeklyStrengthData)}
               </ScatterChart>
             </ResponsiveContainer>
           </div>
