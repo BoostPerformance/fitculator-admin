@@ -61,6 +61,8 @@ export default function ChallengeDetail({
   const [newParticipantEmail, setNewParticipantEmail] = useState('');
   const [newParticipantName, setNewParticipantName] = useState('');
   const [isAddingParticipant, setIsAddingParticipant] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isDeletingParticipant, setIsDeletingParticipant] = useState(false);
   const router = useRouter();
 
   // 챌린지 정보 가져오기
@@ -253,6 +255,95 @@ export default function ChallengeDetail({
     } finally {
       setIsLoading(false);
       setUploadProgress(0);
+    }
+  };
+
+  // 참가자 상태 토글 핸들러
+  const handleToggleStatus = async (
+    participantId: string,
+    currentStatus: string
+  ) => {
+    // 상태 변경 확인
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const confirmMessage =
+      newStatus === 'active'
+        ? '이 참가자를 활성화하시겠습니까?'
+        : '이 참가자를 비활성화하시겠습니까?';
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    setIsUpdatingStatus(true);
+
+    try {
+      const response = await fetch('/api/challenge-participants', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          participantId,
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '참가자 상태 변경에 실패했습니다.');
+      }
+
+      // 참가자 목록 업데이트
+      setParticipants(
+        participants.map((p) =>
+          p.id === participantId ? { ...p, status: newStatus } : p
+        )
+      );
+    } catch (error) {
+      console.error('참가자 상태 변경 오류:', error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : '참가자 상태 변경 중 오류가 발생했습니다.'
+      );
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  // 참가자 삭제 핸들러
+  const handleDeleteParticipant = async (participantId: string) => {
+    // 삭제 확인
+    if (!confirm('정말로 이 참가자를 삭제하시겠습니까?')) {
+      return;
+    }
+
+    setIsDeletingParticipant(true);
+
+    try {
+      const response = await fetch(
+        `/api/challenge-participants?participantId=${participantId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '참가자 삭제에 실패했습니다.');
+      }
+
+      // 참가자 목록 업데이트
+      setParticipants(participants.filter((p) => p.id !== participantId));
+    } catch (error) {
+      console.error('참가자 삭제 오류:', error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : '참가자 삭제 중 오류가 발생했습니다.'
+      );
+    } finally {
+      setIsDeletingParticipant(false);
     }
   };
 
@@ -703,7 +794,7 @@ export default function ChallengeDetail({
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                       >
-                        상태
+                        액션
                       </th>
                     </tr>
                   </thead>
@@ -727,15 +818,44 @@ export default function ChallengeDetail({
                             : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          {participant.status === 'active' ? (
-                            <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
-                              활성
-                            </span>
-                          ) : (
-                            <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                              비활성
-                            </span>
-                          )}
+                          <div className="flex items-center space-x-2">
+                            {participant.status === 'active' ? (
+                              <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                활성
+                              </span>
+                            ) : (
+                              <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                비활성
+                              </span>
+                            )}
+                            <button
+                              onClick={() =>
+                                handleToggleStatus(
+                                  participant.id,
+                                  participant.status || 'inactive'
+                                )
+                              }
+                              disabled={isUpdatingStatus}
+                              className={`px-3 py-1 rounded text-xs font-medium ${
+                                participant.status === 'active'
+                                  ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-800 dark:text-yellow-100'
+                                  : 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-800 dark:text-green-100'
+                              }`}
+                            >
+                              {participant.status === 'active'
+                                ? '비활성화'
+                                : '활성화'}
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleDeleteParticipant(participant.id)
+                              }
+                              disabled={isDeletingParticipant}
+                              className="px-3 py-1 rounded text-xs font-medium bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-800 dark:text-red-100"
+                            >
+                              삭제
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

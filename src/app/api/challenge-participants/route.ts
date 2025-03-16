@@ -141,6 +141,208 @@ export async function GET(request: Request) {
   }
 }
 
+export async function PUT(request: Request) {
+  try {
+    const session = (await getServerSession(authOptions)) as Session;
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        {
+          error: '인증되지 않은 사용자입니다.',
+          type: 'AuthError',
+        },
+        { status: 401 }
+      );
+    }
+
+    // 관리자 사용자 확인
+    const { data: adminUser, error: adminError } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('email', session.user.email)
+      .single();
+
+    if (adminError || !adminUser) {
+      return NextResponse.json(
+        {
+          error: '관리자 권한이 없습니다.',
+          type: 'NotFoundError',
+        },
+        { status: 403 }
+      );
+    }
+
+    // 요청 본문 파싱
+    const body = await request.json();
+    const { participantId, status } = body;
+
+    // 필수 필드 검증
+    if (!participantId) {
+      return NextResponse.json(
+        {
+          error: '참가자 ID는 필수 항목입니다.',
+          type: 'ValidationError',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 참가자 존재 여부 확인
+    const { data: participant, error: participantError } = await supabase
+      .from('challenge_participants')
+      .select('id')
+      .eq('id', participantId)
+      .single();
+
+    if (participantError || !participant) {
+      return NextResponse.json(
+        {
+          error: '참가자를 찾을 수 없습니다.',
+          type: 'NotFoundError',
+        },
+        { status: 404 }
+      );
+    }
+
+    // 참가자 상태 업데이트
+    const { data: updatedParticipant, error: updateError } = await supabase
+      .from('challenge_participants')
+      .update({ status: status || 'inactive' })
+      .eq('id', participantId)
+      .select('id, status')
+      .single();
+
+    if (updateError) {
+      return NextResponse.json(
+        {
+          error: '참가자 상태 업데이트에 실패했습니다.',
+          details: updateError.message,
+          type: 'UpdateError',
+        },
+        { status: 500 }
+      );
+    }
+
+    // 응답 반환
+    return NextResponse.json(updatedParticipant);
+  } catch (error) {
+    console.error('❌ === Challenge Participant API Error ===', {
+      name: error instanceof Error ? error.name : 'Unknown error',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: 'GlobalError',
+    });
+    return NextResponse.json(
+      {
+        error: '서버 오류가 발생했습니다.',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        type: 'GlobalError',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const session = (await getServerSession(authOptions)) as Session;
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        {
+          error: '인증되지 않은 사용자입니다.',
+          type: 'AuthError',
+        },
+        { status: 401 }
+      );
+    }
+
+    // 관리자 사용자 확인
+    const { data: adminUser, error: adminError } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('email', session.user.email)
+      .single();
+
+    if (adminError || !adminUser) {
+      return NextResponse.json(
+        {
+          error: '관리자 권한이 없습니다.',
+          type: 'NotFoundError',
+        },
+        { status: 403 }
+      );
+    }
+
+    // URL에서 참가자 ID 가져오기
+    const { searchParams } = new URL(request.url);
+    const participantId = searchParams.get('participantId');
+
+    // 필수 필드 검증
+    if (!participantId) {
+      return NextResponse.json(
+        {
+          error: '참가자 ID는 필수 항목입니다.',
+          type: 'ValidationError',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 참가자 존재 여부 확인
+    const { data: participant, error: participantError } = await supabase
+      .from('challenge_participants')
+      .select('id')
+      .eq('id', participantId)
+      .single();
+
+    if (participantError || !participant) {
+      return NextResponse.json(
+        {
+          error: '참가자를 찾을 수 없습니다.',
+          type: 'NotFoundError',
+        },
+        { status: 404 }
+      );
+    }
+
+    // 참가자 삭제
+    const { error: deleteError } = await supabase
+      .from('challenge_participants')
+      .delete()
+      .eq('id', participantId);
+
+    if (deleteError) {
+      return NextResponse.json(
+        {
+          error: '참가자 삭제에 실패했습니다.',
+          details: deleteError.message,
+          type: 'DeleteError',
+        },
+        { status: 500 }
+      );
+    }
+
+    // 성공 응답 반환
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('❌ === Challenge Participant API Error ===', {
+      name: error instanceof Error ? error.name : 'Unknown error',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: 'GlobalError',
+    });
+    return NextResponse.json(
+      {
+        error: '서버 오류가 발생했습니다.',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        type: 'GlobalError',
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const session = (await getServerSession(authOptions)) as Session;
