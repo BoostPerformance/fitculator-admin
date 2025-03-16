@@ -309,3 +309,133 @@ export async function GET(
     );
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const session = (await getServerSession(authOptions)) as Session;
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        {
+          error: 'Not authenticated',
+          type: 'AuthError',
+        },
+        { status: 401 }
+      );
+    }
+
+    // 관리자 사용자 확인
+    const { data: adminUser, error: adminError } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('email', session.user.email)
+      .single();
+
+    if (adminError || !adminUser) {
+      return NextResponse.json(
+        {
+          error: 'Admin user not found',
+          type: 'NotFoundError',
+        },
+        { status: 404 }
+      );
+    }
+
+    // 요청 본문 파싱
+    const body = await request.json();
+    const {
+      title,
+      description,
+      start_date,
+      end_date,
+      banner_image_url,
+      cover_image_url,
+      challenge_type = 'diet_and_exercise', // 기본값 설정
+      organization_id,
+    } = body;
+
+    // 필수 필드 검증
+    if (!title || !start_date || !end_date) {
+      return NextResponse.json(
+        {
+          error: 'Missing required fields',
+          type: 'ValidationError',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 조직 ID 검증
+    if (!organization_id) {
+      return NextResponse.json(
+        {
+          error: 'Organization ID is required',
+          type: 'ValidationError',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 조직 존재 여부 확인
+    const { data: organizationData, error: organizationError } = await supabase
+      .from('organizations')
+      .select('id')
+      .eq('id', organization_id)
+      .single();
+
+    if (organizationError || !organizationData) {
+      return NextResponse.json(
+        {
+          error: 'Organization not found',
+          type: 'NotFoundError',
+        },
+        { status: 404 }
+      );
+    }
+
+    // 챌린지 생성
+    const { data: challenge, error: challengeError } = await supabase
+      .from('challenges')
+      .insert({
+        organization_id,
+        challenge_type,
+        title,
+        description,
+        banner_image_url,
+        cover_image_url,
+        start_date,
+        end_date,
+      })
+      .select()
+      .single();
+
+    if (challengeError) {
+      console.error('챌린지 생성 오류:', challengeError);
+      return NextResponse.json(
+        {
+          error: 'Failed to create challenge',
+          details: challengeError.message,
+          type: 'ChallengeCreationError',
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(challenge);
+  } catch (error) {
+    console.error('❌ === Challenge Creation API Error ===', {
+      name: error instanceof Error ? error.name : 'Unknown error',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: 'GlobalError',
+    });
+    return NextResponse.json(
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        type: 'GlobalError',
+      },
+      { status: 500 }
+    );
+  }
+}
