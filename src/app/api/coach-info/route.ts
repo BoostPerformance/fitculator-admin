@@ -29,9 +29,9 @@ export async function GET() {
       throw adminError;
     }
 
-    // 코치가 아닌 경우 기본 정보만 반환
+    // 코치가 아니고 내부 운영자도 아닌 경우 기본 정보만 반환
     if (
-      adminUser.admin_role !== 'coach' ||
+      adminUser.admin_role !== 'coach' &&
       adminUser.admin_role !== 'internal_operator'
     ) {
       return NextResponse.json({

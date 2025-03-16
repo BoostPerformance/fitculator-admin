@@ -76,7 +76,7 @@ export async function GET(
 
     // Handle non-coach admin users
     if (
-      adminUser.admin_role !== 'coach' ||
+      adminUser.admin_role !== 'coach' &&
       adminUser.admin_role !== 'internal_operator'
     ) {
       //   console.log("🔍 Fetching all challenges for admin...");

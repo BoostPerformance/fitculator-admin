@@ -149,7 +149,10 @@ export const authOptions: NextAuthConfig = {
           session.user.organization_id = token.organization_id;
           session.user.admin_user_id = token.admin_user_id;
 
-          if (token.admin_role === 'coach') {
+          if (
+            token.admin_role === 'coach' ||
+            token.admin_role === 'internal_operator'
+          ) {
             const { data: coachData, error: coachError } = await supabase
               .from('coaches')
               .select('*')
