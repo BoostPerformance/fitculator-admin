@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../auth/[...nextauth]/route';
+import type { Session } from 'next-auth';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,35 +21,28 @@ interface DailyRecord {
   meals: Meals;
 }
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const challengeId = searchParams.get('challenge_id');
   try {
-    const { searchParams } = new URL(request.url);
     const page = Number(searchParams.get('page')) || 1;
     const limit = Number(searchParams.get('limit')) || 30;
     const start = (page - 1) * limit;
     const end = start + limit - 1;
     const withRecords = searchParams.get('with_records') === 'true';
 
-    // console.log('[challenge-participants API] Pagination params:', {
-    //   page,
-    //   limit,
-    //   start,
-    //   end,
-    //   withRecords,
-    // });
-
-    // 기본 정보만 먼저 가져오기
-    const { data: participants, error: participantsError } = await supabase
-      .from('challenge_participants')
-      .select(
-        `
+    // 기본 쿼리 설정
+    let query = supabase.from('challenge_participants').select(
+      `
         id,
         coach_memo,
         memo_updated_at,
         service_user_id,
+        created_at,
         users!fk_challenge_participants_service_user (
           id,
           username,
-          name
+          name,
+          email
         ),
         challenges: challenge_id (
           id,
@@ -56,7 +52,15 @@ export async function GET(request: Request) {
           end_date
         )
       `
-      )
+    );
+
+    // 챌린지 ID로 필터링
+    if (challengeId) {
+      query = query.eq('challenge_id', challengeId);
+    }
+
+    // 페이지네이션 및 정렬 적용
+    const { data: participants, error: participantsError } = await query
       .range(start, end)
       .order('created_at', { ascending: false });
 
@@ -106,9 +110,15 @@ export async function GET(request: Request) {
     );
 
     // 전체 개수 가져오기
-    const { count } = await supabase
+    let countQuery = supabase
       .from('challenge_participants')
       .select('*', { count: 'exact', head: true });
+
+    if (challengeId) {
+      countQuery = countQuery.eq('challenge_id', challengeId);
+    }
+
+    const { count } = await countQuery;
 
     return NextResponse.json({
       data: participantsWithRecords,
@@ -124,6 +134,170 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         error: 'failed to fetch data api challenge-participants',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const session = (await getServerSession(authOptions)) as Session;
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        {
+          error: '인증되지 않은 사용자입니다.',
+          type: 'AuthError',
+        },
+        { status: 401 }
+      );
+    }
+
+    // 관리자 사용자 확인
+    const { data: adminUser, error: adminError } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('email', session.user.email)
+      .single();
+
+    if (adminError || !adminUser) {
+      return NextResponse.json(
+        {
+          error: '관리자 권한이 없습니다.',
+          type: 'NotFoundError',
+        },
+        { status: 403 }
+      );
+    }
+
+    // 요청 본문 파싱
+    const body = await request.json();
+    const { challenge_id, email, name } = body;
+
+    // 필수 필드 검증
+    if (!challenge_id || !email) {
+      return NextResponse.json(
+        {
+          error: '챌린지 ID와 이메일은 필수 항목입니다.',
+          type: 'ValidationError',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 챌린지 존재 여부 확인
+    const { data: challenge, error: challengeError } = await supabase
+      .from('challenges')
+      .select('id')
+      .eq('id', challenge_id)
+      .single();
+
+    if (challengeError || !challenge) {
+      return NextResponse.json(
+        {
+          error: '챌린지를 찾을 수 없습니다.',
+          type: 'NotFoundError',
+        },
+        { status: 404 }
+      );
+    }
+
+    // 사용자 확인 또는 생성
+    let userId;
+    const { data: existingUser, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (userError) {
+      // 사용자가 없으면 새로 생성
+      const { data: newUser, error: createUserError } = await supabase
+        .from('users')
+        .insert([
+          {
+            email: email,
+            name: name || null,
+            is_active: true,
+          },
+        ])
+        .select('id')
+        .single();
+
+      if (createUserError) {
+        return NextResponse.json(
+          {
+            error: '사용자 생성에 실패했습니다.',
+            details: createUserError.message,
+            type: 'UserCreationError',
+          },
+          { status: 500 }
+        );
+      }
+
+      userId = newUser.id;
+    } else {
+      userId = existingUser.id;
+    }
+
+    // 이미 참가자로 등록되어 있는지 확인
+    const { data: existingParticipant, error: participantError } =
+      await supabase
+        .from('challenge_participants')
+        .select('id')
+        .eq('challenge_id', challenge_id)
+        .eq('service_user_id', userId)
+        .single();
+
+    if (!participantError && existingParticipant) {
+      return NextResponse.json(
+        {
+          error: '이미 챌린지에 참가 중인 사용자입니다.',
+          type: 'DuplicateError',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 참가자 추가
+    const { data: newParticipant, error: createParticipantError } =
+      await supabase
+        .from('challenge_participants')
+        .insert([
+          {
+            challenge_id: challenge_id,
+            service_user_id: userId,
+            created_by: adminUser.id,
+          },
+        ])
+        .select('id')
+        .single();
+
+    if (createParticipantError) {
+      return NextResponse.json(
+        {
+          error: '참가자 추가에 실패했습니다.',
+          details: createParticipantError.message,
+          type: 'ParticipantCreationError',
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(newParticipant);
+  } catch (error) {
+    console.error('❌ === Challenge Participant API Error ===', {
+      name: error instanceof Error ? error.name : 'Unknown error',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: 'GlobalError',
+    });
+    return NextResponse.json(
+      {
+        error: '서버 오류가 발생했습니다.',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        type: 'GlobalError',
       },
       { status: 500 }
     );
