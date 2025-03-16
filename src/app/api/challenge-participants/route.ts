@@ -212,34 +212,18 @@ export async function POST(request: Request) {
       .single();
 
     if (userError) {
-      // 사용자가 없으면 새로 생성
-      const { data: newUser, error: createUserError } = await supabase
-        .from('users')
-        .insert([
-          {
-            email: email,
-            name: name || null,
-            is_active: true,
-          },
-        ])
-        .select('id')
-        .single();
-
-      if (createUserError) {
-        return NextResponse.json(
-          {
-            error: '사용자 생성에 실패했습니다.',
-            details: createUserError.message,
-            type: 'UserCreationError',
-          },
-          { status: 500 }
-        );
-      }
-
-      userId = newUser.id;
-    } else {
-      userId = existingUser.id;
+      // 사용자가 존재하지 않는 경우 오류 반환
+      return NextResponse.json(
+        {
+          error:
+            '회원 정보가 없습니다. 해당 이메일로 가입 후에 추가할 수 있습니다.',
+          type: 'UserNotFoundError',
+        },
+        { status: 404 }
+      );
     }
+
+    userId = existingUser.id;
 
     // 이미 참가자로 등록되어 있는지 확인
     const { data: existingParticipant, error: participantError } =
@@ -286,33 +270,22 @@ export async function POST(request: Request) {
     }
 
     // 사용자 정보 가져오기
-    let userInfo = {
+    // 기존 사용자의 username 정보 가져오기
+    const { data: userData } = await supabase
+      .from('users')
+      .select('username, name')
+      .eq('id', userId)
+      .single();
+
+    const userInfo = {
       email,
-      name: name || null,
-      username: null,
+      name: userData?.name || name || null,
+      username: userData?.username || null,
     };
 
-    if (!userError) {
-      // 기존 사용자인 경우 username 정보 가져오기
-      const { data: userData } = await supabase
-        .from('users')
-        .select('username, name')
-        .eq('id', userId)
-        .single();
-
-      if (userData) {
-        userInfo = {
-          email,
-          name: userData.name || name || null,
-          username: userData.username || null,
-        };
-      }
-    }
-
-    // 사용자가 새로 생성되었는지 여부를 응답에 포함
+    // 응답 반환
     return NextResponse.json({
       ...newParticipant,
-      is_new_user: userError ? true : false,
       user_info: userInfo,
     });
   } catch (error) {
