@@ -34,6 +34,7 @@ interface Participant {
   name?: string;
   username?: string;
   created_at: string;
+  is_new_user?: boolean; // 새로 추가된 사용자인지 여부
 }
 
 export default function ChallengeDetail({
@@ -283,17 +284,18 @@ export default function ChallengeDetail({
         throw new Error(errorData.error || '참가자 추가에 실패했습니다.');
       }
 
-      const newParticipant = await response.json();
+      const newParticipantData = await response.json();
 
       // 참가자 목록 업데이트
       setParticipants([
         ...participants,
         {
-          id: newParticipant.id,
-          email: newParticipantEmail,
-          name: newParticipantName || '',
-          username: '',
+          id: newParticipantData.id,
+          email: newParticipantData.user_info.email,
+          name: newParticipantData.user_info.name || '',
+          username: newParticipantData.user_info.username || '',
           created_at: new Date().toISOString(),
+          is_new_user: newParticipantData.is_new_user, // 새로 추가된 사용자인지 여부
         },
       ]);
 
@@ -688,6 +690,18 @@ export default function ChallengeDetail({
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                       >
+                        닉네임
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                      >
+                        상태
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                      >
                         등록일
                       </th>
                     </tr>
@@ -699,7 +713,23 @@ export default function ChallengeDetail({
                           {participant.email}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                          {participant.name || participant.username || '-'}
+                          {participant.name || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                          {participant.username || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {participant.is_new_user ? (
+                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100">
+                              신규
+                            </span>
+                          ) : participant.name || participant.username ? (
+                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                              기존
+                            </span>
+                          ) : (
+                            '-'
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                           {participant.created_at

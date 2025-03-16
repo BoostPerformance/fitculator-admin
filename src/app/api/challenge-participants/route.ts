@@ -285,7 +285,36 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json(newParticipant);
+    // 사용자 정보 가져오기
+    let userInfo = {
+      email,
+      name: name || null,
+      username: null,
+    };
+
+    if (!userError) {
+      // 기존 사용자인 경우 username 정보 가져오기
+      const { data: userData } = await supabase
+        .from('users')
+        .select('username, name')
+        .eq('id', userId)
+        .single();
+
+      if (userData) {
+        userInfo = {
+          email,
+          name: userData.name || name || null,
+          username: userData.username || null,
+        };
+      }
+    }
+
+    // 사용자가 새로 생성되었는지 여부를 응답에 포함
+    return NextResponse.json({
+      ...newParticipant,
+      is_new_user: userError ? true : false,
+      user_info: userInfo,
+    });
   } catch (error) {
     console.error('❌ === Challenge Participant API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
