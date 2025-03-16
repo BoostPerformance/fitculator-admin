@@ -9,7 +9,7 @@ import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import MealPhotoLayout from '@/components/layout/mealPhotoLayout';
 import { useParams } from 'next/navigation';
 import Calendar from '@/components/input/calendar';
-import { DailyMealData } from '@/types/dietItemContainerTypes';
+import { DailyMealData, MealItem } from '@/types/dietItemContainerTypes';
 import calendarUtils from '@/components/utils/calendarUtils';
 import DateInput from '@/components/input/dateInput';
 import { useFeedback } from '@/components/hooks/useFeedback';
@@ -98,10 +98,7 @@ export default function SelectedDate() {
     end_date: '',
   });
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [allDailyMeals, setAllDailyMeals] = useState<DailyMealData[]>([]);
-  const [filteredDailyMeals, setFilteredDailyMeals] = useState<DailyMealData[]>(
-    []
-  );
+  const [dailyMeal, setDailyMeal] = useState<DailyMealData | null>(null);
   const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
   useEffect(() => {
@@ -212,78 +209,49 @@ export default function SelectedDate() {
           end_date: data.challenge?.end_date || challengePeriods.end_date,
         });
 
-        // 식단 데이터 처리
+        // 식단 데이터 처리 - 중복 코드 제거
+        const mealTypes = [
+          'breakfast',
+          'lunch',
+          'dinner',
+          'snack',
+          'supplement',
+        ] as const;
+
+        const processedMeals: {
+          breakfast: MealItem[];
+          lunch: MealItem[];
+          dinner: MealItem[];
+          snack: MealItem[];
+          supplement: MealItem[];
+        } = {
+          breakfast: [],
+          lunch: [],
+          dinner: [],
+          snack: [],
+          supplement: [],
+        };
+
+        mealTypes.forEach((type) => {
+          processedMeals[type] = Array.isArray(data.meals?.[type])
+            ? data.meals[type].map((meal: any) => ({
+                ...DEFAULT_MEAL,
+                description: meal?.description || '',
+                meal_time: meal?.meal_time || '',
+                meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
+                  id: photo.id || '',
+                  meal_id: '',
+                  photo_url: photo.url || '',
+                  created_at: new Date().toISOString(),
+                })),
+              }))
+            : [{ ...DEFAULT_MEAL }];
+        });
+
         const processedMeal = {
           recordDate: data.record_date,
           upload_days_count: data.upload_days_count,
-          meals: {
-            breakfast: Array.isArray(data.meals?.breakfast)
-              ? data.meals.breakfast.map((meal: any) => ({
-                  ...DEFAULT_MEAL,
-                  description: meal?.description || '',
-                  meal_time: meal?.meal_time || '',
-                  meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
-                    id: photo.id || '',
-                    meal_id: '',
-                    photo_url: photo.url || '',
-                    created_at: new Date().toISOString(),
-                  })),
-                }))
-              : [{ ...DEFAULT_MEAL }],
-            lunch: Array.isArray(data.meals?.lunch)
-              ? data.meals.lunch.map((meal: any) => ({
-                  ...DEFAULT_MEAL,
-                  description: meal?.description || '',
-                  meal_time: meal?.meal_time || '',
-                  meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
-                    id: photo.id || '',
-                    meal_id: '',
-                    photo_url: photo.url || '',
-                    created_at: new Date().toISOString(),
-                  })),
-                }))
-              : [{ ...DEFAULT_MEAL }],
-            dinner: Array.isArray(data.meals?.dinner)
-              ? data.meals.dinner.map((meal: any) => ({
-                  ...DEFAULT_MEAL,
-                  description: meal?.description || '',
-                  meal_time: meal?.meal_time || '',
-                  meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
-                    id: photo.id || '',
-                    meal_id: '',
-                    photo_url: photo.url || '',
-                    created_at: new Date().toISOString(),
-                  })),
-                }))
-              : [{ ...DEFAULT_MEAL }],
-            snack: Array.isArray(data.meals?.snack)
-              ? data.meals.snack.map((meal) => ({
-                  ...DEFAULT_MEAL,
-                  description: meal?.description || '',
-                  meal_time: meal?.meal_time || '',
-                  meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
-                    id: photo.id || '',
-                    meal_id: '',
-                    photo_url: photo.url || '',
-                    created_at: new Date().toISOString(),
-                  })),
-                }))
-              : [{ ...DEFAULT_MEAL }],
-
-            supplement: Array.isArray(data.meals?.supplement)
-              ? data.meals.supplement.map((meal: any) => ({
-                  ...DEFAULT_MEAL,
-                  description: meal?.description || '',
-                  meal_time: meal?.meal_time || '',
-                  meal_photos: (meal?.meal_photos || []).map((photo: any) => ({
-                    id: photo.id || '',
-                    meal_id: '',
-                    photo_url: photo.url || '',
-                    created_at: new Date().toISOString(),
-                  })),
-                }))
-              : [{ ...DEFAULT_MEAL }],
-          },
+          meals: processedMeals,
           feedbacks: {
             coach_feedback: data.feedbacks?.coach_feedback || '',
             ai_feedback: data.feedbacks?.ai_feedback || '',
@@ -292,8 +260,7 @@ export default function SelectedDate() {
         };
 
         logger.debug('Processed Meal:', processedMeal);
-        setAllDailyMeals([processedMeal]);
-        setFilteredDailyMeals([processedMeal]);
+        setDailyMeal(processedMeal);
         // console.log('processedMeal', processedMeal);
       } catch (error) {
         logger.error('Error fetching data:', error);
@@ -318,13 +285,13 @@ export default function SelectedDate() {
     );
 
     // API response의 upload_days_count 사용
-    const uploadCount = filteredDailyMeals[0]?.upload_days_count || 0;
+    const uploadCount = dailyMeal?.upload_days_count || 0;
 
     return {
       total: totalDays,
       count: uploadCount,
     };
-  }, [filteredDailyMeals]);
+  }, [dailyMeal]);
 
   const handleSaveFeedback = async (feedback: string) => {
     try {
@@ -339,20 +306,15 @@ export default function SelectedDate() {
       });
 
       // 상태 업데이트
-      const updatedAllMeals = allDailyMeals.map((meal) =>
-        meal.recordDate === recordDate
-          ? {
-              ...meal,
-              feedbacks: {
-                ...meal.feedbacks,
-                coach_feedback: feedback,
-              },
-            }
-          : meal
-      );
-
-      setAllDailyMeals(updatedAllMeals);
-      setFilteredDailyMeals(updatedAllMeals);
+      if (dailyMeal && dailyMeal.recordDate === recordDate) {
+        setDailyMeal({
+          ...dailyMeal,
+          feedbacks: {
+            ...dailyMeal.feedbacks,
+            coach_feedback: feedback,
+          },
+        });
+      }
 
       setFeedbacksByDate((prev) => ({
         ...prev,
@@ -470,20 +432,15 @@ export default function SelectedDate() {
       const feedback = await response.json();
 
       // 상태 업데이트
-      const updatedAllMeals = allDailyMeals.map((meal) =>
-        meal.recordDate === recordDate
-          ? {
-              ...meal,
-              feedbacks: {
-                ...meal.feedbacks,
-                ai_feedback: feedback.ai_feedback,
-              },
-            }
-          : meal
-      );
-
-      setAllDailyMeals(updatedAllMeals);
-      setFilteredDailyMeals(updatedAllMeals);
+      if (dailyMeal && dailyMeal.recordDate === recordDate) {
+        setDailyMeal({
+          ...dailyMeal,
+          feedbacks: {
+            ...dailyMeal.feedbacks,
+            ai_feedback: feedback.ai_feedback,
+          },
+        });
+      }
 
       setShowAlert(true);
       setTimeout(() => {
@@ -521,12 +478,9 @@ export default function SelectedDate() {
     router.push(`/user/${params.challengeId}/diet?date=${params.selectedDate}`);
   };
 
-  const displayMeals = useMemo(() => {
-    if (filteredDailyMeals.length > 0) {
-      return filteredDailyMeals;
-    }
-    return [DEFAULT_DAILY_MEAL(recordDate)];
-  }, [filteredDailyMeals, recordDate]);
+  const displayMeal = useMemo(() => {
+    return dailyMeal || DEFAULT_DAILY_MEAL(recordDate);
+  }, [dailyMeal, recordDate]);
 
   if (isLoading) {
     return <DietPageSkeleton />;
@@ -565,7 +519,7 @@ export default function SelectedDate() {
 
               <Title
                 title={(() => {
-                  const userName = filteredDailyMeals[0]?.user?.name;
+                  const userName = dailyMeal?.user?.name;
                   return `${userName || '사용자'}님의 식단현황`;
                 })()}
               />
@@ -648,84 +602,73 @@ export default function SelectedDate() {
             )}
           </div>
 
-          {displayMeals.map((dailyMeal) => (
-            <div key={dailyMeal.recordDate} className="relative mb-[2rem]">
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:px-4 px-4">
-                {(
-                  [
-                    'breakfast',
-                    'lunch',
-                    'dinner',
-                    'snack',
-                    'supplement',
-                  ] as const
-                ).map((mealType) => {
-                  const mealItems = Array.isArray(dailyMeal.meals[mealType])
-                    ? dailyMeal.meals[mealType]
-                    : [dailyMeal.meals[mealType]];
+          <div className="relative mb-[2rem]">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:px-4 px-4">
+              {(
+                ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
+              ).map((mealType) => {
+                const mealItems = Array.isArray(displayMeal.meals[mealType])
+                  ? displayMeal.meals[mealType]
+                  : [displayMeal.meals[mealType]];
 
-                  return (
-                    <MealPhotoLayout
-                      key={mealType}
-                      title={
-                        mealType === 'breakfast'
-                          ? '아침'
-                          : mealType === 'lunch'
-                          ? '점심'
-                          : mealType === 'dinner'
-                          ? '저녁'
-                          : mealType === 'snack'
-                          ? '간식'
-                          : '영양제'
-                      }
-                      mealItems={mealItems}
-                      // onAddComment={() => console.log('comment area')}
-                    />
-                  );
-                })}
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4 mt-8">
-                <TextBox
-                  title="AI 분석 결과"
-                  value={dailyMeal.feedbacks.ai_feedback}
-                  placeholder="아직 AI 분석 진행 전 이에요."
-                  button2="복사"
-                  onClick2={() => handleCopy(dailyMeal.feedbacks.ai_feedback)}
-                  readOnly={true}
-                  svg2="/svg/copyIcon-orange.svg"
-                  Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
-                  copyIcon
-                />
+                const mealTitles = {
+                  breakfast: '아침',
+                  lunch: '점심',
+                  dinner: '저녁',
+                  snack: '간식',
+                  supplement: '영양제',
+                };
 
-                <TextBox
-                  title="코치 피드백"
-                  value={
-                    feedbacksByDate[dailyMeal.recordDate] !== undefined
-                      ? feedbacksByDate[dailyMeal.recordDate]
-                      : dailyMeal.feedbacks.coach_feedback || ''
-                  }
-                  placeholder="피드백을 작성하세요."
-                  button1="남기기"
-                  Btn1className="bg-green text-white"
-                  svg1="/svg/send.svg"
-                  onChange={(e) =>
-                    handleFeedbackChange(dailyMeal.recordDate, e.target.value)
-                  }
-                  onSave={async (feedback) => {
-                    await handleSaveFeedback(feedback);
-                  }}
-                  isFeedbackMode={true}
-                  copyIcon
-                />
-              </div>
-              <button
-                className="mb-4 text-gray-400 font-bold hover:font-extrabold cursor-pointer sm:px-[2rem]"
-                onClick={handleBack}
-              >
-                ← 목록으로
-              </button>
+                return (
+                  <MealPhotoLayout
+                    key={mealType}
+                    title={mealTitles[mealType]}
+                    mealItems={mealItems}
+                  />
+                );
+              })}
             </div>
-          ))}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4 mt-8">
+              <TextBox
+                title="AI 분석 결과"
+                value={displayMeal.feedbacks.ai_feedback}
+                placeholder="아직 AI 분석 진행 전 이에요."
+                button2="복사"
+                onClick2={() => handleCopy(displayMeal.feedbacks.ai_feedback)}
+                readOnly={true}
+                svg2="/svg/copyIcon-orange.svg"
+                Btn2className="text-[#F89A1B] border-[#F89A1B] border-[0.1rem]"
+                copyIcon
+              />
+
+              <TextBox
+                title="코치 피드백"
+                value={
+                  feedbacksByDate[displayMeal.recordDate] !== undefined
+                    ? feedbacksByDate[displayMeal.recordDate]
+                    : displayMeal.feedbacks.coach_feedback || ''
+                }
+                placeholder="피드백을 작성하세요."
+                button1="남기기"
+                Btn1className="bg-green text-white"
+                svg1="/svg/send.svg"
+                onChange={(e) =>
+                  handleFeedbackChange(displayMeal.recordDate, e.target.value)
+                }
+                onSave={async (feedback) => {
+                  await handleSaveFeedback(feedback);
+                }}
+                isFeedbackMode={true}
+                copyIcon
+              />
+            </div>
+            <button
+              className="mb-4 text-gray-400 font-bold hover:font-extrabold cursor-pointer sm:px-[2rem]"
+              onClick={handleBack}
+            >
+              ← 목록으로
+            </button>
+          </div>
         </div>
       </div>
       <Footer />

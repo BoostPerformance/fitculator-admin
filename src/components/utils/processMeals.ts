@@ -1,102 +1,110 @@
 import {
   ProcessedMeal,
-  Meals,
+  Meal,
   DailyRecords,
+  MealType,
 } from '@/types/dietDetaileTableTypes';
 
-export const processMeals = (filteredByChallengeId: ProcessedMeal[]) => {
-  const allParticipants = filteredByChallengeId.flatMap((challenge) =>
-    (challenge.challenges.challenge_participants || []).map((participant) => ({
-      ...participant,
-      challenge_id: challenge.challenge_id, // 원래의 challenge_id를 보존
-    }))
-  );
+import { useMemo } from 'react';
 
-  const filteredMeals = allParticipants.reduce(
-    (acc: Record<string, ProcessedMeal>, participant) => {
-      // console.log('allParticipants', allParticipants);
+// 메모리 효율성을 위해 useMemo를 사용하는 훅으로 변경
+export const useProcessedMeals = (filteredByChallengeId: ProcessedMeal[]) => {
+  return useMemo(() => {
+    // 참가자 데이터 추출 및 변환
+    const processedMeals: ProcessedMeal[] = [];
 
-      participant.daily_records.forEach(
-        (record: DailyRecords, index: number) => {
-          const uniqueId = `${participant.users.id}_${record.record_date}_${index}`;
+    // 각 챌린지에 대해 처리
+    for (const challenge of filteredByChallengeId) {
+      const participants = challenge.challenges.challenge_participants || [];
 
-          acc[uniqueId] = {
-            challenge_id: participant.challenge_id,
-            challenges: participant.challenges,
+      // 각 참가자에 대해 처리
+      for (const participant of participants) {
+        const participantWithChallenge = {
+          ...participant,
+          challenge_id: challenge.challenge_id,
+        };
+
+        // 각 일일 기록에 대해 처리
+        for (
+          let index = 0;
+          index < participantWithChallenge.daily_records.length;
+          index++
+        ) {
+          const record = participantWithChallenge.daily_records[index];
+
+          // 식사 정보 처리
+          // DailyRecords.meals는 이미 필요한 구조를 가지고 있으므로 그대로 사용
+
+          // 처리된 식사 정보 추가
+          processedMeals.push({
+            challenge_id: participantWithChallenge.challenge_id,
+            challenges: participantWithChallenge.challenges,
             user: {
-              id: participant.users.id,
-              username: participant.users.username,
-              name: participant.users.name,
+              id: participantWithChallenge.users.id,
+              username: participantWithChallenge.users.username,
+              name: participantWithChallenge.users.name,
             },
             daily_records: record,
-            meals: {
-              breakfast: { description: '', updated_at: '', meal_time: '' },
-              lunch: { description: '', updated_at: '', meal_time: '' },
-              dinner: { description: '', updated_at: '', meal_time: '' },
-              snack: { description: '', updated_at: '', meal_time: '' },
-              supplement: { description: '', updated_at: '', meal_time: '' },
-            },
+            // ProcessedMeal에는 meals 속성이 없으므로 제거
             record_date: record.record_date,
-          };
-
-          // 식사 정보가 있는 경우 처리
-          if (record.meals && record.meals.length > 0) {
-            record.meals.forEach((meal: Meals) => {
-              if (meal.meal_type && meal.description) {
-                acc[uniqueId].meals[meal.meal_type] = {
-                  description: meal.description,
-                  updated_at: meal.updated_at || '',
-                  meal_time: meal.meal_time || '',
-                };
-                // console.log(
-                //   'here here',
-                //   (acc[uniqueId].meals[meal.meal_type] = {
-                //     description: meal.description,
-                //     updated_at: meal.updated_at || '',
-                //     meal_time: meal.meal_time || '',
-                //   })
-                // );\
-              }
-            });
-          }
+          });
         }
-      );
+      }
+    }
 
-      return acc;
-    },
-    {}
-  );
-
-  // 날짜순으로 정렬된 배열로 변환
-  const processedMeals = Object.values(filteredMeals).sort(
-    (a: ProcessedMeal, b: ProcessedMeal) =>
+    // 날짜순으로 정렬
+    return processedMeals.sort((a, b) =>
       a.record_date.localeCompare(b.record_date)
+    );
+  }, [filteredByChallengeId]); // 의존성 배열: filteredByChallengeId가 변경될 때만 재계산
+};
+
+// 기존 함수도 유지 (하위 호환성)
+export const processMeals = (filteredByChallengeId: ProcessedMeal[]) => {
+  // 참가자 데이터 추출 및 변환
+  const processedMeals: ProcessedMeal[] = [];
+
+  // 각 챌린지에 대해 처리
+  for (const challenge of filteredByChallengeId) {
+    const participants = challenge.challenges.challenge_participants || [];
+
+    // 각 참가자에 대해 처리
+    for (const participant of participants) {
+      const participantWithChallenge = {
+        ...participant,
+        challenge_id: challenge.challenge_id,
+      };
+
+      // 각 일일 기록에 대해 처리
+      for (
+        let index = 0;
+        index < participantWithChallenge.daily_records.length;
+        index++
+      ) {
+        const record = participantWithChallenge.daily_records[index];
+
+        // 식사 정보 처리
+        // DailyRecords.meals는 이미 필요한 구조를 가지고 있으므로 그대로 사용
+
+        // 처리된 식사 정보 추가
+        processedMeals.push({
+          challenge_id: participantWithChallenge.challenge_id,
+          challenges: participantWithChallenge.challenges,
+          user: {
+            id: participantWithChallenge.users.id,
+            username: participantWithChallenge.users.username,
+            name: participantWithChallenge.users.name,
+          },
+          daily_records: record,
+          // ProcessedMeal에는 meals 속성이 없으므로 제거
+          record_date: record.record_date,
+        });
+      }
+    }
+  }
+
+  // 날짜순으로 정렬
+  return processedMeals.sort((a, b) =>
+    a.record_date.localeCompare(b.record_date)
   );
-
-  // const byDate = processedMeals.filter((item) => {
-  //   return item.daily_records.record_date === '2025-02-19';
-  // });
-
-  // type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'supplement';
-  // const mealTypes: MealType[] = [
-  //   'breakfast',
-  //   'lunch',
-  //   'dinner',
-  //   'snack',
-  //   'supplement',
-  // ];
-
-  // // 2월 19일에 입력된 총 끼니 수 계산
-  // const totalMealCount = byDate.reduce((total, item) => {
-  //   const filledMeals = mealTypes.filter(
-  //     (type) => item.meals[type].description.trim() !== ''
-  //   );
-
-  //   return total + filledMeals.length;
-  // }, 0);
-
-  // console.log('Total Meal Count on 2025-02-19:', totalMealCount);
-  // console.log('Processed Meals Length:', byDate);
-
-  return processedMeals;
 };
