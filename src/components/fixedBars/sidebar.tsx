@@ -304,6 +304,16 @@ export default function Sidebar({
                           챌린지 생성
                         </div>
                       </li>
+                      <li>
+                        <div
+                          className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                          onClick={() => {
+                            router.push('/admin/manage-organizations');
+                          }}
+                        >
+                          조직 관리
+                        </div>
+                      </li>
                     </ul>
                   )}
                 </li>

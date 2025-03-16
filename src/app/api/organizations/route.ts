@@ -77,3 +77,91 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const session = (await getServerSession(authOptions)) as Session;
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        {
+          error: '인증되지 않은 사용자입니다.',
+          type: 'AuthError',
+        },
+        { status: 401 }
+      );
+    }
+
+    // 관리자 사용자 확인
+    const { data: adminUser, error: adminError } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('email', session.user.email)
+      .single();
+
+    if (adminError || !adminUser) {
+      return NextResponse.json(
+        {
+          error: '관리자 사용자를 찾을 수 없습니다.',
+          type: 'NotFoundError',
+        },
+        { status: 404 }
+      );
+    }
+
+    // 요청 본문 파싱
+    const body = await request.json();
+
+    // 필수 필드 검증
+    if (!body.name || body.name.trim() === '') {
+      return NextResponse.json(
+        {
+          error: '조직 이름은 필수입니다.',
+          type: 'ValidationError',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 조직 생성
+    const { data: newOrganization, error: createError } = await supabase
+      .from('organizations')
+      .insert({
+        name: body.name.trim(),
+        description: body.description || null,
+        logo_url: body.logo_url || null,
+        created_by: adminUser.id,
+      })
+      .select()
+      .single();
+
+    if (createError) {
+      console.error('조직 생성 오류:', createError);
+      return NextResponse.json(
+        {
+          error: '조직 생성에 실패했습니다.',
+          details: createError.message,
+          type: 'CreateError',
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(newOrganization);
+  } catch (error) {
+    console.error('❌ === Organizations Create API Error ===', {
+      name: error instanceof Error ? error.name : 'Unknown error',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: 'GlobalError',
+    });
+    return NextResponse.json(
+      {
+        error: '서버 내부 오류',
+        details: error instanceof Error ? error.message : '알 수 없는 오류',
+        type: 'GlobalError',
+      },
+      { status: 500 }
+    );
+  }
+}
