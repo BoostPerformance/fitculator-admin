@@ -75,7 +75,10 @@ export async function GET(
     // console.log("👤 Admin role:", adminUser.admin_role);
 
     // Handle non-coach admin users
-    if (adminUser.admin_role !== 'coach') {
+    if (
+      adminUser.admin_role !== 'coach' ||
+      adminUser.admin_role !== 'internal_operator'
+    ) {
       //   console.log("🔍 Fetching all challenges for admin...");
       const { data: challengeData, error } = await supabase.from('challenges')
         .select(`

@@ -352,7 +352,11 @@ export async function GET(request: Request) {
         .eq('email', session.user.email)
         .single();
 
-      if (!adminError && adminUser?.admin_role === 'coach') {
+      if (
+        !adminError &&
+        (adminUser?.admin_role === 'coach' ||
+          adminUser?.admin_role === 'internal_operator')
+      ) {
         // 코치인 경우 담당 챌린지 확인
         const { data: coachData, error: coachError } = await supabase
           .from('coaches')

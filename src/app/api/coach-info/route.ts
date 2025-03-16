@@ -30,7 +30,10 @@ export async function GET() {
     }
 
     // 코치가 아닌 경우 기본 정보만 반환
-    if (adminUser.admin_role !== 'coach') {
+    if (
+      adminUser.admin_role !== 'coach' ||
+      adminUser.admin_role !== 'internal_operator'
+    ) {
       return NextResponse.json({
         username: adminUser.username,
         admin_role: adminUser.admin_role,
