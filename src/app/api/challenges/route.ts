@@ -84,8 +84,13 @@ export async function GET(
         .select(`
           id,
           title,
+          description,
           start_date,
           end_date,
+          banner_image_url,
+          cover_image_url,
+          challenge_type,
+          organization_id,
           challenge_participants!inner (
             id,
             service_user_id
@@ -132,8 +137,13 @@ export async function GET(
       const enrichedData = challengeData.map((challenge) => ({
         id: challenge.id,
         title: challenge.title,
+        description: challenge.description,
         start_date: challenge.start_date,
         end_date: challenge.end_date,
+        banner_image_url: challenge.banner_image_url,
+        cover_image_url: challenge.cover_image_url,
+        challenge_type: challenge.challenge_type,
+        organization_id: challenge.organization_id,
         challenge_participants: challenge.challenge_participants.map((p) => ({
           id: p.id,
           service_user_id: p.service_user_id,

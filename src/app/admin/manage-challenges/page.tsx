@@ -291,7 +291,7 @@ export default function ManageChallenges() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6 dark:text-white">챌린지 관리</h1>
 
-      {isLoading ? (
+      {isLoading || organizations.length === 0 ? (
         <div className="flex justify-center items-center h-64">
           <p className="text-gray-500 dark:text-gray-400">로딩 중...</p>
         </div>
