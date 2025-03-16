@@ -210,13 +210,13 @@ export async function PUT(request: Request) {
     console.log('Supabase 쿼리 실행:', {
       table: 'challenge_participants',
       action: 'update',
-      data: { status: status || 'inactive' },
+      data: { status: status || 'dropped' },
       condition: { id: participantId },
     });
 
     const { data: updatedParticipant, error: updateError } = await supabase
       .from('challenge_participants')
-      .update({ status: status || 'inactive' })
+      .update({ status: status || 'dropped' })
       .eq('id', participantId)
       .select('id, status')
       .single();

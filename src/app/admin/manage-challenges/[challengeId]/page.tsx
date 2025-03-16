@@ -128,7 +128,7 @@ export default function ChallengeDetail({
               name: participant.users?.name || '',
               username: participant.users?.username || '',
               created_at: participant.created_at,
-              status: participant.status || 'inactive',
+              status: participant.status || 'dropped',
             }))
           );
         }
@@ -264,7 +264,7 @@ export default function ChallengeDetail({
     currentStatus: string
   ) => {
     // 상태 변경 확인
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const newStatus = currentStatus === 'active' ? 'dropped' : 'active';
     const confirmMessage =
       newStatus === 'active'
         ? '이 참가자를 활성화하시겠습니까?'
@@ -396,7 +396,7 @@ export default function ChallengeDetail({
           name: newParticipantData.user_info.name || '',
           username: newParticipantData.user_info.username || '',
           created_at: new Date().toISOString(),
-          status: 'inactive', // 기본값으로 비활성 상태 설정
+          status: 'dropped', // 기본값으로 비활성 상태 설정
         },
       ]);
 
@@ -841,7 +841,7 @@ export default function ChallengeDetail({
                               onClick={() =>
                                 handleToggleStatus(
                                   participant.id,
-                                  participant.status || 'inactive'
+                                  participant.status || 'dropped'
                                 )
                               }
                               disabled={isUpdatingStatus}
