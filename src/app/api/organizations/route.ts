@@ -123,14 +123,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // 조직 생성
+    // 조직 생성 (created_by 필드 제거)
     const { data: newOrganization, error: createError } = await supabase
       .from('organizations')
       .insert({
         name: body.name.trim(),
         description: body.description || null,
         logo_url: body.logo_url || null,
-        created_by: adminUser.id,
       })
       .select()
       .single();

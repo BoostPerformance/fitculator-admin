@@ -46,22 +46,12 @@ export async function GET(
 
     const organizationId = params.organizationId;
 
-    // 조직 멤버 목록 가져오기
+    // admin_users 테이블에서 해당 조직의 멤버 가져오기
     const { data: members, error: membersError } = await supabase
-      .from('organization_members')
-      .select(
-        `
-        id,
-        user_id,
-        organization_id,
-        role,
-        users (
-          email,
-          name
-        )
-      `
-      )
-      .eq('organization_id', organizationId);
+      .from('admin_users')
+      .select('id, email, display_name, admin_role, organization_id')
+      .eq('organization_id', organizationId)
+      .eq('is_active', true);
 
     if (membersError) {
       console.error('조직 멤버 목록 가져오기 오류:', membersError);
@@ -78,11 +68,11 @@ export async function GET(
     // 데이터 형식 변환
     const formattedMembers = members.map((member: any) => ({
       id: member.id,
-      user_id: member.user_id,
+      user_id: member.id,
       organization_id: member.organization_id,
-      role: member.role,
-      email: member.users?.email || '',
-      name: member.users?.name || '이름 없음',
+      role: member.admin_role,
+      email: member.email,
+      name: member.display_name,
     }));
 
     return NextResponse.json(formattedMembers || []);
