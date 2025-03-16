@@ -86,7 +86,7 @@ export default function CreateChallenge() {
       }, 300);
 
       const { data, error } = await supabase.storage
-        .from('images')
+        .from('challenge-images')
         .upload(filePath, image, {
           cacheControl: '3600',
           upsert: false,
@@ -99,7 +99,7 @@ export default function CreateChallenge() {
 
       // 업로드된 이미지의 공개 URL 생성
       const { data: urlData } = supabase.storage
-        .from('images')
+        .from('challenge-images')
         .getPublicUrl(filePath);
 
       return urlData.publicUrl;
