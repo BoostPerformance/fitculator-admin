@@ -74,10 +74,11 @@ export async function GET(
 
     // console.log("👤 Admin role:", adminUser.admin_role);
 
-    // Handle non-coach admin users
+    // Handle non-coach admin users or internal operators (who should see all challenges)
     if (
-      adminUser.admin_role !== 'coach' &&
-      adminUser.admin_role !== 'internal_operator'
+      adminUser.admin_role === 'internal_operator' ||
+      (adminUser.admin_role !== 'coach' &&
+        adminUser.admin_role !== 'internal_operator')
     ) {
       //   console.log("🔍 Fetching all challenges for admin...");
       const { data: challengeData, error } = await supabase.from('challenges')
@@ -91,7 +92,7 @@ export async function GET(
           cover_image_url,
           challenge_type,
           organization_id,
-          challenge_participants!inner (
+          challenge_participants (
             id,
             service_user_id
           )
