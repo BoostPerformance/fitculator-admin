@@ -38,7 +38,26 @@ export default function Sidebar({
   const [selectedTitle, setSelectedTitle] = useState<string>('');
   const [userDropdown, setUserDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isInternalOperator, setIsInternalOperator] = useState(false);
   const router = useRouter();
+
+  // 사용자 역할 확인
+  useEffect(() => {
+    // 관리자 정보 가져오기
+    const fetchAdminRole = async () => {
+      try {
+        const response = await fetch('/api/admin-users');
+        if (response.ok) {
+          const data = await response.json();
+          setIsInternalOperator(data.admin_role === 'internal_operator');
+        }
+      } catch (error) {
+        console.error('관리자 정보 가져오기 실패:', error);
+      }
+    };
+
+    fetchAdminRole();
+  }, []);
 
   // 선택된 챌린지 변경 시 타이틀 업데이트
   useEffect(() => {
@@ -250,43 +269,45 @@ export default function Sidebar({
                   </ul>
                 )}
               </li>
-              <li className="w-full items-center justify-between text-1.5-700">
-                <div
-                  role="group"
-                  aria-label="관리자 메뉴"
-                  className="flex flex-row justify-between align-middle cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-4"
-                  onClick={handleAdminDropdown}
-                >
-                  관리자 메뉴
-                  <button className="w-[1rem] lg:w-[0.8rem]">
-                    <Image
-                      src={
-                        !isAdminDropdownOpen
-                          ? `/svg/arrow-up.svg`
-                          : `/svg/arrow-down.svg`
-                      }
-                      width={30}
-                      height={30}
-                      alt="드롭다운 아이콘"
-                    />
-                  </button>
-                </div>
+              {isInternalOperator && (
+                <li className="w-full items-center justify-between text-1.5-700">
+                  <div
+                    role="group"
+                    aria-label="관리자 메뉴"
+                    className="flex flex-row justify-between align-middle cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-4"
+                    onClick={handleAdminDropdown}
+                  >
+                    관리자 메뉴
+                    <button className="w-[1rem] lg:w-[0.8rem]">
+                      <Image
+                        src={
+                          !isAdminDropdownOpen
+                            ? `/svg/arrow-up.svg`
+                            : `/svg/arrow-down.svg`
+                        }
+                        width={30}
+                        height={30}
+                        alt="드롭다운 아이콘"
+                      />
+                    </button>
+                  </div>
 
-                {isAdminDropdownOpen && (
-                  <ul className="font-medium text-1.25-700 text-gray-1 mt-4 flex flex-col gap-2">
-                    <li>
-                      <div
-                        className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
-                        onClick={() => {
-                          router.push('/admin/create-challenge');
-                        }}
-                      >
-                        챌린지 생성
-                      </div>
-                    </li>
-                  </ul>
-                )}
-              </li>
+                  {isAdminDropdownOpen && (
+                    <ul className="font-medium text-1.25-700 text-gray-1 mt-4 flex flex-col gap-2">
+                      <li>
+                        <div
+                          className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                          onClick={() => {
+                            router.push('/admin/create-challenge');
+                          }}
+                        >
+                          챌린지 생성
+                        </div>
+                      </li>
+                    </ul>
+                  )}
+                </li>
+              )}
             </ul>
           </nav>
         </div>
