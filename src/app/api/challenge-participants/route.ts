@@ -176,6 +176,8 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { participantId, status } = body;
 
+    console.log('PUT 요청 받음:', { participantId, status });
+
     // 필수 필드 검증
     if (!participantId) {
       return NextResponse.json(
@@ -205,12 +207,24 @@ export async function PUT(request: Request) {
     }
 
     // 참가자 상태 업데이트
+    console.log('Supabase 쿼리 실행:', {
+      table: 'challenge_participants',
+      action: 'update',
+      data: { status: status || 'inactive' },
+      condition: { id: participantId },
+    });
+
     const { data: updatedParticipant, error: updateError } = await supabase
       .from('challenge_participants')
       .update({ status: status || 'inactive' })
       .eq('id', participantId)
       .select('id, status')
       .single();
+
+    console.log('Supabase 쿼리 결과:', {
+      data: updatedParticipant,
+      error: updateError,
+    });
 
     if (updateError) {
       return NextResponse.json(
