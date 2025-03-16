@@ -34,6 +34,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpenDropdown, setIsOpenDropdown] = useState(true);
+  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(true);
   const [selectedTitle, setSelectedTitle] = useState<string>('');
   const [userDropdown, setUserDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -78,6 +79,10 @@ export default function Sidebar({
 
   const handleDropdown = () => {
     return setIsOpenDropdown(!isOpenDropdown);
+  };
+
+  const handleAdminDropdown = () => {
+    return setIsAdminDropdownOpen(!isAdminDropdownOpen);
   };
 
   const handleSidebarOpen = () => {
@@ -170,7 +175,7 @@ export default function Sidebar({
         >
           <nav className="w-full gap-[2rem] items-start sm:items-center md:py-[1rem] md:pb-[2rem] px-4">
             <ul>
-              <li className="w-full items-center justify-between text-1.5-700">
+              <li className="w-full items-center justify-between text-1.5-700 mb-4">
                 <div
                   role="group"
                   aria-label="챌린지 메뉴"
@@ -242,6 +247,43 @@ export default function Sidebar({
                         </div>
                       </li>
                     )}
+                  </ul>
+                )}
+              </li>
+              <li className="w-full items-center justify-between text-1.5-700">
+                <div
+                  role="group"
+                  aria-label="관리자 메뉴"
+                  className="flex flex-row justify-between align-middle cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-4"
+                  onClick={handleAdminDropdown}
+                >
+                  관리자 메뉴
+                  <button className="w-[1rem] lg:w-[0.8rem]">
+                    <Image
+                      src={
+                        !isAdminDropdownOpen
+                          ? `/svg/arrow-up.svg`
+                          : `/svg/arrow-down.svg`
+                      }
+                      width={30}
+                      height={30}
+                      alt="드롭다운 아이콘"
+                    />
+                  </button>
+                </div>
+
+                {isAdminDropdownOpen && (
+                  <ul className="font-medium text-1.25-700 text-gray-1 mt-4 flex flex-col gap-2">
+                    <li>
+                      <div
+                        className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                        onClick={() => {
+                          router.push('/admin/create-challenge');
+                        }}
+                      >
+                        챌린지 생성
+                      </div>
+                    </li>
                   </ul>
                 )}
               </li>
