@@ -149,7 +149,7 @@ export default function UserLayout({
           </div>
         )}
       </div>
-      <div className="flex md:flex-col sm:flex-col h-screen">
+      <div className="flex md:flex-col sm:flex-col min-h-screen">
         <Sidebar
           data={challenges}
           onSelectChallenge={handleChallengeSelect}
