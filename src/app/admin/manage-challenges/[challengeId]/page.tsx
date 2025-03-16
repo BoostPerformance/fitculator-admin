@@ -34,6 +34,7 @@ interface Participant {
   name?: string;
   username?: string;
   created_at: string;
+  status?: string;
 }
 
 export default function ChallengeDetail({
@@ -125,6 +126,7 @@ export default function ChallengeDetail({
               name: participant.users?.name || '',
               username: participant.users?.username || '',
               created_at: participant.created_at,
+              status: participant.status || 'inactive',
             }))
           );
         }
@@ -294,6 +296,7 @@ export default function ChallengeDetail({
           name: newParticipantData.user_info.name || '',
           username: newParticipantData.user_info.username || '',
           created_at: new Date().toISOString(),
+          status: 'inactive', // 기본값으로 비활성 상태 설정
         },
       ]);
 
@@ -696,6 +699,12 @@ export default function ChallengeDetail({
                       >
                         등록일
                       </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                      >
+                        상태
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-blue-4 divide-y divide-gray-200 dark:divide-blue-2">
@@ -716,6 +725,17 @@ export default function ChallengeDetail({
                                 participant.created_at
                               ).toLocaleDateString()
                             : '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {participant.status === 'active' ? (
+                            <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                              활성
+                            </span>
+                          ) : (
+                            <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                              비활성
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))}

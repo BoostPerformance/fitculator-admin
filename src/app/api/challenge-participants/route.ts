@@ -38,6 +38,7 @@ export async function GET(request: Request) {
         memo_updated_at,
         service_user_id,
         created_at,
+        status,
         users!fk_challenge_participants_service_user (
           id,
           username,
