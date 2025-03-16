@@ -49,7 +49,7 @@ export async function GET(
     // admin_users 테이블에서 해당 조직의 멤버 가져오기
     const { data: members, error: membersError } = await supabase
       .from('admin_users')
-      .select('id, email, display_name, admin_role, organization_id')
+      .select('id, email, username, admin_role, organization_id')
       .eq('organization_id', organizationId)
       .eq('is_active', true);
 
@@ -72,7 +72,7 @@ export async function GET(
       organization_id: member.organization_id,
       role: member.admin_role,
       email: member.email,
-      name: member.display_name,
+      name: member.username,
     }));
 
     return NextResponse.json(formattedMembers || []);
