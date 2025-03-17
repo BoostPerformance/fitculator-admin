@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { Doughnut } from "react-chartjs-2";
+import { useState, useEffect } from 'react';
+import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
   Legend,
   ChartData,
-} from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
+} from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 // ArcElement 등록
@@ -30,6 +30,13 @@ export default function TrafficSourceChart({
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // challengeId가 유효한지 확인
+        if (!challengeId) {
+          console.error('유효하지 않은 challengeId:', challengeId);
+          setChartData([{ category: '데이터 없음', percentage: 100 }]);
+          return;
+        }
+
         const response = await fetch(
           `/api/workouts?challengeId=${challengeId}&type=chart`
         );
@@ -38,29 +45,29 @@ export default function TrafficSourceChart({
         if (Array.isArray(data)) {
           setChartData(data);
         } else {
-          console.error("Invalid data format:", data);
-          setChartData([{ category: "데이터 없음", percentage: 100 }]);
+          console.error('Invalid data format:', data);
+          setChartData([{ category: '데이터 없음', percentage: 100 }]);
         }
       } catch (error) {
-        console.error("Error fetching workout data:", error);
-        setChartData([{ category: "데이터 없음", percentage: 100 }]);
+        console.error('Error fetching workout data:', error);
+        setChartData([{ category: '데이터 없음', percentage: 100 }]);
       }
     };
 
     fetchData();
   }, [challengeId]);
 
-  const data: ChartData<"doughnut"> = {
+  const data: ChartData<'doughnut'> = {
     labels: chartData?.map((item: ChartDataPoint) => item.category) || [],
     datasets: [
       {
         data: chartData?.map((item: ChartDataPoint) => item.percentage) || [],
         backgroundColor: [
-          "#3FE2FF",
-          "#3E82F1",
-          "#ADB9FF",
-          "#7CF5DD",
-          "#3FE2FF",
+          '#3FE2FF',
+          '#3E82F1',
+          '#ADB9FF',
+          '#7CF5DD',
+          '#3FE2FF',
         ],
       },
     ],
@@ -75,7 +82,7 @@ export default function TrafficSourceChart({
         enabled: false,
       },
       datalabels: {
-        color: "#fff",
+        color: '#fff',
         formatter: function (value: number, context: any) {
           if (value < 5) return null;
           const label = context.chart.data.labels[context.dataIndex];
@@ -85,11 +92,11 @@ export default function TrafficSourceChart({
         font: {
           size: 12,
         },
-        align: "center" as const,
-        anchor: "center" as const,
+        align: 'center' as const,
+        anchor: 'center' as const,
       },
     },
-    cutout: "30%",
+    cutout: '30%',
   };
 
   const exerciseList = chartData.map((item: ChartDataPoint, index: number) => ({

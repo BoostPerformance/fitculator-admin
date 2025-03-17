@@ -36,6 +36,13 @@ export default function WorkoutLeaderboard({
   useEffect(() => {
     async function fetchLeaderboardData() {
       try {
+        // challengeId가 유효한지 확인
+        if (!challengeId) {
+          console.error('유효하지 않은 challengeId:', challengeId);
+          setLeaderboardData([]);
+          return;
+        }
+
         const now = new Date();
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 

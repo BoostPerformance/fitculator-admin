@@ -332,7 +332,12 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   // 데이터 로드
   useEffect(() => {
     const loadData = async () => {
-      if (!challengeId) return;
+      if (!challengeId) {
+        console.error('유효하지 않은 challengeId:', challengeId);
+        setLoading(false);
+        setError('유효한 챌린지 ID가 필요합니다.');
+        return;
+      }
 
       setLoading(true);
       setError(null);
