@@ -138,9 +138,9 @@ export default function Sidebar({
   // });
 
   return (
-    <div className="lg:w-[18.75rem] min-h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
+    <div className="lg:w-[18.75rem] min-h-fit md:min-h-fit lg:min-h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
       {/* <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]"> */}
-      <div className="flex justify-start gap-[0.5rem] pt-[2.25rem] sm:pt-[0rem]">
+      <div className="flex justify-start gap-[0.5rem] pt-[2.25rem] sm:pt-[0rem] md:hidden">
         {/* <Image src="/svg/logo_light.svg" width={30} height={30} alt="logo" /> */}
         <Image
           src="/svg/logo_text_light.svg"
@@ -150,10 +150,10 @@ export default function Sidebar({
           className={`${isMobile ? 'hidden' : ''}`}
         />
       </div>
-      <div className="flex justify-between items-center py-[1.25rem] sm:px-4 lg:px-0 lg:gap-[1rem]">
+      <div className="flex justify-between items-center py-[1.25rem] sm:px-4 md:px-4 lg:px-0 lg:gap-[1rem]">
         <button
           onClick={handleSidebarOpen}
-          className={`${isMobile ? '' : 'hidden'}`}
+          className={`${isMobile ? '' : 'hidden'} `}
         >
           <Image
             src={isSidebarOpen ? '/svg/close.svg' : '/svg/hamburger.svg'}
@@ -163,29 +163,27 @@ export default function Sidebar({
             className={`w-[1.5rem] dark:invert`}
           />
         </button>
-        <div className="flex items-center gap-2 absolute right-4 top-4">
-          <div className="flex items-center gap-2 sm:flex md:flex lg:hidden">
-            <div
-              className="text-gray-500 text-sm whitespace-nowrap sm:dark:text-gray-8"
-              onClick={handleUserDropdown}
-            >
-              안녕하세요, {username} !
-            </div>
-            <button onClick={handleUserDropdown} className="flex items-center">
-              <Image
-                src="/svg/arrow-down.svg"
-                width={20}
-                height={20}
-                alt="arrow-down"
-                className="w-[0.8rem]"
-              />
-            </button>
-            {userDropdown && (
-              <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px] ">
-                <LogoutButton />
-              </div>
-            )}
+        <div className="flex items-center gap-2 sm:flex md:flex lg:hidden">
+          <div
+            className="text-gray-500 text-sm whitespace-nowrap sm:dark:text-gray-8"
+            onClick={handleUserDropdown}
+          >
+            안녕하세요, {username} !
           </div>
+          <button onClick={handleUserDropdown} className="flex items-center">
+            <Image
+              src="/svg/arrow-down.svg"
+              width={20}
+              height={20}
+              alt="arrow-down"
+              className="w-[0.8rem]"
+            />
+          </button>
+          {userDropdown && (
+            <div className="absolute right-4 mt-8 bg-white rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px]">
+              <LogoutButton />
+            </div>
+          )}
         </div>
       </div>
       {(isSidebarOpen || !isMobile) && (
@@ -198,7 +196,7 @@ export default function Sidebar({
                 <div
                   role="group"
                   aria-label="챌린지 메뉴"
-                  className="flex flex-row justify-between align-middle cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-4"
+                  className="flex flex-row justify-between align-middle cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-4 "
                   onClick={handleDropdown}
                 >
                   챌린지

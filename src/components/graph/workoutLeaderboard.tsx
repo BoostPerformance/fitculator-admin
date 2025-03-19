@@ -14,12 +14,14 @@ interface LeaderboardEntry {
   user_name: string;
   total_points: number;
   rank: number;
+  strengthWorkoutCount: number;
 }
 
 interface WorkoutData {
   user_id: string;
   user: {
     name: string;
+    strengthWorkoutCount: number;
   };
   points: number;
 }
@@ -30,6 +32,8 @@ export default function WorkoutLeaderboard({
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>(
     []
   );
+  const [usersData, setUsersData] = useState([]);
+
   const [maxPoints, setMaxPoints] = useState(0);
   const [period, setPeriod] = useState<Period>('weekly');
 
@@ -62,10 +66,22 @@ export default function WorkoutLeaderboard({
         }
         const workouts: WorkoutData[] = await response.json();
 
+        // const userStrengthCounts = workouts.users.filter((user) => ({
+        //   name: user.name,
+        //   strengthWorkoutCount: user.strengthWorkoutCount,
+        // }));
+
+        // console.log('userStrengthCounts', userStrengthCounts);
         // 사용자별 포인트 합계 계산
         const userPoints = workouts.reduce(
           (
-            acc: { [key: string]: { points: number; name: string } },
+            acc: {
+              [key: string]: {
+                points: number;
+                name: string;
+                strengthWorkoutCount: number;
+              };
+            },
             workout
           ) => {
             const userId = workout.user_id;
@@ -73,6 +89,7 @@ export default function WorkoutLeaderboard({
               acc[userId] = {
                 points: 0,
                 name: workout.user?.name || '알 수 없음',
+                strengthWorkoutCount: workout.user?.strengthWorkoutCount,
               };
             }
             acc[userId].points += workout.points || 0;
@@ -81,6 +98,7 @@ export default function WorkoutLeaderboard({
           {}
         );
 
+        // console.log('userPoints', userPoints);
         // 리더보드 데이터 형식으로 변환 및 정렬
         const formattedData = Object.entries(userPoints)
           .map(([userId, data]) => ({
@@ -88,6 +106,7 @@ export default function WorkoutLeaderboard({
             user_name: data.name,
             total_points: data.points,
             rank: 0,
+            strengthWorkoutCount: data.strengthWorkoutCount,
           }))
           .sort((a, b) => b.total_points - a.total_points)
           .map((entry, index) => ({
@@ -140,46 +159,53 @@ export default function WorkoutLeaderboard({
         </div>
       </div>
       <div className="space-y-4">
-        {leaderboardData.map((entry) => (
-          <div key={entry.user_id} className="flex items-center gap-4">
-            <span className="w-6 text-center font-bold text-[#6F6F6F] text-[14px]">
-              {entry.rank}
-            </span>
-            <div className="flex-1 flex items-center gap-2">
-              <span className="font-medium text-[#6F6F6F] w-[70px] text-[14px]">
-                {entry.user_name.split(' ')[0]}
+        <div className="text-right text-0.7-500 text-gray-5">
+          유산소포인트/근력횟수
+        </div>
+        {leaderboardData.map((entry) => {
+          //  console.log('leaderboardData', leaderboardData);
+          return (
+            <div key={entry.user_id} className="flex items-center gap-4">
+              <span className="w-6 text-center font-bold text-[#6F6F6F] text-[14px]">
+                {entry.rank}
               </span>
-              <div className="w-[100px] sm:w-[60px] bg-gray-200 rounded-full h-2 relative">
-                <div
-                  className="h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${Math.min(
-                      (entry.total_points / 100) * 100,
-                      100
-                    )}%`,
-                    background:
-                      'linear-gradient(90deg, #FF007A 0%, #FF70AC 100%)',
-                  }}
-                />
-                {entry.total_points >= 100 && (
-                  <div className="absolute -right-2 -top-2">
-                    <Image
-                      src="/svg/fire.svg"
-                      alt="fire"
-                      width={15}
-                      height={20}
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-1 w-[80px] justify-end">
-                <span className="text-[14px] sm:text-[12px] text-[#6F6F6F]">
-                  {entry.total_points.toFixed(2)}pt
+              <div className="flex-1 flex items-center gap-2">
+                <span className="font-medium text-[#6F6F6F] w-[70px] text-[14px]">
+                  {entry.user_name.split(' ')[0]}
                 </span>
+                <div className="w-[100px] sm:w-[60px] bg-gray-200 rounded-full h-2 relative">
+                  <div
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${Math.min(
+                        (entry.total_points / 100) * 100,
+                        100
+                      )}%`,
+                      background:
+                        'linear-gradient(90deg, #FF007A 0%, #FF70AC 100%)',
+                    }}
+                  />
+                  {entry.total_points >= 100 && (
+                    <div className="absolute -right-2 -top-2">
+                      <Image
+                        src="/svg/fire.svg"
+                        alt="fire"
+                        width={15}
+                        height={20}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 w-[80px] justify-end">
+                  <span className="text-[14px] sm:text-[12px] text-[#6F6F6F]">
+                    {entry.total_points.toFixed(2)}pt/
+                    {entry.strengthWorkoutCount}회
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {leaderboardData.length === 0 && (
           <div className="text-center text-gray-500 py-4">
             아직 운동 기록이 없습니다

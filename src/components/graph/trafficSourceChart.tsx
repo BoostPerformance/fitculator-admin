@@ -115,10 +115,10 @@ export default function TrafficSourceChart({
           <Doughnut data={data} options={options} />
         </div>
 
-        <div className="w-full gap-[2rem]">
+        <div className="w-full gap-[2rem] ">
           <div className="lg:px-[2rem] border-t border-gray-200 pt-4 sm:px-[3rem]">
-            <div className="flex justify-between text-gray-7 sm:py-[1rem] mb-4">
-              <div className="flex">
+            <div className="flex justify-between text-gray-7 sm:py-[1.5rem] mb-4 ">
+              <div className="flex ">
                 <span className="w-6"></span>
                 <span className="flex-1 font-medium text-[14px]">운동종목</span>
               </div>
