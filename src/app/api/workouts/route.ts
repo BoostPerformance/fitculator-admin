@@ -438,6 +438,7 @@ export async function GET(request: Request) {
           id,
           user_id,
           points,
+          title,
           timestamp,
           users (
             name
@@ -446,6 +447,58 @@ export async function GET(request: Request) {
         )
         .in('user_id', participantIds);
 
+      const { data: strengthType, error: strengthTypeError } = await supabase
+        .from('workout_types')
+        .select('id')
+        .eq('name', 'STRENGTH')
+        .single();
+
+      if (strengthTypeError) {
+        console.error('❌ Error getting STRENGTH type:', strengthTypeError);
+        return NextResponse.json(
+          { error: 'Failed to fetch workout types' },
+          { status: 500 }
+        );
+      }
+
+      const { data: strengthCategories, error: categoriesError } =
+        await supabase
+          .from('workout_categories')
+          .select('id')
+          .eq('type_id', strengthType.id);
+
+      if (categoriesError) {
+        console.error(
+          '❌ Error fetching strength categories:',
+          categoriesError
+        );
+        return NextResponse.json(
+          { error: 'Failed to fetch categories' },
+          { status: 500 }
+        );
+      }
+
+      const strengthCategoryIds = strengthCategories.map((cat) => cat.id);
+
+      const { data: strengthWorkouts, error: strengthWorkoutsError } =
+        await supabase
+          .from('workouts')
+          .select('user_id, timestamp')
+          .in('category_id', strengthCategoryIds)
+          .in('user_id', participantIds)
+          .gte('timestamp', challenge.start_date)
+          .lte('timestamp', challenge.end_date);
+
+      if (strengthWorkoutsError) {
+        console.error(
+          '❌ Error fetching strength workouts:',
+          strengthWorkoutsError
+        );
+        return NextResponse.json(
+          { error: 'Failed to fetch strength workouts' },
+          { status: 500 }
+        );
+      }
       // 기간에 따른 필터 추가
       // console.log('📊 조회 기간:', startStr, '~', endStr);
       query = query
@@ -489,16 +542,36 @@ export async function GET(request: Request) {
       });
 
       // 리더보드 데이터 형식으로 변환 및 정렬
+
+      const userStrengthCounts: { [key: string]: number } = {};
+      const userStrengthSessions = new Map();
+
+      strengthWorkouts.forEach((workout) => {
+        const userId = workout.user_id;
+        const workoutDate = new Date(workout.timestamp)
+          .toISOString()
+          .split('T')[0];
+        const sessionKey = `${userId}_${workoutDate}`;
+
+        if (!userStrengthSessions.has(sessionKey)) {
+          userStrengthSessions.set(sessionKey, true);
+          userStrengthCounts[userId] = (userStrengthCounts[userId] || 0) + 1;
+        }
+      });
+
+      // 5. 리더보드 데이터에 근력운동 횟수 추가
       const leaderboardData = Object.entries(userPoints)
         .map(([userId, data]) => ({
           user_id: userId,
           user: {
             name: data.name,
+            strengthWorkoutCount: userStrengthCounts[userId] || 0,
           },
           points: data.points,
         }))
         .sort((a, b) => b.points - a.points);
 
+      // console.log('leaderboardData', leaderboardData);
       return NextResponse.json(leaderboardData);
     } else {
       // Get workouts with categories for chart
@@ -517,6 +590,8 @@ export async function GET(request: Request) {
         )
         .in('user_id', participantIds)
         .eq('workout_categories.type_id', cardioTypeId);
+
+      //console.log(workoutData);
 
       if (workoutError) {
         console.error(
@@ -627,8 +702,11 @@ function processWeeklyWorkoutData(
     users: users.map((user) => ({
       id: user.id,
       name: user.name,
+      strengthWorkoutCount: 0,
     })),
   };
+
+  const userStrengthSessions = new Map();
 
   // 날짜 포맷 변환 헬퍼 함수
   const formatDate = (date: Date): string => {
@@ -681,6 +759,17 @@ function processWeeklyWorkoutData(
         timestamp: workout.timestamp,
       });
     } else if (workoutType === 'STRENGTH') {
+      const sessionKey = `${user.id}_${formattedDate}`;
+      if (!userStrengthSessions.has(sessionKey)) {
+        userStrengthSessions.set(sessionKey, true);
+
+        // 해당 유저의 근력운동 카운트 증가
+        const userIndex = result.users.findIndex((u) => u.id === user.id);
+        if (userIndex !== -1) {
+          result.users[userIndex].strengthWorkoutCount += 1;
+        }
+      }
+
       result.strength.push({
         x: weekLabel,
         y: 1, // 근력 운동은 수행 여부만 기록 (1로 표준화)
@@ -716,7 +805,7 @@ function processWeeklyWorkoutData(
   });
 
   // 최종 근력 운동 데이터 생성
-  const finalStrength = [];
+  const finalStrength: string[] = [];
   userWeekStrength.forEach((items) => {
     items.forEach((item) => {
       finalStrength.push(item);

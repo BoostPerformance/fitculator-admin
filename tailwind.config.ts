@@ -105,7 +105,7 @@ const config: Config = {
       '4.25-500': ['4.25rem', { fontWeight: 500 }],
     },
     screens: {
-      lg: { min: '1026px' },
+      lg: { min: '1025px' },
       md: { min: '641px', max: '1024px' },
       sm: { max: '640px' },
     },

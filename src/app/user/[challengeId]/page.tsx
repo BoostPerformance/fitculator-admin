@@ -321,7 +321,7 @@ export default function User() {
       <div className="flex gap-[1rem] flex-1 sm:flex-col md:flex-col">
         <main className="flex-1 overflow-y-auto">
           <div className="pt-[2rem] pb-[2rem] sm:pt-0">
-            <div className="px-4 sm:px-4 relative">
+            <div className="px-4 sm:px-4 relative lg:mb-8 md:mb-4 sm:my-4">
               <Title
                 title={
                   challenges.find(
