@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DietTableProps,
   ChallengeParticipant,
@@ -20,34 +20,42 @@ const DietTable: React.FC<DietTableProps> = ({
   const [existCoachMemo, setExistCoachMemo] = useState('');
 
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
-    // console.log("전체 참가자 데이터:", participant);
-    // console.log("daily_records:", participant.daily_records);
+    // 전체 daily_record 수는 API에서 가져온 daily_records_count 사용
+    const totalRecords = participant.daily_records_count || 0;
 
-    // 총 daily_record 수
-    const totalRecords = participant.daily_records?.length || 0;
-    // console.log("총 레코드 수:", totalRecords);
-
-    // feedbacks가 있는 레코드 수
-    const feedbackCount =
-      participant.daily_records?.reduce((count, record) => {
-        // console.log("현재 레코드:", record);
-        // console.log("현재 레코드의 feedbacks:", record.feedbacks);
-
-        // feedbacks 객체가 있고 id가 있으면 피드백이 존재하는 것으로 간주
-        if (record.feedbacks && record.feedbacks.id) {
-          //  console.log("피드백 있음");
-          return count + 1;
-        }
-        //   console.log("피드백 없음");
-        return count;
-      }, 0) || 0;
-    //  console.log("피드백 있는 레코드 수:", feedbackCount);
+    // 피드백 있는 레코드 수 계산
+    const feedbackCount = participant.feedbacks_count || 0;
 
     return {
       completed: feedbackCount,
       total: totalRecords,
       formatted: `${feedbackCount}/${totalRecords}`,
     };
+  };
+
+  // Alternative calculation method if the API fix doesn't work
+  const countFeedbacksDirectly = (participant: ChallengeParticipant) => {
+    if (
+      !participant.daily_records ||
+      !Array.isArray(participant.daily_records)
+    ) {
+      return 0;
+    }
+
+    return participant.daily_records.reduce((count, record) => {
+      if (!record.feedbacks) return count;
+
+      if (Array.isArray(record.feedbacks) && record.feedbacks.length > 0) {
+        return count + 1;
+      } else if (
+        typeof record.feedbacks === 'object' &&
+        Object.keys(record.feedbacks).length > 0
+      ) {
+        return count + 1;
+      }
+
+      return count;
+    }, 0);
   };
 
   const participants = (records: ChallengeParticipant[]) => {
@@ -60,11 +68,18 @@ const DietTable: React.FC<DietTableProps> = ({
     records.forEach((record) => {
       const participantId = record.id;
       if (!groupedData.has(participantId)) {
+        const calculatedFeedbackCount =
+          typeof record.feedbacks_count === 'number'
+            ? record.feedbacks_count
+            : countFeedbacksDirectly(record);
+
         const participant = {
           id: participantId,
           users: record.users,
           challenges: record.challenges,
           daily_records: record.daily_records,
+          daily_records_count: record.daily_records_count,
+          feedbacks_counts: calculatedFeedbackCount,
           coach_memo: record.coach_memo,
           memo_updated_at: record.memo_updated_at,
           service_user_id: record.service_user_id,
@@ -117,9 +132,12 @@ const DietTable: React.FC<DietTableProps> = ({
     return <DietTableSkeleton />;
   }
 
+  // 디버깅을 위한 로그
+  console.log('dailyRecordsData:', dailyRecordsData);
+  console.log('참가자 데이터:', participants(dailyRecordsData));
+
   return (
     <div className="mt-[1.4rem]">
-      {/* <div className="mb-4 text-lg font-semibold">총 업로드</div> */}
       <div className="absolute items-center justify-center">
         {isModalOpen && selectedParticipant && (
           <Modal

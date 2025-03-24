@@ -429,8 +429,41 @@ export async function GET(request: Request) {
 
     const type = url.searchParams.get('type') || 'leaderboard';
 
+    // In the workouts route.ts file, modify the leaderboard section:
+
     if (type === 'leaderboard') {
-      // Get workouts with user information for leaderboard
+      // Get cardio type ID first
+      const { data: cardioType, error: cardioTypeError } = await supabase
+        .from('workout_types')
+        .select('id')
+        .eq('name', 'CARDIO')
+        .single();
+
+      if (cardioTypeError) {
+        console.error('❌ Error getting CARDIO type:', cardioTypeError);
+        return NextResponse.json(
+          { error: 'Failed to fetch workout types' },
+          { status: 500 }
+        );
+      }
+
+      // Get all cardio categories
+      const { data: cardioCategories, error: cardioError } = await supabase
+        .from('workout_categories')
+        .select('id')
+        .eq('type_id', cardioType.id);
+
+      if (cardioError) {
+        console.error('❌ Error fetching cardio categories:', cardioError);
+        return NextResponse.json(
+          { error: 'Failed to fetch categories' },
+          { status: 500 }
+        );
+      }
+
+      const cardioCategoryIds = cardioCategories.map((cat) => cat.id);
+
+      // Get workouts with user information for leaderboard, filtering by cardio category IDs
       let query = supabase
         .from('workouts')
         .select(
@@ -445,8 +478,10 @@ export async function GET(request: Request) {
           )
         `
         )
-        .in('user_id', participantIds);
+        .in('user_id', participantIds)
+        .in('category_id', cardioCategoryIds); // Only cardio workouts
 
+      // Get strength workout counts for the same period (needed for display)
       const { data: strengthType, error: strengthTypeError } = await supabase
         .from('workout_types')
         .select('id')
@@ -499,8 +534,8 @@ export async function GET(request: Request) {
           { status: 500 }
         );
       }
+
       // 기간에 따른 필터 추가
-      // console.log('📊 조회 기간:', startStr, '~', endStr);
       query = query
         .gte('timestamp', startStr)
         .lt(
@@ -517,7 +552,6 @@ export async function GET(request: Request) {
         );
 
       const { data: workoutData, error: workoutError } = await query;
-      // console.log('📊 조회된 운동 데이터 수:', workoutData?.length || 0);
 
       if (workoutError) {
         console.error('❌ Supabase query error at workoutData:', workoutError);
@@ -527,7 +561,7 @@ export async function GET(request: Request) {
         );
       }
 
-      // 사용자별 포인트 합계 계산
+      // 사용자별 유산소 포인트 합계 계산
       const userPoints: { [key: string]: { points: number; name: string } } =
         {};
       workoutData?.forEach((workout: any) => {
@@ -541,8 +575,7 @@ export async function GET(request: Request) {
         userPoints[userId].points += workout.points || 0;
       });
 
-      // 리더보드 데이터 형식으로 변환 및 정렬
-
+      // Calculate strength workout counts per user
       const userStrengthCounts: { [key: string]: number } = {};
       const userStrengthSessions = new Map();
 
@@ -559,7 +592,7 @@ export async function GET(request: Request) {
         }
       });
 
-      // 5. 리더보드 데이터에 근력운동 횟수 추가
+      // 리더보드 데이터에 포함할 정보: 유산소 포인트 + 근력운동 횟수
       const leaderboardData = Object.entries(userPoints)
         .map(([userId, data]) => ({
           user_id: userId,
@@ -571,7 +604,6 @@ export async function GET(request: Request) {
         }))
         .sort((a, b) => b.points - a.points);
 
-      // console.log('leaderboardData', leaderboardData);
       return NextResponse.json(leaderboardData);
     } else {
       // Get workouts with categories for chart
