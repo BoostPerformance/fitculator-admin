@@ -69,7 +69,7 @@ export async function GET(request: Request) {
       throw participantsError;
     }
 
-    // 각 참가자의 최근 daily record만 가져오기
+    // 각 참가자의 챌린지 기간 내 모든 daily record 가져오기
     const participantsWithRecords = await Promise.all(
       participants.map(async (participant) => {
         // Get count of daily records
@@ -82,6 +82,11 @@ export async function GET(request: Request) {
 
         // If we need the actual records (for the weekly view)
         if (withRecords) {
+          // 챌린지 기간 가져오기
+          const challengeStartDate = participant.challenges.start_date;
+          const challengeEndDate = participant.challenges.end_date;
+
+          // 챌린지 기간 내의 모든 daily records 가져오기 (페이지네이션 없이)
           const { data: records } = await supabase
             .from('daily_records')
             .select(
@@ -94,10 +99,17 @@ export async function GET(request: Request) {
                 meal_type,
                 description,
                 meal_time
+              ),
+              feedbacks(
+                id,
+                content,
+                created_at
               )
             `
             )
-            .eq('participant_id', participant.id);
+            .eq('participant_id', participant.id)
+            .gte('record_date', challengeStartDate)
+            .lte('record_date', challengeEndDate);
 
           dailyRecords = records || [];
         }

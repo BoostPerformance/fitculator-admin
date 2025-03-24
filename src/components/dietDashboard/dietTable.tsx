@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DietTableProps,
   ChallengeParticipant,
@@ -18,30 +18,84 @@ const DietTable: React.FC<DietTableProps> = ({
   const [selectedParticipant, setSelectedParticipant] =
     useState<ChallengeParticipant | null>(null);
   const [existCoachMemo, setExistCoachMemo] = useState('');
+  const [allDailyRecords, setAllDailyRecords] = useState<any[]>([]);
+  const [loadingAllRecords, setLoadingAllRecords] = useState(false);
+
+  // Fetch all daily records for the challenge period when the component mounts or challengeId changes
+  useEffect(() => {
+    const fetchAllDailyRecords = async () => {
+      if (!challengeId) return;
+
+      setLoadingAllRecords(true);
+      try {
+        let page = 1;
+        let hasMoreRecords = true;
+        let allRecords: any[] = [];
+
+        // Keep fetching until no more records are available
+        while (hasMoreRecords) {
+          const url = new URL(
+            '/api/challenge-participants',
+            window.location.origin
+          );
+          url.searchParams.append('page', page.toString());
+          url.searchParams.append('limit', '100'); // Fetch more records per page
+          url.searchParams.append('with_records', 'true');
+          url.searchParams.append('challenge_id', challengeId);
+
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error('Failed to fetch all daily records');
+          }
+
+          const data = await response.json();
+          const newRecords = data.data;
+
+          if (newRecords.length > 0) {
+            allRecords = [...allRecords, ...newRecords];
+            page++;
+          } else {
+            hasMoreRecords = false;
+          }
+        }
+
+        setAllDailyRecords(allRecords);
+      } catch (error) {
+        console.error('Error fetching all daily records:', error);
+      } finally {
+        setLoadingAllRecords(false);
+      }
+    };
+
+    fetchAllDailyRecords();
+  }, [challengeId]);
 
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
-    // console.log("전체 참가자 데이터:", participant);
-    // console.log("daily_records:", participant.daily_records);
+    // Find all records for this participant across all fetched pages
+    const participantRecords =
+      allDailyRecords.find((record) => record.id === participant.id)
+        ?.daily_records || [];
 
-    // 총 daily_record 수
-    const totalRecords = participant.daily_records?.length || 0;
-    // console.log("총 레코드 수:", totalRecords);
+    // Get displayed participant records as fallback if we don't have all records yet
+    const displayedRecords = participant.daily_records || [];
 
-    // feedbacks가 있는 레코드 수
-    const feedbackCount =
-      participant.daily_records?.reduce((count, record) => {
-        // console.log("현재 레코드:", record);
-        // console.log("현재 레코드의 feedbacks:", record.feedbacks);
+    // Use all records if available, otherwise use displayed records
+    const recordsToUse =
+      allDailyRecords.length > 0 && participantRecords.length > 0
+        ? participantRecords
+        : displayedRecords;
 
-        // feedbacks 객체가 있고 id가 있으면 피드백이 존재하는 것으로 간주
-        if (record.feedbacks && record.feedbacks.id) {
-          //  console.log("피드백 있음");
-          return count + 1;
-        }
-        //   console.log("피드백 없음");
-        return count;
-      }, 0) || 0;
-    //  console.log("피드백 있는 레코드 수:", feedbackCount);
+    // Count total valid records for the challenge period
+    const totalRecords = recordsToUse.length;
+
+    // Count records with feedbacks
+    const feedbackCount = recordsToUse.reduce((count, record) => {
+      // Check if feedbacks exists and has an ID
+      if (record.feedbacks && record.feedbacks.id) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
 
     return {
       completed: feedbackCount,
@@ -119,7 +173,6 @@ const DietTable: React.FC<DietTableProps> = ({
 
   return (
     <div className="mt-[1.4rem]">
-      {/* <div className="mb-4 text-lg font-semibold">총 업로드</div> */}
       <div className="absolute items-center justify-center">
         {isModalOpen && selectedParticipant && (
           <Modal
@@ -209,7 +262,7 @@ const DietTable: React.FC<DietTableProps> = ({
           ))}
         </tbody>
       </table>
-      {loading && (
+      {(loading || loadingAllRecords) && (
         <div className="w-full text-center py-4">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
         </div>
