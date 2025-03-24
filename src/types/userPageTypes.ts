@@ -53,22 +53,25 @@ export interface DailyRecord {
 
 export interface ChallengeParticipant {
   id: string;
-  coach_memo?: string;
-  memo_updated_at?: string;
-  service_user_id: string;
   users: {
     id: string;
+    username: string | null;
     name: string;
-    username: string;
+    email: string;
   };
   challenges: {
     id: string;
     title: string;
-    end_date: string;
-    start_date: string;
     challenge_type: string;
+    start_date: string;
+    end_date: string;
   };
-  daily_records: DailyRecord[];
+  daily_records?: Array<DailyRecord>;
+  daily_records_count?: number;
+  feedbacks_count?: number;
+  coach_memo: string | null;
+  memo_updated_at: string | null;
+  service_user_id: string;
 }
 
 export interface DietTableProps {

@@ -18,90 +18,44 @@ const DietTable: React.FC<DietTableProps> = ({
   const [selectedParticipant, setSelectedParticipant] =
     useState<ChallengeParticipant | null>(null);
   const [existCoachMemo, setExistCoachMemo] = useState('');
-  const [allDailyRecords, setAllDailyRecords] = useState<any[]>([]);
-  const [loadingAllRecords, setLoadingAllRecords] = useState(false);
-
-  // Fetch all daily records for the challenge period when the component mounts or challengeId changes
-  useEffect(() => {
-    const fetchAllDailyRecords = async () => {
-      if (!challengeId) return;
-
-      setLoadingAllRecords(true);
-      try {
-        let page = 1;
-        let hasMoreRecords = true;
-        let allRecords: any[] = [];
-
-        // Keep fetching until no more records are available
-        while (hasMoreRecords) {
-          const url = new URL(
-            '/api/challenge-participants',
-            window.location.origin
-          );
-          url.searchParams.append('page', page.toString());
-          url.searchParams.append('limit', '100'); // Fetch more records per page
-          url.searchParams.append('with_records', 'true');
-          url.searchParams.append('challenge_id', challengeId);
-
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error('Failed to fetch all daily records');
-          }
-
-          const data = await response.json();
-          const newRecords = data.data;
-
-          if (newRecords.length > 0) {
-            allRecords = [...allRecords, ...newRecords];
-            page++;
-          } else {
-            hasMoreRecords = false;
-          }
-        }
-
-        setAllDailyRecords(allRecords);
-      } catch (error) {
-        console.error('Error fetching all daily records:', error);
-      } finally {
-        setLoadingAllRecords(false);
-      }
-    };
-
-    fetchAllDailyRecords();
-  }, [challengeId]);
 
   const calculateFeedbackRatio = (participant: ChallengeParticipant) => {
-    // Find all records for this participant across all fetched pages
-    const participantRecords =
-      allDailyRecords.find((record) => record.id === participant.id)
-        ?.daily_records || [];
+    // 전체 daily_record 수는 API에서 가져온 daily_records_count 사용
+    const totalRecords = participant.daily_records_count || 0;
 
-    // Get displayed participant records as fallback if we don't have all records yet
-    const displayedRecords = participant.daily_records || [];
-
-    // Use all records if available, otherwise use displayed records
-    const recordsToUse =
-      allDailyRecords.length > 0 && participantRecords.length > 0
-        ? participantRecords
-        : displayedRecords;
-
-    // Count total valid records for the challenge period
-    const totalRecords = recordsToUse.length;
-
-    // Count records with feedbacks
-    const feedbackCount = recordsToUse.reduce((count, record) => {
-      // Check if feedbacks exists and has an ID
-      if (record.feedbacks && record.feedbacks.id) {
-        return count + 1;
-      }
-      return count;
-    }, 0);
+    // 피드백 있는 레코드 수 계산
+    const feedbackCount = participant.feedbacks_count || 0;
 
     return {
       completed: feedbackCount,
       total: totalRecords,
       formatted: `${feedbackCount}/${totalRecords}`,
     };
+  };
+
+  // Alternative calculation method if the API fix doesn't work
+  const countFeedbacksDirectly = (participant: ChallengeParticipant) => {
+    if (
+      !participant.daily_records ||
+      !Array.isArray(participant.daily_records)
+    ) {
+      return 0;
+    }
+
+    return participant.daily_records.reduce((count, record) => {
+      if (!record.feedbacks) return count;
+
+      if (Array.isArray(record.feedbacks) && record.feedbacks.length > 0) {
+        return count + 1;
+      } else if (
+        typeof record.feedbacks === 'object' &&
+        Object.keys(record.feedbacks).length > 0
+      ) {
+        return count + 1;
+      }
+
+      return count;
+    }, 0);
   };
 
   const participants = (records: ChallengeParticipant[]) => {
@@ -114,11 +68,18 @@ const DietTable: React.FC<DietTableProps> = ({
     records.forEach((record) => {
       const participantId = record.id;
       if (!groupedData.has(participantId)) {
+        const calculatedFeedbackCount =
+          typeof record.feedbacks_count === 'number'
+            ? record.feedbacks_count
+            : countFeedbacksDirectly(record);
+
         const participant = {
           id: participantId,
           users: record.users,
           challenges: record.challenges,
           daily_records: record.daily_records,
+          daily_records_count: record.daily_records_count,
+          feedbacks_counts: calculatedFeedbackCount,
           coach_memo: record.coach_memo,
           memo_updated_at: record.memo_updated_at,
           service_user_id: record.service_user_id,
@@ -170,6 +131,10 @@ const DietTable: React.FC<DietTableProps> = ({
   if (loading) {
     return <DietTableSkeleton />;
   }
+
+  // 디버깅을 위한 로그
+  console.log('dailyRecordsData:', dailyRecordsData);
+  console.log('참가자 데이터:', participants(dailyRecordsData));
 
   return (
     <div className="mt-[1.4rem]">
@@ -262,7 +227,7 @@ const DietTable: React.FC<DietTableProps> = ({
           ))}
         </tbody>
       </table>
-      {(loading || loadingAllRecords) && (
+      {loading && (
         <div className="w-full text-center py-4">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
         </div>

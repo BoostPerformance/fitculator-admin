@@ -86,8 +86,13 @@ export async function GET(request: Request) {
           const challengeStartDate = participant.challenges.start_date;
           const challengeEndDate = participant.challenges.end_date;
 
+          // 오늘 날짜 확인
+          const today = new Date();
+          const startDate = new Date(challengeStartDate);
+          const endDate = new Date(challengeEndDate);
+
           // 챌린지 기간 내의 모든 daily records 가져오기 (페이지네이션 없이)
-          const { data: records } = await supabase
+          let recordsQuery = supabase
             .from('daily_records')
             .select(
               `
@@ -107,16 +112,55 @@ export async function GET(request: Request) {
               )
             `
             )
-            .eq('participant_id', participant.id)
-            .gte('record_date', challengeStartDate)
-            .lte('record_date', challengeEndDate);
+            .eq('participant_id', participant.id);
+
+          // 오늘이 챌린지 기간 밖이면 (챌린지가 이미 끝났으면)
+          if (today > endDate) {
+            // 기간 내 모든 데이터를 가져옴 (마지막 날 데이터를 표시하기 위해)
+            recordsQuery = recordsQuery
+              .gte('record_date', challengeStartDate)
+              .lte('record_date', challengeEndDate)
+              .order('record_date', { ascending: false });
+          }
+          // 챌린지가 아직 시작되지 않았거나 진행 중이면
+          else {
+            recordsQuery = recordsQuery
+              .gte('record_date', challengeStartDate)
+              .lte('record_date', challengeEndDate);
+          }
+
+          const { data: records } = await recordsQuery;
 
           dailyRecords = records || [];
         }
 
+        const feedbacksCount =
+          dailyRecords.reduce((count, record) => {
+            console.log('Record feedbacks structure:', record.feedbacks);
+
+            if (record.feedbacks) {
+              // feedbacks가 배열인 경우
+              if (
+                Array.isArray(record.feedbacks) &&
+                record.feedbacks.length > 0
+              ) {
+                return count + 1;
+              }
+              // feedbacks가 객체인 경우
+              else if (
+                typeof record.feedbacks === 'object' &&
+                record.feedbacks.id
+              ) {
+                return count + 1;
+              }
+            }
+            return count;
+          }, 0) || 0;
+
         return {
           ...participant,
           daily_records_count: count || 0,
+          feedbacks_count: feedbacksCount,
           ...(withRecords && { daily_records: dailyRecords }),
         };
       })
