@@ -1,9 +1,9 @@
 export type MealType =
-  | "breakfast"
-  | "lunch"
-  | "dinner"
-  | "snack"
-  | "supplement";
+  | 'breakfast'
+  | 'lunch'
+  | 'dinner'
+  | 'snack'
+  | 'supplement';
 
 export interface User {
   id: string;
@@ -80,6 +80,14 @@ export interface ProcessedMeal {
 export interface DietDetailTableProps {
   dietDetailItems: ProcessedMeal[];
   selectedDate: string;
+  loading?: boolean;
+  onLoadMore?: (page: number) => void;
+  hasMore?: boolean;
+}
+
+export interface WorkoutTableProps {
+  dietDetailItems?: ProcessedMeal[];
+  selectedDate?: string;
   loading?: boolean;
   onLoadMore?: (page: number) => void;
   hasMore?: boolean;

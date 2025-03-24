@@ -16,6 +16,7 @@ interface DietContentProps {
   mobileSize: boolean;
   loading?: boolean;
   challengeId: string;
+  workout?: boolean;
 }
 
 export const DietContent = ({
@@ -26,6 +27,7 @@ export const DietContent = ({
   mobileSize,
   loading: parentLoading,
   challengeId,
+  workout,
 }: DietContentProps) => {
   const [page, setPage] = useState(1);
   const { dietRecords, loading, hasMore } = useDietData(
