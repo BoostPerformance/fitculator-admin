@@ -90,7 +90,7 @@ const DailyDietRecord = ({
 
     // 챌린지 기간 밖의 날짜는 항상 false 반환 (시작일 이전이거나 종료일 이후)
     if (recordDate < challengeStart || recordDate > challengeEnd) {
-      console.log(`[${userName}] ${date} - 챌린지 기간 밖 (false 반환)`);
+      // console.log(`[${userName}] ${date} - 챌린지 기간 밖 (false 반환)`);
       return false;
     }
 

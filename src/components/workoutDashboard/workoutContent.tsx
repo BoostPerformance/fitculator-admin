@@ -11,7 +11,7 @@ interface WorkoutContentProps {
     startDate: string;
     endDate: string;
   };
-  mobileSize?: boolean; // 더 이상 사용하지 않지만 호환성을 위해 유지
+  mobileSize?: boolean;
   loading?: boolean;
   challengeId: string;
 }
