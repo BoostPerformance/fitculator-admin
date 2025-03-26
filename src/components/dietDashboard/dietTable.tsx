@@ -13,6 +13,7 @@ const DietTable: React.FC<DietTableProps> = ({
   loading,
   challengeId,
   selectedDate,
+  feedbackData,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] =
@@ -23,8 +24,11 @@ const DietTable: React.FC<DietTableProps> = ({
     // 전체 daily_record 수는 API에서 가져온 daily_records_count 사용
     const totalRecords = participant.daily_records_count || 0;
 
-    // 피드백 있는 레코드 수 계산
-    const feedbackCount = participant.feedbacks_count || 0;
+    // 상위 컴포넌트에서 전달받은 피드백 데이터 사용
+    const feedbackCount =
+      feedbackData && feedbackData[participant.id] !== undefined
+        ? feedbackData[participant.id]
+        : participant.feedbacks_count || countFeedbacksDirectly(participant);
 
     return {
       completed: feedbackCount,
@@ -33,28 +37,28 @@ const DietTable: React.FC<DietTableProps> = ({
     };
   };
 
-  // Alternative calculation method if the API fix doesn't work
-  const countFeedbacksDirectly = (participant: ChallengeParticipant) => {
-    if (
-      !participant.daily_records ||
-      !Array.isArray(participant.daily_records)
-    ) {
+  // 기존의 직접 카운트 함수 (백업으로 유지)
+  const countFeedbacksDirectly = (
+    participant: ChallengeParticipant
+  ): number => {
+    if (!participant.daily_records || participant.daily_records.length === 0) {
       return 0;
     }
 
     return participant.daily_records.reduce((count, record) => {
-      if (!record.feedbacks) return count;
-
-      if (Array.isArray(record.feedbacks) && record.feedbacks.length > 0) {
-        return count + 1;
-      } else if (
-        typeof record.feedbacks === 'object' &&
-        Object.keys(record.feedbacks).length > 0
-      ) {
-        return count + 1;
+      // 피드백이 없으면 카운트하지 않음
+      if (!record.feedbacks || record.feedbacks.length === 0) {
+        return count;
       }
 
-      return count;
+      // 피드백 배열에서 coach_feedback이 있는지 확인
+      const hasCoachFeedback = record.feedbacks.some(
+        (feedback) => feedback.coach_feedback
+      );
+      const result = hasCoachFeedback ? count + 1 : count;
+      console.log('result', result);
+      // coach_feedback이 있으면 카운트 증가
+      return result;
     }, 0);
   };
 
@@ -68,8 +72,11 @@ const DietTable: React.FC<DietTableProps> = ({
     records.forEach((record) => {
       const participantId = record.id;
       if (!groupedData.has(participantId)) {
+        // 피드백 수 계산
         const calculatedFeedbackCount =
-          typeof record.feedbacks_count === 'number'
+          feedbackData && feedbackData[participantId] !== undefined
+            ? feedbackData[participantId]
+            : typeof record.feedbacks_count === 'number'
             ? record.feedbacks_count
             : countFeedbacksDirectly(record);
 
@@ -79,7 +86,7 @@ const DietTable: React.FC<DietTableProps> = ({
           challenges: record.challenges,
           daily_records: record.daily_records,
           daily_records_count: record.daily_records_count,
-          feedbacks_counts: calculatedFeedbackCount,
+          feedbacks_count: calculatedFeedbackCount,
           coach_memo: record.coach_memo,
           memo_updated_at: record.memo_updated_at,
           service_user_id: record.service_user_id,
@@ -132,9 +139,7 @@ const DietTable: React.FC<DietTableProps> = ({
     return <DietTableSkeleton />;
   }
 
-  // 디버깅을 위한 로그
-  console.log('dailyRecordsData:', dailyRecordsData);
-  console.log('참가자 데이터:', participants(dailyRecordsData));
+  const participantsList = participants(dailyRecordsData);
 
   return (
     <div className="mt-[1.4rem]">
@@ -198,7 +203,7 @@ const DietTable: React.FC<DietTableProps> = ({
           </tr>
         </thead>
         <tbody className="text-center">
-          {participants(dailyRecordsData).map((data, index) => (
+          {participantsList.map((data, index) => (
             <tr key={index} className="text-[#6F6F6F]">
               <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
                 {data.participant.users?.username}
@@ -225,6 +230,13 @@ const DietTable: React.FC<DietTableProps> = ({
               </td>
             </tr>
           ))}
+          {participantsList.length === 0 && (
+            <tr>
+              <td colSpan={4} className="p-4 text-center text-gray-500">
+                표시할 참가자 데이터가 없습니다.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
       {loading && (

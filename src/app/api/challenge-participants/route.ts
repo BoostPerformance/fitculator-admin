@@ -20,15 +20,23 @@ interface DailyRecord {
   record_date: Date;
   meals: Meals;
 }
+// challenge-participants API 수정 코드
+// 핵심 부분에 디버깅 로그 추가
+
 export async function GET(request: Request) {
+  // console.log('===== challenge-participants API 시작 =====');
   const { searchParams } = new URL(request.url);
   const challengeId = searchParams.get('challenge_id');
+  // console.log('요청 챌린지 ID:', challengeId);
+
   try {
     const page = Number(searchParams.get('page')) || 1;
     const limit = Number(searchParams.get('limit')) || 30;
     const start = (page - 1) * limit;
     const end = start + limit - 1;
     const withRecords = searchParams.get('with_records') === 'true';
+
+    console.log('쿼리 파라미터:', { page, limit, start, end, withRecords });
 
     // 기본 쿼리 설정
     let query = supabase.from('challenge_participants').select(
@@ -66,30 +74,46 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false });
 
     if (participantsError) {
+      console.error('참가자 정보 쿼리 오류:', participantsError);
       throw participantsError;
     }
 
+    console.log(`가져온 참가자 수: ${participants?.length || 0}`);
+
     // 각 참가자의 챌린지 기간 내 모든 daily record 가져오기
+    console.log('참가자 별 일일 기록 가져오기 시작');
     const participantsWithRecords = await Promise.all(
       participants.map(async (participant) => {
+        console.log(`참가자 ID: ${participant.id} 처리 중`);
+
         // Get count of daily records
         const { count } = await supabase
           .from('daily_records')
           .select('*', { count: 'exact', head: true })
           .eq('participant_id', participant.id);
 
-        let dailyRecords: DailyRecord | any = [];
+        console.log(
+          `참가자 ${participant.id}의 daily_records 수: ${count || 0}`
+        );
+
+        let dailyRecords = [];
 
         // If we need the actual records (for the weekly view)
         if (withRecords) {
           // 챌린지 기간 가져오기
-          const challengeStartDate = participant.challenges.start_date;
-          const challengeEndDate = participant.challenges.end_date;
+          const challengeStartDate = new Date(
+            participant.challenges.start_date
+          );
+          const challengeEndDate = new Date(participant.challenges.end_date);
 
-          // 오늘 날짜 확인
-          const today = new Date();
-          const startDate = new Date(challengeStartDate);
-          const endDate = new Date(challengeEndDate);
+          const formattedStartDate = challengeStartDate
+            .toISOString()
+            .split('T')[0];
+          const formattedEndDate = challengeEndDate.toISOString().split('T')[0];
+
+          console.log(
+            `참가자 ${participant.id}의 챌린지 기간: ${formattedStartDate} ~ ${formattedEndDate}`
+          );
 
           // 챌린지 기간 내의 모든 daily records 가져오기 (페이지네이션 없이)
           let recordsQuery = supabase
@@ -107,55 +131,87 @@ export async function GET(request: Request) {
               ),
               feedbacks(
                 id,
-                content,
+                ai_feedback,
+                coach_feedback,
                 created_at
               )
             `
             )
-            .eq('participant_id', participant.id);
+            .eq('participant_id', participant.id)
+            .gte('record_date', formattedStartDate)
+            .lte('record_date', formattedEndDate);
 
-          // 오늘이 챌린지 기간 밖이면 (챌린지가 이미 끝났으면)
-          if (today > endDate) {
-            // 기간 내 모든 데이터를 가져옴 (마지막 날 데이터를 표시하기 위해)
-            recordsQuery = recordsQuery
-              .gte('record_date', challengeStartDate)
-              .lte('record_date', challengeEndDate)
-              .order('record_date', { ascending: false });
+          // console.log(
+          //   `참가자 ${participant.id}의 일일 기록 쿼리:`,
+          //   recordsQuery
+          // );
+
+          const { data: records, error: recordsError } = await recordsQuery;
+
+          if (recordsError) {
+            console.error(
+              `참가자 ${participant.id}의 일일 기록 조회 오류:`,
+              recordsError
+            );
+            dailyRecords = []; // 에러 발생 시 빈 배열로 설정
+          } else {
+            console.log(
+              `참가자 ${participant.id}의 일일 기록 조회 성공: ${
+                records?.length || 0
+              }개 발견`
+            );
+
+            if (records && records.length > 0) {
+              // console.log('첫 번째 일일 기록 샘플:', {
+              //   id: records[0].id,
+              //   record_date: records[0].record_date,
+              //   feedbacks: records[0].feedbacks,
+              // });
+            }
+
+            dailyRecords = records || [];
           }
-          // 챌린지가 아직 시작되지 않았거나 진행 중이면
-          else {
-            recordsQuery = recordsQuery
-              .gte('record_date', challengeStartDate)
-              .lte('record_date', challengeEndDate);
-          }
-
-          const { data: records } = await recordsQuery;
-
-          dailyRecords = records || [];
         }
 
-        const feedbacksCount =
-          dailyRecords.reduce((count, record) => {
-            console.log('Record feedbacks structure:', record.feedbacks);
+        // 기존 피드백 카운트 로직 개선
+        const feedbacksCount = dailyRecords.reduce((count, record) => {
+          // 먼저 feedbacks가 존재하는지 확인
+          if (!record.feedbacks) {
+            return count;
+          }
 
-            if (record.feedbacks) {
-              // feedbacks가 배열인 경우
-              if (
-                Array.isArray(record.feedbacks) &&
-                record.feedbacks.length > 0
-              ) {
-                return count + 1;
-              }
-              // feedbacks가 객체인 경우
-              else if (
-                typeof record.feedbacks === 'object' &&
-                record.feedbacks.id
-              ) {
+          // feedbacks가 배열인 경우
+          if (Array.isArray(record.feedbacks)) {
+            if (record.feedbacks.length > 0) {
+              // 배열 내 피드백 내용 체크
+              const hasFeedbackContent = record.feedbacks.some(
+                (feedback) => feedback.ai_feedback || feedback.coach_feedback
+              );
+
+              if (hasFeedbackContent) {
                 return count + 1;
               }
             }
             return count;
-          }, 0) || 0;
+          }
+
+          // feedbacks가 객체인 경우
+          if (
+            typeof record.feedbacks === 'object' &&
+            record.feedbacks !== null
+          ) {
+            if (
+              record.feedbacks.ai_feedback ||
+              record.feedbacks.coach_feedback
+            ) {
+              return count + 1;
+            }
+          }
+
+          return count;
+        }, 0);
+
+        console.log(`참가자 ${participant.id}의 피드백 수: ${feedbacksCount}`);
 
         return {
           ...participant,
@@ -165,6 +221,7 @@ export async function GET(request: Request) {
         };
       })
     );
+    //  console.log('참가자 별 일일 기록 가져오기 완료');
 
     // 전체 개수 가져오기
     let countQuery = supabase
@@ -176,8 +233,9 @@ export async function GET(request: Request) {
     }
 
     const { count } = await countQuery;
+    //  console.log(`총 참가자 수: ${count || 0}`);
 
-    return NextResponse.json({
+    const result = {
       data: participantsWithRecords,
       pagination: {
         page,
@@ -185,9 +243,27 @@ export async function GET(request: Request) {
         total: count || 0,
         totalPages: Math.ceil((count || 0) / limit),
       },
-    });
+    };
+
+    //console.log('===== challenge-participants API 종료 =====');
+    return NextResponse.json(result);
   } catch (error) {
-    console.error('Error fetching Data', error);
+    console.error('===== challenge-participants API 에러 =====');
+    console.error('오류 내용:', error);
+    console.error(
+      '오류 타입:',
+      error instanceof Error ? error.constructor.name : typeof error
+    );
+    console.error(
+      '오류 메시지:',
+      error instanceof Error ? error.message : String(error)
+    );
+    console.error(
+      '오류 스택:',
+      error instanceof Error ? error.stack : '스택 정보 없음'
+    );
+    console.error('===== challenge-participants API 에러 종료 =====');
+
     return NextResponse.json(
       {
         error: 'failed to fetch data api challenge-participants',
@@ -232,7 +308,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { participantId, status } = body;
 
-    console.log('PUT 요청 받음:', { participantId, status });
+    // console.log('PUT 요청 받음:', { participantId, status });
 
     // 필수 필드 검증
     if (!participantId) {
@@ -263,12 +339,12 @@ export async function PUT(request: Request) {
     }
 
     // 참가자 상태 업데이트
-    console.log('Supabase 쿼리 실행:', {
-      table: 'challenge_participants',
-      action: 'update',
-      data: { status: status || 'dropped' },
-      condition: { id: participantId },
-    });
+    // console.log('Supabase 쿼리 실행:', {
+    //   table: 'challenge_participants',
+    //   action: 'update',
+    //   data: { status: status || 'dropped' },
+    //   condition: { id: participantId },
+    // });
 
     const { data: updatedParticipant, error: updateError } = await supabase
       .from('challenge_participants')
@@ -277,10 +353,10 @@ export async function PUT(request: Request) {
       .select('id, status')
       .single();
 
-    console.log('Supabase 쿼리 결과:', {
-      data: updatedParticipant,
-      error: updateError,
-    });
+    // console.log('Supabase 쿼리 결과:', {
+    //   data: updatedParticipant,
+    //   error: updateError,
+    // });
 
     if (updateError) {
       return NextResponse.json(

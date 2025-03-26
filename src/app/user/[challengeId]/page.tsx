@@ -2,21 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Footer from '@/components/layout/footer';
-import Image from 'next/image';
-import LogoutButton from '@/components/buttons/logoutButton';
 import TrafficSourceChart from '@/components/graph/trafficSourceChart';
 import DailyDietRecord from '@/components/graph/dailyDietRecord';
 import WorkoutLeaderboard from '@/components/graph/workoutLeaderboard';
 import DietTable from '@/components/dietDashboard/dietTable';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import Title from '@/components/layout/title';
-import Sidebar from '@/components/fixedBars/sidebar';
 import { useParams } from 'next/navigation';
 import { ChallengeDashboardSkeleton } from '@/components/layout/skeleton';
-import {
-  calculateTodayDietUploads,
-  calculateTotalDietUploads,
-} from '@/components/statistics/challengeParticipantsDietStatics';
 import WeeklyWorkoutChart from '@/components/graph/WeeklyWorkoutChart';
 
 interface AdminUser {
@@ -98,7 +91,13 @@ export default function User() {
     counts: string;
     total: string;
   } | null>(null);
-  const [userDropdown, setUserDropdown] = useState(false);
+  const [feedbackData, setFeedbackData] = useState<Record<string, number>>({});
+  const [isLoadingFeedbacks, setIsLoadingFeedbacks] = useState(false);
+  const [totalFeedbackStats, setTotalFeedbackStats] = useState({
+    totalFeedbacks: 0,
+    totalParticipants: 0,
+    feedbackPercentage: 0,
+  });
   const [adminData, setAdminData] = useState({
     admin_role: '',
     username: '',
@@ -120,6 +119,69 @@ export default function User() {
     },
     challenge_coaches: [],
   });
+
+  // 피드백 데이터 가져오기
+  const fetchFeedbackData = async (challengeId: string) => {
+    try {
+      setIsLoadingFeedbacks(true);
+
+      // 챌린지 전체 피드백 통계 가져오기
+      const statsResponse = await fetch(
+        `/api/challenge-feedback-counts?challengeId=${challengeId}`
+      );
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setTotalFeedbackStats({
+          totalFeedbacks: statsData.totalFeedbacks || 0,
+          totalParticipants: statsData.totalParticipants || 0,
+          feedbackPercentage: statsData.feedbackPercentage || 0,
+        });
+      }
+
+      // 챌린지 참가자 목록 가져오기
+      const participantsResponse = await fetch(
+        `/api/challenge-participants?challenge_id=${challengeId}&limit=100`
+      );
+      if (!participantsResponse.ok) {
+        throw new Error('Failed to fetch participants');
+      }
+
+      const participantsData = await participantsResponse.json();
+      const participants = participantsData.data;
+
+      // 참가자별 피드백 데이터 가져오기
+      const feedbackCounts: Record<string, number> = {};
+
+      await Promise.all(
+        participants.map(async (participant) => {
+          if (!participant.id) return;
+
+          try {
+            const feedbackResponse = await fetch(
+              `/api/test-feedbacks?participantId=${participant.id}`
+            );
+            if (feedbackResponse.ok) {
+              const data = await feedbackResponse.json();
+              feedbackCounts[participant.id] =
+                data.dailyRecordsWithFeedback || 0;
+            }
+          } catch (error) {
+            console.error(
+              `Error fetching feedback for participant ${participant.id}:`,
+              error
+            );
+            feedbackCounts[participant.id] = 0;
+          }
+        })
+      );
+
+      setFeedbackData(feedbackCounts);
+    } catch (error) {
+      console.error('Error fetching feedback data:', error);
+    } finally {
+      setIsLoadingFeedbacks(false);
+    }
+  };
 
   // 오늘 식단 업로드 수 조회
   const fetchTodayDietUploads = async (challengeId: string) => {
@@ -220,6 +282,10 @@ export default function User() {
       url.searchParams.append('limit', '30');
       url.searchParams.append('with_records', 'true');
 
+      if (selectedChallengeId) {
+        url.searchParams.append('challenge_id', selectedChallengeId);
+      }
+
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to fetch daily-records data');
@@ -252,10 +318,14 @@ export default function User() {
     }
   }, [challenges, params.challengeId]);
 
-  // 챌린지 ID가 변경될 때마다 운동 및 식단 업로드 멤버 수 업데이트
+  // 챌린지 ID가 변경될 때마다 데이터 업데이트
   useEffect(() => {
     if (selectedChallengeId) {
+      // 데이터 불러오기
       fetchTodayDietUploads(selectedChallengeId);
+      fetchFeedbackData(selectedChallengeId);
+      fetchDailyRecords(1);
+
       // 운동 업로드 수 조회
       fetch(`/api/workouts?type=today-count&challengeId=${selectedChallengeId}`)
         .then((response) => {
@@ -288,8 +358,6 @@ export default function User() {
         (record) => record.challenges.id === selectedChallengeId
       )
     : [];
-
-  //console.log('filteredDailyRecordsbyId:', filteredDailyRecordsbyId);
 
   const getSelectedChallengeDates = () => {
     const selectedChallenge = challenges.find(
@@ -332,7 +400,7 @@ export default function User() {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-1 px-4 sm:px-4 sm:grid-cols-1 sm:mt-4">
+            <div className="grid grid-cols-4 gap-1 px-4 sm:px-4 sm:grid-cols-1 sm:mt-4">
               <TotalFeedbackCounts
                 counts={progress.progressDays}
                 total={`${progress.totalDays}일`}
@@ -342,11 +410,7 @@ export default function User() {
               />
               <TotalFeedbackCounts
                 counts={`${workOutCountToday}`}
-                total={`${
-                  dailyRecords.filter(
-                    (record) => record.challenges.id === selectedChallengeId
-                  ).length
-                }명`}
+                total={`${filteredDailyRecordsbyId.length}명`}
                 title={
                   <span>
                     오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
@@ -380,7 +444,8 @@ export default function User() {
               <DietTable
                 dailyRecordsData={filteredDailyRecordsbyId}
                 challengeId={selectedChallengeId}
-                loading={loading}
+                loading={isLoadingFeedbacks || loading}
+                feedbackData={feedbackData}
               />
             </div>
           </div>

@@ -80,4 +80,5 @@ export interface DietTableProps {
   challengeId: string;
   selectedDate?: string;
   onLoadMore?: (page: number) => void;
+  feedbackData: any;
 }
