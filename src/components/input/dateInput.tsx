@@ -22,9 +22,8 @@ const DateInput = ({
   const isInChallengeRange = (date: Date) => {
     const dateStr = calendarUtils.formatDate(date);
     const startStr = formatDateForComparison(challengeStartDate);
-    const endStr = formatDateForComparison(challengeEndDate);
-
-    return dateStr >= startStr && dateStr <= endStr;
+    // 챌린지 시작일 이후의 모든 날짜를 선택 가능하도록 종료일 체크 제거
+    return dateStr >= startStr;
   };
 
   const handleDateClick = (date: Date) => {
