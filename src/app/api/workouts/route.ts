@@ -839,7 +839,7 @@ function processWeeklyWorkoutData(
   // 최종 근력 운동 데이터 생성
   const finalStrength: string[] = [];
   userWeekStrength.forEach((items) => {
-    items.forEach((item) => {
+    items.forEach((item: any) => {
       finalStrength.push(item);
     });
   });

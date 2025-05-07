@@ -85,7 +85,7 @@ export default function DietItem() {
           {challenges?.find((c) => c.challenges.id === params.challengeId)
             ?.challenges.title || ''}
         </div>
-        <Title title="식단 현황" />
+        <Title title="운동 현황" />
       </div>
       {dietError && <div className="p-4 text-red-500">{dietError}</div>}
       <div className="mt-6">

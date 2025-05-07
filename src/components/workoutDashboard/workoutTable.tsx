@@ -221,10 +221,6 @@ const WorkoutTable = ({
   // 데스크톱 렌더링
   return (
     <div className="mt-6 overflow-x-auto w-full">
-      <div className="flex items-start mb-4">
-        <h2 className="text-xl font-bold">운동 현황</h2>
-      </div>
-
       {/* 운동 통계 섹션 */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-lg p-4 shadow-sm">
@@ -289,7 +285,7 @@ const WorkoutTable = ({
               </th>
               <th className="w-[10%] p-3 text-left">
                 <div className="flex items-center justify-start gap-1">
-                  <span className="text-sm">지점</span>
+                  <span className="text-sm">이름</span>
                   <button>
                     <Image
                       src="/svg/arrow-down.svg"
