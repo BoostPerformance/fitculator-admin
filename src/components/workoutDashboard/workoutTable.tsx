@@ -5,17 +5,56 @@ import { WorkoutTableProps } from '@/types/workoutTableTypes';
 import { useRouter } from 'next/navigation';
 import { DietTableSkeleton } from '../layout/skeleton';
 
-const WorkoutTable = ({
-  workoutItems,
-  selectedDate,
-  loading,
-  onLoadMore,
-  hasMore,
-}: WorkoutTableProps) => {
+const WorkoutTable = ({ selectedDate }: WorkoutTableProps) => {
+  const [workoutItems, setWorkoutItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const lastRowRef = useRef<HTMLTableRowElement | null>(null);
+  const observerRef = useRef(null);
+  const lastRowRef = useRef(null);
+
+  // 데이터 가져오기 함수
+  const fetchWorkoutData = useCallback(
+    async (pageNum = 1) => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/workout?page=${pageNum}&date=${selectedDate || ''}`
+        );
+
+        if (!response.ok) {
+          throw new Error('서버 응답 에러');
+        }
+
+        const data = await response.json();
+
+        if (pageNum === 1) {
+          setWorkoutItems(data.items || []);
+        } else {
+          setWorkoutItems((prev) => [...prev, ...(data.items || [])]);
+        }
+
+        setHasMore(data.hasMore || false);
+        setLoading(false);
+      } catch (error) {
+        console.error('운동 데이터 불러오기 실패:', error);
+        setLoading(false);
+      }
+    },
+    [selectedDate]
+  );
+
+  // 초기 로드 및 날짜 변경 시 데이터 가져오기
+  useEffect(() => {
+    setPage(1);
+    fetchWorkoutData(1);
+  }, [fetchWorkoutData, selectedDate]);
+
+  // 무한 스크롤 핸들러
+  const handleLoadMore = (nextPage) => {
+    fetchWorkoutData(nextPage);
+  };
 
   // 미디어 쿼리 감지 로직
   useEffect(() => {
@@ -36,13 +75,13 @@ const WorkoutTable = ({
   }, []);
 
   const handleObserver = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
+    (entries) => {
       const target = entries[0];
       if (target.isIntersecting && !loading && hasMore) {
         const currentScrollPosition = window.scrollY;
         setPage((prev) => {
           const nextPage = prev + 1;
-          onLoadMore?.(nextPage);
+          handleLoadMore(nextPage);
           // 스크롤 위치 복원
           requestAnimationFrame(() => {
             window.scrollTo(0, currentScrollPosition);
@@ -51,7 +90,7 @@ const WorkoutTable = ({
         });
       }
     },
-    [loading, hasMore, onLoadMore]
+    [loading, hasMore, handleLoadMore]
   );
 
   useEffect(() => {
@@ -76,7 +115,7 @@ const WorkoutTable = ({
 
   const router = useRouter();
 
-  if (loading) {
+  if (loading && page === 1) {
     return <DietTableSkeleton />;
   }
 
@@ -95,7 +134,13 @@ const WorkoutTable = ({
             전체 운동 달성도 수
           </div>
           <div className="text-2xl font-bold text-blue-500 mb-2 text-center">
-            100<span className="text-lg">개</span>
+            {workoutItems.length > 0
+              ? workoutItems.reduce(
+                  (total, item) => total + (item.totalAchievements || 0),
+                  0
+                )
+              : 0}
+            <span className="text-lg">개</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
             <div
@@ -106,14 +151,26 @@ const WorkoutTable = ({
 
           <div className="flex justify-between mb-2">
             <div className="w-[48%]">
-              <div className="text-gray-500 text-sm mb-1">업로드 평버</div>
+              <div className="text-gray-500 text-sm mb-1">업로드 평균</div>
               <div className="text-xl font-bold text-blue-500 mb-2">
-                10<span className="text-base">/10명</span>
+                {workoutItems.length > 0
+                  ? `${workoutItems.filter((item) => item.hasUploaded).length}`
+                  : 0}
+                <span className="text-base">/{workoutItems.length}명</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                 <div
                   className="bg-blue-500 h-2 rounded-full"
-                  style={{ width: '100%' }}
+                  style={{
+                    width: `${
+                      workoutItems.length > 0
+                        ? (workoutItems.filter((item) => item.hasUploaded)
+                            .length /
+                            workoutItems.length) *
+                          100
+                        : 0
+                    }%`,
+                  }}
                 ></div>
               </div>
             </div>
@@ -121,12 +178,29 @@ const WorkoutTable = ({
             <div className="w-[48%]">
               <div className="text-gray-500 text-sm mb-1">이번주 활성 운동</div>
               <div className="text-xl font-bold text-green-500 mb-2">
-                60.7<span className="text-base">%</span>
+                {workoutItems.length > 0
+                  ? (
+                      (workoutItems.filter((item) => item.activeThisWeek)
+                        .length /
+                        workoutItems.length) *
+                      100
+                    ).toFixed(1)
+                  : 0}
+                <span className="text-base">%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                 <div
                   className="bg-green-500 h-2 rounded-full"
-                  style={{ width: '60.7%' }}
+                  style={{
+                    width: `${
+                      workoutItems.length > 0
+                        ? (workoutItems.filter((item) => item.activeThisWeek)
+                            .length /
+                            workoutItems.length) *
+                          100
+                        : 0
+                    }%`,
+                  }}
                 ></div>
               </div>
             </div>
@@ -134,80 +208,35 @@ const WorkoutTable = ({
         </div>
 
         {/* 모바일용 멤버 리스트 */}
-        <div className="bg-white rounded-lg p-4 shadow-sm mb-4">
-          <h3 className="text-md font-medium mb-3">잠글레어학원 휘트니3</h3>
+        {workoutItems.map((item, index) => (
+          <div key={index} className="bg-white rounded-lg p-4 shadow-sm mb-4">
+            <h3 className="text-md font-medium mb-3">{item.name}</h3>
 
-          <div className="flex border-b border-gray-200 py-2">
-            <div className="w-1/2 font-medium text-gray-500">주차</div>
-            <div className="w-1/2 font-medium text-gray-500">유산소 / 근력</div>
-          </div>
-
-          {/* 주차별 데이터 */}
-          <div className="flex border-b border-gray-200 py-2">
-            <div className="w-1/2 text-blue-500">
-              1주차
-              <br />
-              (03.20~)
+            <div className="flex border-b border-gray-200 py-2">
+              <div className="w-1/2 font-medium text-gray-500">주차</div>
+              <div className="w-1/2 font-medium text-gray-500">
+                유산소 / 근력
+              </div>
             </div>
-            <div className="w-1/2 text-blue-500">100% / 1회</div>
-          </div>
 
-          <div className="flex border-b border-gray-200 py-2">
-            <div className="w-1/2 text-blue-500">
-              2주차
-              <br />
-              (10.07~)
-            </div>
-            <div className="w-1/2 text-blue-500">100% / 1회</div>
+            {/* 주차별 데이터 */}
+            {item.weeklyData &&
+              item.weeklyData.map((week, weekIndex) => (
+                <div
+                  key={weekIndex}
+                  className="flex border-b border-gray-200 py-2"
+                >
+                  <div className="w-1/2 text-blue-500">
+                    {week.weekNumber}주차
+                    <br />({week.startDate}~)
+                  </div>
+                  <div className="w-1/2 text-blue-500">
+                    {week.aerobicPercentage}% / {week.strengthSessions}회
+                  </div>
+                </div>
+              ))}
           </div>
-
-          <div className="flex border-b border-gray-200 py-2">
-            <div className="w-1/2 text-blue-500">
-              3주차
-              <br />
-              (10.14~)
-            </div>
-            <div className="w-1/2 text-blue-500">100% / 1회</div>
-          </div>
-        </div>
-
-        {/* 두 번째 멤버 */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <h3 className="text-md font-medium mb-3">잠글레어학원 휘트니3</h3>
-
-          <div className="flex border-b border-gray-200 py-2">
-            <div className="w-1/2 font-medium text-gray-500">주차</div>
-            <div className="w-1/2 font-medium text-gray-500">유산소 / 근력</div>
-          </div>
-
-          {/* 주차별 데이터 */}
-          <div className="flex border-b border-gray-200 py-2">
-            <div className="w-1/2 text-blue-500">
-              1주차
-              <br />
-              (03.20~)
-            </div>
-            <div className="w-1/2 text-blue-500">100% / 1회</div>
-          </div>
-
-          <div className="flex border-b border-gray-200 py-2">
-            <div className="w-1/2 text-blue-500">
-              2주차
-              <br />
-              (10.07~)
-            </div>
-            <div className="w-1/2 text-blue-500">100% / 1회</div>
-          </div>
-
-          <div className="flex border-b border-gray-200 py-2">
-            <div className="w-1/2 text-blue-500">
-              3주차
-              <br />
-              (10.14~)
-            </div>
-            <div className="w-1/2 text-blue-500">100% / 1회</div>
-          </div>
-        </div>
+        ))}
 
         {loading && hasMore && (
           <div className="w-full text-center py-4">
@@ -221,50 +250,6 @@ const WorkoutTable = ({
   // 데스크톱 렌더링
   return (
     <div className="mt-6 overflow-x-auto w-full">
-      {/* 운동 통계 섹션 */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <div className="text-gray-500 text-sm mb-1">전체 운동 달성률</div>
-          <div className="text-2xl font-bold text-blue-500 mb-2">
-            100<span className="text-lg">개</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-500 h-2 rounded-full"
-              style={{ width: '100%' }}
-            ></div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <div className="text-gray-500 text-sm mb-1">
-            오늘 운동 달성도 평이
-          </div>
-          <div className="text-2xl font-bold text-blue-500 mb-2">
-            10<span className="text-lg">/10명</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-500 h-2 rounded-full"
-              style={{ width: '100%' }}
-            ></div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <div className="text-gray-500 text-sm mb-1">이번주 운동 참여율</div>
-          <div className="text-2xl font-bold text-green-500 mb-2">
-            60.1<span className="text-lg">%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-green-500 h-2 rounded-full"
-              style={{ width: '60.1%' }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
       {/* 메인 워크아웃 테이블 */}
       <div className="min-w-[1000px] max-w-full">
         <table className="w-full bg-white shadow-md rounded-md border border-gray-200">
@@ -335,84 +320,54 @@ const WorkoutTable = ({
                 <span className="text-sm">
                   6주차
                   <br />
-                  (10.28~)
+                  (11.04~)
                 </span>
               </th>
               <th className="w-[10%] p-3 text-center">
                 <span className="text-sm">
                   7주차
                   <br />
-                  (10.28~)
+                  (11.11~)
                 </span>
               </th>
             </tr>
           </thead>
           <tbody>
-            {/* 첫 번째와 두 번째 행: 높은 달성률 */}
-            <tr
-              className="border-b border-gray-200 hover:bg-[#F4F6FC] cursor-pointer"
-              onClick={() =>
-                router.push(
-                  `/user/${dietDetailTableItem.challenge_id}/diet/${dietDetailTableItem.daily_records.id}/${selectedDate}`
-                )
-              }
-            >
-              <td className="p-3">
-                <div>
-                  Ashly
-                  <br />
-                  #0227
-                </div>
-              </td>
-              <td className="p-3">영등포어학원 휘트니</td>
-              <td className="p-3 text-center text-blue-500">100% / 1회</td>
-              <td className="p-3 text-center text-blue-500">100% / 2회</td>
-              <td className="p-3 text-center text-blue-500">150% / 2회</td>
-              <td className="p-3 text-center text-blue-500">90% / 1회</td>
-              <td className="p-3 text-center text-blue-500">100% / 2회</td>
-              <td className="p-3 text-center text-blue-500">100% / 2회</td>
-              <td className="p-3 text-center text-blue-500">100% / 2회</td>
-            </tr>
-            <tr className="border-b border-gray-200 hover:bg-[#F4F6FC] cursor-pointer">
-              <td className="p-3">
-                <div>
-                  Ashly
-                  <br />
-                  #0227
-                </div>
-              </td>
-              <td className="p-3">영등포어학원 휘트니2</td>
-              <td className="p-3 text-center text-blue-500">100% / 1회</td>
-              <td className="p-3 text-center text-blue-500">100% / 2회</td>
-              <td className="p-3 text-center text-blue-500">150% / 2회</td>
-              <td className="p-3 text-center text-blue-500">90% / 1회</td>
-              <td className="p-3 text-center text-blue-500">100% / 2회</td>
-              <td className="p-3 text-center text-blue-500">100% / 2회</td>
-              <td className="p-3 text-center text-blue-500">88% / 2회</td>
-            </tr>
-
-            {/* 나머지 행: 낮은 달성률 */}
-            {[3, 4, 5].map((idx) => (
+            {workoutItems.map((item, index) => (
               <tr
-                key={idx}
-                ref={idx === 5 ? lastRowRef : null}
+                key={index}
+                ref={index === workoutItems.length - 1 ? lastRowRef : null}
                 className="border-b border-gray-200 hover:bg-[#F4F6FC] cursor-pointer"
+                onClick={() =>
+                  item.id &&
+                  router.push(
+                    `/user/${item.challenge_id}/workout/${item.id}/${selectedDate}`
+                  )
+                }
               >
                 <td className="p-3">
                   <div>
-                    Ashly
-                    <br />
-                    #0227
+                    {item.userName || 'Ashly'}
+                    <br />#{item.userId || '0227'}
                   </div>
                 </td>
-                <td className="p-3">영등포어학원 휘트니3</td>
-                <td className="p-3 text-center text-blue-500">20% / 0회</td>
-                <td className="p-3 text-center text-blue-500">10% / 0회</td>
-                <td className="p-3 text-center text-blue-500">40% / 2회</td>
-                <td className="p-3 text-center text-blue-500">90% / 1회</td>
-                <td className="p-3 text-center text-blue-500">50% / 0회</td>
-                <td className="p-3 text-center text-blue-500">50% / 0회</td>
-                <td className="p-3 text-center text-blue-500">50% / 0회</td>
+                <td className="p-3">{item.name || '유저'}</td>
+                {item.weeklyData &&
+                  item.weeklyData.map((week, weekIndex) => (
+                    <td
+                      key={weekIndex}
+                      className="p-3 text-center text-blue-500"
+                    >
+                      {week.aerobicPercentage}% / {week.strengthSessions}회
+                    </td>
+                  ))}
+                {/* 주차 데이터가 7개 미만인 경우 빈 셀 추가 */}
+                {item.weeklyData &&
+                  [...Array(7 - item.weeklyData.length)].map((_, i) => (
+                    <td key={`empty-${i}`} className="p-3 text-center">
+                      -
+                    </td>
+                  ))}
               </tr>
             ))}
           </tbody>

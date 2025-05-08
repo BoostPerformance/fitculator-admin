@@ -172,31 +172,24 @@ const DietStatistics = ({
   return (
     <>
       <div className="flex flex-row gap-[0.625rem] overflow-x-auto sm:flex sm:flex-col sm:gap-[0.3rem] sm:justify-between px-[2rem] pb-[3rem] sm:px-0">
-        <TotalFeedbackCounts
-          counts={`${totalMealUploads}개`}
-          title="전체 운동 업로드 수"
-          // TODO: 원래 "전체 식단 업로드 수"에서 변경
-          borderColor="border-blue-500"
-          textColor="text-blue-500"
-        />
+        {/* <TotalFeedbackCounts
+        counts={`${totalMealUploads}개`}
+        title="오늘 식단 업로드 수"
+        // TODO: 원래 "전체 식단 업로드 수"에서 변경
+        borderColor="border-blue-500"
+        textColor="text-blue-500"
+      /> */}
 
         <TotalFeedbackCounts
           counts={todayStats.uploadCount.toString()}
           total={`${todayStats.totalMembers}명`}
-          title="오늘 운동 업로드 멤버"
-          borderColor="border-blue-500"
-          textColor="text-blue-500"
-        />
-
-        <TotalFeedbackCounts
-          counts={`${feedbackStats.pending}pt`}
-          total={''}
-          title="이번주 평균 운동량"
+          title="오늘 식단 업로드"
           borderColor="border-green"
           textColor="text-green"
         />
+
         <TotalFeedbackCounts
-          counts={`${feedbackStats.pending}`}
+          counts={`${feedbackStats.pending}명`}
           total={''}
           title="피드백 미작성"
           borderColor="border-[#FDB810]"
