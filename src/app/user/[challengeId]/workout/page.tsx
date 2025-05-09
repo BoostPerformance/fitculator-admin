@@ -9,13 +9,16 @@ import { useResponsive } from '@/components/hooks/useResponsive';
 import { useChallenge } from '@/components/hooks/useChallenges';
 import { processMeals } from '@/components/utils/processMeals';
 import Title from '@/components/layout/title';
+import DateInput from '@/components/input/dateInput';
 import WorkoutTable from '@/components/workoutDashboard/workoutTable';
+import { ExcerciseStatistics } from '@/components/statistics/excerciseStatistics';
 
 export default function DietItem() {
   const params = useParams();
   const searchParams = useSearchParams();
   const urlDate = searchParams.get('date');
   const today = new Date().toISOString().split('T')[0];
+
   // console.log("[Diet Page] Date info:", {
   //   today,
   //   urlDate,
@@ -89,7 +92,7 @@ export default function DietItem() {
       </div>
       {dietError && <div className="p-4 text-red-500">{dietError}</div>}
       <div className="mt-6">
-        <DietStatistics
+        <ExcerciseStatistics
           processedMeals={dietRecords}
           selectedChallengeId={params.challengeId as string}
           selectedDate={selectedDate}

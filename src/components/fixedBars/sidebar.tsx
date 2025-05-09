@@ -246,7 +246,7 @@ export default function Sidebar({
                                   className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
                                   onClick={() => {
                                     router.push(
-                                      `/user/${challenge.challenges.id}/exercise`
+                                      `/user/${challenge.challenges.id}/workout`
                                     );
                                   }}
                                 >
