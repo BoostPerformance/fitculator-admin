@@ -53,7 +53,7 @@ const MOCK_DATA = {
         x: '03.15-03.21',
         y: 80,
         user: '이영희',
-        date: '2024-03-18',
+        date: '2024-02-18',
         dayLabel: '토',
       },
       {
@@ -103,7 +103,7 @@ const MOCK_DATA = {
         x: '03.15-03.21',
         y: 1,
         user: '김철수',
-        date: '2024-03-19',
+        date: '2024-02-19',
         dayLabel: '토',
       },
       {
@@ -119,7 +119,7 @@ const MOCK_DATA = {
         x: '03.15-03.21',
         y: 1,
         user: '이영희',
-        date: '2024-03-17',
+        date: '2024-02-17',
         dayLabel: '금',
       },
     ],
@@ -131,15 +131,16 @@ const MOCK_DATA = {
       { id: 'user5', name: '정수연', strengthWorkoutCount: 0 },
     ],
     weeks: [
-      { label: '03.01-03.07' },
-      { label: '03.08-03.14' },
-      { label: '03.15-03.21' },
-      { label: '03.22-03.28' },
-      { label: '03.29-04.04' },
+      { label: '02.10-02.17' },
+      { label: '02.18-02.25' },
+      { label: '02.26-03.05' },
+      { label: '03.06-03.13' },
+      { label: '03.14-03.21' },
+      { label: '03.22-03.29' },
     ],
     challengePeriod: {
-      startDate: '2024-03-01',
-      endDate: '2024-04-30',
+      startDate: '2024-02-10',
+      endDate: '2024-03-30',
     },
   },
   todayCount: {
@@ -490,80 +491,18 @@ const WorkoutTable = ({
   if (isMobile) {
     return (
       <div className="mt-6 w-full">
-        <div className="text-center mb-4">
-          <h1 className="text-lg font-bold">F&S 휘트니스 CSO 휘트니</h1>
-          <h2 className="text-xl font-bold">운동현황</h2>
-          {useMockData && (
-            <div className="text-xs bg-yellow-100 p-1 mt-1 inline-block rounded">
-              목데이터 사용 중
-            </div>
-          )}
-        </div>
-
-        {/* 모바일용 통계 카드 */}
-        <div className="bg-white rounded-lg p-4 shadow-sm mb-4">
-          <div className="text-gray-500 text-sm mb-1 text-center">
-            전체 운동 달성도 수
-          </div>
-          <div className="text-2xl font-bold text-blue-500 mb-2 text-center">
-            {totalAchievements}
-            <span className="text-lg">개</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-            <div
-              className="bg-blue-500 h-2 rounded-full"
-              style={{ width: '100%' }}
-            ></div>
-          </div>
-
-          <div className="flex justify-between mb-2">
-            <div className="w-[48%]">
-              <div className="text-gray-500 text-sm mb-1">업로드 평균</div>
-              <div className="text-xl font-bold text-blue-500 mb-2">
-                {workoutItems.filter((item) => item.hasUploaded).length}
-                <span className="text-base">/{workoutItems.length}명</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div
-                  className="bg-blue-500 h-2 rounded-full"
-                  style={{
-                    width: `${
-                      workoutItems.length > 0
-                        ? (workoutItems.filter((item) => item.hasUploaded)
-                            .length /
-                            workoutItems.length) *
-                          100
-                        : 0
-                    }%`,
-                  }}
-                ></div>
-              </div>
-            </div>
-
-            <div className="w-[48%]">
-              <div className="text-gray-500 text-sm mb-1">이번주 활성 운동</div>
-              <div className="text-xl font-bold text-green-500 mb-2">
-                {activeMembersPercent}
-                <span className="text-base">%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                <div
-                  className="bg-green-500 h-2 rounded-full"
-                  style={{ width: `${activeMembersPercent}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* 모바일용 멤버 리스트 */}
         {workoutItems.map((item, index) => (
           <div key={index} className="bg-white rounded-lg p-4 shadow-sm mb-4">
-            <h3 className="text-md font-medium mb-3">{item.name}</h3>
+            <h3 className="text-md text-[#6F6F6F] text-1.125-700 mb-3 pl-3 py-4">
+              {item.name} 회원님
+            </h3>
 
-            <div className="flex border-b border-gray-200 py-2">
-              <div className="w-1/2 font-medium text-gray-500">주차</div>
-              <div className="w-1/2 font-medium text-gray-500">
+            <div className="flex border-b border-gray-200 py-2 px-4 items-center">
+              <div className="w-1/2 text-gray-11 text-1.125-500 text-center">
+                주차
+              </div>
+              <div className="w-1/2 text-gray-11 text-1.125-500 text-center">
                 유산소 / 근력
               </div>
             </div>
@@ -572,14 +511,17 @@ const WorkoutTable = ({
             {item.weeklyData.map((week, weekIndex) => (
               <div
                 key={weekIndex}
-                className="flex border-b border-gray-200 py-2"
+                className="flex border-b border-gray-200 py-2 text-center"
               >
-                <div className="w-1/2 text-blue-500">
+                <div className="w-1/2 text-gray-11 text-1.125-500">
                   {week.weekNumber}주차
                   <br />({week.startDate}~)
                 </div>
-                <div className="w-1/2 text-blue-500">
-                  {week.aerobicPercentage}% / {week.strengthSessions}회
+                <div className="w-1/2 text-gray-11 text-1.125-700">
+                  <span className="text-blue-500">
+                    {week.aerobicPercentage}%
+                  </span>
+                  / {week.strengthSessions}회
                 </div>
               </div>
             ))}

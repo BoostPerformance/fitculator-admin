@@ -287,14 +287,12 @@ export default function SelectedDate() {
       : null;
 
     // 챌린지 총 기간 계산 (시작일부터 종료일까지의 일수)
-    const totalChallengeDays = endDate
-      ? Math.ceil(
-          (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-        )
-      : 45; // 기본값 45일
+    const totalChallengeDays =
+      endDate &&
+      Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1
+      );
 
-    // API에서 가져온 실제 업로드 일수 사용
-    // 이 값은 유저가 실제로 업로드한 일수를 나타냄
     const uploadCount = dailyMeal?.upload_days_count || 0;
     //console.log(dailyMeal?.upload_days_count);
 
