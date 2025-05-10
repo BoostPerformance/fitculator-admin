@@ -240,12 +240,43 @@ export async function GET(request: Request) {
     if (feedbackError && feedbackError.code !== 'PGRST116') throw feedbackError;
 
     // 5. 식단 업로드 일수 조회
-    const { count: uploadDaysCount, error: countError } = await supabase
-      .from('daily_records')
-      .select('*', { count: 'exact' })
-      .eq('participant_id', participantId);
+    const challengeStartDate = new Date(participantData.challenge.start_date);
+    const challengeEndDate = new Date(participantData.challenge.end_date);
 
-    if (countError) throw countError;
+    const { data: daysWithMeals, error: daysWithMealsError } = await supabase
+      .from('daily_records')
+      .select(
+        `
+          id, 
+          record_date,
+          meals!inner (id)  
+        `
+      )
+      .eq('participant_id', participantId)
+      .gte('record_date', challengeStartDate.toISOString().split('T')[0]) // 챌린지 시작일 이후
+      .lte('record_date', challengeEndDate.toISOString().split('T')[0]); // 챌린지 종료일 이전
+
+    if (daysWithMealsError) throw daysWithMealsError;
+
+    // 중복 제거를 위해 Set 객체 사용 (같은 날짜에 여러 meal이 있을 수 있음)
+    const uniqueDatesWithMeals = new Set();
+    daysWithMeals.forEach((record) => {
+      if (record.record_date) {
+        uniqueDatesWithMeals.add(record.record_date);
+      }
+    });
+
+    const uploadDaysCount = uniqueDatesWithMeals.size;
+
+    // 콘솔에 결과 기록 (디버깅용)
+    console.log('식단 업로드 일수 계산:', {
+      participantId,
+      챌린지시작일: challengeStartDate,
+      챌린지종료일: challengeEndDate,
+      식단있는레코드수: daysWithMeals.length,
+      고유날짜수: uploadDaysCount,
+      고유날짜목록: Array.from(uniqueDatesWithMeals),
+    });
 
     // 식사 데이터 그룹화 및 변환
     const groupedMeals = {
