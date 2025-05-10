@@ -144,7 +144,6 @@ export default function SelectedDate() {
         );
         // console.log(`API 응답 상태: ${response.status} ${response.statusText}`);
 
-        // console.log('response meals', response);
         // console.log(params);
         let data = {
           record_date: params.selectedDate,
@@ -261,7 +260,8 @@ export default function SelectedDate() {
 
         logger.debug('Processed Meal:', processedMeal);
         setDailyMeal(processedMeal);
-        // console.log('processedMeal', processedMeal);
+
+        //console.log('processedMeal', processedMeal);
       } catch (error) {
         logger.error('Error fetching data:', error);
       } finally {
@@ -275,23 +275,36 @@ export default function SelectedDate() {
     };
   }, [params.selectedDate, params.dailyRecordId, params.challengeId]);
 
+  // 업로드 일수 계산 수정
   const metrics = useMemo(() => {
-    const startDate = new Date('2025-02-10');
-    const today = new Date();
-    const koreanToday = new Date(today.getTime() + 9 * 60 * 60 * 1000); // UTC+9 변환
+    // 챌린지 시작일과 종료일
+    const startDate = challengePeriods.start_date
+      ? new Date(challengePeriods.start_date)
+      : new Date('2025-02-10');
 
-    const totalDays = Math.ceil(
-      (koreanToday.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const endDate = challengePeriods.end_date
+      ? new Date(challengePeriods.end_date)
+      : null;
 
-    // API response의 upload_days_count 사용
+    // 챌린지 총 기간 계산 (시작일부터 종료일까지의 일수)
+    const totalChallengeDays = endDate
+      ? Math.ceil(
+          (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+        )
+      : 45; // 기본값 45일
+
+    // API에서 가져온 실제 업로드 일수 사용
+    // 이 값은 유저가 실제로 업로드한 일수를 나타냄
     const uploadCount = dailyMeal?.upload_days_count || 0;
+    //console.log(dailyMeal?.upload_days_count);
 
     return {
-      total: totalDays,
+      // 분모: 챌린지 총 기간 (보통 45일)
+      total: totalChallengeDays,
+      // 분자: API에서 받아온 실제 업로드 일수
       count: uploadCount,
     };
-  }, [dailyMeal]);
+  }, [dailyMeal, challengePeriods]);
 
   const handleSaveFeedback = async (feedback: string) => {
     try {
