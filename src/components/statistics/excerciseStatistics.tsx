@@ -87,14 +87,16 @@ const ExcerciseStatistics = ({
 
   return (
     <>
-      <div className="flex flex-row gap-[0.625rem] overflow-x-auto sm:flex sm:flex-col sm:gap-[2rem] sm:justify-between px-[2rem] pb-[3rem] sm:px-3">
-        <TotalFeedbackCounts
-          counts={`${todayStats.totalMembers}개`}
-          title="전체 운동 업로드 수"
-          borderColor="border-blue-5"
-          textColor="text-blue-5"
-        />
-        <div className="sm:flex sm:gap-3">
+      <div className="grid grid-cols-3 sm:grid-cols-1 gap-4 px-[2rem] pb-[3rem] sm:px-3">
+        <div>
+          <TotalFeedbackCounts
+            counts={`${todayStats.totalMembers}개`}
+            title="전체 운동 업로드 수"
+            borderColor="border-blue-5"
+            textColor="text-blue-5"
+          />
+        </div>
+        <div>
           <TotalFeedbackCounts
             counts={`${10}`}
             total={'10 명'}
@@ -102,6 +104,8 @@ const ExcerciseStatistics = ({
             borderColor="border-blue-5"
             textColor="text-blue-5"
           />
+        </div>
+        <div>
           <TotalFeedbackCounts
             counts={`${60.1}%`}
             total={''}
