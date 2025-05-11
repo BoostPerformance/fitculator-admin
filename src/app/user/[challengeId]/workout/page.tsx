@@ -3,27 +3,22 @@ import { useState, useEffect } from 'react';
 import { DietPageSkeleton } from '@/components/layout/skeleton';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useDietData } from '@/components/hooks/useDietData';
-import { DietStatistics } from '@/components/statistics/dietStatistics';
-import { DietContent } from '@/components/dietDashboard/dietContent';
+//import { DietStatistics } from '@/components/statistics/dietStatistics';
+//import { DietContent } from '@/components/dietDashboard/dietContent';
 import { useResponsive } from '@/components/hooks/useResponsive';
 import { useChallenge } from '@/components/hooks/useChallenges';
-import { processMeals } from '@/components/utils/processMeals';
+//import { processMeals } from '@/components/utils/processMeals';
 import Title from '@/components/layout/title';
-import DateInput from '@/components/input/dateInput';
+//import DateInput from '@/components/input/dateInput';
 import WorkoutTable from '@/components/workoutDashboard/workoutTable';
 import { ExcerciseStatistics } from '@/components/statistics/excerciseStatistics';
 
-export default function DietItem() {
+export default function WorkoutPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const urlDate = searchParams.get('date');
   const today = new Date().toISOString().split('T')[0];
 
-  // console.log("[Diet Page] Date info:", {
-  //   today,
-  //   urlDate,
-  //   currentTime: new Date().toISOString(),
-  // });
   const [selectedDate, setSelectedDate] = useState<string>(urlDate || today);
   const {
     dietRecords,
@@ -39,6 +34,7 @@ export default function DietItem() {
   } = useChallenge();
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challengeError, setChallengeError] = useState<string | null>(null);
+  const [isApiConnected, setIsApiConnected] = useState<boolean>(false);
 
   const handleSelectChallenge = (challengeId: string) => {
     setSelectedChallengeId(challengeId);
@@ -56,6 +52,22 @@ export default function DietItem() {
     };
     loadChallenges();
   }, [fetchChallenges]);
+
+  // API 연결 확인
+  useEffect(() => {
+    const checkApiConnection = async () => {
+      try {
+        const response = await fetch(
+          '/api/workouts/user-detail?type=test-connection'
+        );
+        setIsApiConnected(response.ok);
+      } catch (error) {
+        console.error('API 연결 확인 실패:', error);
+        setIsApiConnected(false);
+      }
+    };
+    checkApiConnection();
+  }, []);
 
   useEffect(() => {
     if (urlDate) {
@@ -119,10 +131,17 @@ export default function DietItem() {
             )}
         />
       </div>
+
+      {!isApiConnected && (
+        <div className="p-3 bg-yellow-100 text-yellow-800 rounded mb-4">
+          <span className="font-medium">⚠️ API 연결 안됨:</span> 실제 API에
+          연결할 수 없어 목데이터를 사용합니다.
+        </div>
+      )}
+
       <WorkoutTable
-        selectedDate={selectedDate}
         challengeId={params.challengeId as string}
-        useMockData={true}
+        useMockData={!isApiConnected} // API 연결 상태에 따라 목데이터 사용 여부 결정
       />
     </div>
   );
