@@ -83,7 +83,7 @@ export default function DietItem() {
 
   return (
     <div className="flex-1 p-4 sm:p-0">
-      <div className="px-8 pt-4 sm:px-4 sm:pt-0">
+      <div className="px-8 pt-4 sm:px-4 sm:pt-4">
         <div className="text-gray-2 text-1.25-700">
           {challenges?.find((c) => c.challenges.id === params.challengeId)
             ?.challenges.title || ''}
@@ -119,7 +119,11 @@ export default function DietItem() {
             )}
         />
       </div>
-      <WorkoutTable />
+      <WorkoutTable
+        selectedDate={selectedDate}
+        challengeId={params.challengeId as string}
+        useMockData={true}
+      />
     </div>
   );
 }

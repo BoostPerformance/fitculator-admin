@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import TextBox from '@/components/textBox';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
-import { TbCrop169 } from 'react-icons/tb';
+import WeeklyWorkoutChart from '@/components/workoutDashboard/weeklyWorkoutChart';
 
 // 도넛 차트 SVG 생성 함수
 const generateDonutChart = (workoutTypes) => {
@@ -290,7 +290,7 @@ export default function UserWorkoutDetailPage() {
       <div className="w-full md:w-4/6 mr-2 flex flex-col gap-5">
         {/* Top Performance Card */}
         <div className="font-bold mb-1">{userData.name} 님의 운동현황</div>
-        <div className="w-1/3">
+        <div className="w-1/3 sm:w-full">
           <TotalFeedbackCounts
             counts={`${100}pt`}
             title="총 운동포인트"
@@ -298,116 +298,80 @@ export default function UserWorkoutDetailPage() {
             textColor="text-blue-500"
           />
         </div>
+
         <div className="font-bold mb-4">주간운동 그래프</div>
-        <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-gray-500 text-xs">
-                <th className="py-2 text-left">ID</th>
-                <th className="py-2 text-left">이름</th>
-                <th className="py-2 text-center">
-                  1주차
-                  <br />
-                  (03.20~)
-                </th>
-                <th className="py-2 text-center">
-                  2주차
-                  <br />
-                  (03.27~)
-                </th>
-                <th className="py-2 text-center">
-                  3주차
-                  <br />
-                  (10.13~)
-                </th>
-                <th className="py-2 text-center">
-                  4주차
-                  <br />
-                  (10.21~)
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-t border-gray-100">
-                <td className="py-4 text-left">
-                  Ashly
-                  <br />
-                  ###227
-                </td>
-                <td className="py-4 text-left">{userData.name}</td>
-                <td className="py-4 text-center text-blue-500">100% / 1회</td>
-                <td className="py-4 text-center text-blue-500">100% / 2회</td>
-                <td className="py-4 text-center text-blue-500">100% / 2회</td>
-                <td className="py-4 text-center text-blue-500">90% / 1회</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* First Chart Panel */}
-        <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
-          <div className="font-bold mb-4">지난 주 운동 그래프</div>
 
-          <div className="flex mb-6">
-            {/* Donut Chart */}
-            <div className="w-1/3 relative">
-              {generateDonutChart(weekData.workoutTypes)}
-            </div>
+        <div>
+          <WeeklyWorkoutChart userName={userData.name} />
+          {/* First Chart Panel */}
+          <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
+            <div className="font-bold mb-4">지난 주 운동 그래프</div>
 
-            {/* Bar Chart */}
-            <div className="w-2/3 flex items-end pl-6">
-              {generateBarChart(weekData.dailyWorkouts)}
-            </div>
-          </div>
-
-          <div className="flex justify-between text-sm">
-            <div className="text-gray-500">전체 운동</div>
-            <div className="text-blue-500">
-              {weekData.totalSessions}
-              <span className="text-gray-500">
-                /{weekData.requiredSessions} 회
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Second Chart Panel (Duplicate of the first) */}
-        <div className="bg-white rounded-lg p-6 shadow-sm">
-          <div className="font-bold mb-4">이번 주 운동 그래프</div>
-
-          <div className="flex gap-6 mb-6">
-            {/* 왼쪽: 도넛 차트 + 근력운동 */}
-            <div className="flex flex-col items-center w-1/3">
-              <div className="relative w-full">
-                {generateDonutChart(weekData.workoutTypes)}
-              </div>
-              <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
-                <div className="text-gray-500">근력 운동</div>
-                <div className="text-blue-500 text-2.5-900 pt-5">
-                  {weekData.totalSessions}
-                  <span className="text-1.75-900">
-                    /{weekData.requiredSessions} 회
-                  </span>
+            <div className="flex mb-6 sm:flex-col">
+              {/* Donut Chart */}
+              <div className="flex flex-col w-1/3 sm:w-full sm:gap-6">
+                <div className="relative">
+                  {generateDonutChart(weekData.workoutTypes)}
+                </div>
+                <div className="flex justify-between text-sm mt-4 bg-gray-8 px-[1.875rem] py-[1.25rem]">
+                  <div className="text-gray-500">근력 운동</div>
+                  <div className="text-blue-500 text-2.5-900 pt-5">
+                    {weekData.totalSessions}
+                    <span className="text-1.75-900">
+                      /{weekData.requiredSessions} 회
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* 오른쪽: 바차트 + TextBox */}
-            <div className="flex flex-col w-2/3">
-              <div className="flex items-end mb-4">
+              {/* Bar Chart */}
+              <div className="w-2/3 flex items-end pl-6 sm:w-full">
                 {generateBarChart(weekData.dailyWorkouts)}
               </div>
-              <TextBox
-                title="코치 피드백"
-                value={weekData.feedback.text}
-                placeholder="피드백을 작성하세요."
-                button1="남기기"
-                Btn1className="bg-green text-white"
-                svg1="/svg/send.svg"
-                onChange={(e) => console.log(e.target.value)}
-                onSave={async (feedback) => console.log('Saved:', feedback)}
-                isFeedbackMode={true}
-                copyIcon
-              />
+            </div>
+          </div>
+
+          {/* Second Chart Panel (Duplicate of the first) */}
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="font-bold mb-4">이번 주 운동 그래프</div>
+
+            <div className="flex gap-6 mb-6 sm:flex-col sm:gap-6">
+              {/* 왼쪽: 도넛 차트 + 근력운동 */}
+              <div className="flex flex-col items-center w-1/3 sm:w-full">
+                <div className="relative w-full">
+                  {generateDonutChart(weekData.workoutTypes)}
+                </div>
+                <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
+                  <div className="text-gray-500">근력 운동</div>
+                  <div className="text-blue-500 text-2.5-900 pt-5">
+                    {weekData.totalSessions}
+                    <span className="text-1.75-900">
+                      /{weekData.requiredSessions} 회
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 오른쪽: 바차트 + TextBox */}
+              <div className="flex flex-col w-2/3 sm:w-full sm:items-center">
+                <div className="flex items-end mb-4">
+                  {generateBarChart(weekData.dailyWorkouts)}
+                </div>
+                <div>
+                  <TextBox
+                    title="코치 피드백"
+                    value={weekData.feedback.text}
+                    placeholder="피드백을 작성하세요."
+                    button1="남기기"
+                    Btn1className="bg-green text-white"
+                    svg1="/svg/send.svg"
+                    onChange={(e) => console.log(e.target.value)}
+                    onSave={async (feedback) => console.log('Saved:', feedback)}
+                    isFeedbackMode={true}
+                    copyIcon
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
