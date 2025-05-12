@@ -200,9 +200,8 @@ const fetchMockApi = (type, params = {}) => {
 
 // WorkoutTable 컴포넌트
 const WorkoutTable = ({
-  selectedDate,
   challengeId,
-  useMockData = true, // 목데이터 사용 여부 플래그 추가
+  useMockData = false, // 목데이터 사용 여부 플래그 추가
 }) => {
   const [workoutItems, setWorkoutItems] = useState([]);
   const [weekInfo, setWeekInfo] = useState([]);
@@ -233,31 +232,57 @@ const WorkoutTable = ({
           leaderboardData = await fetchMockApi('leaderboard', { challengeId });
         } else {
           // 실제 API 호출
-          const weeklyResponse = await fetch(
-            `/api/workout?type=weekly-chart&challengeId=${challengeId || ''}`
-          );
-          if (!weeklyResponse.ok) {
-            throw new Error(`주간 차트 API 오류: ${weeklyResponse.status}`);
-          }
-          weeklyChartData = await weeklyResponse.json();
-
-          const todayCountResponse = await fetch(
-            `/api/workout?type=today-count&challengeId=${challengeId || ''}`
-          );
-          if (!todayCountResponse.ok) {
-            throw new Error(
-              `오늘 카운트 API 오류: ${todayCountResponse.status}`
+          try {
+            console.log('Fetching weekly chart data...');
+            const weeklyResponse = await fetch(
+              `/api/workouts/user-detail?type=weekly-chart${
+                challengeId ? `&challengeId=${challengeId}` : ''
+              }`
             );
-          }
-          todayCountData = await todayCountResponse.json();
+            if (!weeklyResponse.ok) {
+              throw new Error(`주간 차트 API 오류: ${weeklyResponse.status}`);
+            }
+            weeklyChartData = await weeklyResponse.json();
+            console.log('Weekly chart data received:', weeklyChartData);
 
-          const leaderboardResponse = await fetch(
-            `/api/workout?type=leaderboard&challengeId=${challengeId || ''}`
-          );
-          if (!leaderboardResponse.ok) {
-            throw new Error(`리더보드 API 오류: ${leaderboardResponse.status}`);
+            const todayCountResponse = await fetch(
+              `/api/workouts/user-detail?type=today-count${
+                challengeId ? `&challengeId=${challengeId}` : ''
+              }`
+            );
+            if (!todayCountResponse.ok) {
+              throw new Error(
+                `오늘 카운트 API 오류: ${todayCountResponse.status}`
+              );
+            }
+            todayCountData = await todayCountResponse.json();
+            console.log('Today count data received:', todayCountData);
+
+            const leaderboardResponse = await fetch(
+              `/api/workouts/user-detail?type=leaderboard${
+                challengeId ? `&challengeId=${challengeId}` : ''
+              }`
+            );
+            if (!leaderboardResponse.ok) {
+              throw new Error(
+                `리더보드 API 오류: ${leaderboardResponse.status}`
+              );
+            }
+            leaderboardData = await leaderboardResponse.json();
+            console.log('Leaderboard data received:', leaderboardData);
+          } catch (error) {
+            console.error('API 호출 중 오류 발생:', error);
+            setApiError(`API 호출 오류: ${error.message}`);
+            // 목데이터로 폴백
+            console.log('API 오류로 인해 목데이터 사용');
+            weeklyChartData = await fetchMockApi('weekly-chart', {
+              challengeId,
+            });
+            todayCountData = await fetchMockApi('today-count', { challengeId });
+            leaderboardData = await fetchMockApi('leaderboard', {
+              challengeId,
+            });
           }
-          leaderboardData = await leaderboardResponse.json();
         }
 
         // 주차 정보 설정
@@ -284,7 +309,7 @@ const WorkoutTable = ({
         setLoading(false);
       }
     },
-    [challengeId, selectedDate, useMockData]
+    [challengeId, useMockData]
   );
 
   // API 응답 데이터를 WorkoutItem 형식으로 변환하는 함수
@@ -367,7 +392,7 @@ const WorkoutTable = ({
 
       return {
         id: user.id,
-        challenge_id: challengeId || 'mock-challenge',
+        challenge_id: challengeId || 'default-challenge',
         userId: user.id,
         userName: user.name.split(' ')[0] || 'User',
         name: user.name || '유저',
@@ -410,7 +435,7 @@ const WorkoutTable = ({
   useEffect(() => {
     setPage(1);
     fetchWorkoutData(1);
-  }, [fetchWorkoutData, selectedDate, challengeId]);
+  }, [fetchWorkoutData, challengeId]);
 
   // 미디어 쿼리 감지 로직
   useEffect(() => {
@@ -437,9 +462,6 @@ const WorkoutTable = ({
         const currentScrollPosition = window.scrollY;
         setPage((prev) => {
           const nextPage = prev + 1;
-          // 페이지네이션이 필요한 경우 다음 페이지 불러오기
-          // handleLoadMore(nextPage);
-
           // 스크롤 위치 복원
           requestAnimationFrame(() => {
             window.scrollTo(0, currentScrollPosition);
@@ -475,7 +497,7 @@ const WorkoutTable = ({
     return <DietTableSkeleton />;
   }
 
-  if (apiError) {
+  if (apiError && !useMockData) {
     return (
       <div className="mt-6 p-4 bg-red-100 text-red-700 rounded">
         <h2 className="font-bold">API 오류 발생</h2>
@@ -491,6 +513,13 @@ const WorkoutTable = ({
   if (isMobile) {
     return (
       <div className="mt-6 w-full">
+        {useMockData && (
+          <div className="mb-4 text-center bg-yellow-100 p-2 rounded">
+            <span className="font-semibold">🔧 목데이터 사용 중</span> - API
+            연결 없이 테스트 데이터로 UI를 렌더링합니다.
+          </div>
+        )}
+
         {/* 모바일용 멤버 리스트 */}
         {workoutItems.map((item, index) => (
           <div key={index} className="bg-white rounded-lg p-4 shadow-sm mb-4">
@@ -574,7 +603,15 @@ const WorkoutTable = ({
               </th>
               {/* 주차 헤더 동적 생성 - 각 주차와 날짜 범위 표시 */}
               {weekInfo.map((week, index) => (
-                <th key={index} className="w-[10%] p-3 text-center">
+                <th
+                  key={index}
+                  className="w-[10%] p-3 text-center cursor-pointer hover:bg-gray-100"
+                  onClick={() =>
+                    router.push(
+                      `/workout/workout-categories?challengeId=${challengeId}&weekLabel=${week.label}`
+                    )
+                  }
+                >
                   <span className="text-sm">
                     {index + 1}주차
                     <br />({week.label})
