@@ -141,7 +141,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         });
         setTotalPoints(0);
         setUseMockData(false);
-
       } finally {
         setLoading(false);
       }
@@ -150,7 +149,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     if (userId) {
       fetchUserWorkoutData();
     } else {
-
       // userId가 없는 경우 빈 데이터 구조 제공
       setUserData({
         name: '사용자',
@@ -187,6 +185,8 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         recordEndDate
       )}`;
 
+      console.log('label:', label);
+
       // 2. 운동 유형별 데이터 생성
       let workoutTypes: WorkoutTypes = {};
 
@@ -199,10 +199,14 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         if (response.ok) {
           const categoryData = await response.json();
 
+          console.log('categoryData', categoryData);
+
           if (categoryData.data && categoryData.data.length > 0) {
             const weekData = categoryData.data.find(
               (week: any) => week.weekLabel === label
             );
+
+            console.log('weekData', weekData);
 
             if (weekData && weekData.categories) {
               // 새로운 운동 타입 객체 생성
@@ -228,48 +232,48 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
       // 카테고리 데이터가 비어있으면 기본 데이터 생성
       if (Object.keys(workoutTypes).length === 0) {
-        // DB에 저장된 카테고리 목록
-        const defaultCategories = [
-          '달리기',
-          '하이트',
-          '테니스',
-          '등산',
-          '사이클',
-          '수영',
-          '크로스 트레이닝',
-          '걷기',
-          '기타',
-        ];
+        console.log('바 데이터없음');
+        // const defaultCategories = [
+        //   '달리기',
+        //   '하이트',
+        //   '테니스',
+        //   '등산',
+        //   '사이클',
+        //   '수영',
+        //   '크로스 트레이닝',
+        //   '걷기',
+        //   '기타',
+        // ];
 
         // 총 유산소 포인트
-        const totalCardioPoints = record.cardio_points_total || 0;
+        // const totalCardioPoints = record.cardio_points_total || 0;
 
-        // 랜덤하게 3-5개의 카테고리 선택
-        const selectedCount = Math.floor(Math.random() * 3) + 3; // 3-5개
-        const selectedCategories = [...defaultCategories]
-          .sort(() => 0.5 - Math.random())
-          .slice(0, selectedCount);
+        // // 랜덤하게 3-5개의 카테고리 선택
+        // const selectedCount = Math.floor(Math.random() * 3) + 3; // 3-5개
+        // const selectedCategories = [...defaultCategories]
+        //   .sort(() => 0.5 - Math.random())
+        //   .slice(0, selectedCount);
 
-        // 각 선택된 카테고리에 유산소 포인트 분배
-        let remainingPoints = totalCardioPoints;
-        selectedCategories.forEach((category, index) => {
-          if (index === selectedCategories.length - 1) {
-            // 마지막 카테고리는 남은 포인트 모두 할당
-            workoutTypes[category] = remainingPoints;
-          } else {
-            // 나머지는 랜덤하게 분배 (최소 10% 이상)
-            const minPoint = Math.max(10, Math.floor(totalCardioPoints * 0.1));
-            const maxPoint = Math.max(
-              minPoint,
-              Math.floor(remainingPoints * 0.6)
-            );
-            const points =
-              Math.floor(Math.random() * (maxPoint - minPoint)) + minPoint;
+        // // 각 선택된 카테고리에 유산소 포인트 분배
+        // let remainingPoints = totalCardioPoints;
+        // selectedCategories.forEach((category, index) => {
+        //   if (index === selectedCategories.length - 1) {
+        //     // 마지막 카테고리는 남은 포인트 모두 할당
+        //     workoutTypes[category] = remainingPoints;
+        //   } else {
+        //     // 나머지는 랜덤하게 분배 (최소 10% 이상)
+        //     const minPoint = Math.max(10, Math.floor(totalCardioPoints * 0.1));
+        //     const maxPoint = Math.max(
+        //       minPoint,
+        //       Math.floor(remainingPoints * 0.6)
+        //     );
+        //     const points =
+        //       Math.floor(Math.random() * (maxPoint - minPoint)) + minPoint;
 
-            workoutTypes[category] = points;
-            remainingPoints -= points;
-          }
-        });
+        //     workoutTypes[category] = points;
+        //     remainingPoints -= points;
+        //   }
+        // });
       }
 
       // 3. 주간 일일 데이터 생성

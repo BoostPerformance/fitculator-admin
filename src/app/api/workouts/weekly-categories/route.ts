@@ -13,6 +13,7 @@ export async function GET(request: Request) {
     const challengeId = url.searchParams.get('challengeId');
     const userId = url.searchParams.get('userId'); // 특정 사용자 필터링 (선택적)
     const weekLabel = url.searchParams.get('weekLabel'); // 특정 주 필터링 (선택적)
+    console.log('Received weekLabel:', weekLabel);
 
     if (!challengeId) {
       return NextResponse.json(
@@ -248,7 +249,7 @@ export async function GET(request: Request) {
 
       result.data.push(weekResult);
     });
-
+    console.log('Final result.data:', result.data);
     // 결과 반환
     return NextResponse.json(result);
   } catch (error) {
