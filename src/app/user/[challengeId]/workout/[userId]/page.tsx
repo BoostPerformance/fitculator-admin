@@ -6,7 +6,7 @@ import TextBox from '@/components/textBox';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import WeeklyWorkoutChart from '@/components/workoutDashboard/weeklyWorkoutChart';
 import { useWorkoutData } from '@/components/hooks/useWorkoutData';
-// 타입 정의
+
 interface WorkoutTypes {
   [key: string]: number;
 }
@@ -288,7 +288,6 @@ export default function UserWorkoutDetailPage() {
     userData,
     loading,
     error: apiError,
-    useMockData,
     totalPoints,
   } = useWorkoutData(userId, challengeId);
 
@@ -349,7 +348,6 @@ export default function UserWorkoutDetailPage() {
   };
 
   useEffect(() => {
-    // 페이지 로드 시 상단으로 스크롤
     window.scrollTo(0, 0);
   }, [params]);
 
@@ -361,7 +359,7 @@ export default function UserWorkoutDetailPage() {
     );
   }
 
-  if (apiError && !userData) {
+  if (apiError) {
     return (
       <div className="p-4 bg-red-100 text-red-700 rounded my-4">
         <h2 className="font-bold">데이터 로딩 오류</h2>
@@ -372,6 +370,15 @@ export default function UserWorkoutDetailPage() {
 
   if (!userData) {
     return <div>사용자 데이터를 불러오는 중 오류가 발생했습니다.</div>;
+  }
+
+  if (userData.weeklyWorkouts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen text-gray-500">
+        <h1 className="text-2xl font-bold mb-2">아직 데이터가 없습니다.</h1>
+        <p>운동 기록이 등록되면 여기에 표시됩니다.</p>
+      </div>
+    );
   }
 
   // 지난 주와 이번 주 데이터
@@ -388,12 +395,6 @@ export default function UserWorkoutDetailPage() {
 
   return (
     <div className="flex w-full p-4">
-      {useMockData && (
-        <div className="absolute top-4 right-4 bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm">
-          목업 데이터 사용 중
-        </div>
-      )}
-
       {/* Main Content */}
       <div className="w-full md:w-4/6 mr-2 flex flex-col gap-5">
         {/* Top Performance Card */}
@@ -490,7 +491,6 @@ export default function UserWorkoutDetailPage() {
                     onChange={(e) => console.log(e.target.value)}
                     onSave={async (feedback) => {
                       console.log('Saved:', feedback);
-                      // 여기에 피드백 저장 API 호출 코드 추가 가능
                     }}
                     isFeedbackMode={true}
                     copyIcon

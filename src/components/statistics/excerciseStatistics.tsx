@@ -149,7 +149,7 @@ const ExcerciseStatistics = ({
             loading={loading}
           />
         </div>
-        <div>
+        {/* <div>
           <TotalFeedbackCounts
             counts={`${weeklyAverage}%`}
             total={''}
@@ -158,7 +158,7 @@ const ExcerciseStatistics = ({
             textColor="text-green"
             loading={loading}
           />
-        </div>
+        </div> */}
       </div>
     </>
   );
