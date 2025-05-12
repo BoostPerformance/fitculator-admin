@@ -35,12 +35,6 @@ interface WeeklyWorkout {
   feedback: Feedback;
 }
 
-interface UserData {
-  name: string;
-  achievement: number;
-  weeklyWorkouts: WeeklyWorkout[];
-}
-
 // API 응답 타입
 interface CoachInfo {
   id: string;
@@ -98,12 +92,18 @@ const generateDonutChart = (workoutTypes: WorkoutTypes) => {
   );
   let offset = 0;
   const circumference = 283; // 2 * Math.PI * 45
+
+  // DB에 있는 카테고리만 색상 매핑
   const colors: Record<string, string> = {
-    HIT: '#60BDFF',
-    일반기기: '#90EFA5',
-    걷기: '#9BA3FF',
-    러닝: '#FFB6C1',
-    수영: '#FFD700',
+    달리기: '#80FBD0',
+    HIIT: '#26CBFF',
+    테니스: '#4CAF50',
+    등산: '#795548',
+    사이클: '#FF9800',
+    수영: '#03A9F4',
+    크로스핏: '#9C27B0',
+    걷기: '#7BA5FF',
+    기타: '#607D8F',
   };
 
   // 각 세그먼트에 대한 정보 계산
@@ -129,57 +129,29 @@ const generateDonutChart = (workoutTypes: WorkoutTypes) => {
         rotation: startAngle,
         textX,
         textY,
+        // 색상 매핑에 없는 경우 HSL 색상으로 생성
         color: colors[type] || `hsl(${index * 60}, 70%, 60%)`,
       };
     }
   );
 
-  // 애니메이션 없이 도넛 차트 생성
   return (
     <div className="relative w-full">
       <div className="flex items-center justify-center">
         <svg className="w-45 h-45" viewBox="0 0 100 100">
-          {/* 세그먼트 그리기 */}
           {segmentInfo.map((segment, index) => (
-            <g key={index}>
-              <circle
-                cx="50"
-                cy="50"
-                r="35"
-                fill="transparent"
-                stroke={segment.color}
-                strokeWidth="23"
-                strokeDasharray={circumference}
-                strokeDashoffset={segment.dashoffset}
-                transform={`rotate(${segment.rotation} 50 50)`}
-              />
-
-              {/* 세그먼트 내부 텍스트 (퍼센티지가 10% 이상인 경우에만 표시) */}
-              {segment.percentage >= 10 && (
-                <g transform={`translate(${segment.textX}, ${segment.textY})`}>
-                  <text
-                    x="0"
-                    y="-4"
-                    textAnchor="middle"
-                    fontSize="5"
-                    fill="black"
-                    fontWeight="bold"
-                  >
-                    {segment.type}
-                  </text>
-                  <text
-                    x="0"
-                    y="4"
-                    textAnchor="middle"
-                    fontSize="5"
-                    fill="black"
-                    fontWeight="bold"
-                  >
-                    {Math.round(segment.percentage)}%
-                  </text>
-                </g>
-              )}
-            </g>
+            <circle
+              key={`circle-${index}`}
+              cx="50"
+              cy="50"
+              r="35"
+              fill="transparent"
+              stroke={segment.color}
+              strokeWidth="23"
+              strokeDasharray={circumference}
+              strokeDashoffset={segment.dashoffset}
+              transform={`rotate(${segment.rotation} 50 50)`}
+            />
           ))}
 
           {/* 중앙 전체 퍼센티지 */}
@@ -215,6 +187,7 @@ const generateDonutChart = (workoutTypes: WorkoutTypes) => {
     </div>
   );
 };
+
 // 바 차트 SVG 생성 함수 (근력 운동은 덤벨 아이콘 사용)
 interface DailyWorkout {
   day: string;
@@ -402,8 +375,16 @@ export default function UserWorkoutDetailPage() {
   }
 
   // 지난 주와 이번 주 데이터
-  const lastWeekData = userData.weeklyWorkouts[lastWeekIndex];
-  const currentWeekData = userData.weeklyWorkouts[currentWeekIndex];
+  const lastWeekData = userData?.weeklyWorkouts?.[lastWeekIndex] || {
+    label: '데이터 없음',
+    workoutTypes: {},
+    dailyWorkouts: [],
+  };
+  const currentWeekData = userData?.weeklyWorkouts?.[currentWeekIndex] || {
+    label: '데이터 없음',
+    workoutTypes: {},
+    dailyWorkouts: [],
+  };
 
   return (
     <div className="flex w-full p-4">
@@ -429,26 +410,29 @@ export default function UserWorkoutDetailPage() {
         <div className="font-bold mb-4">주간운동 그래프</div>
 
         <div>
-          <WeeklyWorkoutChart userName={userData.name} />
-
+          <WeeklyWorkoutChart
+            userName={userData.name}
+            weeklyWorkouts={userData.weeklyWorkouts}
+            userId={userId}
+          />
           {/* 지난 주 차트 패널 */}
           <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
             <div className="font-bold mb-4">
-              지난 주 운동 그래프 ({lastWeekData.label})
+              지난 주 운동 그래프 ({lastWeekData?.label || '데이터 없음'})
             </div>
 
             <div className="flex mb-6 sm:flex-col">
               {/* Donut Chart */}
               <div className="flex flex-col w-1/3 sm:w-full sm:gap-6">
                 <div className="relative">
-                  {generateDonutChart(lastWeekData.workoutTypes)}
+                  {generateDonutChart(lastWeekData.workoutTypes || {})}
                 </div>
                 <div className="flex justify-between text-sm mt-4 bg-gray-8 px-[1.875rem] py-[1.25rem]">
                   <div className="text-gray-500">근력 운동</div>
                   <div className="text-blue-500 text-2.5-900 pt-5">
-                    {lastWeekData.totalSessions}
+                    {lastWeekData.totalSessions || 0}
                     <span className="text-1.75-900">
-                      /{lastWeekData.requiredSessions} 회
+                      /{lastWeekData.requiredSessions || 0} 회
                     </span>
                   </div>
                 </div>
@@ -456,7 +440,7 @@ export default function UserWorkoutDetailPage() {
 
               {/* Bar Chart */}
               <div className="w-2/3 flex items-end pl-6 sm:w-full">
-                {generateBarChart(lastWeekData.dailyWorkouts)}
+                {generateBarChart(lastWeekData.dailyWorkouts) || []}
               </div>
             </div>
           </div>

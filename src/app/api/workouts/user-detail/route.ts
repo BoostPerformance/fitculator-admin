@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import type {
+  WeeklyChartResponse,
+  LeaderboardEntry,
+  TodayCountResponse,
+  ApiResponse,
+} from './types'; // 타입 파일 경로에 맞게 수정
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,18 +18,47 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const userId = url.searchParams.get('userId');
+    const challengeId = url.searchParams.get('challengeId'); // 챌린지 ID 추가
     const type = url.searchParams.get('type') || 'user-data'; // 기본값 추가
 
-    console.log('Request received for type:', type, 'user ID:', userId);
+    console.log(
+      'Request received for type:',
+      type,
+      'user ID:',
+      userId,
+      'challenge ID:',
+      challengeId
+    );
 
     if (type === 'test-connection') {
       return NextResponse.json({ status: 'OK' });
     } else if (type === 'weekly-chart') {
-      return await getWeeklyChartData(userId);
+      // 챌린지 ID 필수 확인
+      if (!challengeId) {
+        return NextResponse.json(
+          { error: 'Challenge ID is required for weekly chart data' },
+          { status: 400 }
+        );
+      }
+      return await getWeeklyChartData(userId, challengeId);
     } else if (type === 'leaderboard') {
-      return await getLeaderboardData(userId);
+      // 챌린지 ID 필수 확인
+      if (!challengeId) {
+        return NextResponse.json(
+          { error: 'Challenge ID is required for leaderboard data' },
+          { status: 400 }
+        );
+      }
+      return await getLeaderboardData(userId, challengeId);
     } else if (type === 'today-count') {
-      return await getTodayCountData(userId);
+      // 챌린지 ID 필수 확인
+      if (!challengeId) {
+        return NextResponse.json(
+          { error: 'Challenge ID is required for today count data' },
+          { status: 400 }
+        );
+      }
+      return await getTodayCountData(userId, challengeId);
     } else {
       // 기본 유저 데이터 요청
       if (!userId) {
@@ -32,7 +67,7 @@ export async function GET(request: Request) {
           { status: 400 }
         );
       }
-      return await getUserWorkoutData(userId);
+      return await getUserWorkoutData(userId, challengeId);
     }
   } catch (error) {
     console.error('Error in workout API:', error);
@@ -43,13 +78,63 @@ export async function GET(request: Request) {
   }
 }
 
-// 주간 차트 데이터 조회
-async function getWeeklyChartData(userId) {
+// 주간 차트 데이터 조회 (챌린지 ID로 필터링)
+async function getWeeklyChartData(
+  userId: string | null,
+  challengeId: string
+): Promise<NextResponse<WeeklyChartResponse>> {
   try {
-    // 1. 주간 기록 가져오기
+    console.log(`Getting weekly chart data for challenge: ${challengeId}`);
+
+    // 1. 챌린지 참가자 목록 조회
+    const { data: participants, error: participantsError } = await supabase
+      .from('challenge_participants')
+      .select('service_user_id')
+      .eq('challenge_id', challengeId)
+      .eq('status', 'active');
+
+    if (participantsError) {
+      console.error(
+        'Error fetching challenge participants:',
+        participantsError
+      );
+      return NextResponse.json(
+        { error: 'Failed to fetch challenge participants' },
+        { status: 500 }
+      );
+    }
+
+    console.log(
+      `Found ${
+        participants?.length || 0
+      } participants for challenge ${challengeId}`
+    );
+
+    // 참가자 ID 목록 생성
+    const participantIds = participants?.map((p) => p.service_user_id) || [];
+
+    // 특정 사용자만 필터링 (선택적)
+    if (userId && participantIds.includes(userId)) {
+      participantIds.length = 0;
+      participantIds.push(userId);
+    }
+
+    // 참가자가 없는 경우 빈 데이터 반환
+    if (participantIds.length === 0) {
+      return NextResponse.json({
+        cardio: [],
+        strength: [],
+        users: [],
+        weeks: [],
+        challengePeriod: { startDate: null, endDate: null },
+      });
+    }
+
+    // 2. 주간 기록 가져오기 (챌린지 참가자만)
     const { data: weeklyRecords, error: weeklyError } = await supabase
       .from('workout_weekly_records')
       .select('*')
+      .in('user_id', participantIds)
       .order('start_date', { ascending: true });
 
     if (weeklyError) {
@@ -60,10 +145,15 @@ async function getWeeklyChartData(userId) {
       );
     }
 
-    // 2. 사용자 정보 가져오기
+    console.log(
+      `Found ${weeklyRecords?.length || 0} weekly records for participants`
+    );
+
+    // 3. 사용자 정보 가져오기 (챌린지 참가자만)
     const { data: users, error: usersError } = await supabase
       .from('users')
-      .select('id, name, username');
+      .select('id, name, username')
+      .in('id', participantIds);
 
     if (usersError) {
       console.error('Error fetching users:', usersError);
@@ -74,7 +164,7 @@ async function getWeeklyChartData(userId) {
     }
 
     // 주차 계산 (고유한 start_date, end_date 페어링 추출)
-    const uniqueWeeks = [];
+    const uniqueWeeks: any = [];
     const weekMap = new Map();
 
     weeklyRecords.forEach((record) => {
@@ -167,19 +257,24 @@ async function getWeeklyChartData(userId) {
       };
     });
 
-    // 챌린지 기간 계산 (모든 weekly_record의 start_date 중 최소값, end_date 중 최대값)
-    const startDates = weeklyRecords.map(
-      (record) => new Date(record.start_date)
-    );
-    const endDates = weeklyRecords.map((record) => new Date(record.end_date));
+    // 챌린지 기간 가져오기
+    const { data: challenge, error: challengeError } = await supabase
+      .from('challenges')
+      .select('start_date, end_date')
+      .eq('id', challengeId)
+      .single();
+
+    if (challengeError) {
+      console.error('Error getting challenge:', challengeError);
+      return NextResponse.json(
+        { error: 'Failed to fetch challenge' },
+        { status: 500 }
+      );
+    }
 
     const challengePeriod = {
-      startDate: startDates.length
-        ? new Date(Math.min(...startDates)).toISOString().split('T')[0]
-        : null,
-      endDate: endDates.length
-        ? new Date(Math.max(...endDates)).toISOString().split('T')[0]
-        : null,
+      startDate: challenge.start_date,
+      endDate: challenge.end_date,
     };
 
     return NextResponse.json({
@@ -198,13 +293,57 @@ async function getWeeklyChartData(userId) {
   }
 }
 
-// 리더보드 데이터 조회
-async function getLeaderboardData(userId) {
+// 리더보드 데이터 조회 (챌린지 ID로 필터링)
+async function getLeaderboardData(
+  userId: string | null,
+  challengeId: string
+): Promise<NextResponse<LeaderboardEntry[]>> {
   try {
-    // 1. 사용자 정보 가져오기
+    console.log(`Getting leaderboard data for challenge: ${challengeId}`);
+
+    // 1. 챌린지 참가자 목록 조회
+    const { data: participants, error: participantsError } = await supabase
+      .from('challenge_participants')
+      .select('service_user_id')
+      .eq('challenge_id', challengeId)
+      .eq('status', 'active');
+
+    if (participantsError) {
+      console.error(
+        'Error fetching challenge participants:',
+        participantsError
+      );
+      return NextResponse.json(
+        { error: 'Failed to fetch challenge participants' },
+        { status: 500 }
+      );
+    }
+
+    console.log(
+      `Found ${
+        participants?.length || 0
+      } participants for challenge ${challengeId}`
+    );
+
+    // 참가자 ID 목록 생성
+    const participantIds = participants?.map((p) => p.service_user_id) || [];
+
+    // 특정 사용자만 필터링 (선택적)
+    if (userId && participantIds.includes(userId)) {
+      participantIds.length = 0;
+      participantIds.push(userId);
+    }
+
+    // 참가자가 없는 경우 빈 데이터 반환
+    if (participantIds.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    // 2. 사용자 정보 가져오기 (챌린지 참가자만)
     const { data: users, error: usersError } = await supabase
       .from('users')
-      .select('id, name, username');
+      .select('id, name, username')
+      .in('id', participantIds);
 
     if (usersError) {
       console.error('Error fetching users:', usersError);
@@ -214,10 +353,11 @@ async function getLeaderboardData(userId) {
       );
     }
 
-    // 2. 주간 운동 기록 조회
+    // 3. 주간 운동 기록 조회 (챌린지 참가자만)
     const { data: weeklyRecords, error: weeklyError } = await supabase
       .from('workout_weekly_records')
-      .select('*');
+      .select('*')
+      .in('user_id', participantIds);
 
     if (weeklyError) {
       console.error('Error fetching weekly records:', weeklyError);
@@ -275,20 +415,47 @@ async function getLeaderboardData(userId) {
   }
 }
 
-// 오늘 카운트 데이터 조회
-async function getTodayCountData(userId) {
+// 오늘 카운트 데이터 조회 (챌린지 ID로 필터링)
+async function getTodayCountData(
+  userId: string | null,
+  challengeId: string
+): Promise<NextResponse<TodayCountResponse>> {
   try {
-    // 1. 사용자 수 카운트
-    const { count: totalUsers, error: usersError } = await supabase
-      .from('users')
-      .select('id', { count: 'exact' });
+    console.log(`Getting today count data for challenge: ${challengeId}`);
 
-    if (usersError) {
-      console.error('Error counting users:', usersError);
+    // 1. 챌린지 참가자 목록 조회
+    const { data: participants, error: participantsError } = await supabase
+      .from('challenge_participants')
+      .select('service_user_id')
+      .eq('challenge_id', challengeId)
+      .eq('status', 'active');
+
+    if (participantsError) {
+      console.error(
+        'Error fetching challenge participants:',
+        participantsError
+      );
       return NextResponse.json(
-        { error: 'Failed to count users' },
+        { error: 'Failed to fetch challenge participants' },
         { status: 500 }
       );
+    }
+
+    console.log(
+      `Found ${
+        participants?.length || 0
+      } participants for challenge ${challengeId}`
+    );
+
+    // 참가자 ID 목록 생성
+    const participantIds = participants?.map((p) => p.service_user_id) || [];
+
+    // 참가자가 없는 경우 빈 데이터 반환
+    if (participantIds.length === 0) {
+      return NextResponse.json({
+        count: 0,
+        total: 0,
+      });
     }
 
     // 2. 오늘 운동 기록이 있는 사용자 수 카운트
@@ -297,6 +464,7 @@ async function getTodayCountData(userId) {
     const { data: todayWorkouts, error: workoutsError } = await supabase
       .from('workouts')
       .select('user_id')
+      .in('user_id', participantIds)
       .gte('timestamp', `${today}T00:00:00`)
       .lte('timestamp', `${today}T23:59:59`);
 
@@ -316,7 +484,7 @@ async function getTodayCountData(userId) {
 
     return NextResponse.json({
       count: todayActiveUsers,
-      total: totalUsers,
+      total: participantIds.length,
     });
   } catch (error) {
     console.error('Error in today count data:', error);
@@ -327,158 +495,196 @@ async function getTodayCountData(userId) {
   }
 }
 
-// 기본 유저 워크아웃 데이터 조회
-async function getUserWorkoutData(userId) {
+// 기본 유저 워크아웃 데이터 조회 (챌린지 ID 고려)
+async function getUserWorkoutData(
+  userId: string,
+  challengeId?: string | null
+): Promise<NextResponse<ApiResponse>> {
   if (!userId) {
     return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
   }
 
-  // 1. 사용자 정보 가져오기
-  const { data: user, error: userError } = await supabase
-    .from('users')
-    .select('id, name, username')
-    .eq('id', userId)
-    .single();
+  try {
+    // 1. 사용자 정보 가져오기
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id, name, username')
+      .eq('id', userId)
+      .single();
 
-  if (userError) {
-    console.error('Error fetching user:', userError);
-    return NextResponse.json(
-      { error: 'Failed to fetch user' },
-      { status: 500 }
-    );
-  }
-
-  console.log('User data:', user);
-
-  // 2. 사용자의 주간 운동 기록 조회
-  const { data: weeklyRecords, error: weeklyError } = await supabase
-    .from('workout_weekly_records')
-    .select('*')
-    .eq('user_id', userId)
-    .order('start_date', { ascending: true });
-
-  if (weeklyError) {
-    console.error('Error fetching weekly records:', weeklyError);
-    return NextResponse.json(
-      { error: 'Failed to fetch weekly workout records' },
-      { status: 500 }
-    );
-  }
-
-  console.log('Weekly records fetched:', weeklyRecords);
-
-  // 3. 각 주차별 피드백 정보 조회
-  const weeklyRecordsWithFeedback = [];
-
-  for (const record of weeklyRecords) {
-    const { data: feedback, error: feedbackError } = await supabase
-      .from('workout_feedbacks')
-      .select(
-        'id, ai_feedback, coach_feedback, coach_memo, coach_id, created_at'
-      )
-      .eq('workout_weekly_records_id', record.id)
-      .maybeSingle();
-
-    if (feedbackError) {
-      console.error(
-        'Error fetching feedback for record:',
-        record.id,
-        feedbackError
+    if (userError) {
+      console.error('Error fetching user:', userError);
+      return NextResponse.json(
+        { error: 'Failed to fetch user' },
+        { status: 500 }
       );
     }
 
-    // 코치 정보 조회 (피드백이 있고 코치 ID가 있는 경우)
-    let coach = null;
-    if (feedback && feedback.coach_id) {
-      const { data: coachData, error: coachError } = await supabase
-        .from('coaches')
-        .select('id, name, profile_image_url')
-        .eq('id', feedback.coach_id)
+    console.log('User data:', user);
+
+    // 챌린지 참가 여부 확인 (챌린지 ID가 제공된 경우)
+    if (challengeId) {
+      const { data: participation, error: participationError } = await supabase
+        .from('challenge_participants')
+        .select('id')
+        .eq('service_user_id', userId)
+        .eq('challenge_id', challengeId)
+        .eq('status', 'active')
         .maybeSingle();
 
-      if (!coachError) {
-        coach = coachData;
-      } else {
-        console.error('Error fetching coach:', coachError);
+      if (participationError) {
+        console.error(
+          'Error checking challenge participation:',
+          participationError
+        );
+      } else if (!participation) {
+        console.warn(
+          `User ${userId} is not an active participant in challenge ${challengeId}`
+        );
+        // 챌린지 참가자가 아닌 경우 에러 반환 (선택적)
+        // return NextResponse.json(
+        //   { error: 'User is not a participant in this challenge' },
+        //   { status: 403 }
+        // );
       }
     }
 
-    // 주차 번호 계산 (start_date 기준으로 몇 번째 주인지)
-    const weekNumber = weeklyRecords.indexOf(record) + 1;
+    // 2. 사용자의 주간 운동 기록 조회
+    const { data: weeklyRecords, error: weeklyError } = await supabase
+      .from('workout_weekly_records')
+      .select('*')
+      .eq('user_id', userId)
+      .order('start_date', { ascending: true });
 
-    weeklyRecordsWithFeedback.push({
-      ...record,
-      weekNumber,
-      feedback: feedback || null,
-      coach: coach || null,
-    });
-  }
+    if (weeklyError) {
+      console.error('Error fetching weekly records:', weeklyError);
+      return NextResponse.json(
+        { error: 'Failed to fetch weekly workout records' },
+        { status: 500 }
+      );
+    }
 
-  console.log('Weekly records with feedback:', weeklyRecordsWithFeedback);
+    console.log('Weekly records fetched:', weeklyRecords);
 
-  // 4. 개별 운동 기록 조회 (최근 5개)
-  const { data: recentWorkouts, error: workoutsError } = await supabase
-    .from('workouts')
-    .select(
+    // 3. 각 주차별 피드백 정보 조회
+    const weeklyRecordsWithFeedback = [];
+
+    for (const record of weeklyRecords) {
+      const { data: feedback, error: feedbackError } = await supabase
+        .from('workout_feedbacks')
+        .select(
+          'id, ai_feedback, coach_feedback, coach_memo, coach_id, created_at'
+        )
+        .eq('workout_weekly_records_id', record.id)
+        .maybeSingle();
+
+      if (feedbackError) {
+        console.error(
+          'Error fetching feedback for record:',
+          record.id,
+          feedbackError
+        );
+      }
+
+      // 코치 정보 조회 (피드백이 있고 코치 ID가 있는 경우)
+      let coach = null;
+      if (feedback && feedback.coach_id) {
+        const { data: coachData, error: coachError } = await supabase
+          .from('coaches')
+          .select('id, name, profile_image_url')
+          .eq('id', feedback.coach_id)
+          .maybeSingle();
+
+        if (!coachError) {
+          coach = coachData;
+        } else {
+          console.error('Error fetching coach:', coachError);
+        }
+      }
+
+      // 주차 번호 계산 (start_date 기준으로 몇 번째 주인지)
+      const weekNumber = weeklyRecords.indexOf(record) + 1;
+
+      weeklyRecordsWithFeedback.push({
+        ...record,
+        weekNumber,
+        feedback: feedback || null,
+        coach: coach || null,
+      });
+    }
+
+    console.log('Weekly records with feedback:', weeklyRecordsWithFeedback);
+
+    // 4. 개별 운동 기록 조회 (최근 5개)
+    const { data: recentWorkouts, error: workoutsError } = await supabase
+      .from('workouts')
+      .select(
+        `
+        id,
+        user_id,
+        category_id,
+        title,
+        timestamp,
+        duration_minutes,
+        avg_heart_rate,
+        max_heart_rate,
+        points,
+        calories,
+        progress,
+        workout_categories(id, name_ko, name_en, type_id, workout_types(id, name))
       `
-      id,
-      user_id,
-      category_id,
-      title,
-      timestamp,
-      duration_minutes,
-      avg_heart_rate,
-      max_heart_rate,
-      points,
-      calories,
-      progress,
-      workout_categories(id, name_ko, name_en, type_id, workout_types(id, name))
-    `
-    )
-    .eq('user_id', userId)
-    .order('timestamp', { ascending: false })
-    .limit(5);
+      )
+      .eq('user_id', userId)
+      .order('timestamp', { ascending: false })
+      .limit(5);
 
-  if (workoutsError) {
-    console.error('Error fetching recent workouts:', workoutsError);
+    if (workoutsError) {
+      console.error('Error fetching recent workouts:', workoutsError);
+      return NextResponse.json(
+        { error: 'Failed to fetch recent workouts' },
+        { status: 500 }
+      );
+    }
+
+    console.log('Recent workouts fetched:', recentWorkouts);
+
+    // 5. 전체 통계 계산
+    const totalCardioPoints = weeklyRecordsWithFeedback.reduce(
+      (sum, record) => sum + (record.cardio_points_total || 0),
+      0
+    );
+
+    const totalStrengthSessions = weeklyRecordsWithFeedback.reduce(
+      (sum, record) => sum + (record.strength_sessions_count || 0),
+      0
+    );
+
+    // 6. 결과 반환
+    return NextResponse.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        displayName: user.username,
+      },
+      weeklyRecords: weeklyRecordsWithFeedback,
+      recentWorkouts,
+      stats: {
+        totalWeeks: weeklyRecordsWithFeedback.length,
+        totalCardioPoints,
+        totalStrengthSessions,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching user workout data:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch recent workouts' },
+      { error: 'Failed to fetch user workout data' },
       { status: 500 }
     );
   }
-
-  console.log('Recent workouts fetched:', recentWorkouts);
-
-  // 5. 전체 통계 계산
-  const totalCardioPoints = weeklyRecordsWithFeedback.reduce(
-    (sum, record) => sum + (record.cardio_points_total || 0),
-    0
-  );
-
-  const totalStrengthSessions = weeklyRecordsWithFeedback.reduce(
-    (sum, record) => sum + (record.strength_sessions_count || 0),
-    0
-  );
-
-  // 6. 결과 반환
-  return NextResponse.json({
-    user: {
-      id: user.id,
-      name: user.name,
-      displayName: user.username,
-    },
-    weeklyRecords: weeklyRecordsWithFeedback,
-    recentWorkouts,
-    stats: {
-      totalWeeks: weeklyRecordsWithFeedback.length,
-      totalCardioPoints,
-      totalStrengthSessions,
-    },
-  });
 }
 
 // 요일 라벨 반환 함수
-function getDayLabel(date) {
+function getDayLabel(date: Date): string {
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
   return dayNames[date.getDay()];
 }
