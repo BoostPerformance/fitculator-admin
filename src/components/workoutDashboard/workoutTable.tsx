@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { DietTableSkeleton } from '../layout/skeleton';
-
 // 목데이터 정의
 const MOCK_DATA = {
   weeklyChart: {
@@ -179,7 +178,6 @@ const MOCK_DATA = {
 // 목 API 함수 정의
 const fetchMockApi = (type, params = {}) => {
   return new Promise((resolve) => {
-    // 실제 네트워크 요청처럼 약간의 지연 추가
     setTimeout(() => {
       switch (type) {
         case 'weekly-chart':
@@ -198,11 +196,68 @@ const fetchMockApi = (type, params = {}) => {
   });
 };
 
-// WorkoutTable 컴포넌트
-const WorkoutTable = ({
-  challengeId,
-  useMockData = false, // 목데이터 사용 여부 플래그 추가
-}) => {
+// Helper function to format date to MM.DD format
+const formatDateToMMDD = (dateString) => {
+  const date = new Date(dateString);
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${month}.${day}`;
+};
+
+// Helper function to generate week labels based on challenge period
+const generateWeekLabels = (startDateStr, endDateStr) => {
+  const startDate = new Date(startDateStr);
+  const endDate = new Date(endDateStr);
+
+  // Adjust to the beginning of the week (Sunday or Monday depending on your preference)
+  const adjustedStartDate = new Date(startDate);
+
+  const weeks = [];
+  let currentStart = adjustedStartDate;
+
+  while (currentStart < endDate) {
+    const currentEnd = new Date(currentStart);
+    currentEnd.setDate(currentEnd.getDate() + 6); // 7-day week
+
+    const formattedStart = formatDateToMMDD(currentStart);
+    const formattedEnd = formatDateToMMDD(currentEnd);
+
+    weeks.push({
+      label: `${formattedStart}-${formattedEnd}`,
+      startDate: new Date(currentStart),
+      endDate: new Date(currentEnd),
+    });
+
+    // Move to next week
+    currentStart = new Date(currentEnd);
+    currentStart.setDate(currentStart.getDate() + 1);
+  }
+
+  return weeks;
+};
+
+// Function to determine which week a workout belongs to
+const getWeekForDate = (date, weeks) => {
+  const workoutDate = new Date(date);
+
+  for (let i = 0; i < weeks.length; i++) {
+    const weekStart = weeks[i].startDate;
+    const weekEnd = weeks[i].endDate;
+
+    if (workoutDate >= weekStart && workoutDate <= weekEnd) {
+      return {
+        index: i,
+        label: weeks[i].label,
+      };
+    }
+  }
+
+  // If no match, return null or a default
+  return null;
+};
+
+// WorkoutTable component
+const WorkoutTable = ({ challengeId, useMockData = false }) => {
   const [workoutItems, setWorkoutItems] = useState([]);
   const [weekInfo, setWeekInfo] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -216,7 +271,7 @@ const WorkoutTable = ({
   const lastRowRef = useRef(null);
   const router = useRouter();
 
-  // 데이터 가져오기 함수
+  // Fetch workout data
   const fetchWorkoutData = useCallback(
     async (pageNum = 1) => {
       try {
@@ -226,12 +281,12 @@ const WorkoutTable = ({
         let weeklyChartData, todayCountData, leaderboardData;
 
         if (useMockData) {
-          // 목데이터 사용
+          // Use mock data
           weeklyChartData = await fetchMockApi('weekly-chart', { challengeId });
           todayCountData = await fetchMockApi('today-count', { challengeId });
           leaderboardData = await fetchMockApi('leaderboard', { challengeId });
         } else {
-          // 실제 API 호출
+          // Real API calls
           try {
             console.log('Fetching weekly chart data...');
             const weeklyResponse = await fetch(
@@ -245,6 +300,7 @@ const WorkoutTable = ({
             weeklyChartData = await weeklyResponse.json();
             console.log('Weekly chart data received:', weeklyChartData);
 
+            // ... other API calls
             const todayCountResponse = await fetch(
               `/api/workouts/user-detail?type=today-count${
                 challengeId ? `&challengeId=${challengeId}` : ''
@@ -273,7 +329,7 @@ const WorkoutTable = ({
           } catch (error) {
             console.error('API 호출 중 오류 발생:', error);
             setApiError(`API 호출 오류: ${error.message}`);
-            // 목데이터로 폴백
+            // Fallback to mock data
             console.log('API 오류로 인해 목데이터 사용');
             weeklyChartData = await fetchMockApi('weekly-chart', {
               challengeId,
@@ -285,16 +341,30 @@ const WorkoutTable = ({
           }
         }
 
-        // 주차 정보 설정
-        if (weeklyChartData.weeks && weeklyChartData.weeks.length > 0) {
+        // Generate proper week info based on challenge period
+        let generatedWeeks = [];
+        if (
+          weeklyChartData.challengePeriod &&
+          weeklyChartData.challengePeriod.startDate &&
+          weeklyChartData.challengePeriod.endDate
+        ) {
+          generatedWeeks = generateWeekLabels(
+            weeklyChartData.challengePeriod.startDate,
+            weeklyChartData.challengePeriod.endDate
+          );
+          setWeekInfo(generatedWeeks);
+        } else if (weeklyChartData.weeks && weeklyChartData.weeks.length > 0) {
+          // Fallback to existing weeks if challenge period is not available
           setWeekInfo(weeklyChartData.weeks);
+          generatedWeeks = weeklyChartData.weeks;
         }
 
-        // API 응답 데이터를 WorkoutItem 형식으로 변환
+        // Process API data to workout items using the generated weeks
         const workoutData = processApiDataToWorkoutItems(
           weeklyChartData,
           leaderboardData,
-          todayCountData
+          todayCountData,
+          generatedWeeks
         );
 
         setWorkoutItems(workoutData);
@@ -312,25 +382,23 @@ const WorkoutTable = ({
     [challengeId, useMockData]
   );
 
-  // API 응답 데이터를 WorkoutItem 형식으로 변환하는 함수
+  // Process API data to workout items
   const processApiDataToWorkoutItems = (
     weeklyChartData,
     leaderboardData,
-    todayCountData
+    todayCountData,
+    generatedWeeks
   ) => {
-    // 주별 데이터 추출
-    const weeks = weeklyChartData.weeks || [];
-
-    // 사용자 정보 추출
+    // Extract users
     const users = weeklyChartData.users || [];
 
-    // 유산소 데이터 추출
+    // Extract cardio data
     const cardioData = weeklyChartData.cardio || [];
 
-    // 근력 데이터 추출
+    // Extract strength data
     const strengthData = weeklyChartData.strength || [];
 
-    // 리더보드 데이터로 사용자별 총점 찾기
+    // Find user points from leaderboard
     const userPointsMap = {};
     if (leaderboardData && Array.isArray(leaderboardData)) {
       leaderboardData.forEach((item) => {
@@ -338,21 +406,33 @@ const WorkoutTable = ({
       });
     }
 
-    // WorkoutItem 배열 생성
+    // Create workout items
     const items = users.map((user) => {
-      // 사용자별 주별 데이터 생성
-      const userWeeklyData = weeks.map((week, index) => {
-        // 해당 주에 대한 유저의 유산소 데이터 필터링
-        const userCardioInWeek = cardioData.filter(
-          (item) => item.userId === user.id && item.x === week.label
-        );
+      // Create weekly data for each user
+      const userWeeklyData = generatedWeeks.map((week, index) => {
+        // Find cardio data for this user and week
+        const userCardioInWeek = cardioData.filter((item) => {
+          // Check if the workout date falls within this week
+          const workoutDate = new Date(item.date);
+          return (
+            item.userId === user.id &&
+            workoutDate >= week.startDate &&
+            workoutDate <= week.endDate
+          );
+        });
 
-        // 해당 주에 대한 유저의 근력 데이터 필터링
-        const userStrengthInWeek = strengthData.filter(
-          (item) => item.userId === user.id && item.x === week.label
-        );
+        // Find strength data for this user and week
+        const userStrengthInWeek = strengthData.filter((item) => {
+          // Check if the workout date falls within this week
+          const workoutDate = new Date(item.date);
+          return (
+            item.userId === user.id &&
+            workoutDate >= week.startDate &&
+            workoutDate <= week.endDate
+          );
+        });
 
-        // 유산소 달성률 계산 (100%를 기준으로)
+        // Calculate cardio percentage (max 100%)
         const cardioPoints = userCardioInWeek.reduce(
           (sum, item) => sum + item.y,
           0
@@ -360,17 +440,15 @@ const WorkoutTable = ({
         const cardioPercentage =
           cardioPoints > 0 ? Math.min(Math.round(cardioPoints), 100) : 0;
 
-        // 주간 근력 세션 횟수
+        // Weekly strength sessions count
         const strengthSessions = userStrengthInWeek.length;
 
-        // 주차 날짜 범위 추출
-        // MM.DD-MM.DD 형식에서 시작일과 종료일 분리
-        const dateRange = week.label.split('-');
-        const startDate = dateRange[0];
-        const endDate = dateRange.length > 1 ? dateRange[1] : '';
+        // Extract date range
+        const startDate = formatDateToMMDD(week.startDate);
+        const endDate = formatDateToMMDD(week.endDate);
 
         return {
-          weekNumber: index + 1,
+          weekNumber: index + 1, // Week number is now correctly the index + 1
           startDate: startDate,
           endDate: endDate,
           aerobicPercentage: cardioPercentage,
@@ -378,13 +456,13 @@ const WorkoutTable = ({
         };
       });
 
-      // 이번 주에 활성화 여부 확인 (최근 주에 데이터가 있으면 활성 상태로 간주)
+      // Check if user is active this week (has data in the most recent week)
       const isActiveThisWeek =
         userWeeklyData.length > 0 &&
         (userWeeklyData[userWeeklyData.length - 1].aerobicPercentage > 0 ||
           userWeeklyData[userWeeklyData.length - 1].strengthSessions > 0);
 
-      // 전체 달성도 합계 계산
+      // Calculate total achievements
       const totalAchievement = userWeeklyData.reduce(
         (sum, week) => sum + week.aerobicPercentage,
         0
@@ -403,7 +481,7 @@ const WorkoutTable = ({
       };
     });
 
-    // 유산소 달성률 기준으로 내림차순 정렬
+    // Sort by total aerobic percentage (descending)
     return items.sort((a, b) => {
       const aTotal = a.weeklyData.reduce(
         (sum, week) => sum + week.aerobicPercentage,
@@ -417,44 +495,41 @@ const WorkoutTable = ({
     });
   };
 
-  // 총 달성도 계산
+  // Calculate total achievements
   const calculateTotalAchievements = (items) => {
     return items.reduce((sum, item) => {
       return sum + (item.totalAchievements || 0);
     }, 0);
   };
 
-  // 활성 멤버 비율 계산
+  // Calculate active members percentage
   const calculateActiveMembersPercent = (items) => {
     if (!items || items.length === 0) return 0;
     const activeMembers = items.filter((item) => item.activeThisWeek).length;
     return Math.round((activeMembers / items.length) * 100);
   };
 
-  // 초기 로드 및 날짜/챌린지 ID 변경 시 데이터 가져오기
+  // Initial load and when date/challengeId changes
   useEffect(() => {
     setPage(1);
     fetchWorkoutData(1);
   }, [fetchWorkoutData, challengeId]);
 
-  // 미디어 쿼리 감지 로직
+  // Media query detection
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768); // 768px 이하를 모바일로 간주
+      setIsMobile(window.innerWidth < 768);
     };
 
-    // 초기 로드 시 한 번 체크
     checkIsMobile();
-
-    // 리사이즈 이벤트 리스너 추가
     window.addEventListener('resize', checkIsMobile);
 
-    // 컴포넌트 언마운트 시 리스너 제거
     return () => {
       window.removeEventListener('resize', checkIsMobile);
     };
   }, []);
 
+  // Intersection observer handler
   const handleObserver = useCallback(
     (entries) => {
       const target = entries[0];
@@ -462,7 +537,6 @@ const WorkoutTable = ({
         const currentScrollPosition = window.scrollY;
         setPage((prev) => {
           const nextPage = prev + 1;
-          // 스크롤 위치 복원
           requestAnimationFrame(() => {
             window.scrollTo(0, currentScrollPosition);
           });
@@ -473,6 +547,7 @@ const WorkoutTable = ({
     [loading, hasMore]
   );
 
+  // Set up intersection observer
   useEffect(() => {
     const observer = new IntersectionObserver(handleObserver, {
       root: null,
@@ -509,7 +584,7 @@ const WorkoutTable = ({
     );
   }
 
-  // 모바일 렌더링
+  // Mobile rendering
   if (isMobile) {
     return (
       <div className="mt-6 w-full">
@@ -520,7 +595,7 @@ const WorkoutTable = ({
           </div>
         )}
 
-        {/* 모바일용 멤버 리스트 */}
+        {/* Mobile member list */}
         {workoutItems.map((item, index) => (
           <div key={index} className="bg-white rounded-lg p-4 shadow-sm mb-4">
             <h3 className="text-md text-[#6F6F6F] text-1.125-700 mb-3 pl-3 py-4">
@@ -536,7 +611,7 @@ const WorkoutTable = ({
               </div>
             </div>
 
-            {/* 주차별 데이터 */}
+            {/* Weekly data */}
             {item.weeklyData.map((week, weekIndex) => (
               <div
                 key={weekIndex}
@@ -544,7 +619,7 @@ const WorkoutTable = ({
               >
                 <div className="w-1/2 text-gray-11 text-1.125-500">
                   {week.weekNumber}주차
-                  <br />({week.startDate}~)
+                  <br />({week.startDate}~{week.endDate})
                 </div>
                 <div className="w-1/2 text-gray-11 text-1.125-700">
                   <span className="text-blue-500">
@@ -560,7 +635,7 @@ const WorkoutTable = ({
     );
   }
 
-  // 데스크톱 렌더링
+  // Desktop rendering
   return (
     <div className="mt-6 overflow-x-auto w-full">
       {useMockData && (
@@ -570,7 +645,7 @@ const WorkoutTable = ({
         </div>
       )}
 
-      {/* 메인 워크아웃 테이블 */}
+      {/* Main workout table */}
       <div className="min-w-[1000px] max-w-full">
         <table className="w-full bg-white shadow-md rounded-md border border-gray-200">
           <thead>
@@ -601,20 +676,28 @@ const WorkoutTable = ({
                   </button>
                 </div>
               </th>
-              {/* 주차 헤더 동적 생성 - 각 주차와 날짜 범위 표시 */}
+              {/* Dynamic week headers */}
               {weekInfo.map((week, index) => (
                 <th
                   key={index}
                   className="w-[10%] p-3 text-center cursor-pointer hover:bg-gray-100"
                   onClick={() =>
                     router.push(
-                      `/workout/workout-categories?challengeId=${challengeId}&weekLabel=${week.label}`
+                      `/workout/workout-categories?challengeId=${challengeId}&weekLabel=${
+                        typeof week.label === 'string'
+                          ? week.label
+                          : `${week.startDate}-${week.endDate}`
+                      }`
                     )
                   }
                 >
                   <span className="text-sm">
                     {index + 1}주차
-                    <br />({week.label})
+                    <br />(
+                    {typeof week.label === 'string'
+                      ? week.label
+                      : `${week.startDate}-${week.endDate}`}
+                    )
                   </span>
                 </th>
               ))}
@@ -643,7 +726,7 @@ const WorkoutTable = ({
                     {week.aerobicPercentage}% / {week.strengthSessions}회
                   </td>
                 ))}
-                {/* 주차 데이터가 주차 정보보다 적은 경우 빈 셀 추가 */}
+                {/* Add empty cells if weekly data is less than week info */}
                 {[
                   ...Array(
                     Math.max(0, weekInfo.length - item.weeklyData.length)
