@@ -8,38 +8,23 @@ import WeeklyWorkoutChart from '@/components/workoutDashboard/weeklyWorkoutChart
 import { useWorkoutData } from '@/components/hooks/useWorkoutData';
 import { WorkoutTypes, DailyWorkout } from '@/types/workoutDetailPageType';
 
-// 유저 기본 정보 받아오기용 API
-const useUserInfo = (userId: string) => {
-  const [name, setName] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`/api/user?userId=${userId}`);
-        if (!res.ok) throw new Error('유저 정보 로딩 실패');
-        const data = await res.json();
-        setName(data.name || '알 수 없음');
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userId) fetchUserInfo();
-  }, [userId]);
-
-  return { name, loading, error };
-};
-
 const generateDonutChart = (workoutTypes: WorkoutTypes) => {
   const total = Object.values(workoutTypes).reduce(
     (sum, value) => sum + value,
     0
   );
+
+  if (total === 0) {
+    return (
+      <div className="relative w-full flex flex-col items-center justify-center py-8 text-gray-400 text-sm">
+        <div className="w-24 h-24 rounded-full border-4 border-dashed border-gray-300 flex items-center justify-center">
+          0%
+        </div>
+        <p className="mt-4">운동 기록이 등록되면 여기에 표시됩니다.</p>
+      </div>
+    );
+  }
+
   let offset = 0;
   const circumference = 283;
   const colors: Record<string, string> = {
@@ -129,6 +114,14 @@ const generateDonutChart = (workoutTypes: WorkoutTypes) => {
 
 const generateBarChart = (dailyWorkouts: DailyWorkout[]): JSX.Element => {
   const maxValue = 100;
+
+  if (dailyWorkouts.length === 0) {
+    return (
+      <div className="h-64 w-full flex items-center justify-center text-gray-400 text-sm">
+        운동 기록이 등록되면 여기에 표시됩니다.
+      </div>
+    );
+  }
   const statusColors: Record<string, string> = {
     complete: 'bg-[#26CBFF]',
     incomplete: 'bg-[#FF1469]',
@@ -182,6 +175,34 @@ const generateBarChart = (dailyWorkouts: DailyWorkout[]): JSX.Element => {
     </div>
   );
 };
+
+const useUserInfo = (userId: string) => {
+  const [name, setName] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/user?userId=${userId}`);
+        if (!res.ok) throw new Error('유저 정보 로딩 실패');
+        const data = await res.json();
+        setName(data.name || '알 수 없음');
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) fetchUserInfo();
+  }, [userId]);
+
+  return { name, loading, error };
+};
+
+// NOTE: Removed early return for no data and instead fallback handled in generateDonutChart and generateBarChart
 
 export default function UserWorkoutDetailPage() {
   const params = useParams();
@@ -248,13 +269,6 @@ export default function UserWorkoutDetailPage() {
     );
   if (!userData)
     return <div>사용자 데이터를 불러오는 중 오류가 발생했습니다.</div>;
-  if (userData.weeklyWorkouts.length === 0)
-    return (
-      <div className="flex flex-col items-center justify-center h-screen text-gray-500">
-        <h1 className="text-2xl font-bold mb-2">아직 데이터가 없습니다.</h1>
-        <p>운동 기록이 등록되면 여기에 표시됩니다.</p>
-      </div>
-    );
 
   const lastWeekData = userData.weeklyWorkouts?.[lastWeekIndex] || {
     label: '데이터 없음',
@@ -324,9 +338,9 @@ export default function UserWorkoutDetailPage() {
                 <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
                   <div className="text-gray-500">근력 운동</div>
                   <div className="text-blue-500 text-2.5-900 pt-5">
-                    {currentWeekData.totalSessions}
+                    {currentWeekData.totalSessions || 0}
                     <span className="text-1.75-900">
-                      /{currentWeekData.requiredSessions} 회
+                      /{currentWeekData.requiredSessions || 0} 회
                     </span>
                   </div>
                 </div>
@@ -344,7 +358,7 @@ export default function UserWorkoutDetailPage() {
                 <div>
                   <TextBox
                     title="코치 피드백"
-                    value={currentWeekData.feedback.text}
+                    value={currentWeekData.feedback?.text || ''}
                     placeholder="피드백을 작성하세요."
                     button1="남기기"
                     Btn1className="bg-green text-white"
