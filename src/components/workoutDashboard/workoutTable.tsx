@@ -603,7 +603,15 @@ const WorkoutTable = ({
               </th>
               {/* 주차 헤더 동적 생성 - 각 주차와 날짜 범위 표시 */}
               {weekInfo.map((week, index) => (
-                <th key={index} className="w-[10%] p-3 text-center">
+                <th
+                  key={index}
+                  className="w-[10%] p-3 text-center cursor-pointer hover:bg-gray-100"
+                  onClick={() =>
+                    router.push(
+                      `/workout/workout-categories?challengeId=${challengeId}&weekLabel=${week.label}`
+                    )
+                  }
+                >
                   <span className="text-sm">
                     {index + 1}주차
                     <br />({week.label})
