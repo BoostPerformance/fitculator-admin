@@ -108,27 +108,6 @@ export default function WorkoutPage() {
           processedMeals={dietRecords}
           selectedChallengeId={params.challengeId as string}
           selectedDate={selectedDate}
-          dailyRecords={challenges
-            ?.filter(
-              (challenge) => challenge.challenges.id === params.challengeId
-            )
-            .flatMap((challenge) =>
-              challenge.challenges.challenge_participants.map(
-                (participant) => ({
-                  id: challenge.challenges.id,
-                  users: {
-                    id: participant.service_user_id || '',
-                    name: '',
-                    username: '',
-                  },
-                  challenges: {
-                    ...challenge.challenges,
-                    challenge_type: 'diet',
-                  },
-                  daily_records: [],
-                })
-              )
-            )}
         />
       </div>
 
@@ -139,10 +118,7 @@ export default function WorkoutPage() {
         </div>
       )}
 
-      <WorkoutTable
-        challengeId={params.challengeId as string}
-        useMockData={!isApiConnected} // API 연결 상태에 따라 목데이터 사용 여부 결정
-      />
+      <WorkoutTable challengeId={params.challengeId as string} />
     </div>
   );
 }

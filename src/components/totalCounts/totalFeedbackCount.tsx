@@ -5,13 +5,15 @@ const TotalFeedbackCounts = ({
   borderColor,
   grids,
   textColor,
+  loading,
 }: {
-  title: React.ReactNode | string; // 또는
+  title: React.ReactNode | string;
   counts: string;
   total?: string;
   borderColor: string;
   grids?: string;
   textColor?: string;
+  loading?: boolean;
 }) => {
   return (
     <div className={`w-full h-full overflow-hidden dark:bg-blue-4 ${grids}`}>
@@ -22,16 +24,24 @@ const TotalFeedbackCounts = ({
           {title}
         </div>
         <div className={`text-right ${textColor}`}>
-          <span className=" text-1-700 sm:text-0.625-500">
-            <span className="text-2.5-900 sm:text-2-900 md:text-1.5-900">{`${counts}`}</span>
-          </span>
-          {total ? (
-            <>
-              <span className="text-1.75-900">/</span>
-              <span className="text-1.75-900 md:text-1-900">{`${total}`}</span>
-            </>
+          {loading ? (
+            <div className="flex justify-end sm:justify-center">
+              <div className="w-8 h-8 border-4 border-t-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+            </div>
           ) : (
-            ''
+            <>
+              <span className=" text-1-700 sm:text-0.625-500">
+                <span className="text-2.5-900 sm:text-2-900 md:text-1.5-900">{`${counts}`}</span>
+              </span>
+              {total ? (
+                <>
+                  <span className="text-1.75-900">/</span>
+                  <span className="text-1.75-900 md:text-1-900">{`${total}`}</span>
+                </>
+              ) : (
+                ''
+              )}
+            </>
           )}
         </div>
       </div>

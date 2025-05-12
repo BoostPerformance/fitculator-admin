@@ -141,6 +141,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         });
         setTotalPoints(0);
         setUseMockData(false);
+
       } finally {
         setLoading(false);
       }
@@ -149,6 +150,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     if (userId) {
       fetchUserWorkoutData();
     } else {
+
       // userId가 없는 경우 빈 데이터 구조 제공
       setUserData({
         name: '사용자',
@@ -157,6 +159,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
       });
       setTotalPoints(0);
       setUseMockData(false);
+
       setLoading(false);
     }
   }, [userId, challengeId]);
