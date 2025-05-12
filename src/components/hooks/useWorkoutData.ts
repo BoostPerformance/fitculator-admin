@@ -123,23 +123,25 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         // API 응답 데이터 처리 (데이터 매핑 함수)
         const processedData = await transformApiData(data);
 
-        // 데이터가 비어있는지 확인
-        const isEmpty =
-          !processedData.weeklyWorkouts ||
-          processedData.weeklyWorkouts.length === 0;
-
-        // 데이터가 비어있으면 목데이터 사용, 그렇지 않으면 실제 데이터 사용
+        // 항상 실제 데이터 사용
         setUserData(processedData);
-        setTotalPoints(
-          isEmpty
-            ? MOCK_WORKOUT_DATA.stats.totalCardioPoints
-            : data.stats.totalCardioPoints
-        );
-        setUseMockData(isEmpty);
+        setTotalPoints(data.stats.totalCardioPoints);
+        setUseMockData(false);
+
+        console.log('Final User Data:', processedData);
       } catch (error) {
         console.error('API 호출 중 오류 발생:', error);
         setError((error as Error).message);
-        setUseMockData(true);
+
+        // 오류 발생 시 빈 데이터 구조 제공
+        setUserData({
+          name: '사용자',
+          achievement: 0,
+          weeklyWorkouts: [],
+        });
+        setTotalPoints(0);
+        setUseMockData(false);
+
       } finally {
         setLoading(false);
       }
@@ -148,10 +150,16 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     if (userId) {
       fetchUserWorkoutData();
     } else {
-      // userId가 없는 경우에도 목데이터 사용
-      console.log('userId is null');
-      setTotalPoints(MOCK_WORKOUT_DATA.stats.totalCardioPoints);
-      setUseMockData(true);
+
+      // userId가 없는 경우 빈 데이터 구조 제공
+      setUserData({
+        name: '사용자',
+        achievement: 0,
+        weeklyWorkouts: [],
+      });
+      setTotalPoints(0);
+      setUseMockData(false);
+
       setLoading(false);
     }
   }, [userId, challengeId]);
