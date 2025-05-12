@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useEffect, useMemo } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import TextBox from '@/components/textBox';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
@@ -304,312 +304,13 @@ const generateBarChart = (dailyWorkouts: DailyWorkout[]): JSX.Element => {
   );
 };
 
-// 목업 데이터 (백업용)
-const MOCK_DATA: Record<string, UserData> = {
-  user1: {
-    name: '김철수',
-    achievement: 88,
-    weeklyWorkouts: [
-      {
-        weekNumber: 1,
-        label: '03.20-03.26',
-        totalAchievement: 88,
-        workoutTypes: {
-          HIT: 40,
-          일반기기: 38.2,
-          걷기: 9.8,
-        },
-        dailyWorkouts: [
-          {
-            day: '월',
-            value: 45,
-            status: 'complete',
-            hasStrength: true,
-            strengthCount: 2,
-          },
-          {
-            day: '화',
-            value: 30,
-            status: 'incomplete',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '수',
-            value: 20,
-            status: 'complete',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '목',
-            value: 60,
-            status: 'complete',
-            hasStrength: true,
-            strengthCount: 2,
-          },
-          {
-            day: '금',
-            value: 30,
-            status: 'complete',
-            hasStrength: false,
-            strengthCount: 0,
-          },
-          {
-            day: '토',
-            value: 30,
-            status: 'complete',
-            hasStrength: true,
-            strengthCount: 1,
-          },
-          {
-            day: '일',
-            value: 30,
-            status: 'complete',
-            hasStrength: false,
-            strengthCount: 3,
-          },
-        ],
-        totalSessions: 5,
-        requiredSessions: 2,
-        feedback: {
-          text: '김철수님 이번 주 운동 목표를 달성하셨네요! 특히 HIT 운동의 비중이 높아 효과적인 운동이 되었을 것 같아요. 다음 주에는 걷기의 비중을 조금 더 높여보는 것도 좋을 것 같습니다.',
-          author: '코치 이지훈',
-          date: '2023.10.24 14:15:34',
-        },
-      },
-    ],
-  },
-  user2: {
-    name: '이영희',
-    achievement: 75,
-    weeklyWorkouts: [
-      {
-        weekNumber: 1,
-        label: '03.20-03.26',
-        totalAchievement: 75,
-        workoutTypes: {
-          HIT: 35,
-          일반기기: 30,
-          걷기: 10,
-        },
-        dailyWorkouts: [
-          {
-            day: '월',
-            value: 40,
-            status: 'complete',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '화',
-            value: 0,
-            status: 'incomplete',
-            hasStrength: false,
-            strengthCount: 0,
-          },
-          {
-            day: '수',
-            value: 15,
-            status: 'complete',
-            hasStrength: true,
-            strengthCount: 2,
-          },
-          {
-            day: '목',
-            value: 50,
-            status: 'complete',
-            hasStrength: true,
-            strengthCount: 2,
-          },
-          {
-            day: '금',
-            value: 25,
-            status: 'complete',
-            hasStrength: false,
-            strengthCount: 1,
-          },
-          {
-            day: '토',
-            value: 0,
-            status: 'rest',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '일',
-            value: 0,
-            status: 'rest',
-            hasStrength: false,
-            strengthCount: 0,
-          },
-        ],
-        totalSessions: 3,
-        requiredSessions: 5,
-        feedback: {
-          text: '이영희님, 운동을 시작하신 첫 주차네요. 일반기기 운동 비중이 높았고, 주 3회 운동을 하셨습니다. 다음 주에는 목표인 5회를 달성해보시는 것이 어떨까요?',
-          author: '코치 박성민',
-          date: '2023.10.24 14:15:34',
-        },
-      },
-    ],
-  },
-  user3: {
-    name: '박지민',
-    achievement: 50,
-    weeklyWorkouts: [
-      {
-        weekNumber: 1,
-        label: '03.20-03.26',
-        totalAchievement: 50,
-        workoutTypes: {
-          HIT: 20,
-          일반기기: 25,
-          걷기: 5,
-        },
-        dailyWorkouts: [
-          {
-            day: '월',
-            value: 0,
-            status: 'incomplete',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '화',
-            value: 30,
-            status: 'complete',
-            hasStrength: true,
-            strengthCount: 2,
-          },
-          {
-            day: '수',
-            value: 0,
-            status: 'incomplete',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '목',
-            value: 0,
-            status: 'incomplete',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '금',
-            value: 25,
-            status: 'complete',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '토',
-            value: 0,
-            status: 'rest',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '일',
-            value: 0,
-            status: 'rest',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-        ],
-        totalSessions: 2,
-        requiredSessions: 5,
-        feedback: {
-          text: '박지민님, 첫 주차 운동을 시작하셨네요. 화요일과 금요일에만 운동을 하셨는데, 다음 주에는 좀 더 자주 운동해보시면 어떨까요?',
-          author: '코치 김민수',
-          date: '2023.10.24 14:15:34',
-        },
-      },
-    ],
-  },
-  default: {
-    name: '최한',
-    achievement: 88,
-    weeklyWorkouts: [
-      {
-        weekNumber: 1,
-        label: '03.20-03.26',
-        totalAchievement: 88,
-        workoutTypes: {
-          HIT: 40,
-          일반기기: 38.2,
-          걷기: 9.8,
-        },
-        dailyWorkouts: [
-          {
-            day: '월',
-            value: 45,
-            status: 'complete',
-            hasStrength: true,
-            strengthCount: 2,
-          },
-          {
-            day: '화',
-            value: 30,
-            status: 'incomplete',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '수',
-            value: 20,
-            status: 'complete',
-            hasStrength: false,
-            strengthCount: 0,
-          },
-          {
-            day: '목',
-            value: 60,
-            status: 'complete',
-            hasStrength: true,
-            strengthCount: 1,
-          },
-          {
-            day: '금',
-            value: 30,
-            status: 'complete',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-          {
-            day: '토',
-            value: 30,
-            status: 'complete',
-            hasStrength: true,
-            strengthCount: 2,
-          },
-          {
-            day: '일',
-            value: 30,
-            status: 'complete',
-            hasStrength: false,
-            strengthCount: 2,
-          },
-        ],
-        totalSessions: 5,
-        requiredSessions: 2,
-        feedback: {
-          text: '최한님 이번 주 운동 목표를 달성하셨네요! 특히 HIT 운동의 비중이 높아 효과적인 운동이 되었을 것 같아요.',
-          author: '코치 이지훈',
-          date: '2023.10.24 14:15:34',
-        },
-      },
-    ],
-  },
-};
-
 // 운동 상세 페이지 컴포넌트
 export default function UserWorkoutDetailPage() {
   const params = useParams();
-  const [selectedWeek, setSelectedWeek] = useState<number>(0); // 기본값은 첫 번째 주
   const userId = params.userId as string;
   const challengeId = params.challengeId as string;
+  const router = useRouter();
+
   const {
     userData,
     loading,
@@ -617,6 +318,62 @@ export default function UserWorkoutDetailPage() {
     useMockData,
     totalPoints,
   } = useWorkoutData(userId, challengeId);
+
+  // 날짜 관련 로직을 useMemo로 계산
+  const { currentWeekIndex, lastWeekIndex } = useMemo(() => {
+    if (!userData || !userData.weeklyWorkouts.length) {
+      return { currentWeekIndex: 0, lastWeekIndex: 0 };
+    }
+
+    const today = new Date();
+
+    // 현재 주차와 지난 주차 인덱스 찾기
+    let currentIdx = 0; // 기본값: 가장 최근 주차
+    let lastIdx = Math.max(0, userData.weeklyWorkouts.length - 2); // 기본값: 마지막에서 두 번째 주차 또는 첫 번째 주차
+
+    // 각 주차 데이터를 반복하여 현재 날짜가 포함된 주차 찾기
+    userData.weeklyWorkouts.forEach((week, idx) => {
+      // 주차 라벨에서 날짜 범위 추출 (MM.DD-MM.DD 형식)
+      const dateParts = week.label.split('-');
+      if (dateParts.length === 2) {
+        const endDateParts = dateParts[1].split('.');
+
+        if (endDateParts.length === 2) {
+          // 현재 년도와 월, 일 조합
+          const endMonth = parseInt(endDateParts[0]);
+          const endDay = parseInt(endDateParts[1]);
+
+          // 주차 종료일 생성 (현재 년도 사용)
+          const weekEndDate = new Date(
+            today.getFullYear(),
+            endMonth - 1,
+            endDay
+          );
+
+          // 오늘 날짜가 주차 종료일보다 이전이거나 같으면 현재 주차로 설정
+          if (today <= weekEndDate) {
+            currentIdx = idx;
+            // 지난 주차는 현재 주차 이전 또는 마지막에서 두 번째 주차
+            lastIdx = Math.max(0, idx - 1);
+          }
+        }
+      }
+    });
+
+    // 주차가 하나뿐이면 두 차트 모두 같은 데이터 사용
+    if (userData.weeklyWorkouts.length === 1) {
+      currentIdx = lastIdx = 0;
+    }
+
+    console.log(
+      `Current week index: ${currentIdx}, Last week index: ${lastIdx}`
+    );
+    return { currentWeekIndex: currentIdx, lastWeekIndex: lastIdx };
+  }, [userData]);
+
+  const handleBack = () => {
+    router.push(`/user/${params.challengeId}/workout`);
+  };
 
   useEffect(() => {
     // 페이지 로드 시 상단으로 스크롤
@@ -644,8 +401,9 @@ export default function UserWorkoutDetailPage() {
     return <div>사용자 데이터를 불러오는 중 오류가 발생했습니다.</div>;
   }
 
-  // 선택된 주차 데이터
-  const weekData = userData.weeklyWorkouts[selectedWeek];
+  // 지난 주와 이번 주 데이터
+  const lastWeekData = userData.weeklyWorkouts[lastWeekIndex];
+  const currentWeekData = userData.weeklyWorkouts[currentWeekIndex];
 
   return (
     <div className="flex w-full p-4">
@@ -672,22 +430,25 @@ export default function UserWorkoutDetailPage() {
 
         <div>
           <WeeklyWorkoutChart userName={userData.name} />
-          {/* First Chart Panel */}
+
+          {/* 지난 주 차트 패널 */}
           <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
-            <div className="font-bold mb-4">지난 주 운동 그래프</div>
+            <div className="font-bold mb-4">
+              지난 주 운동 그래프 ({lastWeekData.label})
+            </div>
 
             <div className="flex mb-6 sm:flex-col">
               {/* Donut Chart */}
               <div className="flex flex-col w-1/3 sm:w-full sm:gap-6">
                 <div className="relative">
-                  {generateDonutChart(weekData.workoutTypes)}
+                  {generateDonutChart(lastWeekData.workoutTypes)}
                 </div>
                 <div className="flex justify-between text-sm mt-4 bg-gray-8 px-[1.875rem] py-[1.25rem]">
                   <div className="text-gray-500">근력 운동</div>
                   <div className="text-blue-500 text-2.5-900 pt-5">
-                    {weekData.totalSessions}
+                    {lastWeekData.totalSessions}
                     <span className="text-1.75-900">
-                      /{weekData.requiredSessions} 회
+                      /{lastWeekData.requiredSessions} 회
                     </span>
                   </div>
                 </div>
@@ -695,41 +456,49 @@ export default function UserWorkoutDetailPage() {
 
               {/* Bar Chart */}
               <div className="w-2/3 flex items-end pl-6 sm:w-full">
-                {generateBarChart(weekData.dailyWorkouts)}
+                {generateBarChart(lastWeekData.dailyWorkouts)}
               </div>
             </div>
           </div>
 
-          {/* Second Chart Panel (Duplicate of the first) */}
+          {/* 이번 주 차트 패널 */}
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="font-bold mb-4">이번 주 운동 그래프</div>
+            <div className="font-bold mb-4">
+              이번 주 운동 그래프 ({currentWeekData.label})
+            </div>
 
             <div className="flex gap-6 mb-6 sm:flex-col sm:gap-6">
               {/* 왼쪽: 도넛 차트 + 근력운동 */}
               <div className="flex flex-col items-center w-1/3 sm:w-full">
                 <div className="relative w-full">
-                  {generateDonutChart(weekData.workoutTypes)}
+                  {generateDonutChart(currentWeekData.workoutTypes)}
                 </div>
                 <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
                   <div className="text-gray-500">근력 운동</div>
                   <div className="text-blue-500 text-2.5-900 pt-5">
-                    {weekData.totalSessions}
+                    {currentWeekData.totalSessions}
                     <span className="text-1.75-900">
-                      /{weekData.requiredSessions} 회
+                      /{currentWeekData.requiredSessions} 회
                     </span>
                   </div>
                 </div>
+                <button
+                  className="pt-[6rem] text-gray-400 font-bold hover:font-extrabold cursor-pointer sm:px-[2rem]"
+                  onClick={handleBack}
+                >
+                  ← 목록으로
+                </button>
               </div>
 
               {/* 오른쪽: 바차트 + TextBox */}
               <div className="flex flex-col w-2/3 sm:w-full sm:items-center">
                 <div className="flex items-end mb-4">
-                  {generateBarChart(weekData.dailyWorkouts)}
+                  {generateBarChart(currentWeekData.dailyWorkouts)}
                 </div>
                 <div>
                   <TextBox
                     title="코치 피드백"
-                    value={weekData.feedback.text}
+                    value={currentWeekData.feedback.text}
                     placeholder="피드백을 작성하세요."
                     button1="남기기"
                     Btn1className="bg-green text-white"
