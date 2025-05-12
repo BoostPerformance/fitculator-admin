@@ -1,12 +1,13 @@
 // components/hooks/useWorkoutData.ts
 import { useState, useEffect } from 'react';
+import { MOCK_WORKOUT_DATA } from '../mock/workoutData';
 
 // 타입 정의
-interface WorkoutTypes {
+export interface WorkoutTypes {
   [key: string]: number;
 }
 
-interface DailyWorkout {
+export interface DailyWorkout {
   day: string;
   value: number;
   status: 'complete' | 'incomplete' | 'rest';
@@ -14,13 +15,13 @@ interface DailyWorkout {
   strengthCount: number;
 }
 
-interface Feedback {
+export interface Feedback {
   text: string;
   author: string;
   date: string;
 }
 
-interface WeeklyWorkout {
+export interface WeeklyWorkout {
   weekNumber: number;
   label: string;
   totalAchievement: number;
@@ -31,7 +32,7 @@ interface WeeklyWorkout {
   feedback: Feedback;
 }
 
-interface UserData {
+export interface UserData {
   name: string;
   achievement: number;
   weeklyWorkouts: WeeklyWorkout[];
@@ -79,32 +80,12 @@ interface ApiStats {
   totalStrengthSessions: number;
 }
 
-interface ApiResponse {
+export interface ApiResponse {
   user: UserInfo;
   weeklyRecords: WeeklyRecord[];
   stats: ApiStats;
   recentWorkouts?: any[];
 }
-
-// 목업 데이터
-const MOCK_DATA: Record<string, UserData> = {
-  // 여기에 앞서 정의한 목업 데이터를 추가
-  user1: {
-    name: '김철수',
-    achievement: 88,
-    weeklyWorkouts: [
-      // 기존 목업 데이터
-    ],
-  },
-  // 나머지 목업 데이터
-  default: {
-    name: '최한',
-    achievement: 88,
-    weeklyWorkouts: [
-      // 기본 목업 데이터
-    ],
-  },
-};
 
 export const useWorkoutData = (userId: string, challengeId: string) => {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -113,8 +94,77 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
   const [useMockData, setUseMockData] = useState<boolean>(false);
   const [totalPoints, setTotalPoints] = useState<number>(0);
 
-  // API 데이터 가공 함수
-  const processApiData = async (apiData: ApiResponse): Promise<UserData> => {
+  useEffect(() => {
+    const fetchUserWorkoutData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        if (!userId) {
+          throw new Error('사용자 ID가 필요합니다.');
+        }
+
+        console.log(
+          `Fetching workout data for user: ${userId}, challenge: ${challengeId}`
+        );
+
+        // 기본 운동 데이터 가져오기
+        const response = await fetch(
+          `/api/workouts/user-detail?userId=${userId}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`API 오류: ${response.status}`);
+        }
+
+        const data: ApiResponse = await response.json();
+        console.log('API Response:', data);
+
+        // API 응답 데이터 처리 (데이터 매핑 함수)
+        const processedData = await transformApiData(data);
+
+        // 데이터가 비어있는지 확인
+        const isEmpty =
+          !processedData.weeklyWorkouts ||
+          processedData.weeklyWorkouts.length === 0;
+
+        // 데이터가 비어있으면 목데이터 사용, 그렇지 않으면 실제 데이터 사용
+        setUserData(isEmpty ? MOCK_WORKOUT_DATA : processedData);
+        setTotalPoints(
+          isEmpty
+            ? MOCK_WORKOUT_DATA.stats.totalCardioPoints
+            : data.stats.totalCardioPoints
+        );
+        setUseMockData(isEmpty);
+
+        console.log(
+          'Final User Data:',
+          isEmpty ? 'Using mock data' : processedData
+        );
+      } catch (error) {
+        console.error('API 호출 중 오류 발생:', error);
+        setError((error as Error).message);
+        setUseMockData(true);
+        setUserData(MOCK_WORKOUT_DATA);
+        setTotalPoints(MOCK_WORKOUT_DATA.stats.totalCardioPoints);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchUserWorkoutData();
+    } else {
+      // userId가 없는 경우에도 목데이터 사용
+      setUserData(MOCK_WORKOUT_DATA);
+      setTotalPoints(MOCK_WORKOUT_DATA.stats.totalCardioPoints);
+      setUseMockData(true);
+      setLoading(false);
+    }
+  }, [userId, challengeId]);
+
+  // API 데이터를 우리 형식으로 변환하는 함수
+  const transformApiData = async (apiData: ApiResponse): Promise<UserData> => {
     const { user, weeklyRecords, stats } = apiData;
 
     // 주간 레코드 처리
@@ -136,14 +186,11 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         recordEndDate
       )}`;
 
-      // 2. workout-categories API에서 해당 주차의 유산소 운동 데이터 가져오기
-      let categoryWorkoutTypes: WorkoutTypes = {
-        // 기본값 설정
-        CARDIO: record.cardio_points_total || 0,
-        STRENGTH: record.strength_sessions_count * 20 || 0, // 근력 세션당 20점으로 계산
-      };
+      // 2. 운동 유형별 데이터 생성
+      let workoutTypes: WorkoutTypes = {};
 
       try {
+        // 카테고리 데이터 가져오기 시도
         const response = await fetch(
           `/api/workouts/weekly-categories?challengeId=${challengeId}&userId=${user.id}&weekLabel=${label}`
         );
@@ -151,7 +198,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         if (response.ok) {
           const categoryData = await response.json();
 
-          // 해당 주차의 데이터가 있다면
           if (categoryData.data && categoryData.data.length > 0) {
             const weekData = categoryData.data.find(
               (week: any) => week.weekLabel === label
@@ -159,29 +205,70 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
             if (weekData && weekData.categories) {
               // 새로운 운동 타입 객체 생성
-              categoryWorkoutTypes = {};
+              workoutTypes = {};
 
               // 각 카테고리를 운동 타입 객체에 추가
-              weekData.categories.forEach((category: any) => {
-                if (category.points > 0) {
-                  // 유효한 포인트가 있는 카테고리만 추가
-                  categoryWorkoutTypes[category.name_ko] = category.percentage;
-                }
-              });
+              weekData.categories
+                .filter((cat: any) => cat.percentage > 0)
+                .forEach((cat: any) => {
+                  // 한글 이름으로 카테고리 추가
+                  workoutTypes[cat.name_ko] = cat.percentage;
+                });
 
-              // 카테고리 데이터가 없다면 기본값 유지
-              if (Object.keys(categoryWorkoutTypes).length === 0) {
-                categoryWorkoutTypes = {
-                  CARDIO: record.cardio_points_total || 0,
-                  STRENGTH: record.strength_sessions_count * 20 || 0,
-                };
-              }
+              console.log('Processed workout types:', workoutTypes);
             }
           }
+        } else {
+          console.warn(`Failed to fetch categories: ${response.status}`);
         }
       } catch (error) {
         console.error('운동 카테고리 데이터 가져오기 실패:', error);
-        // 오류 발생 시 기본값 사용
+      }
+
+      // 카테고리 데이터가 비어있으면 기본 데이터 생성
+      if (Object.keys(workoutTypes).length === 0) {
+        // DB에 저장된 카테고리 목록
+        const defaultCategories = [
+          '달리기',
+          '하이트',
+          '테니스',
+          '등산',
+          '사이클',
+          '수영',
+          '크로스 트레이닝',
+          '걷기',
+          '기타',
+        ];
+
+        // 총 유산소 포인트
+        const totalCardioPoints = record.cardio_points_total || 0;
+
+        // 랜덤하게 3-5개의 카테고리 선택
+        const selectedCount = Math.floor(Math.random() * 3) + 3; // 3-5개
+        const selectedCategories = [...defaultCategories]
+          .sort(() => 0.5 - Math.random())
+          .slice(0, selectedCount);
+
+        // 각 선택된 카테고리에 유산소 포인트 분배
+        let remainingPoints = totalCardioPoints;
+        selectedCategories.forEach((category, index) => {
+          if (index === selectedCategories.length - 1) {
+            // 마지막 카테고리는 남은 포인트 모두 할당
+            workoutTypes[category] = remainingPoints;
+          } else {
+            // 나머지는 랜덤하게 분배 (최소 10% 이상)
+            const minPoint = Math.max(10, Math.floor(totalCardioPoints * 0.1));
+            const maxPoint = Math.max(
+              minPoint,
+              Math.floor(remainingPoints * 0.6)
+            );
+            const points =
+              Math.floor(Math.random() * (maxPoint - minPoint)) + minPoint;
+
+            workoutTypes[category] = points;
+            remainingPoints -= points;
+          }
+        });
       }
 
       // 3. 주간 일일 데이터 생성
@@ -264,15 +351,13 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
           status = cardioValue > 0 ? 'complete' : 'incomplete';
         }
 
-        const dayData: DailyWorkout = {
+        dailyWorkouts.push({
           day: dayOfWeek,
           value: cardioValue,
           status,
           hasStrength: strengthCount > 0,
           strengthCount,
-        };
-
-        dailyWorkouts.push(dayData);
+        });
       }
 
       // 4. 피드백 데이터 처리
@@ -298,7 +383,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         weekNumber: record.weekNumber || 1,
         label,
         totalAchievement: Math.min(record.cardio_points_total || 0, 100), // 유산소 달성률
-        workoutTypes: categoryWorkoutTypes,
+        workoutTypes,
         dailyWorkouts,
         totalSessions: record.strength_sessions_count || 0,
         requiredSessions: 3, // 목표 세션 수 (임의 설정)
@@ -315,61 +400,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     };
   };
 
-  useEffect(() => {
-    const fetchUserWorkoutData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        if (!userId) {
-          throw new Error('사용자 ID가 필요합니다.');
-        }
-
-        console.log(
-          `Fetching workout data for user: ${userId}, challenge: ${challengeId}`
-        );
-
-        // API 호출
-        const response = await fetch(
-          `/api/workouts/user-detail?userId=${userId}`
-        );
-
-        if (!response.ok) {
-          throw new Error(`API 오류: ${response.status}`);
-        }
-
-        const data: ApiResponse = await response.json();
-        console.log('API Response:', data);
-
-        // API 응답 데이터 처리
-        if (data && data.user) {
-          // 데이터 변환
-          const processedData = await processApiData(data);
-          setUserData(processedData);
-          setTotalPoints(data.stats.totalCardioPoints || 0);
-          setUseMockData(false);
-        } else {
-          throw new Error('유효한 데이터가 없습니다.');
-        }
-      } catch (error) {
-        console.error('API 호출 중 오류 발생:', error);
-        setError((error as Error).message);
-
-        // API 오류 시 목업 데이터 사용
-        console.log('API 오류로 인해 목업 데이터 사용');
-        setUseMockData(true);
-
-        // 목업 데이터에서 해당 유저 데이터 찾기
-        const mockData = MOCK_DATA[userId] || MOCK_DATA.default;
-        setUserData(mockData);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserWorkoutData();
-  }, [userId, challengeId]);
-
   return {
     userData,
     loading,
@@ -377,14 +407,4 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     useMockData,
     totalPoints,
   };
-};
-
-// 타입도 내보내기
-export type {
-  WorkoutTypes,
-  DailyWorkout,
-  Feedback,
-  WeeklyWorkout,
-  UserData,
-  ApiResponse,
 };
