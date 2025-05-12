@@ -3,101 +3,15 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { DietTableSkeleton } from '../layout/skeleton';
-
-interface WeekLabel {
-  label: string;
-  startDate: Date;
-  endDate: Date;
-}
-
-interface WeeklyChartData {
-  cardio: {
-    userId: string;
-    x: string;
-    y: number;
-    user: string;
-    date: string;
-    dayLabel: string;
-  }[];
-  strength: {
-    userId: string;
-    x: string;
-    y: number;
-    user: string;
-    date: string;
-    dayLabel: string;
-  }[];
-  users: {
-    id: string;
-    name: string;
-    strengthWorkoutCount: number;
-  }[];
-  weeks: {
-    label: string;
-  }[];
-  challengePeriod: {
-    startDate: string;
-    endDate: string;
-  };
-}
-
-interface LeaderboardEntry {
-  user_id: string;
-  user: {
-    name: string;
-    strengthWorkoutCount: number;
-  };
-  points: number;
-}
-
-interface TodayCountData {
-  count: number;
-  total: number;
-}
-
-interface WeekInfo {
-  label: string;
-  startDate: Date;
-  endDate: Date;
-}
-
-interface WeeklyData {
-  weekNumber: number;
-  startDate: string; // MM.DD
-  endDate: string; // MM.DD
-  aerobicPercentage: number; // 0~100
-  strengthSessions: number;
-}
-
-interface WorkoutWeekData {
-  weekNumber: number;
-  startDate: string;
-  endDate: string;
-  aerobicPercentage: number;
-  strengthSessions: number;
-}
-
-interface WorkoutItem {
-  id: string;
-  challenge_id: string;
-  userId: string;
-  userName: string;
-  name: string;
-  weeklyData: WorkoutWeekData[];
-  hasUploaded: boolean;
-  activeThisWeek: boolean;
-  totalAchievements: number;
-}
-
-interface WeekInfo {
-  label: string;
-  startDate: Date;
-  endDate: Date;
-}
-
-interface WorkoutTableProps {
-  challengeId: string;
-}
+import {
+  WeekLabel,
+  WeeklyChartData,
+  LeaderboardEntry,
+  TodayCountData,
+  WeekInfo,
+  WorkoutItem,
+  WorkoutTableProps,
+} from '@/types/workoutTableTypes';
 
 // Helper function to format date to MM.DD format
 const formatDateToMMDD = (dateString: string | Date) => {

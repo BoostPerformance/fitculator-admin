@@ -118,10 +118,7 @@ export default function WorkoutPage() {
         </div>
       )}
 
-      <WorkoutTable
-        challengeId={params.challengeId as string}
-        useMockData={!isApiConnected} // API 연결 상태에 따라 목데이터 사용 여부 결정
-      />
+      <WorkoutTable challengeId={params.challengeId as string} />
     </div>
   );
 }

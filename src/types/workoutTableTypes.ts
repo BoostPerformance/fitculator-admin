@@ -41,17 +41,104 @@ export interface WorkoutData {
   center_name: string;
 }
 
-export interface WorkoutTableProps {
-  workoutItems?: WorkoutData[];
-  selectedDate?: string;
-  loading?: boolean;
-  onLoadMore?: (page: number) => void;
-  hasMore?: boolean;
-}
-
 export interface WorkoutStatistics {
   total_workouts: number;
   active_users_today: number;
   total_users_today: number;
   weekly_participation_rate: number;
+}
+
+export interface WeekLabel {
+  label: string;
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface WeeklyChartData {
+  cardio: {
+    userId: string;
+    x: string;
+    y: number;
+    user: string;
+    date: string;
+    dayLabel: string;
+  }[];
+  strength: {
+    userId: string;
+    x: string;
+    y: number;
+    user: string;
+    date: string;
+    dayLabel: string;
+  }[];
+  users: {
+    id: string;
+    name: string;
+    strengthWorkoutCount: number;
+  }[];
+  weeks: {
+    label: string;
+  }[];
+  challengePeriod: {
+    startDate: string;
+    endDate: string;
+  };
+}
+
+export interface LeaderboardEntry {
+  user_id: string;
+  user: {
+    name: string;
+    strengthWorkoutCount: number;
+  };
+  points: number;
+}
+
+export interface TodayCountData {
+  count: number;
+  total: number;
+}
+
+export interface WeekInfo {
+  label: string;
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface WeeklyData {
+  weekNumber: number;
+  startDate: string; // MM.DD
+  endDate: string; // MM.DD
+  aerobicPercentage: number; // 0~100
+  strengthSessions: number;
+}
+
+export interface WorkoutWeekData {
+  weekNumber: number;
+  startDate: string;
+  endDate: string;
+  aerobicPercentage: number;
+  strengthSessions: number;
+}
+
+export interface WorkoutItem {
+  id: string;
+  challenge_id: string;
+  userId: string;
+  userName: string;
+  name: string;
+  weeklyData: WorkoutWeekData[];
+  hasUploaded: boolean;
+  activeThisWeek: boolean;
+  totalAchievements: number;
+}
+
+export interface WeekInfo {
+  label: string;
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface WorkoutTableProps {
+  challengeId: string;
 }
