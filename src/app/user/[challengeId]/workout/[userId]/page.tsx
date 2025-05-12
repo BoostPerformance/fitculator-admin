@@ -379,11 +379,25 @@ export default function UserWorkoutDetailPage() {
     label: '데이터 없음',
     workoutTypes: {},
     dailyWorkouts: [],
+    feedback: {
+      text: '피드백이 아직 없습니다.',
+      author: 'AI 코치',
+      date: new Date().toISOString(),
+    },
+    totalSessions: 0,
+    requiredSessions: 3,
   };
   const currentWeekData = userData?.weeklyWorkouts?.[currentWeekIndex] || {
     label: '데이터 없음',
     workoutTypes: {},
     dailyWorkouts: [],
+    feedback: {
+      text: '피드백이 아직 없습니다.',
+      author: 'AI 코치',
+      date: new Date().toISOString(),
+    },
+    totalSessions: 0,
+    requiredSessions: 3,
   };
 
   return (
@@ -482,7 +496,10 @@ export default function UserWorkoutDetailPage() {
                 <div>
                   <TextBox
                     title="코치 피드백"
-                    value={currentWeekData.feedback.text}
+                    value={
+                      currentWeekData.feedback?.text ||
+                      '피드백이 아직 없습니다.'
+                    }
                     placeholder="피드백을 작성하세요."
                     button1="남기기"
                     Btn1className="bg-green text-white"
