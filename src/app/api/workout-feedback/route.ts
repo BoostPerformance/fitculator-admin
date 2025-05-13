@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    // 코치 권한 확인
     const { data: adminUser, error: adminError } = await supabase
       .from('admin_users')
       .select('id')
@@ -44,11 +43,18 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    if (!body.workout_weekly_records_id || !body.coach_feedback) {
+    // ✅ 디버깅용 로그 추가
+    console.log('📥 POST body:', body);
+
+    // ✅ 엄격하게 타입 검사
+    if (
+      !body.workout_weekly_records_id ||
+      typeof body.workout_weekly_records_id !== 'string' ||
+      !body.coach_feedback
+    ) {
       return NextResponse.json({ error: '필수 필드 누락' }, { status: 400 });
     }
 
-    // 기존 피드백 확인
     const { data: existingFeedback } = await supabase
       .from('workout_feedbacks')
       .select('id')
@@ -77,7 +83,7 @@ export async function POST(req: NextRequest) {
           workout_weekly_records_id: body.workout_weekly_records_id,
           coach_id: coach.id,
           coach_feedback: body.coach_feedback,
-          ai_feedback: '',
+          ai_feedback: 'AI 피드백',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })

@@ -385,6 +385,7 @@ export default function UserWorkoutDetailPage() {
   // };
 
   const currentWeekData = userData.weeklyWorkouts?.[currentWeekIndex] || {
+    recordId: '',
     label: '데이터 없음',
     workoutTypes: {},
     dailyWorkouts: [],
@@ -400,6 +401,8 @@ export default function UserWorkoutDetailPage() {
   const weeklyRecordId = userData?.weeklyWorkouts?.[currentWeekIndex]?.recordId;
 
   const handleFeedbackSave = async (feedback: string) => {
+    console.log('📌 recordId:', userData?.weeklyWorkouts?.[currentWeekIndex]);
+
     if (!weeklyRecordId) return alert('주간 운동 데이터 ID가 없습니다.');
 
     setSaving(true);
@@ -466,10 +469,10 @@ export default function UserWorkoutDetailPage() {
                 <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
                   <div className="text-gray-500">근력 운동</div>
                   <div className="text-blue-500 text-2.5-900 pt-5">
-                    {currentWeekData.totalSessions || 0}
-                    <span className="text-1.75-900">
+                    {currentWeekData.totalSessions || 0} 회
+                    {/* <span className="text-1.75-900">
                       /{currentWeekData.requiredSessions || 0} 회
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <button
