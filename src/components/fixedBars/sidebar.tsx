@@ -34,6 +34,9 @@ export default function Sidebar({
 }: SidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpenDropdown, setIsOpenDropdown] = useState(true);
+  const [isOpenChallengeDropdown, setIsOpenChallengeDropdown] = useState<{
+    [id: string]: boolean;
+  }>({});
   const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(true);
   const [selectedTitle, setSelectedTitle] = useState<string>('');
   const [userDropdown, setUserDropdown] = useState(false);
@@ -96,9 +99,22 @@ export default function Sidebar({
     };
   }, []);
 
+  const toggleChallengeDropdown = (challengeId: string) => {
+    setIsOpenChallengeDropdown((prev) => ({
+      ...prev,
+      [challengeId]: !prev[challengeId],
+    }));
+  };
+
   const handleDropdown = () => {
     return setIsOpenDropdown(!isOpenDropdown);
   };
+
+  const handleChallengeDropdown = () => {
+    return setIsOpenChallengeDropdown(!isOpenChallengeDropdown);
+  };
+
+  //() => handleChallengeClick(challenge)
 
   const handleAdminDropdown = () => {
     return setIsAdminDropdownOpen(!isAdminDropdownOpen);
@@ -217,46 +233,73 @@ export default function Sidebar({
                 {isOpenDropdown && (
                   <ul className="font-medium text-1.25-700 text-gray-1 mt-4 flex flex-col gap-2">
                     {data && data.length > 0 ? (
-                      data.map((challenge, index) => (
-                        <li key={challenge.challenges.id}>
-                          <div
-                            className="font-medium block cursor-pointer py-2 pl-4 rounded hover:bg-gray-100 dark:hover:bg-blue-3"
-                            onClick={() => handleChallengeClick(challenge)}
-                          >
-                            <span className="font-medium dark:text-white">
-                              {challenge.challenges.title || '제목 없음'}
-                            </span>
-                          </div>
-                          {selectedChallengeId === challenge.challenges.id && (
-                            <ul className="mt-2 ml-2 border-l-2 border-gray-100 dark:border-blue-3">
-                              <li>
-                                <div
-                                  className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
-                                  onClick={() => {
-                                    router.push(
-                                      `/user/${challenge.challenges.id}/diet`
-                                    );
-                                  }}
-                                >
-                                  식단
-                                </div>
-                              </li>
-                              <li>
-                                <div
-                                  className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
-                                  onClick={() => {
-                                    router.push(
-                                      `/user/${challenge.challenges.id}/workout`
-                                    );
-                                  }}
-                                >
-                                  운동
-                                </div>
-                              </li>
-                            </ul>
-                          )}
-                        </li>
-                      ))
+                      data.map((challenge) => {
+                        const isDropdownOpen =
+                          isOpenChallengeDropdown[challenge.challenges.id];
+
+                        return (
+                          <li key={challenge.challenges.id}>
+                            <div className="font-medium py-2 pl-4 rounded hover:bg-gray-100 dark:hover:bg-blue-3 flex justify-between items-center">
+                              <div
+                                className="cursor-pointer font-medium dark:text-white"
+                                onClick={() => handleChallengeClick(challenge)}
+                              >
+                                {challenge.challenges.title || '제목 없음'}
+                              </div>
+                              <button
+                                onClick={() =>
+                                  toggleChallengeDropdown(
+                                    challenge.challenges.id
+                                  )
+                                }
+                                className="ml-2"
+                              >
+                                <Image
+                                  src={
+                                    isDropdownOpen
+                                      ? `/svg/arrow-up.svg`
+                                      : `/svg/arrow-down.svg`
+                                  }
+                                  width={30}
+                                  height={30}
+                                  alt="드롭다운 아이콘"
+                                  className="w-[1rem] lg:w-[0.8rem]"
+                                />
+                              </button>
+                            </div>
+
+                            {/* 식단/운동 드롭다운 */}
+                            {isDropdownOpen && (
+                              <ul className="mt-2 ml-2 border-l-2 border-gray-100 dark:border-blue-3">
+                                <li>
+                                  <div
+                                    className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                                    onClick={() => {
+                                      router.push(
+                                        `/user/${challenge.challenges.id}/diet`
+                                      );
+                                    }}
+                                  >
+                                    식단
+                                  </div>
+                                </li>
+                                {/* <li>
+                                  <div
+                                    className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
+                                    onClick={() => {
+                                      router.push(
+                                        `/user/${challenge.challenges.id}/workout`
+                                      );
+                                    }}
+                                  >
+                                    운동
+                                  </div>
+                                </li> */}
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      })
                     ) : (
                       <li>
                         <div className="py-2 px-3 text-gray-400">
