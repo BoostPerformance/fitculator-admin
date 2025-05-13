@@ -320,6 +320,8 @@ export default function UserWorkoutDetailPage() {
     requiredSessions: 3,
   };
 
+  console.log('currentWeekData.dailyWorkouts', currentWeekData.dailyWorkouts);
+
   return (
     <div className="flex w-full p-4">
       <div className="w-full md:w-4/6 mr-2 flex flex-col gap-5">
@@ -341,37 +343,7 @@ export default function UserWorkoutDetailPage() {
             weeklyWorkouts={userData.weeklyWorkouts}
             userId={userId}
           />
-          <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
-            <div className="font-bold mb-4">
-              지난 주 운동 그래프 ({lastWeekData?.label || '데이터 없음'})
-            </div>
-            <div className="flex mb-6 sm:flex-col">
-              <div className="flex flex-col w-1/3 sm:w-full sm:gap-6">
-                <div className="relative">
-                  {generateDonutChart(
-                    lastWeekData.workoutTypes || {},
-                    isFirstWeek
-                  )}
-                </div>
-                <div className="flex justify-between text-sm mt-4 bg-gray-8 px-[1.875rem] py-[1.25rem]">
-                  <div className="text-gray-500">근력 운동</div>
-                  <div className="text-blue-500 text-2.5-900 pt-5">
-                    {isFirstWeek ? 0 : lastWeekData.totalSessions || 0}
-                    <span className="text-1.75-900">
-                      /
-                      {isFirstWeek
-                        ? lastWeekData.requiredSessions || 0
-                        : lastWeekData.requiredSessions || 0}{' '}
-                      회
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="w-2/3 flex items-end pl-6 sm:w-full">
-                {generateBarChart(lastWeekData.dailyWorkouts, isFirstWeek)}
-              </div>
-            </div>
-          </div>
+
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="font-bold mb-4">
               이번 주 운동 그래프 ({currentWeekData.label})
@@ -423,6 +395,37 @@ export default function UserWorkoutDetailPage() {
               </div>
             </div>
           </div>
+          {/* <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
+            <div className="font-bold mb-4">
+              지난 주 운동 그래프 ({lastWeekData?.label || '데이터 없음'})
+            </div>
+            <div className="flex mb-6 sm:flex-col">
+              <div className="flex flex-col w-1/3 sm:w-full sm:gap-6">
+                <div className="relative">
+                  {generateDonutChart(
+                    lastWeekData.workoutTypes || {},
+                    isFirstWeek
+                  )}
+                </div>
+                <div className="flex justify-between text-sm mt-4 bg-gray-8 px-[1.875rem] py-[1.25rem]">
+                  <div className="text-gray-500">근력 운동</div>
+                  <div className="text-blue-500 text-2.5-900 pt-5">
+                    {isFirstWeek ? 0 : lastWeekData.totalSessions || 0}
+                    <span className="text-1.75-900">
+                      /
+                      {isFirstWeek
+                        ? lastWeekData.requiredSessions || 0
+                        : lastWeekData.requiredSessions || 0}{' '}
+                      회
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="w-2/3 flex items-end pl-6 sm:w-full">
+                {generateBarChart(lastWeekData.dailyWorkouts, isFirstWeek)}
+              </div>
+            </div>
+          </div> */}
         </div>
       </div>
     </div>

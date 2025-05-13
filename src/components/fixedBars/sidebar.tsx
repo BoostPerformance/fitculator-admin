@@ -241,7 +241,7 @@ export default function Sidebar({
                                   식단
                                 </div>
                               </li>
-                              {/* <li>
+                              <li>
                                 <div
                                   className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
                                   onClick={() => {
@@ -252,7 +252,7 @@ export default function Sidebar({
                                 >
                                   운동
                                 </div>
-                              </li> */}
+                              </li>
                             </ul>
                           )}
                         </li>

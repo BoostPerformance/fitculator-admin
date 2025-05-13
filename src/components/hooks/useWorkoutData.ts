@@ -1,91 +1,14 @@
 // components/hooks/useWorkoutData.ts
 import { useState, useEffect } from 'react';
 import { MOCK_WORKOUT_DATA } from '../mock/workoutData';
-
-// 타입 정의
-export interface WorkoutTypes {
-  [key: string]: number;
-}
-
-export interface DailyWorkout {
-  day: string;
-  value: number;
-  status: 'complete' | 'incomplete' | 'rest';
-  hasStrength: boolean;
-  strengthCount: number;
-}
-
-export interface Feedback {
-  text: string;
-  author: string;
-  date: string;
-}
-
-export interface WeeklyWorkout {
-  weekNumber: number;
-  label: string;
-  totalAchievement: number;
-  workoutTypes: WorkoutTypes;
-  dailyWorkouts: DailyWorkout[];
-  totalSessions: number;
-  requiredSessions: number;
-  feedback: Feedback;
-}
-
-export interface UserData {
-  name: string;
-  achievement: number;
-  weeklyWorkouts: WeeklyWorkout[];
-}
-
-// API 응답 타입
-interface CoachInfo {
-  id: string;
-  name: string;
-  profile_image_url?: string;
-}
-
-interface FeedbackData {
-  id: string;
-  ai_feedback?: string;
-  coach_feedback?: string;
-  coach_memo?: string;
-  coach_id?: string;
-  created_at: string;
-}
-
-interface WeeklyRecord {
-  id: string;
-  user_id: string;
-  start_date: string;
-  end_date: string;
-  cardio_points_total: number;
-  strength_sessions_count: number;
-  created_at: string;
-  updated_at: string;
-  weekNumber?: number;
-  feedback?: FeedbackData | null;
-  coach?: CoachInfo | null;
-}
-
-interface UserInfo {
-  id: string;
-  name: string;
-  displayName?: string;
-}
-
-interface ApiStats {
-  totalWeeks: number;
-  totalCardioPoints: number;
-  totalStrengthSessions: number;
-}
-
-export interface ApiResponse {
-  user: UserInfo;
-  weeklyRecords: WeeklyRecord[];
-  stats: ApiStats;
-  recentWorkouts?: any[];
-}
+import {
+  ApiResponse,
+  UserData,
+  WeeklyWorkout,
+  Feedback,
+  DailyWorkout,
+  WorkoutTypes,
+} from '@/types/useWorkoutDataTypes';
 
 export const useWorkoutData = (userId: string, challengeId: string) => {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -343,11 +266,26 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         // 현재 요일이 주말인지 확인
         const isWeekend = dayOfWeek === '토' || dayOfWeek === '일';
 
+        // 1. cardio 운동 값들 date별로 합산
+        const cardioWorkoutsByDate: Record<string, number> = {};
+
+        recentWorkouts.forEach((workout) => {
+          const workoutType = workout.workout_categories?.workout_types?.name;
+          const workoutDate = new Date(workout.timestamp);
+          const dateKey = workoutDate.toISOString().split('T')[0];
+
+          if (workoutType === 'CARDIO') {
+            if (!cardioWorkoutsByDate[dateKey])
+              cardioWorkoutsByDate[dateKey] = 0;
+            cardioWorkoutsByDate[dateKey] += workout.points || 0; // 또는 duration 등 원하는 값
+          }
+        });
+
         // 유산소 운동 값 설정
         let cardioValue = 0;
-        if (!isWeekend) {
-          // 임시 로직: 요일별로 다른 값 설정
-          cardioValue = weekdays.indexOf(dayOfWeek) * 10 + 20;
+        if (dayDate) {
+          const dateKey = dayDate.toISOString().split('T')[0];
+          cardioValue = cardioWorkoutsByDate[dateKey] || 0;
         }
 
         // 상태 설정
