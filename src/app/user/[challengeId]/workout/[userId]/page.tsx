@@ -10,14 +10,16 @@ import { WorkoutTypes, DailyWorkout } from '@/types/workoutDetailPageType';
 
 const generateDonutChart = (
   workoutTypes: WorkoutTypes,
-  showAsEmpty = false
+  showAsEmpty = false,
+  totalPoints: number
 ) => {
   const total = Object.values(workoutTypes).reduce(
     (sum, value) => sum + value,
     0
   );
+  const circumference = 283;
 
-  if (total === 0 || showAsEmpty) {
+  if (total === 0 || showAsEmpty || totalPoints === 0) {
     return (
       <div className="relative w-full flex flex-col items-center justify-center py-8 text-gray-400 text-sm">
         <svg className="w-45 h-45" viewBox="0 0 100 100">
@@ -45,8 +47,6 @@ const generateDonutChart = (
     );
   }
 
-  let offset = 0;
-  const circumference = 283;
   const colors: Record<string, string> = {
     달리기: '#80FBD0',
     HIIT: '#26CBFF',
@@ -59,26 +59,28 @@ const generateDonutChart = (
     기타: '#607D8F',
   };
 
+  const filledLength = Math.min(
+    (totalPoints / 100) * circumference,
+    circumference
+  ); // 100 기준 max
+
+  let offset = 0;
+
   const segmentInfo = Object.entries(workoutTypes).map(
     ([type, value], index) => {
-      const percentage = (value / total) * 100;
-      const dashoffset = circumference * (1 - value / total);
-      const startAngle = offset * 3.6;
-      offset += percentage;
-      const endAngle = offset * 3.6;
-      const midAngle = ((startAngle + endAngle) / 2) * (Math.PI / 180);
-      const textRadius = 28;
-      const textX = 50 + textRadius * Math.sin(midAngle);
-      const textY = 50 - textRadius * Math.cos(midAngle);
+      const ratio = value / total; // 각 항목이 전체 중 차지하는 비율
+      const segmentLength = ratio * filledLength;
+      const dashoffset = circumference - offset - segmentLength;
+      const rotation = (offset / circumference) * 360;
+      offset += segmentLength;
+
       return {
         type,
-        value,
-        percentage,
-        dashoffset,
-        rotation: startAngle,
-        textX,
-        textY,
+        percentage: ratio * 100, // 텍스트로 표시될 값
         color: colors[type] || `hsl(${index * 60}, 70%, 60%)`,
+        dashoffset,
+        arcLength: segmentLength,
+        rotation,
       };
     }
   );
@@ -87,6 +89,16 @@ const generateDonutChart = (
     <div className="relative w-full">
       <div className="flex items-center justify-center">
         <svg className="w-45 h-45" viewBox="0 0 100 100">
+          {/* 회색 백그라운드 */}
+          <circle
+            cx="50"
+            cy="50"
+            r="35"
+            fill="transparent"
+            stroke="#e5e7eb"
+            strokeWidth="23"
+          />
+          {/* 실제 채워진 부분 */}
           {segmentInfo.map((segment, index) => (
             <circle
               key={`circle-${index}`}
@@ -96,11 +108,12 @@ const generateDonutChart = (
               fill="transparent"
               stroke={segment.color}
               strokeWidth="23"
-              strokeDasharray={circumference}
+              strokeDasharray={`${segment.arcLength} ${circumference}`}
               strokeDashoffset={segment.dashoffset}
               transform={`rotate(${segment.rotation} 50 50)`}
             />
           ))}
+          {/* 중앙 텍스트 */}
           <text
             x="50"
             y="52"
@@ -109,7 +122,7 @@ const generateDonutChart = (
             fontSize="14"
             fontWeight="bold"
           >
-            {Math.round(total)}%
+            {totalPoints.toFixed(1)}%
           </text>
         </svg>
       </div>
@@ -123,7 +136,7 @@ const generateDonutChart = (
             <div>
               {segment.type}
               <br />
-              {Math.round(segment.percentage)}%
+              {segment.percentage.toFixed(1)}%
             </div>
           </div>
         ))}
@@ -153,47 +166,75 @@ const generateBarChart = (
 
   return (
     <div className="relative h-64 w-full">
+      {/* Y축 눈금 */}
       <div className="absolute left-0 h-[90%] flex flex-col justify-between text-gray-500 text-xs">
         <div>100</div>
         <div>50</div>
         <div>0</div>
       </div>
+
+      {/* 바 차트 */}
       <div className="absolute left-8 right-0 h-[90%] flex items-end justify-between">
-        {dailyWorkouts.map((day, index) => (
-          <div
-            key={index}
-            className="flex flex-col items-center h-full relative"
-          >
-            <div className="h-full flex flex-col justify-end w-10 relative">
-              <div className="flex flex-col-reverse items-center gap-1 relative -translate-y-full">
-                {Array.from({ length: day.strengthCount }).map((_, i) => (
-                  <div key={i} className="w-5 h-5">
-                    <Image
-                      src="/svg/dumbell.svg"
-                      width={20}
-                      height={20}
-                      alt="근력운동"
-                      className="w-full h-full"
-                    />
+        {dailyWorkouts.map((day, index) => {
+          const barHeight = (day.value / maxValue) * 100;
+
+          return (
+            <div
+              key={index}
+              className="flex flex-col items-center h-full relative group"
+            >
+              <div className="flex flex-col items-center w-10 h-full justify-end relative">
+                {/* bar 자체 */}
+                <div
+                  className={`relative w-full ${
+                    statusColors[day.status] || 'bg-gray-300'
+                  }`}
+                  style={{
+                    height: `${barHeight}%`,
+                    minHeight: '2px',
+                    borderRadius: '4px 4px 0 0',
+                  }}
+                >
+                  {/* 덤벨 - bar 위에 띄우기 */}
+                  {day.strengthCount > 0 && (
+                    <div
+                      className="absolute bottom-full mb-1 flex flex-col items-center gap-1 pl-3"
+                      style={{
+                        transform: `translateY(-${
+                          (day.value / maxValue) * 100
+                        }%)`,
+                      }}
+                    >
+                      {Array.from({ length: day.strengthCount }).map((_, i) => (
+                        <div key={i} className="w-5 h-5">
+                          <Image
+                            src="/svg/dumbell.svg"
+                            width={20}
+                            height={20}
+                            alt="근력운동"
+                            className="w-full h-full"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* 툴팁 - bar 바깥으로 빼기 */}
+                  <div className="absolute bottom-0 mb-2 px-[0.5rem] py-[0.1rem] text-0.625-500 text-white bg-black rounded opacity-0 group-hover:opacity-50 transition-opacity z-10">
+                    {typeof day.value === 'number'
+                      ? day.value.toFixed(1)
+                      : '0.0'}
+                    p
                   </div>
-                ))}
+                </div>
               </div>
-              <div
-                className={`w-full ${
-                  statusColors[day.status] || 'bg-gray-300'
-                }`}
-                style={{
-                  height: `${(day.value / maxValue) * 100}%`,
-                  minHeight: '2px',
-                  borderRadius: '4px 4px 0 0',
-                }}
-              ></div>
+
+              {/* 요일 */}
+              <div className="text-xs text-gray-500 mt-2 absolute -bottom-6 left-0 right-0 text-center">
+                {day.day}
+              </div>
             </div>
-            <div className="text-xs text-gray-500 mt-2 absolute -bottom-6 left-0 right-0 text-center">
-              {day.day}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -295,18 +336,18 @@ export default function UserWorkoutDetailPage() {
   if (!userData)
     return <div>사용자 데이터를 불러오는 중 오류가 발생했습니다.</div>;
 
-  const lastWeekData = userData.weeklyWorkouts?.[lastWeekIndex] || {
-    label: '데이터 없음',
-    workoutTypes: {},
-    dailyWorkouts: [],
-    feedback: {
-      text: '피드백이 아직 없습니다.',
-      author: 'AI 코치',
-      date: new Date().toISOString(),
-    },
-    totalSessions: 0,
-    requiredSessions: 3,
-  };
+  // const lastWeekData = userData.weeklyWorkouts?.[lastWeekIndex] || {
+  //   label: '데이터 없음',
+  //   workoutTypes: {},
+  //   dailyWorkouts: [],
+  //   feedback: {
+  //     text: '피드백이 아직 없습니다.',
+  //     author: 'AI 코치',
+  //     date: new Date().toISOString(),
+  //   },
+  //   totalSessions: 0,
+  //   requiredSessions: 3,
+  // };
   const currentWeekData = userData.weeklyWorkouts?.[currentWeekIndex] || {
     label: '데이터 없음',
     workoutTypes: {},
@@ -319,6 +360,8 @@ export default function UserWorkoutDetailPage() {
     totalSessions: 0,
     requiredSessions: 3,
   };
+
+  //console.log('currentWeekData.dailyWorkouts', currentWeekData.dailyWorkouts);
 
   return (
     <div className="flex w-full p-4">
@@ -341,7 +384,69 @@ export default function UserWorkoutDetailPage() {
             weeklyWorkouts={userData.weeklyWorkouts}
             userId={userId}
           />
-          <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
+
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="font-bold mb-4">
+              이번 주 운동 그래프 ({currentWeekData.label})
+            </div>
+            <div className="flex gap-6 mb-6 sm:flex-col sm:gap-6">
+              <div className="flex flex-col items-center w-1/3 sm:w-full">
+                <div className="relative w-full">
+                  {generateDonutChart(
+                    currentWeekData.workoutTypes,
+                    false,
+                    totalPoints // ← 이걸 넣어줘야 채워지는 양이 이 기준으로 됨
+                  )}
+                </div>
+                <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
+                  <div className="text-gray-500">근력 운동</div>
+                  <div className="text-blue-500 text-2.5-900 pt-5">
+                    {currentWeekData.totalSessions || 0}
+                    <span className="text-1.75-900">
+                      /{currentWeekData.requiredSessions || 0} 회
+                    </span>
+                  </div>
+                </div>
+                <button
+                  className="pt-[6rem] text-gray-400 font-bold hover:font-extrabold cursor-pointer sm:px-[2rem] sm:hidden lg:block md:block"
+                  onClick={handleBack}
+                >
+                  ← 목록으로
+                </button>
+              </div>
+              <div className="flex flex-col w-2/3 sm:w-full sm:items-start ">
+                <div className="flex items-end mb-4">
+                  {generateBarChart(currentWeekData.dailyWorkouts)}
+                </div>
+                <div>
+                  <TextBox
+                    title="코치 피드백"
+                    value={
+                      currentWeekData.feedback?.text ||
+                      '피드백이 아직 없습니다.'
+                    }
+                    placeholder="피드백을 작성하세요."
+                    button1="남기기"
+                    Btn1className="bg-green text-white"
+                    svg1="/svg/send.svg"
+                    onChange={(e) => console.log(e.target.value)}
+                    onSave={async (feedback) => {
+                      console.log('Saved:', feedback);
+                    }}
+                    isFeedbackMode={true}
+                    copyIcon
+                  />
+                </div>
+                <button
+                  className="pt-[6rem] text-gray-400 font-bold hover:font-extrabold cursor-pointer sm:px-[2rem] sm:block lg:hidden md:hidden"
+                  onClick={handleBack}
+                >
+                  ← 목록으로
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
             <div className="font-bold mb-4">
               지난 주 운동 그래프 ({lastWeekData?.label || '데이터 없음'})
             </div>
@@ -371,58 +476,7 @@ export default function UserWorkoutDetailPage() {
                 {generateBarChart(lastWeekData.dailyWorkouts, isFirstWeek)}
               </div>
             </div>
-          </div>
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="font-bold mb-4">
-              이번 주 운동 그래프 ({currentWeekData.label})
-            </div>
-            <div className="flex gap-6 mb-6 sm:flex-col sm:gap-6">
-              <div className="flex flex-col items-center w-1/3 sm:w-full">
-                <div className="relative w-full">
-                  {generateDonutChart(currentWeekData.workoutTypes)}
-                </div>
-                <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
-                  <div className="text-gray-500">근력 운동</div>
-                  <div className="text-blue-500 text-2.5-900 pt-5">
-                    {currentWeekData.totalSessions || 0}
-                    <span className="text-1.75-900">
-                      /{currentWeekData.requiredSessions || 0} 회
-                    </span>
-                  </div>
-                </div>
-                <button
-                  className="pt-[6rem] text-gray-400 font-bold hover:font-extrabold cursor-pointer sm:px-[2rem]"
-                  onClick={handleBack}
-                >
-                  ← 목록으로
-                </button>
-              </div>
-              <div className="flex flex-col w-2/3 sm:w-full sm:items-center">
-                <div className="flex items-end mb-4">
-                  {generateBarChart(currentWeekData.dailyWorkouts)}
-                </div>
-                <div>
-                  <TextBox
-                    title="코치 피드백"
-                    value={
-                      currentWeekData.feedback?.text ||
-                      '피드백이 아직 없습니다.'
-                    }
-                    placeholder="피드백을 작성하세요."
-                    button1="남기기"
-                    Btn1className="bg-green text-white"
-                    svg1="/svg/send.svg"
-                    onChange={(e) => console.log(e.target.value)}
-                    onSave={async (feedback) => {
-                      console.log('Saved:', feedback);
-                    }}
-                    isFeedbackMode={true}
-                    copyIcon
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

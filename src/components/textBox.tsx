@@ -76,7 +76,7 @@ const TextBox = ({
   };
 
   return (
-    <div className="mt-[2rem] p-[1rem] relative lg:px-0 lg:w-full lg:h-[28rem] sm:min-w-[23rem] sm:dark:text-white">
+    <div className="mt-[2rem] p-[1rem] relative lg:px-0 lg:w-full lg:h-[28rem] sm:min-w-[18rem] sm:dark:text-white sm:px-0">
       <h4 className="text-1.375-700 font-semibold mb-2 flex items-center ">
         {title}
         {copyIcon && (

@@ -155,7 +155,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
         }
 
         // Process API data to workout items using the generated weeks
-        const workoutData = processApiDataToWorkoutItems(
+        const workoutData = await processApiDataToWorkoutItems(
           weeklyChartData,
           leaderboardData,
           todayCountData,
@@ -184,105 +184,95 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   );
 
   // Process API data to workout items
-  const processApiDataToWorkoutItems = (
+  const processApiDataToWorkoutItems = async (
     weeklyChartData: WeeklyChartData,
     leaderboardData: LeaderboardEntry[],
     todayCountData: TodayCountData,
     generatedWeeks: WeekInfo[]
-  ) => {
-    // Extract users
+  ): Promise<WorkoutItem[]> => {
     const users = weeklyChartData.users || [];
-
-    // Extract cardio data
     const cardioData = weeklyChartData.cardio || [];
-
-    // Extract strength data
     const strengthData = weeklyChartData.strength || [];
 
-    // Find user points from leaderboard
     const userPointsMap: Record<string, number> = {};
-    if (leaderboardData && Array.isArray(leaderboardData)) {
-      leaderboardData.forEach((item) => {
-        userPointsMap[item.user_id] = item.points;
-      });
-    }
-
-    // Create workout items
-    const items = users.map((user) => {
-      // Create weekly data for each user
-      const userWeeklyData = generatedWeeks.map((week, index) => {
-        // Find cardio data for this user and week
-        const userCardioInWeek = cardioData.filter((item) => {
-          // Check if the workout date falls within this week
-          const workoutDate = new Date(item.date);
-          return (
-            item.userId === user.id &&
-            workoutDate >= week.startDate &&
-            workoutDate <= week.endDate
-          );
-        });
-
-        // Find strength data for this user and week
-        const userStrengthInWeek = strengthData.filter((item) => {
-          // Check if the workout date falls within this week
-          const workoutDate = new Date(item.date);
-          return (
-            item.userId === user.id &&
-            workoutDate >= week.startDate &&
-            workoutDate <= week.endDate
-          );
-        });
-
-        // Calculate cardio percentage (max 100%)
-        const cardioPoints = userCardioInWeek.reduce(
-          (sum, item) => sum + item.y,
-          0
-        );
-        const cardioPercentage =
-          cardioPoints > 0 ? Math.min(Math.round(cardioPoints), 100) : 0;
-
-        // Weekly strength sessions count
-        const strengthSessions = userStrengthInWeek.length;
-
-        // Extract date range
-        const startDate = formatDateToMMDD(week.startDate);
-        const endDate = formatDateToMMDD(week.endDate);
-
-        return {
-          weekNumber: index + 1, // Week number is now correctly the index + 1
-          startDate: startDate,
-          endDate: endDate,
-          aerobicPercentage: cardioPercentage,
-          strengthSessions: strengthSessions,
-        };
-      });
-
-      // Check if user is active this week (has data in the most recent week)
-      const isActiveThisWeek =
-        userWeeklyData.length > 0 &&
-        (userWeeklyData[userWeeklyData.length - 1].aerobicPercentage > 0 ||
-          userWeeklyData[userWeeklyData.length - 1].strengthSessions > 0);
-
-      // Calculate total achievements
-      const totalAchievement = userWeeklyData.reduce(
-        (sum, week) => sum + week.aerobicPercentage,
-        0
-      );
-
-      return {
-        id: user.id,
-        challenge_id: challengeId || 'default-challenge',
-        userId: user.id,
-        userName: user.name.split(' ')[0] || 'User',
-        name: user.name || '유저',
-        weeklyData: userWeeklyData,
-        hasUploaded: userPointsMap[user.id] > 0,
-        activeThisWeek: isActiveThisWeek,
-        totalAchievements: totalAchievement,
-      };
+    leaderboardData?.forEach((item) => {
+      userPointsMap[item.user_id] = item.points;
     });
 
-    // Sort by total aerobic percentage (descending)
+    const items = await Promise.all(
+      users.map(async (user) => {
+        const userStatsResponse = await fetch(
+          `/api/workouts/user-detail?userId=${user.id}`
+        );
+        const userStatsData = await userStatsResponse.json();
+        const totalCardioPoints = userStatsData.stats?.totalCardioPoints || 0;
+
+        const weeksCount = generatedWeeks.length || 1;
+
+        const userWeeklyData = generatedWeeks.map((week, index) => {
+          const userCardioInWeek = cardioData.filter((item) => {
+            const workoutDate = new Date(item.date);
+            return (
+              item.userId === user.id &&
+              workoutDate >= week.startDate &&
+              workoutDate <= week.endDate
+            );
+          });
+
+          const userStrengthInWeek = strengthData.filter((item) => {
+            const workoutDate = new Date(item.date);
+            return (
+              item.userId === user.id &&
+              workoutDate >= week.startDate &&
+              workoutDate <= week.endDate
+            );
+          });
+
+          const cardioPoints = userCardioInWeek.reduce(
+            (sum, item) => sum + item.y,
+            0
+          );
+          const strengthSessions = userStrengthInWeek.length;
+
+          const startDate = formatDateToMMDD(week.startDate);
+          const endDate = formatDateToMMDD(week.endDate);
+
+          const actualPercentage = Math.round(totalCardioPoints * 10) / 10;
+
+          return {
+            weekNumber: index + 1,
+            startDate,
+            endDate,
+            aerobicPercentage: Math.min(Math.round(cardioPoints), 100),
+            actualPercentage,
+            strengthSessions,
+          };
+        });
+
+        const isActiveThisWeek =
+          userWeeklyData.length > 0 &&
+          (userWeeklyData.at(-1)?.aerobicPercentage > 0 ||
+            userWeeklyData.at(-1)?.strengthSessions > 0);
+
+        const totalAchievement = userWeeklyData.reduce(
+          (sum, week) => sum + week.aerobicPercentage,
+          0
+        );
+
+        return {
+          id: user.id,
+          challenge_id: challengeId || 'default-challenge',
+          userId: user.id,
+          userName: user.name.split(' ')[0] || 'User',
+          name: user.name || '유저',
+          weeklyData: userWeeklyData,
+          hasUploaded: userPointsMap[user.id] > 0,
+          activeThisWeek: isActiveThisWeek,
+          totalAchievements: totalAchievement,
+        };
+      })
+    );
+
     return items.sort((a, b) => {
       const aTotal = a.weeklyData.reduce(
         (sum, week) => sum + week.aerobicPercentage,
@@ -508,7 +498,8 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                 <td className="p-3">{item.name}</td>
                 {item.weeklyData.map((week, weekIndex) => (
                   <td key={weekIndex} className="p-3 text-center text-blue-500">
-                    {week.aerobicPercentage}% / {week.strengthSessions}회
+                    {week.actualPercentage.toFixed(1)}% /{' '}
+                    {week.strengthSessions}회
                   </td>
                 ))}
                 {/* Add empty cells if weekly data is less than week info */}
