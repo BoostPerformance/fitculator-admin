@@ -8,18 +8,38 @@ import WeeklyWorkoutChart from '@/components/workoutDashboard/weeklyWorkoutChart
 import { useWorkoutData } from '@/components/hooks/useWorkoutData';
 import { WorkoutTypes, DailyWorkout } from '@/types/workoutDetailPageType';
 
-const generateDonutChart = (workoutTypes: WorkoutTypes) => {
+const generateDonutChart = (
+  workoutTypes: WorkoutTypes,
+  showAsEmpty = false
+) => {
   const total = Object.values(workoutTypes).reduce(
     (sum, value) => sum + value,
     0
   );
 
-  if (total === 0) {
+  if (total === 0 || showAsEmpty) {
     return (
       <div className="relative w-full flex flex-col items-center justify-center py-8 text-gray-400 text-sm">
-        <div className="w-24 h-24 rounded-full border-4 border-dashed border-gray-300 flex items-center justify-center">
-          0%
-        </div>
+        <svg className="w-45 h-45" viewBox="0 0 100 100">
+          <circle
+            cx="50"
+            cy="50"
+            r="35"
+            fill="transparent"
+            stroke="#e5e7eb"
+            strokeWidth="23"
+          />
+          <text
+            x="50"
+            y="52"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize="14"
+            fontWeight="bold"
+          >
+            0%
+          </text>
+        </svg>
         <p className="mt-4">운동 기록이 등록되면 여기에 표시됩니다.</p>
       </div>
     );
@@ -112,16 +132,19 @@ const generateDonutChart = (workoutTypes: WorkoutTypes) => {
   );
 };
 
-const generateBarChart = (dailyWorkouts: DailyWorkout[]): JSX.Element => {
-  const maxValue = 100;
-
-  if (dailyWorkouts.length === 0) {
+const generateBarChart = (
+  dailyWorkouts: DailyWorkout[],
+  showAsEmpty = false
+): JSX.Element => {
+  if (dailyWorkouts.length === 0 || showAsEmpty) {
     return (
       <div className="h-64 w-full flex items-center justify-center text-gray-400 text-sm">
         운동 기록이 등록되면 여기에 표시됩니다.
       </div>
     );
   }
+
+  const maxValue = 100;
   const statusColors: Record<string, string> = {
     complete: 'bg-[#26CBFF]',
     incomplete: 'bg-[#FF1469]',
@@ -248,6 +271,8 @@ export default function UserWorkoutDetailPage() {
     return { currentWeekIndex: currentIdx, lastWeekIndex: lastIdx };
   }, [userData]);
 
+  const isFirstWeek = currentWeekIndex === lastWeekIndex;
+
   const handleBack = () => router.push(`/user/${params.challengeId}/workout`);
 
   useEffect(() => {
@@ -323,20 +348,27 @@ export default function UserWorkoutDetailPage() {
             <div className="flex mb-6 sm:flex-col">
               <div className="flex flex-col w-1/3 sm:w-full sm:gap-6">
                 <div className="relative">
-                  {generateDonutChart(lastWeekData.workoutTypes || {})}
+                  {generateDonutChart(
+                    lastWeekData.workoutTypes || {},
+                    isFirstWeek
+                  )}
                 </div>
                 <div className="flex justify-between text-sm mt-4 bg-gray-8 px-[1.875rem] py-[1.25rem]">
                   <div className="text-gray-500">근력 운동</div>
                   <div className="text-blue-500 text-2.5-900 pt-5">
-                    {lastWeekData.totalSessions || 0}
+                    {isFirstWeek ? 0 : lastWeekData.totalSessions || 0}
                     <span className="text-1.75-900">
-                      /{lastWeekData.requiredSessions || 0} 회
+                      /
+                      {isFirstWeek
+                        ? lastWeekData.requiredSessions || 0
+                        : lastWeekData.requiredSessions || 0}{' '}
+                      회
                     </span>
                   </div>
                 </div>
               </div>
               <div className="w-2/3 flex items-end pl-6 sm:w-full">
-                {generateBarChart(lastWeekData.dailyWorkouts) || []}
+                {generateBarChart(lastWeekData.dailyWorkouts, isFirstWeek)}
               </div>
             </div>
           </div>
@@ -372,12 +404,10 @@ export default function UserWorkoutDetailPage() {
                 <div>
                   <TextBox
                     title="코치 피드백"
-
                     value={
                       currentWeekData.feedback?.text ||
                       '피드백이 아직 없습니다.'
                     }
-
                     placeholder="피드백을 작성하세요."
                     button1="남기기"
                     Btn1className="bg-green text-white"

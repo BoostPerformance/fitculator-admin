@@ -26,7 +26,7 @@ export async function GET() {
 
     // 받아온 데이터 구조 변환
 
-    // console.log(adminUser);
+    // console.log('adminUser 여ㅕ깃어요', adminUser);
 
     // console.log(formattedData);
 
