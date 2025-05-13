@@ -249,10 +249,11 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
           };
         });
 
+        const lastWeek = userWeeklyData.at(-1);
         const isActiveThisWeek =
           userWeeklyData.length > 0 &&
-          (userWeeklyData.at(-1)?.aerobicPercentage > 0 ||
-            userWeeklyData.at(-1)?.strengthSessions > 0);
+          ((lastWeek?.aerobicPercentage ?? 0) > 0 ||
+            (lastWeek?.strengthSessions ?? 0) > 0);
 
         const totalAchievement = userWeeklyData.reduce(
           (sum, week) => sum + week.aerobicPercentage,

@@ -18,6 +18,7 @@ export interface Feedback {
 }
 
 export interface WeeklyWorkout {
+  recordId: string;
   weekNumber: number;
   label: string;
   totalAchievement: number;
@@ -77,6 +78,7 @@ export interface ApiStats {
 }
 
 export interface ApiResponse {
+  id: string;
   user: UserInfo;
   weeklyRecords: WeeklyRecord[];
   stats: ApiStats;

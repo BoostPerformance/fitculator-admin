@@ -1,6 +1,5 @@
 // components/hooks/useWorkoutData.ts
 import { useState, useEffect } from 'react';
-import { MOCK_WORKOUT_DATA } from '../mock/workoutData';
 import {
   ApiResponse,
   UserData,
@@ -43,7 +42,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
         // API 응답 데이터 처리 (데이터 매핑 함수)
         const processedData = await transformApiData(data);
-
+        console.log('processedData', processedData);
         // 항상 실제 데이터 사용
         setUserData(processedData);
         setTotalPoints(data.stats.totalCardioPoints);
@@ -82,7 +81,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
   // API 데이터를 우리 형식으로 변환하는 함수
   const transformApiData = async (apiData: ApiResponse): Promise<UserData> => {
-    const { user, weeklyRecords, stats } = apiData;
+    const { id, user, weeklyRecords, stats } = apiData;
 
     // 주간 레코드 처리
     const processedWeeklyWorkouts: WeeklyWorkout[] = [];
@@ -117,14 +116,14 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         if (response.ok) {
           const categoryData = await response.json();
 
-          console.log('categoryData', categoryData);
+          //console.log('categoryData', categoryData);
 
           if (categoryData.data && categoryData.data.length > 0) {
             const weekData = categoryData.data.find(
               (week: any) => week.weekLabel === label
             );
 
-            console.log('weekData', weekData);
+            // console.log('weekData', weekData);
 
             if (weekData && weekData.categories) {
               // 새로운 운동 타입 객체 생성
@@ -304,13 +303,14 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
       // 5. 주간 정보 구성
       processedWeeklyWorkouts.push({
+        recordId: record.id,
         weekNumber: record.weekNumber || 1,
         label,
-        totalAchievement: Math.min(record.cardio_points_total || 0, 100), // 유산소 달성률
+        totalAchievement: Math.min(record.cardio_points_total || 0, 100),
         workoutTypes,
         dailyWorkouts,
         totalSessions: record.strength_sessions_count || 0,
-        requiredSessions: 3, // 목표 세션 수 (임의 설정)
+        requiredSessions: 3,
         feedback: feedbackData,
       });
     }

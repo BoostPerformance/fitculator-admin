@@ -13,23 +13,23 @@ const generateDonutChart = (
   showAsEmpty = false,
   totalPoints: number
 ) => {
-  const total = Object.values(workoutTypes).reduce(
-    (sum, value) => sum + value,
-    0
-  );
-  const circumference = 283;
+  const radius = 35;
+  const center = 50;
+  const strokeWidth = 23;
+  const safeTotalPoints = Math.min(totalPoints, 100); // 최대 100%
+  const total = Object.values(workoutTypes).reduce((sum, v) => sum + v, 0);
 
   if (total === 0 || showAsEmpty || totalPoints === 0) {
     return (
       <div className="relative w-full flex flex-col items-center justify-center py-8 text-gray-400 text-sm">
         <svg className="w-45 h-45" viewBox="0 0 100 100">
           <circle
-            cx="50"
-            cy="50"
-            r="35"
+            cx={center}
+            cy={center}
+            r={radius}
             fill="transparent"
             stroke="#e5e7eb"
-            strokeWidth="23"
+            strokeWidth={strokeWidth}
           />
           <text
             x="50"
@@ -59,60 +59,68 @@ const generateDonutChart = (
     기타: '#607D8F',
   };
 
-  const filledLength = Math.min(
-    (totalPoints / 100) * circumference,
-    circumference
-  ); // 100 기준 max
+  const toRadians = (degree: number) => (degree * Math.PI) / 180;
 
-  let offset = 0;
+  const describeArc = (startAngle: number, endAngle: number) => {
+    const start = {
+      x: center + radius * Math.cos(toRadians(startAngle)),
+      y: center + radius * Math.sin(toRadians(startAngle)),
+    };
+    const end = {
+      x: center + radius * Math.cos(toRadians(endAngle)),
+      y: center + radius * Math.sin(toRadians(endAngle)),
+    };
 
-  const segmentInfo = Object.entries(workoutTypes).map(
-    ([type, value], index) => {
-      const ratio = value / total; // 각 항목이 전체 중 차지하는 비율
-      const segmentLength = ratio * filledLength;
-      const dashoffset = circumference - offset - segmentLength;
-      const rotation = (offset / circumference) * 360;
-      offset += segmentLength;
+    const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
 
-      return {
-        type,
-        percentage: ratio * 100, // 텍스트로 표시될 값
-        color: colors[type] || `hsl(${index * 60}, 70%, 60%)`,
-        dashoffset,
-        arcLength: segmentLength,
-        rotation,
-      };
-    }
-  );
+    return [
+      `M ${start.x} ${start.y}`,
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`,
+    ].join(' ');
+  };
+
+  let currentAngle = -90;
+  const segmentInfo = Object.entries(workoutTypes).map(([type, value], i) => {
+    const ratio = value / total;
+    const sweepAngle = ratio * 360 * (safeTotalPoints / 100); // 100% 기준 내에서만 표시
+    const path = describeArc(currentAngle, currentAngle + sweepAngle);
+    const color = colors[type] || `hsl(${i * 60}, 70%, 60%)`;
+    const segment = {
+      type,
+      percentage: ratio * 100,
+      path,
+      color,
+    };
+    currentAngle += sweepAngle;
+    return segment;
+  });
 
   return (
     <div className="relative w-full">
       <div className="flex items-center justify-center">
         <svg className="w-45 h-45" viewBox="0 0 100 100">
-          {/* 회색 백그라운드 */}
+          {/* 배경 원 */}
           <circle
-            cx="50"
-            cy="50"
-            r="35"
+            cx={center}
+            cy={center}
+            r={radius}
             fill="transparent"
             stroke="#e5e7eb"
-            strokeWidth="23"
+            strokeWidth={strokeWidth}
           />
-          {/* 실제 채워진 부분 */}
+
+          {/* 세그먼트 arc */}
           {segmentInfo.map((segment, index) => (
-            <circle
-              key={`circle-${index}`}
-              cx="50"
-              cy="50"
-              r="35"
+            <path
+              key={index}
+              d={segment.path}
               fill="transparent"
               stroke={segment.color}
-              strokeWidth="23"
-              strokeDasharray={`${segment.arcLength} ${circumference}`}
-              strokeDashoffset={segment.dashoffset}
-              transform={`rotate(${segment.rotation} 50 50)`}
+              strokeWidth={strokeWidth}
+              strokeLinecap="butt"
             />
           ))}
+
           {/* 중앙 텍스트 */}
           <text
             x="50"
@@ -126,6 +134,8 @@ const generateDonutChart = (
           </text>
         </svg>
       </div>
+
+      {/* 범례 */}
       <div className="flex flex-wrap justify-around text-xs mt-2">
         {segmentInfo.map((segment, index) => (
           <div key={index} className="flex items-center my-1">
@@ -273,6 +283,9 @@ export default function UserWorkoutDetailPage() {
   const userId = params.userId as string;
   const challengeId = params.challengeId as string;
   const router = useRouter();
+  const [coachFeedback, setCoachFeedback] = useState('');
+  const [feedbackId, setFeedbackId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const {
     userData,
@@ -317,6 +330,28 @@ export default function UserWorkoutDetailPage() {
   const handleBack = () => router.push(`/user/${params.challengeId}/workout`);
 
   useEffect(() => {
+    const weeklyRecordId =
+      userData?.weeklyWorkouts?.[currentWeekIndex]?.recordId;
+    if (!weeklyRecordId) return;
+
+    const fetchCoachFeedback = async () => {
+      const res = await fetch(
+        `/api/workout-feedback?workout_weekly_records_id=${weeklyRecordId}`
+      );
+      const data = await res.json();
+      if (res.ok && data.data) {
+        setCoachFeedback(data.data.coach_feedback || '');
+        setFeedbackId(data.data.id);
+      } else {
+        setCoachFeedback('');
+        setFeedbackId(null);
+      }
+    };
+
+    fetchCoachFeedback();
+  }, [userData, currentWeekIndex]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, [params]);
 
@@ -348,7 +383,9 @@ export default function UserWorkoutDetailPage() {
   //   totalSessions: 0,
   //   requiredSessions: 3,
   // };
+
   const currentWeekData = userData.weeklyWorkouts?.[currentWeekIndex] || {
+    recordId: '',
     label: '데이터 없음',
     workoutTypes: {},
     dailyWorkouts: [],
@@ -361,7 +398,38 @@ export default function UserWorkoutDetailPage() {
     requiredSessions: 3,
   };
 
-  //console.log('currentWeekData.dailyWorkouts', currentWeekData.dailyWorkouts);
+  const weeklyRecordId = userData?.weeklyWorkouts?.[currentWeekIndex]?.recordId;
+
+  const handleFeedbackSave = async (feedback: string) => {
+    console.log('📌 recordId:', userData?.weeklyWorkouts?.[currentWeekIndex]);
+
+    if (!weeklyRecordId) return alert('주간 운동 데이터 ID가 없습니다.');
+
+    setSaving(true);
+    try {
+      const res = await fetch('/api/workout-feedback', {
+        method: 'POST',
+        body: JSON.stringify({
+          workout_weekly_records_id: weeklyRecordId,
+          coach_feedback: feedback,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || '저장 실패');
+
+      setCoachFeedback(result.data.coach_feedback || '');
+      alert('피드백이 저장되었습니다!');
+    } catch (e) {
+      console.error('저장 중 에러:', e);
+      alert('피드백 저장에 실패했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="flex w-full p-4">
@@ -401,10 +469,10 @@ export default function UserWorkoutDetailPage() {
                 <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
                   <div className="text-gray-500">근력 운동</div>
                   <div className="text-blue-500 text-2.5-900 pt-5">
-                    {currentWeekData.totalSessions || 0}
-                    <span className="text-1.75-900">
+                    {currentWeekData.totalSessions || 0} 회
+                    {/* <span className="text-1.75-900">
                       /{currentWeekData.requiredSessions || 0} 회
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <button
@@ -421,18 +489,13 @@ export default function UserWorkoutDetailPage() {
                 <div>
                   <TextBox
                     title="코치 피드백"
-                    value={
-                      currentWeekData.feedback?.text ||
-                      '피드백이 아직 없습니다.'
-                    }
+                    value={coachFeedback}
                     placeholder="피드백을 작성하세요."
                     button1="남기기"
                     Btn1className="bg-green text-white"
                     svg1="/svg/send.svg"
-                    onChange={(e) => console.log(e.target.value)}
-                    onSave={async (feedback) => {
-                      console.log('Saved:', feedback);
-                    }}
+                    onChange={(e) => setCoachFeedback(e.target.value)}
+                    onSave={handleFeedbackSave}
                     isFeedbackMode={true}
                     copyIcon
                   />

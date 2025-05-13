@@ -84,7 +84,7 @@ export async function GET(request: Request) {
     console.log('참가자 별 일일 기록 가져오기 시작');
     const participantsWithRecords = await Promise.all(
       participants.map(async (participant) => {
-        console.log(`참가자 ID: ${participant.id} 처리 중`);
+        // console.log(`참가자 ID: ${participant.id} 처리 중`);
 
         // Get count of daily records
         const { count } = await supabase
@@ -92,9 +92,9 @@ export async function GET(request: Request) {
           .select('*', { count: 'exact', head: true })
           .eq('participant_id', participant.id);
 
-        console.log(
-          `참가자 ${participant.id}의 daily_records 수: ${count || 0}`
-        );
+        // console.log(
+        //   `참가자 ${participant.id}의 daily_records 수: ${count || 0}`
+        // );
 
         let dailyRecords = [];
 
@@ -111,9 +111,9 @@ export async function GET(request: Request) {
             .split('T')[0];
           const formattedEndDate = challengeEndDate.toISOString().split('T')[0];
 
-          console.log(
-            `참가자 ${participant.id}의 챌린지 기간: ${formattedStartDate} ~ ${formattedEndDate}`
-          );
+          // console.log(
+          //   `참가자 ${participant.id}의 챌린지 기간: ${formattedStartDate} ~ ${formattedEndDate}`
+          // );
 
           // 챌린지 기간 내의 모든 daily records 가져오기 (페이지네이션 없이)
           let recordsQuery = supabase
@@ -149,17 +149,17 @@ export async function GET(request: Request) {
           const { data: records, error: recordsError } = await recordsQuery;
 
           if (recordsError) {
-            console.error(
-              `참가자 ${participant.id}의 일일 기록 조회 오류:`,
-              recordsError
-            );
+            // console.error(
+            //   `참가자 ${participant.id}의 일일 기록 조회 오류:`,
+            //   recordsError
+            // );
             dailyRecords = []; // 에러 발생 시 빈 배열로 설정
           } else {
-            console.log(
-              `참가자 ${participant.id}의 일일 기록 조회 성공: ${
-                records?.length || 0
-              }개 발견`
-            );
+            // console.log(
+            //   `참가자 ${participant.id}의 일일 기록 조회 성공: ${
+            //     records?.length || 0
+            //   }개 발견`
+            // );
 
             if (records && records.length > 0) {
               // console.log('첫 번째 일일 기록 샘플:', {
