@@ -14,7 +14,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [useMockData, setUseMockData] = useState<boolean>(false);
   const [totalPoints, setTotalPoints] = useState<number>(0);
 
   useEffect(() => {
@@ -22,7 +21,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
       try {
         setLoading(true);
         setError(null);
-
         if (!userId) {
           throw new Error('사용자 ID가 필요합니다.');
         }
@@ -49,7 +47,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         // 항상 실제 데이터 사용
         setUserData(processedData);
         setTotalPoints(data.stats.totalCardioPoints);
-        setUseMockData(false);
 
         console.log('Final User Data:', processedData);
       } catch (error) {
@@ -63,7 +60,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
           weeklyWorkouts: [],
         });
         setTotalPoints(0);
-        setUseMockData(false);
       } finally {
         setLoading(false);
       }
@@ -79,7 +75,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         weeklyWorkouts: [],
       });
       setTotalPoints(0);
-      setUseMockData(false);
 
       setLoading(false);
     }
@@ -333,7 +328,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     userData,
     loading,
     error,
-    useMockData,
+
     totalPoints,
   };
 };

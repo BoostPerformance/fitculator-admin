@@ -11,7 +11,7 @@ import { WorkoutTypes, DailyWorkout } from '@/types/workoutDetailPageType';
 const generateDonutChart = (
   workoutTypes: WorkoutTypes,
   showAsEmpty = false,
-  actualPercentage: number = 0
+  totalPoints: number
 ) => {
   const total = Object.values(workoutTypes).reduce(
     (sum, value) => sum + value,
@@ -19,7 +19,7 @@ const generateDonutChart = (
   );
   const circumference = 283;
 
-  if (total === 0 || showAsEmpty) {
+  if (total === 0 || showAsEmpty || totalPoints === 0) {
     return (
       <div className="relative w-full flex flex-col items-center justify-center py-8 text-gray-400 text-sm">
         <svg className="w-45 h-45" viewBox="0 0 100 100">
@@ -59,24 +59,27 @@ const generateDonutChart = (
     기타: '#607D8F',
   };
 
+  const filledLength = Math.min(
+    (totalPoints / 100) * circumference,
+    circumference
+  ); // 100 기준 max
+
   let offset = 0;
 
   const segmentInfo = Object.entries(workoutTypes).map(
     ([type, value], index) => {
-      const typeRatio = value / total; // 비율만
-      const filledAngle = (actualPercentage / 100) * circumference; // 전체에서 몇만큼 채워질지
-      const typeArcLength = typeRatio * filledAngle;
-
-      const dashoffset = circumference - offset - typeArcLength;
+      const ratio = value / total; // 각 항목이 전체 중 차지하는 비율
+      const segmentLength = ratio * filledLength;
+      const dashoffset = circumference - offset - segmentLength;
       const rotation = (offset / circumference) * 360;
-      offset += typeArcLength;
+      offset += segmentLength;
 
       return {
         type,
-        percentage: typeRatio * 100, // 내부 표시용
+        percentage: ratio * 100, // 텍스트로 표시될 값
         color: colors[type] || `hsl(${index * 60}, 70%, 60%)`,
         dashoffset,
-        arcLength: typeArcLength,
+        arcLength: segmentLength,
         rotation,
       };
     }
@@ -119,7 +122,7 @@ const generateDonutChart = (
             fontSize="14"
             fontWeight="bold"
           >
-            {actualPercentage.toFixed(1)}%
+            {totalPoints.toFixed(1)}%
           </text>
         </svg>
       </div>
@@ -380,7 +383,11 @@ export default function UserWorkoutDetailPage() {
             <div className="flex gap-6 mb-6 sm:flex-col sm:gap-6">
               <div className="flex flex-col items-center w-1/3 sm:w-full">
                 <div className="relative w-full">
-                  {generateDonutChart(currentWeekData.workoutTypes)}
+                  {generateDonutChart(
+                    currentWeekData.workoutTypes,
+                    false,
+                    totalPoints // ← 이걸 넣어줘야 채워지는 양이 이 기준으로 됨
+                  )}
                 </div>
                 <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
                   <div className="text-gray-500">근력 운동</div>
