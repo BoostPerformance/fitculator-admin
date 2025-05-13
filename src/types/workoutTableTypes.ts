@@ -119,6 +119,7 @@ export interface WorkoutWeekData {
   endDate: string;
   aerobicPercentage: number;
   strengthSessions: number;
+  actualPercentage: number;
 }
 
 export interface WorkoutItem {
@@ -130,6 +131,7 @@ export interface WorkoutItem {
   weeklyData: WorkoutWeekData[];
   hasUploaded: boolean;
   activeThisWeek: boolean;
+  actualPercentage?: number;
   totalAchievements: number;
 }
 

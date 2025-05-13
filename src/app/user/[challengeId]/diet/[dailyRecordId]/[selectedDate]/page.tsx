@@ -537,7 +537,7 @@ export default function SelectedDate() {
 
               <TotalFeedbackCounts
                 counts={metrics.count.toString()}
-                total={metrics.total.toString() + '일'}
+                total={metrics.total?.toString() + '일'}
                 borderColor="border-[#FDB810]"
                 textColor="text-[#FDB810]"
                 title="총 식단 업로드"
