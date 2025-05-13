@@ -237,11 +237,9 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
       for (let i = 0; i < 7; i++) {
         const dayOfWeek = weekdays[i];
 
-        // 해당 요일에 맞는 날짜 찾기 (있다면)
         const dayDate = dateRange.find((date) => {
           const day = date.getDay();
-          // 0(일) ~ 6(토) -> '일', '월', ... 로 변환
-          return weekdays[(day + 1) % 7] === dayOfWeek;
+          return weekdays[day] === dayOfWeek; // 요일 정렬 개선 후
         });
 
         // 해당 날짜의 근력 운동 횟수 가져오기
@@ -249,18 +247,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         if (dayDate) {
           const dateKey = dayDate.toISOString().split('T')[0];
           strengthCount = strengthWorkoutsByDate[dateKey] || 0;
-        }
-
-        // 주간 총 근력 운동 횟수를 기반으로 추산 (API 데이터가 충분하지 않은 경우)
-        if (!strengthCount && record.strength_sessions_count) {
-          // 월, 수, 금에 균등하게 분배 (또는 다른 분배 방식 적용)
-          const strengthDays = ['월', '수', '금'];
-          if (strengthDays.includes(dayOfWeek)) {
-            const sessionsPerDay = Math.ceil(
-              record.strength_sessions_count / strengthDays.length
-            );
-            strengthCount = Math.min(1, sessionsPerDay); // 최대 1개만 표시
-          }
         }
 
         // 현재 요일이 주말인지 확인

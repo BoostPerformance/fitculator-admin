@@ -178,16 +178,27 @@ const generateBarChart = (
                   </div>
                 ))}
               </div>
-              <div
-                className={`w-full ${
-                  statusColors[day.status] || 'bg-gray-300'
-                }`}
-                style={{
-                  height: `${(day.value / maxValue) * 100}%`,
-                  minHeight: '2px',
-                  borderRadius: '4px 4px 0 0',
-                }}
-              ></div>
+              {/* 바 + 툴팁 컨테이너 */}
+              <div className="w-full h-full relative group flex justify-center">
+                {/* 툴팁 */}
+                <div className="absolute bottom-2 mb-1 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-70 transition-opacity z-10 text-0.625-500 bg-black">
+                  {typeof day.value === 'number' ? day.value.toFixed(1) : '0.0'}
+                  p
+                </div>
+
+                {/* 바 */}
+                <div
+                  className={`${
+                    statusColors[day.status] || 'bg-gray-300'
+                  } w-full`}
+                  style={{
+                    height: `${(day.value / maxValue) * 100}%`,
+                    minHeight: '2px',
+                    borderRadius: '4px 4px 0 0',
+                    alignSelf: 'flex-end', // 핵심!
+                  }}
+                ></div>
+              </div>
             </div>
             <div className="text-xs text-gray-500 mt-2 absolute -bottom-6 left-0 right-0 text-center">
               {day.day}
@@ -295,18 +306,18 @@ export default function UserWorkoutDetailPage() {
   if (!userData)
     return <div>사용자 데이터를 불러오는 중 오류가 발생했습니다.</div>;
 
-  const lastWeekData = userData.weeklyWorkouts?.[lastWeekIndex] || {
-    label: '데이터 없음',
-    workoutTypes: {},
-    dailyWorkouts: [],
-    feedback: {
-      text: '피드백이 아직 없습니다.',
-      author: 'AI 코치',
-      date: new Date().toISOString(),
-    },
-    totalSessions: 0,
-    requiredSessions: 3,
-  };
+  // const lastWeekData = userData.weeklyWorkouts?.[lastWeekIndex] || {
+  //   label: '데이터 없음',
+  //   workoutTypes: {},
+  //   dailyWorkouts: [],
+  //   feedback: {
+  //     text: '피드백이 아직 없습니다.',
+  //     author: 'AI 코치',
+  //     date: new Date().toISOString(),
+  //   },
+  //   totalSessions: 0,
+  //   requiredSessions: 3,
+  // };
   const currentWeekData = userData.weeklyWorkouts?.[currentWeekIndex] || {
     label: '데이터 없음',
     workoutTypes: {},
@@ -320,7 +331,7 @@ export default function UserWorkoutDetailPage() {
     requiredSessions: 3,
   };
 
-  console.log('currentWeekData.dailyWorkouts', currentWeekData.dailyWorkouts);
+  //console.log('currentWeekData.dailyWorkouts', currentWeekData.dailyWorkouts);
 
   return (
     <div className="flex w-full p-4">
