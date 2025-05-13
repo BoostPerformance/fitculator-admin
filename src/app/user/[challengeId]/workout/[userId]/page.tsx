@@ -196,19 +196,28 @@ const generateBarChart = (
                   }}
                 >
                   {/* 덤벨 - bar 위에 띄우기 */}
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
-                    {Array.from({ length: day.strengthCount }).map((_, i) => (
-                      <div key={i} className="w-5 h-5">
-                        <Image
-                          src="/svg/dumbell.svg"
-                          width={20}
-                          height={20}
-                          alt="근력운동"
-                          className="w-full h-full"
-                        />
-                      </div>
-                    ))}
-                  </div>
+                  {day.strengthCount > 0 && (
+                    <div
+                      className="absolute bottom-full mb-1 flex flex-col items-center gap-1 pl-3"
+                      style={{
+                        transform: `translateY(-${
+                          (day.value / maxValue) * 100
+                        }%)`,
+                      }}
+                    >
+                      {Array.from({ length: day.strengthCount }).map((_, i) => (
+                        <div key={i} className="w-5 h-5">
+                          <Image
+                            src="/svg/dumbell.svg"
+                            width={20}
+                            height={20}
+                            alt="근력운동"
+                            className="w-full h-full"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {/* 툴팁 - bar 바깥으로 빼기 */}
                   <div className="absolute bottom-0 mb-2 px-[0.5rem] py-[0.1rem] text-0.625-500 text-white bg-black rounded opacity-0 group-hover:opacity-50 transition-opacity z-10">
                     {typeof day.value === 'number'
