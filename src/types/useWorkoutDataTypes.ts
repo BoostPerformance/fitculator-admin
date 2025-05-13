@@ -26,6 +26,7 @@ export interface WeeklyWorkout {
   totalSessions: number;
   requiredSessions: number;
   feedback: Feedback;
+  recordId?: string;
 }
 
 export interface UserData {

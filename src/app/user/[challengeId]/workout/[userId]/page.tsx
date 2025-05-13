@@ -283,6 +283,9 @@ export default function UserWorkoutDetailPage() {
   const userId = params.userId as string;
   const challengeId = params.challengeId as string;
   const router = useRouter();
+  const [coachFeedback, setCoachFeedback] = useState('');
+  const [feedbackId, setFeedbackId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const {
     userData,
@@ -327,6 +330,28 @@ export default function UserWorkoutDetailPage() {
   const handleBack = () => router.push(`/user/${params.challengeId}/workout`);
 
   useEffect(() => {
+    const weeklyRecordId =
+      userData?.weeklyWorkouts?.[currentWeekIndex]?.recordId;
+    if (!weeklyRecordId) return;
+
+    const fetchCoachFeedback = async () => {
+      const res = await fetch(
+        `/api/workout-feedback?workout_weekly_records_id=${weeklyRecordId}`
+      );
+      const data = await res.json();
+      if (res.ok && data.data) {
+        setCoachFeedback(data.data.coach_feedback || '');
+        setFeedbackId(data.data.id);
+      } else {
+        setCoachFeedback('');
+        setFeedbackId(null);
+      }
+    };
+
+    fetchCoachFeedback();
+  }, [userData, currentWeekIndex]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, [params]);
 
@@ -358,6 +383,7 @@ export default function UserWorkoutDetailPage() {
   //   totalSessions: 0,
   //   requiredSessions: 3,
   // };
+
   const currentWeekData = userData.weeklyWorkouts?.[currentWeekIndex] || {
     label: '데이터 없음',
     workoutTypes: {},
@@ -371,7 +397,36 @@ export default function UserWorkoutDetailPage() {
     requiredSessions: 3,
   };
 
-  //console.log('currentWeekData.dailyWorkouts', currentWeekData.dailyWorkouts);
+  const weeklyRecordId = userData?.weeklyWorkouts?.[currentWeekIndex]?.recordId;
+
+  const handleFeedbackSave = async (feedback: string) => {
+    if (!weeklyRecordId) return alert('주간 운동 데이터 ID가 없습니다.');
+
+    setSaving(true);
+    try {
+      const res = await fetch('/api/workout-feedback', {
+        method: 'POST',
+        body: JSON.stringify({
+          workout_weekly_records_id: weeklyRecordId,
+          coach_feedback: feedback,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || '저장 실패');
+
+      setCoachFeedback(result.data.coach_feedback || '');
+      alert('피드백이 저장되었습니다!');
+    } catch (e) {
+      console.error('저장 중 에러:', e);
+      alert('피드백 저장에 실패했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="flex w-full p-4">
@@ -431,18 +486,13 @@ export default function UserWorkoutDetailPage() {
                 <div>
                   <TextBox
                     title="코치 피드백"
-                    value={
-                      currentWeekData.feedback?.text ||
-                      '피드백이 아직 없습니다.'
-                    }
+                    value={coachFeedback}
                     placeholder="피드백을 작성하세요."
                     button1="남기기"
                     Btn1className="bg-green text-white"
                     svg1="/svg/send.svg"
-                    onChange={(e) => console.log(e.target.value)}
-                    onSave={async (feedback) => {
-                      console.log('Saved:', feedback);
-                    }}
+                    onChange={(e) => setCoachFeedback(e.target.value)}
+                    onSave={handleFeedbackSave}
                     isFeedbackMode={true}
                     copyIcon
                   />
