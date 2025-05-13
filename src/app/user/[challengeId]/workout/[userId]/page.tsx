@@ -13,23 +13,23 @@ const generateDonutChart = (
   showAsEmpty = false,
   totalPoints: number
 ) => {
-  const total = Object.values(workoutTypes).reduce(
-    (sum, value) => sum + value,
-    0
-  );
-  const circumference = 283;
+  const radius = 35;
+  const center = 50;
+  const strokeWidth = 23;
+  const safeTotalPoints = Math.min(totalPoints, 100); // 최대 100%
+  const total = Object.values(workoutTypes).reduce((sum, v) => sum + v, 0);
 
   if (total === 0 || showAsEmpty || totalPoints === 0) {
     return (
       <div className="relative w-full flex flex-col items-center justify-center py-8 text-gray-400 text-sm">
         <svg className="w-45 h-45" viewBox="0 0 100 100">
           <circle
-            cx="50"
-            cy="50"
-            r="35"
+            cx={center}
+            cy={center}
+            r={radius}
             fill="transparent"
             stroke="#e5e7eb"
-            strokeWidth="23"
+            strokeWidth={strokeWidth}
           />
           <text
             x="50"
@@ -59,60 +59,68 @@ const generateDonutChart = (
     기타: '#607D8F',
   };
 
-  const filledLength = Math.min(
-    (totalPoints / 100) * circumference,
-    circumference
-  ); // 100 기준 max
+  const toRadians = (degree: number) => (degree * Math.PI) / 180;
 
-  let offset = 0;
+  const describeArc = (startAngle: number, endAngle: number) => {
+    const start = {
+      x: center + radius * Math.cos(toRadians(startAngle)),
+      y: center + radius * Math.sin(toRadians(startAngle)),
+    };
+    const end = {
+      x: center + radius * Math.cos(toRadians(endAngle)),
+      y: center + radius * Math.sin(toRadians(endAngle)),
+    };
 
-  const segmentInfo = Object.entries(workoutTypes).map(
-    ([type, value], index) => {
-      const ratio = value / total; // 각 항목이 전체 중 차지하는 비율
-      const segmentLength = ratio * filledLength;
-      const dashoffset = circumference - offset - segmentLength;
-      const rotation = (offset / circumference) * 360;
-      offset += segmentLength;
+    const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
 
-      return {
-        type,
-        percentage: ratio * 100, // 텍스트로 표시될 값
-        color: colors[type] || `hsl(${index * 60}, 70%, 60%)`,
-        dashoffset,
-        arcLength: segmentLength,
-        rotation,
-      };
-    }
-  );
+    return [
+      `M ${start.x} ${start.y}`,
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`,
+    ].join(' ');
+  };
+
+  let currentAngle = -90;
+  const segmentInfo = Object.entries(workoutTypes).map(([type, value], i) => {
+    const ratio = value / total;
+    const sweepAngle = ratio * 360 * (safeTotalPoints / 100); // 100% 기준 내에서만 표시
+    const path = describeArc(currentAngle, currentAngle + sweepAngle);
+    const color = colors[type] || `hsl(${i * 60}, 70%, 60%)`;
+    const segment = {
+      type,
+      percentage: ratio * 100,
+      path,
+      color,
+    };
+    currentAngle += sweepAngle;
+    return segment;
+  });
 
   return (
     <div className="relative w-full">
       <div className="flex items-center justify-center">
         <svg className="w-45 h-45" viewBox="0 0 100 100">
-          {/* 회색 백그라운드 */}
+          {/* 배경 원 */}
           <circle
-            cx="50"
-            cy="50"
-            r="35"
+            cx={center}
+            cy={center}
+            r={radius}
             fill="transparent"
             stroke="#e5e7eb"
-            strokeWidth="23"
+            strokeWidth={strokeWidth}
           />
-          {/* 실제 채워진 부분 */}
+
+          {/* 세그먼트 arc */}
           {segmentInfo.map((segment, index) => (
-            <circle
-              key={`circle-${index}`}
-              cx="50"
-              cy="50"
-              r="35"
+            <path
+              key={index}
+              d={segment.path}
               fill="transparent"
               stroke={segment.color}
-              strokeWidth="23"
-              strokeDasharray={`${segment.arcLength} ${circumference}`}
-              strokeDashoffset={segment.dashoffset}
-              transform={`rotate(${segment.rotation} 50 50)`}
+              strokeWidth={strokeWidth}
+              strokeLinecap="butt"
             />
           ))}
+
           {/* 중앙 텍스트 */}
           <text
             x="50"
@@ -126,6 +134,8 @@ const generateDonutChart = (
           </text>
         </svg>
       </div>
+
+      {/* 범례 */}
       <div className="flex flex-wrap justify-around text-xs mt-2">
         {segmentInfo.map((segment, index) => (
           <div key={index} className="flex items-center my-1">
