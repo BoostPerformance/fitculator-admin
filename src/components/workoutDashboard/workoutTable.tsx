@@ -506,8 +506,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                 <td className="p-3">{item.name}</td>
                 {item.weeklyData.map((week, weekIndex) => (
                   <td key={weekIndex} className="p-3 text-center text-blue-500">
-                    {week.actualPercentage.toFixed(1)}% /{' '}
-                    {week.strengthSessions}회
+                    {week.aerobicPercentage}% / {week.strengthSessions}회
                   </td>
                 ))}
                 {[

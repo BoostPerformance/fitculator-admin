@@ -105,7 +105,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         const workoutDate = new Date(workout.timestamp); // 이미 KST 기준임
         const dateKey = toDateKey(workoutDate);
         const type = workout.workout_categories?.workout_types?.name;
-        console.log('workout time', new Date(workout.timestamp).toString());
+        // console.log('workout time', new Date(workout.timestamp).toString());
 
         if (type === 'STRENGTH') {
           strengthWorkoutsByDate[dateKey] =
@@ -137,7 +137,9 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
           strengthCount = strengthWorkoutsByDate[dateKey] || 0;
           cardioValue = cardioWorkoutsByDate[dateKey] || 0;
         }
-
+        console.log(
+          `[${label}] 요일: ${dayOfWeek}, Strength Count: ${strengthCount}, Cardio Value: ${cardioValue}`
+        );
         const isWeekend = dayOfWeek === '토' || dayOfWeek === '일';
         const status: 'complete' | 'incomplete' | 'rest' = isWeekend
           ? 'rest'

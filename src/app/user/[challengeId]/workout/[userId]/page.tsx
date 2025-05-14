@@ -187,6 +187,7 @@ const generateBarChart = (
       <div className="absolute left-8 right-0 h-[90%] flex items-end justify-between">
         {dailyWorkouts.map((day, index) => {
           const barHeight = (day.value / maxValue) * 100;
+          console.log('✅ 근력운동 수:', day.day, day.strengthCount); // 👈 여기에 찍으면 됨
 
           return (
             <div
