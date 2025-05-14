@@ -524,7 +524,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   const xAxisDomain = [0, weekLabels.length - 1 + 1];
 
   return (
-    <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 space-y-4 md:space-y-6">
+    <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 space-y-4 md:space-y-6 ">
       {/* 유산소 운동 차트 */}
       <div className="bg-white p-3 md:p-4 shadow rounded-lg dark:bg-gray-8 overflow-hidden">
         <h2 className="text-base md:text-lg font-semibold mb-2 md:mb-4 dark:text-gray-5 text-[#6F6F6F] pt-2 md:pt-3">
@@ -610,7 +610,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
       </div>
 
       {/* 근력 운동 차트 */}
-      <div className="bg-white p-3 md:p-4 shadow rounded-lg dark:bg-gray-8 border border-blue-200 overflow-hidden">
+      <div className="bg-white p-3 md:p-4 shadow rounded-lg dark:bg-gray-8  overflow-hidden">
         <h2 className="text-base md:text-lg font-semibold mb-2 md:mb-4 dark:text-gray-5 text-[#6F6F6F] pt-2 md:pt-3">
           주별 근력 운동량
         </h2>

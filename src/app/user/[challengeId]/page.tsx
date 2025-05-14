@@ -434,13 +434,14 @@ export default function User() {
               />
             </div>
 
-            <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4">
+            <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4 ">
               <TrafficSourceChart challengeId={selectedChallengeId} />
               <DailyDietRecord activities={filteredDailyRecordsbyId} />
               <WorkoutLeaderboard challengeId={selectedChallengeId} />
+              <WeeklyWorkoutChart challengeId={selectedChallengeId} />
             </div>
-            <WeeklyWorkoutChart challengeId={selectedChallengeId} />
-            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem] sm:pt-4 bg-white-1 px-4 sm:px-4">
+
+            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem]  bg-white-1 px-4 sm:px-4">
               <DietTable
                 dailyRecordsData={filteredDailyRecordsbyId}
                 challengeId={selectedChallengeId}

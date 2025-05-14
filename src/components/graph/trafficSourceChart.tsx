@@ -76,7 +76,7 @@ export default function TrafficSourceChart({
   const options = {
     plugins: {
       legend: {
-        display: false, // 오른쪽 범례 숨기기
+        display: false,
       },
       tooltip: {
         enabled: false,
