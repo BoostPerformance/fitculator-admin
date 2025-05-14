@@ -283,18 +283,35 @@ const DietDetaileTable = ({
                   </td>
                   <td className="p-3 sm:text-sm">
                     {(() => {
-                      // console.log("피드백 시간 데이터:", {
-                      //   feedback: dietDetailTableItem.daily_records.feedback,
-                      //   updated_at:
-                      //     dietDetailTableItem.daily_records.feedback
-                      //       ?.updated_at,
-                      //   created_at:
-                      //     dietDetailTableItem.daily_records.feedback
-                      //       ?.created_at,
-                      // });
-                      return formatDateTime(
-                        dietDetailTableItem.daily_records.feedback?.updated_at,
-                        dietDetailTableItem.daily_records.feedback?.created_at
+                      const rawDate =
+                        dietDetailTableItem.daily_records.feedback?.updated_at;
+                      if (!rawDate) return null;
+
+                      const utcDate = new Date(rawDate);
+
+                      // UTC 기준으로 시간 구성
+                      const yyyy = utcDate.getUTCFullYear();
+                      const mm = (utcDate.getUTCMonth() + 1)
+                        .toString()
+                        .padStart(2, '0');
+                      const dd = utcDate
+                        .getUTCDate()
+                        .toString()
+                        .padStart(2, '0');
+                      const hh = (utcDate.getUTCHours() + 9)
+                        .toString()
+                        .padStart(2, '0'); // KST 변환
+                      const min = utcDate
+                        .getUTCMinutes()
+                        .toString()
+                        .padStart(2, '0');
+
+                      return (
+                        <div className="whitespace-nowrap">
+                          {`${yyyy}-${mm}-${dd}`}
+                          <br />
+                          {`${hh}:${min}`}
+                        </div>
                       );
                     })()}
                   </td>
