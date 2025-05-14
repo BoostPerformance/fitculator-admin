@@ -157,7 +157,12 @@ const DietStatistics = ({
         }
       }
     });
-
+    console.log({
+      completed: completedFeedbacks,
+      ['totalRecords']: totalRecords,
+      ['completedFeedbacks']: completedFeedbacks,
+      total: totalRecords,
+    });
     return {
       completed: completedFeedbacks,
       pending: totalRecords - completedFeedbacks,

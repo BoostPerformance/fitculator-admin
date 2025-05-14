@@ -102,7 +102,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
             );
           }
           todayCountData = await todayCountResponse.json();
-          console.log('Today count data received:', todayCountData);
+          // console.log('Today count data received:', todayCountData);
 
           const leaderboardResponse = await fetch(
             `/api/workouts/user-detail?type=leaderboard${
@@ -113,7 +113,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
             throw new Error(`리더보드 API 오류: ${leaderboardResponse.status}`);
           }
           leaderboardData = await leaderboardResponse.json();
-          console.log('Leaderboard data received:', leaderboardData);
+          // console.log('Leaderboard data received:', leaderboardData);
         } catch (error) {
           console.error('API 호출 중 오류 발생:', error);
 

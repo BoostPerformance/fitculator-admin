@@ -291,7 +291,6 @@ export default function User() {
         throw new Error('Failed to fetch daily-records data');
       }
       const data = await response.json();
-
       if (pageNum === 1) {
         setDailyRecords(data.data);
       } else {
