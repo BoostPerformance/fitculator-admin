@@ -69,6 +69,7 @@ export interface UserInfo {
   id: string;
   name: string;
   displayName?: string;
+  strengthWorkoutCount?: number;
 }
 
 export interface ApiStats {
@@ -83,4 +84,26 @@ export interface ApiResponse {
   weeklyRecords: WeeklyRecord[];
   stats: ApiStats;
   recentWorkouts?: any[];
+}
+
+export interface WeeklyChartData {
+  userId: string;
+  x: string;
+  y: number;
+  user: string;
+  date: string;
+  dayLabel: '월' | '화' | '수' | '목' | '금' | '토' | '일';
+}
+
+export interface ChallengePeriod {
+  startDate: string;
+  endDate: string;
+}
+
+export interface UserWorkoutTypes {
+  cardio: WeeklyChartData[];
+  strength: WeeklyChartData[];
+  users: UserInfo[];
+  weeks: { label: string }[];
+  challengePeriod: ChallengePeriod;
 }

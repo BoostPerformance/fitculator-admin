@@ -395,7 +395,7 @@ export default function UserWorkoutDetailPage() {
       date: new Date().toISOString(),
     },
     totalSessions: 0,
-    requiredSessions: 3,
+    requiredSessions: 2,
   };
 
   const weeklyRecordId = userData?.weeklyWorkouts?.[currentWeekIndex]?.recordId;
@@ -469,10 +469,8 @@ export default function UserWorkoutDetailPage() {
                 <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
                   <div className="text-gray-500">근력 운동</div>
                   <div className="text-blue-500 text-2.5-900 pt-5">
-                    {currentWeekData.totalSessions || 0} 회
-                    {/* <span className="text-1.75-900">
-                      /{currentWeekData.requiredSessions || 0} 회
-                    </span> */}
+                    {currentWeekData.totalSessions || 0}
+                    <span className="text-1.75-900">/2회</span>
                   </div>
                 </div>
                 <button

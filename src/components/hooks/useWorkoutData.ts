@@ -20,44 +20,23 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
       try {
         setLoading(true);
         setError(null);
-        if (!userId) {
-          throw new Error('사용자 ID가 필요합니다.');
-        }
+        if (!userId) throw new Error('사용자 ID가 필요합니다.');
 
-        console.log(
-          `Fetching workout data for user: ${userId}, challenge: ${challengeId}`
-        );
-
-        // 기본 운동 데이터 가져오기
         const response = await fetch(
           `/api/workouts/user-detail?userId=${userId}`
         );
 
-        if (!response.ok) {
-          throw new Error(`API 오류: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`API 오류: ${response.status}`);
 
         const data: ApiResponse = await response.json();
-        console.log('API Response:', data);
-
-        // API 응답 데이터 처리 (데이터 매핑 함수)
         const processedData = await transformApiData(data);
-        console.log('processedData', processedData);
-        // 항상 실제 데이터 사용
+
         setUserData(processedData);
         setTotalPoints(data.stats.totalCardioPoints);
-
-        console.log('Final User Data:', processedData);
       } catch (error) {
         console.error('API 호출 중 오류 발생:', error);
         setError((error as Error).message);
-
-        // 오류 발생 시 빈 데이터 구조 제공
-        setUserData({
-          name: '사용자',
-          achievement: 0,
-          weeklyWorkouts: [],
-        });
+        setUserData({ name: '사용자', achievement: 0, weeklyWorkouts: [] });
         setTotalPoints(0);
       } finally {
         setLoading(false);
@@ -67,28 +46,22 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     if (userId) {
       fetchUserWorkoutData();
     } else {
-      // userId가 없는 경우 빈 데이터 구조 제공
-      setUserData({
-        name: '사용자',
-        achievement: 0,
-        weeklyWorkouts: [],
-      });
+      setUserData({ name: '사용자', achievement: 0, weeklyWorkouts: [] });
       setTotalPoints(0);
-
       setLoading(false);
     }
   }, [userId, challengeId]);
 
-  // API 데이터를 우리 형식으로 변환하는 함수
   const transformApiData = async (apiData: ApiResponse): Promise<UserData> => {
-    const { id, user, weeklyRecords, stats } = apiData;
-
-    // 주간 레코드 처리
+    const { user, weeklyRecords, stats } = apiData;
     const processedWeeklyWorkouts: WeeklyWorkout[] = [];
 
-    // 각 주간 기록에 대해 처리
+    const toDateKey = (date: Date): string => {
+      // timestamp는 이미 KST로 제공됨 → UTC 보정 불필요
+      return date.toISOString().split('T')[0];
+    };
+
     for (const record of weeklyRecords) {
-      // 1. 레코드의 시작일과 종료일로 주차 라벨 생성
       const recordStartDate = new Date(record.start_date);
       const recordEndDate = new Date(record.end_date);
 
@@ -102,177 +75,75 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         recordEndDate
       )}`;
 
-      console.log('label:', label);
-
-      // 2. 운동 유형별 데이터 생성
       let workoutTypes: WorkoutTypes = {};
-
       try {
-        // 카테고리 데이터 가져오기 시도
         const response = await fetch(
           `/api/workouts/weekly-categories?challengeId=${challengeId}&userId=${user.id}&weekLabel=${label}`
         );
-
         if (response.ok) {
           const categoryData = await response.json();
-
-          //console.log('categoryData', categoryData);
-
-          if (categoryData.data && categoryData.data.length > 0) {
-            const weekData = categoryData.data.find(
-              (week: any) => week.weekLabel === label
-            );
-
-            // console.log('weekData', weekData);
-
-            if (weekData && weekData.categories) {
-              // 새로운 운동 타입 객체 생성
-              workoutTypes = {};
-
-              // 각 카테고리를 운동 타입 객체에 추가
-              weekData.categories
-                .filter((cat: any) => cat.percentage > 0)
-                .forEach((cat: any) => {
-                  // 한글 이름으로 카테고리 추가
-                  workoutTypes[cat.name_ko] = cat.percentage;
-                });
-
-              console.log('Processed workout types:', workoutTypes);
-            }
+          const weekData = categoryData.data?.find(
+            (week: any) => week.weekLabel === label
+          );
+          if (weekData?.categories) {
+            weekData.categories
+              .filter((cat: any) => cat.percentage > 0)
+              .forEach((cat: any) => {
+                workoutTypes[cat.name_ko] = cat.percentage;
+              });
           }
-        } else {
-          console.warn(`Failed to fetch categories: ${response.status}`);
         }
       } catch (error) {
         console.error('운동 카테고리 데이터 가져오기 실패:', error);
       }
 
-      // 카테고리 데이터가 비어있으면 기본 데이터 생성
-      if (Object.keys(workoutTypes).length === 0) {
-        console.log('바 데이터없음');
-        // const defaultCategories = [
-        //   '달리기',
-        //   '하이트',
-        //   '테니스',
-        //   '등산',
-        //   '사이클',
-        //   '수영',
-        //   '크로스 트레이닝',
-        //   '걷기',
-        //   '기타',
-        // ];
-
-        // 총 유산소 포인트
-        // const totalCardioPoints = record.cardio_points_total || 0;
-
-        // // 랜덤하게 3-5개의 카테고리 선택
-        // const selectedCount = Math.floor(Math.random() * 3) + 3; // 3-5개
-        // const selectedCategories = [...defaultCategories]
-        //   .sort(() => 0.5 - Math.random())
-        //   .slice(0, selectedCount);
-
-        // // 각 선택된 카테고리에 유산소 포인트 분배
-        // let remainingPoints = totalCardioPoints;
-        // selectedCategories.forEach((category, index) => {
-        //   if (index === selectedCategories.length - 1) {
-        //     // 마지막 카테고리는 남은 포인트 모두 할당
-        //     workoutTypes[category] = remainingPoints;
-        //   } else {
-        //     // 나머지는 랜덤하게 분배 (최소 10% 이상)
-        //     const minPoint = Math.max(10, Math.floor(totalCardioPoints * 0.1));
-        //     const maxPoint = Math.max(
-        //       minPoint,
-        //       Math.floor(remainingPoints * 0.6)
-        //     );
-        //     const points =
-        //       Math.floor(Math.random() * (maxPoint - minPoint)) + minPoint;
-
-        //     workoutTypes[category] = points;
-        //     remainingPoints -= points;
-        //   }
-        // });
-      }
-
-      // 3. 주간 일일 데이터 생성
-      const dailyWorkouts: DailyWorkout[] = [];
-      const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-
-      // API에서 사용자의 최근 운동 데이터 가져오기 (있다면)
       const recentWorkouts = apiData.recentWorkouts || [];
-
-      // 날짜별 근력 운동 횟수 맵 생성
       const strengthWorkoutsByDate: Record<string, number> = {};
+      const cardioWorkoutsByDate: Record<string, number> = {};
 
-      // 근력 운동 데이터 추출 (운동 카테고리 타입이 STRENGTH인 운동)
       recentWorkouts.forEach((workout) => {
-        if (workout.workout_categories?.workout_types?.name === 'STRENGTH') {
-          const workoutDate = new Date(workout.timestamp);
-          const dateKey = workoutDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+        const workoutDate = new Date(workout.timestamp); // 이미 KST 기준임
+        const dateKey = toDateKey(workoutDate);
+        const type = workout.workout_categories?.workout_types?.name;
+        console.log('workout time', new Date(workout.timestamp).toString());
 
-          // 해당 날짜에 근력 운동 횟수 증가
-          if (!strengthWorkoutsByDate[dateKey]) {
-            strengthWorkoutsByDate[dateKey] = 0;
-          }
-          strengthWorkoutsByDate[dateKey]++;
+        if (type === 'STRENGTH') {
+          strengthWorkoutsByDate[dateKey] =
+            (strengthWorkoutsByDate[dateKey] || 0) + 1;
+        }
+        if (type === 'CARDIO') {
+          cardioWorkoutsByDate[dateKey] =
+            (cardioWorkoutsByDate[dateKey] || 0) + (workout.points || 0);
         }
       });
 
-      // 주간 시작/종료일로 날짜 범위 생성
       const dateRange: Date[] = [];
-
-      // 주간 날짜 배열 생성
       let currentDate = new Date(recordStartDate);
       while (currentDate <= recordEndDate) {
         dateRange.push(new Date(currentDate));
         currentDate.setDate(currentDate.getDate() + 1);
       }
 
-      // 각 요일별 데이터 생성
-      for (let i = 0; i < 7; i++) {
-        const dayOfWeek = weekdays[i];
+      const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+      const dailyWorkouts: DailyWorkout[] = [];
 
-        const dayDate = dateRange.find((date) => {
-          const day = date.getDay();
-          return weekdays[day] === dayOfWeek; // 요일 정렬 개선 후
-        });
+      weekdays.forEach((dayOfWeek, i) => {
+        const dayDate = dateRange.find((date) => date.getDay() === (i + 1) % 7);
 
-        // 해당 날짜의 근력 운동 횟수 가져오기
         let strengthCount = 0;
-        if (dayDate) {
-          const dateKey = dayDate.toISOString().split('T')[0];
-          strengthCount = strengthWorkoutsByDate[dateKey] || 0;
-        }
-
-        // 현재 요일이 주말인지 확인
-        const isWeekend = dayOfWeek === '토' || dayOfWeek === '일';
-
-        // 1. cardio 운동 값들 date별로 합산
-        const cardioWorkoutsByDate: Record<string, number> = {};
-
-        recentWorkouts.forEach((workout) => {
-          const workoutType = workout.workout_categories?.workout_types?.name;
-          const workoutDate = new Date(workout.timestamp);
-          const dateKey = workoutDate.toISOString().split('T')[0];
-
-          if (workoutType === 'CARDIO') {
-            if (!cardioWorkoutsByDate[dateKey])
-              cardioWorkoutsByDate[dateKey] = 0;
-            cardioWorkoutsByDate[dateKey] += workout.points || 0; // 또는 duration 등 원하는 값
-          }
-        });
-
-        // 유산소 운동 값 설정
         let cardioValue = 0;
         if (dayDate) {
-          const dateKey = dayDate.toISOString().split('T')[0];
+          const dateKey = toDateKey(dayDate);
+          strengthCount = strengthWorkoutsByDate[dateKey] || 0;
           cardioValue = cardioWorkoutsByDate[dateKey] || 0;
         }
 
-        // 상태 설정
-        let status: 'complete' | 'incomplete' | 'rest' = 'rest';
-        if (!isWeekend) {
-          status = cardioValue > 0 ? 'complete' : 'incomplete';
-        }
+        const isWeekend = dayOfWeek === '토' || dayOfWeek === '일';
+        const status: 'complete' | 'incomplete' | 'rest' = isWeekend
+          ? 'rest'
+          : cardioValue > 0
+          ? 'complete'
+          : 'incomplete';
 
         dailyWorkouts.push({
           day: dayOfWeek,
@@ -281,27 +152,17 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
           hasStrength: strengthCount > 0,
           strengthCount,
         });
-      }
+      });
 
-      // 4. 피드백 데이터 처리
-      let feedbackData: Feedback = {
-        text: '피드백이 아직 없습니다.',
-        author: 'AI 코치',
-        date: new Date().toISOString(),
+      const feedbackData: Feedback = {
+        text:
+          record.feedback?.ai_feedback ||
+          record.feedback?.coach_feedback ||
+          '피드백이 아직 없습니다.',
+        author: record.coach ? `코치 ${record.coach.name}` : 'AI 코치',
+        date: record.feedback?.created_at || new Date().toISOString(),
       };
 
-      if (record.feedback) {
-        feedbackData = {
-          text:
-            record.feedback.ai_feedback ||
-            record.feedback.coach_feedback ||
-            '피드백이 아직 없습니다.',
-          author: record.coach ? `코치 ${record.coach.name}` : 'AI 코치',
-          date: record.feedback.created_at || new Date().toISOString(),
-        };
-      }
-
-      // 5. 주간 정보 구성
       processedWeeklyWorkouts.push({
         recordId: record.id,
         weekNumber: record.weekNumber || 1,
@@ -315,7 +176,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
       });
     }
 
-    // 최종 사용자 데이터 구조
     return {
       name: user.name || user.displayName || '사용자',
       achievement:
@@ -328,7 +188,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     userData,
     loading,
     error,
-
     totalPoints,
   };
 };

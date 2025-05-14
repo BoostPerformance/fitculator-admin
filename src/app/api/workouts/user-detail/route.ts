@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import type {
-  WeeklyChartResponse,
-  LeaderboardEntry,
-  TodayCountResponse,
+import {
   ApiResponse,
-} from './types'; // 타입 파일 경로에 맞게 수정
+  UserData,
+  WeeklyWorkout,
+  Feedback,
+  DailyWorkout,
+  WorkoutTypes,
+  UserWorkoutTypes,
+  WeeklyChartData,
+} from '@/types/useWorkoutDataTypes';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -82,7 +86,7 @@ export async function GET(request: Request) {
 async function getWeeklyChartData(
   userId: string | null,
   challengeId: string
-): Promise<NextResponse<WeeklyChartResponse>> {
+): Promise<NextResponse> {
   try {
     console.log(`Getting weekly chart data for challenge: ${challengeId}`);
 
@@ -185,7 +189,7 @@ async function getWeeklyChartData(
     });
 
     // 유산소 데이터 가공
-    const cardioData = [];
+    const cardioData: WeeklyChartData = [];
     weeklyRecords.forEach((record) => {
       const user = users.find((u) => u.id === record.user_id);
       if (!user) return;
@@ -276,6 +280,14 @@ async function getWeeklyChartData(
       startDate: challenge.start_date,
       endDate: challenge.end_date,
     };
+    const forTypeCheck: UserWorkoutTypes = {
+      cardio: cardioData,
+      strength: strengthData,
+      users: usersWithCounts,
+      weeks: uniqueWeeks,
+      challengePeriod,
+    };
+    console.log('for types', forTypeCheck);
 
     return NextResponse.json({
       cardio: cardioData,
@@ -319,11 +331,11 @@ async function getLeaderboardData(
       );
     }
 
-    console.log(
-      `Found ${
-        participants?.length || 0
-      } participants for challenge ${challengeId}`
-    );
+    // console.log(
+    //   `Found ${
+    //     participants?.length || 0
+    //   } participants for challenge ${challengeId}`
+    // );
 
     // 참가자 ID 목록 생성
     const participantIds = participants?.map((p) => p.service_user_id) || [];
@@ -495,17 +507,23 @@ async function getTodayCountData(
   }
 }
 
-// 기본 유저 워크아웃 데이터 조회 (챌린지 ID 고려)
-async function getUserWorkoutData(
+// UTC → KST 변환 함수
+const convertToKoreanTime = (utcString: string): string => {
+  const date = new Date(utcString);
+  const offsetMs = 9 * 60 * 60 * 1000; // 9시간
+  const koreanDate = new Date(date.getTime() + offsetMs);
+  return koreanDate.toISOString();
+};
+
+export async function getUserWorkoutData(
   userId: string,
   challengeId?: string | null
-): Promise<NextResponse<ApiResponse>> {
+): Promise<NextResponse> {
   if (!userId) {
     return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
   }
 
   try {
-    // 1. 사용자 정보 가져오기
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('id, name, username')
@@ -520,9 +538,6 @@ async function getUserWorkoutData(
       );
     }
 
-    console.log('User data:', user);
-
-    // 챌린지 참가 여부 확인 (챌린지 ID가 제공된 경우)
     if (challengeId) {
       const { data: participation, error: participationError } = await supabase
         .from('challenge_participants')
@@ -541,15 +556,9 @@ async function getUserWorkoutData(
         console.warn(
           `User ${userId} is not an active participant in challenge ${challengeId}`
         );
-        // 챌린지 참가자가 아닌 경우 에러 반환 (선택적)
-        // return NextResponse.json(
-        //   { error: 'User is not a participant in this challenge' },
-        //   { status: 403 }
-        // );
       }
     }
 
-    // 2. 사용자의 주간 운동 기록 조회
     const { data: weeklyRecords, error: weeklyError } = await supabase
       .from('workout_weekly_records')
       .select('*')
@@ -564,9 +573,6 @@ async function getUserWorkoutData(
       );
     }
 
-    console.log('Weekly records fetched:', weeklyRecords);
-
-    // 3. 각 주차별 피드백 정보 조회
     const weeklyRecordsWithFeedback = [];
 
     for (const record of weeklyRecords) {
@@ -586,7 +592,6 @@ async function getUserWorkoutData(
         );
       }
 
-      // 코치 정보 조회 (피드백이 있고 코치 ID가 있는 경우)
       let coach = null;
       if (feedback && feedback.coach_id) {
         const { data: coachData, error: coachError } = await supabase
@@ -602,20 +607,21 @@ async function getUserWorkoutData(
         }
       }
 
-      // 주차 번호 계산 (start_date 기준으로 몇 번째 주인지)
       const weekNumber = weeklyRecords.indexOf(record) + 1;
 
       weeklyRecordsWithFeedback.push({
         ...record,
         weekNumber,
-        feedback: feedback || null,
+        feedback: feedback
+          ? {
+              ...feedback,
+              created_at_kst: convertToKoreanTime(feedback.created_at),
+            }
+          : null,
         coach: coach || null,
       });
     }
 
-    console.log('Weekly records with feedback:', weeklyRecordsWithFeedback);
-
-    // 4. 개별 운동 기록 조회 (최근 5개)
     const { data: recentWorkouts, error: workoutsError } = await supabase
       .from('workouts')
       .select(
@@ -646,9 +652,11 @@ async function getUserWorkoutData(
       );
     }
 
-    console.log('Recent workouts fetched:', recentWorkouts);
+    const recentWorkoutsWithKST = recentWorkouts.map((w) => ({
+      ...w,
+      timestamp_kst: convertToKoreanTime(w.timestamp),
+    }));
 
-    // 5. 전체 통계 계산
     const totalCardioPoints = weeklyRecordsWithFeedback.reduce(
       (sum, record) => sum + (record.cardio_points_total || 0),
       0
@@ -658,22 +666,22 @@ async function getUserWorkoutData(
       (sum, record) => sum + (record.strength_sessions_count || 0),
       0
     );
-
-    // 6. 결과 반환
-    return NextResponse.json({
+    const final = {
       user: {
         id: user.id,
         name: user.name,
         displayName: user.username,
       },
       weeklyRecords: weeklyRecordsWithFeedback,
-      recentWorkouts,
+      recentWorkouts: recentWorkoutsWithKST,
       stats: {
         totalWeeks: weeklyRecordsWithFeedback.length,
         totalCardioPoints,
         totalStrengthSessions,
       },
-    });
+    };
+    //console.log('final: ', final);
+    return NextResponse.json(final);
   } catch (error) {
     console.error('Error fetching user workout data:', error);
     return NextResponse.json(
