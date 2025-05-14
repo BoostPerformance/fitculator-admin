@@ -189,7 +189,7 @@ async function getWeeklyChartData(
     });
 
     // 유산소 데이터 가공
-    const cardioData: WeeklyChartData = [];
+    const cardioData: any = [];
     weeklyRecords.forEach((record) => {
       const user = users.find((u) => u.id === record.user_id);
       if (!user) return;
@@ -215,7 +215,7 @@ async function getWeeklyChartData(
     });
 
     // 근력 데이터 가공
-    const strengthData = [];
+    const strengthData: any = [];
     weeklyRecords.forEach((record) => {
       if (!record.strength_sessions_count) return;
 
@@ -309,7 +309,7 @@ async function getWeeklyChartData(
 async function getLeaderboardData(
   userId: string | null,
   challengeId: string
-): Promise<NextResponse<LeaderboardEntry[]>> {
+): Promise<NextResponse> {
   try {
     console.log(`Getting leaderboard data for challenge: ${challengeId}`);
 
@@ -431,7 +431,7 @@ async function getLeaderboardData(
 async function getTodayCountData(
   userId: string | null,
   challengeId: string
-): Promise<NextResponse<TodayCountResponse>> {
+): Promise<NextResponse> {
   try {
     console.log(`Getting today count data for challenge: ${challengeId}`);
 
