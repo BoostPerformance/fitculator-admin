@@ -378,7 +378,14 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
       <div className="mt-6 w-full">
         {/* Mobile member list */}
         {workoutItems.map((item, index) => (
-          <div key={index} className="bg-white rounded-lg p-4 shadow-sm mb-4">
+          <div
+            key={index}
+            className="bg-white rounded-lg p-4 shadow-sm mb-4"
+            onClick={() =>
+              item.id &&
+              router.push(`/user/${item.challenge_id}/workout/${item.userId}`)
+            }
+          >
             <h3 className="text-md text-[#6F6F6F] text-1.125-700 mb-3 pl-3 py-4">
               {item.name} 회원님
             </h3>
@@ -503,7 +510,6 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                     {week.strengthSessions}회
                   </td>
                 ))}
-                {/* Add empty cells if weekly data is less than week info */}
                 {[
                   ...Array(
                     Math.max(0, weekInfo.length - item.weeklyData.length)

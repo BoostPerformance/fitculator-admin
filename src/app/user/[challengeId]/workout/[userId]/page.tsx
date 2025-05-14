@@ -196,7 +196,7 @@ const generateBarChart = (
               <div className="flex flex-col items-center w-10 h-full justify-end relative">
                 {/* bar 자체 */}
                 <div
-                  className={`relative w-full ${
+                  className={`relative w-full sm:w-[2rem] ${
                     statusColors[day.status] || 'bg-gray-300'
                   }`}
                   style={{
@@ -208,7 +208,7 @@ const generateBarChart = (
                   {/* 덤벨 - bar 위에 띄우기 */}
                   {day.strengthCount > 0 && (
                     <div
-                      className="absolute bottom-full mb-1 flex flex-col items-center gap-1 pl-3"
+                      className="absolute bottom-full mb-1 flex flex-col items-center gap-1 pl-3 sm:pl-2"
                       style={{
                         transform: `translateY(-${
                           (day.value / maxValue) * 100
@@ -466,11 +466,11 @@ export default function UserWorkoutDetailPage() {
                     totalPoints // ← 이걸 넣어줘야 채워지는 양이 이 기준으로 됨
                   )}
                 </div>
-                <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem]">
-                  <div className="text-gray-500">근력 운동</div>
-                  <div className="text-blue-500 text-2.5-900 pt-5">
+                <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem] md:px-[0.7rem] ">
+                  <div className="text-gray-500 ">근력 운동</div>
+                  <div className="text-blue-500 text-2.5-900 pt-5 md:text-1.5-900">
                     {currentWeekData.totalSessions || 0}
-                    <span className="text-1.75-900">/2회</span>
+                    <span className="text-1.75-900 md:text-1.25-900">/2회</span>
                   </div>
                 </div>
                 <button
