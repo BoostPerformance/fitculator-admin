@@ -11,7 +11,7 @@ export default function Login() {
   const { setTheme, resolvedTheme } = useTheme();
   const { data: session, status } = useSession();
   const router = useRouter();
-  
+
   useEffect(() => {
     console.log('🔄 Login Page useEffect - Theme');
     const logoTheme = localStorage.getItem('theme') || 'light';
@@ -37,9 +37,9 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     console.log('📤 Initiating Google Sign In');
     try {
-      await signIn('google', { 
+      await signIn('google', {
         callbackUrl: '/user',
-        redirect: true
+        redirect: true,
       });
     } catch (error) {
       console.error('❌ Sign in error:', error);

@@ -142,7 +142,7 @@ const DietTable: React.FC<DietTableProps> = ({
   const participantsList = participants(dailyRecordsData);
 
   return (
-    <div className="mt-[1.4rem]">
+    <div className="mt-[1.4rem] ">
       <div className="absolute items-center justify-center">
         {isModalOpen && selectedParticipant && (
           <Modal
@@ -155,7 +155,7 @@ const DietTable: React.FC<DietTableProps> = ({
           />
         )}
       </div>
-      <table className="table-auto w-full bg-white shadow-md rounded-md">
+      <table className="table-auto w-full bg-white shadow rounded-lg ">
         <thead>
           <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
             <th className="p-[1rem] lg:w-[15%] sm:w-[18%] sm:p-0 sm:pt-[1.4rem]">

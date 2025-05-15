@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const end = start + limit - 1;
     const withRecords = searchParams.get('with_records') === 'true';
 
-    console.log('쿼리 파라미터:', { page, limit, start, end, withRecords });
+    // console.log('쿼리 파라미터:', { page, limit, start, end, withRecords });
 
     // 기본 쿼리 설정
     let query = supabase.from('challenge_participants').select(

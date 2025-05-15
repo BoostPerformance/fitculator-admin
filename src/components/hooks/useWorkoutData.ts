@@ -137,9 +137,9 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
           strengthCount = strengthWorkoutsByDate[dateKey] || 0;
           cardioValue = cardioWorkoutsByDate[dateKey] || 0;
         }
-        console.log(
-          `[${label}] 요일: ${dayOfWeek}, Strength Count: ${strengthCount}, Cardio Value: ${cardioValue}`
-        );
+        // console.log(
+        //   `[${label}] 요일: ${dayOfWeek}, Strength Count: ${strengthCount}, Cardio Value: ${cardioValue}`
+        // );
         const isWeekend = dayOfWeek === '토' || dayOfWeek === '일';
         const status: 'complete' | 'incomplete' | 'rest' = isWeekend
           ? 'rest'

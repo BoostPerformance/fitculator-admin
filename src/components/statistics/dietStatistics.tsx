@@ -158,6 +158,11 @@ const DietStatistics = ({
       }
     });
 
+    console.log({
+      completed: completedFeedbacks,
+      pending: totalRecords - completedFeedbacks,
+      total: totalRecords,
+    });
     return {
       completed: completedFeedbacks,
       pending: totalRecords - completedFeedbacks,

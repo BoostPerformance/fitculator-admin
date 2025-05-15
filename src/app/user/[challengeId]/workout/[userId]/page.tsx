@@ -157,6 +157,7 @@ const generateDonutChart = (
 
 const generateBarChart = (
   dailyWorkouts: DailyWorkout[],
+  totalStrength: number,
   showAsEmpty = false
 ): JSX.Element => {
   if (dailyWorkouts.length === 0 || showAsEmpty) {
@@ -174,6 +175,10 @@ const generateBarChart = (
     rest: 'bg-gray-300',
   };
 
+  const distributedStrengthCounts = dailyWorkouts.map((_, index) => {
+    return index < totalStrength ? 1 : 0;
+  });
+
   return (
     <div className="relative h-64 w-full">
       {/* Y축 눈금 */}
@@ -187,7 +192,6 @@ const generateBarChart = (
       <div className="absolute left-8 right-0 h-[90%] flex items-end justify-between">
         {dailyWorkouts.map((day, index) => {
           const barHeight = (day.value / maxValue) * 100;
-          console.log('✅ 근력운동 수:', day.day, day.strengthCount); // 👈 여기에 찍으면 됨
 
           return (
             <div
@@ -207,7 +211,7 @@ const generateBarChart = (
                   }}
                 >
                   {/* 덤벨 - bar 위에 띄우기 */}
-                  {day.strengthCount > 0 && (
+                  {distributedStrengthCounts[index] > 0 && (
                     <div
                       className="absolute bottom-full mb-1 flex flex-col items-center gap-1 pl-3 sm:pl-2"
                       style={{
@@ -216,7 +220,9 @@ const generateBarChart = (
                         }%)`,
                       }}
                     >
-                      {Array.from({ length: day.strengthCount }).map((_, i) => (
+                      {Array.from({
+                        length: distributedStrengthCounts[index],
+                      }).map((_, i) => (
                         <div key={i} className="w-5 h-5">
                           <Image
                             src="/svg/dumbell.svg"
@@ -483,7 +489,10 @@ export default function UserWorkoutDetailPage() {
               </div>
               <div className="flex flex-col w-2/3 sm:w-full sm:items-start ">
                 <div className="flex items-end mb-4">
-                  {generateBarChart(currentWeekData.dailyWorkouts)}
+                  {generateBarChart(
+                    currentWeekData.dailyWorkouts,
+                    currentWeekData.totalSessions
+                  )}
                 </div>
                 <div>
                   <TextBox

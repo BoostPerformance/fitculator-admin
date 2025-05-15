@@ -277,17 +277,17 @@ export default function ChallengeDetail({
     setIsUpdatingStatus(true);
 
     try {
-      console.log('클라이언트에서 상태 토글 요청:', {
-        participantId,
-        status: newStatus,
-      });
+      // console.log('클라이언트에서 상태 토글 요청:', {
+      //   participantId,
+      //   status: newStatus,
+      // });
 
       const requestBody = {
         participantId,
         status: newStatus,
       };
 
-      console.log('요청 본문:', JSON.stringify(requestBody));
+      // console.log('요청 본문:', JSON.stringify(requestBody));
 
       const response = await fetch('/api/challenge-participants', {
         method: 'PUT',
