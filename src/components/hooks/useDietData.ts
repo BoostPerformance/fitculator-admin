@@ -208,19 +208,37 @@ export const useDietData = (
 
   // 데이터 변환 및 정렬 - useMemo로 최적화
   const processedAndSortedRecords = useMemo(() => {
-    // 현재 선택된 챌린지 정보 가져오기
     const challenge = challenges.find(
       (c) => c.challenges.id === challengeId
     )?.challenges;
 
-    // 사용자별 업로드 수 계산 (메모리 효율성 개선)
     const userUploadCounts: Record<string, number> = {};
     for (const record of dietRecords) {
       const userId = record.challenge_participants.id;
       userUploadCounts[userId] = (userUploadCounts[userId] || 0) + 1;
     }
 
-    // 데이터 변환 및 정렬을 한 번에 처리
+    // ✅ 콘솔 테스트용: 미작성 피드백 대상 (KST 기준으로 +9h)
+    if (selectedDate) {
+      const feedbackMissingList = dietRecords.filter((r) => {
+        const utcDate = new Date(r.record_date);
+        const kstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
+        const kstDateOnly = kstDate.toISOString().split('T')[0];
+
+        const hasMeal = Object.values(r.meals).some((mealArray) =>
+          mealArray.some((mealItem) => mealItem.description.trim() !== '')
+        );
+
+        const noFeedback =
+          !r.feedbacks?.coach_feedback ||
+          r.feedbacks.coach_feedback.trim() === '';
+
+        return kstDateOnly === selectedDate && hasMeal && noFeedback;
+      });
+
+      console.log('[✅ 미작성 피드백 대상 (KST 보정 후)]', feedbackMissingList);
+    }
+
     return dietRecords
       .map(
         (record): ProcessedMeal => ({
@@ -265,20 +283,12 @@ export const useDietData = (
         })
       )
       .sort((a, b) => {
-        // 먼저 총 업로드 수로 정렬 (많은 순)
         const uploadsA = userUploadCounts[a.user.id] || 0;
         const uploadsB = userUploadCounts[b.user.id] || 0;
-
-        if (uploadsA !== uploadsB) {
-          return uploadsB - uploadsA; // 내림차순
-        }
-
-        // 업로드 수가 같은 경우 이름으로 정렬
-        const nameA = a.user.name || '';
-        const nameB = b.user.name || '';
-        return nameA.localeCompare(nameB);
+        if (uploadsA !== uploadsB) return uploadsB - uploadsA;
+        return a.user.name.localeCompare(b.user.name);
       });
-  }, [challengeId, challenges, dietRecords]);
+  }, [challengeId, challenges, dietRecords, selectedDate]);
 
   // 변환된 데이터 로깅
   // console.log("[useDietData] Processed and sorted records:", {
