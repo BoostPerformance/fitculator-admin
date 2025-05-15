@@ -7,6 +7,7 @@ import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import WeeklyWorkoutChart from '@/components/workoutDashboard/weeklyWorkoutChart';
 import { useWorkoutData } from '@/components/hooks/useWorkoutData';
 import { WorkoutTypes, DailyWorkout } from '@/types/workoutDetailPageType';
+import { CustomAlert } from '@/components/layout/customAlert';
 
 const generateDonutChart = (
   workoutTypes: WorkoutTypes,
@@ -293,6 +294,9 @@ export default function UserWorkoutDetailPage() {
   const [coachFeedback, setCoachFeedback] = useState('');
   const [feedbackId, setFeedbackId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [copyMessage, setCopyMessage] = useState(false);
+  const [isDisable, setIsDisable] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   const {
     userData,
@@ -408,11 +412,12 @@ export default function UserWorkoutDetailPage() {
   const weeklyRecordId = userData?.weeklyWorkouts?.[currentWeekIndex]?.recordId;
 
   const handleFeedbackSave = async (feedback: string) => {
-    console.log('📌 recordId:', userData?.weeklyWorkouts?.[currentWeekIndex]);
-
     if (!weeklyRecordId) return alert('주간 운동 데이터 ID가 없습니다.');
 
     setSaving(true);
+    setIsDisable(true); // 알람 표시 조건에 사용
+    setShowAlert(true); // 알람 표시 ON
+
     try {
       const res = await fetch('/api/workout-feedback', {
         method: 'POST',
@@ -429,10 +434,16 @@ export default function UserWorkoutDetailPage() {
       if (!res.ok) throw new Error(result.error || '저장 실패');
 
       setCoachFeedback(result.data.coach_feedback || '');
-      alert('피드백이 저장되었습니다!');
+
+      setTimeout(() => {
+        setShowAlert(false);
+        setIsDisable(false);
+      }, 3000);
     } catch (e) {
       console.error('저장 중 에러:', e);
       alert('피드백 저장에 실패했습니다.');
+      setShowAlert(false);
+      setIsDisable(false);
     } finally {
       setSaving(false);
     }
@@ -503,7 +514,9 @@ export default function UserWorkoutDetailPage() {
                     Btn1className="bg-green text-white"
                     svg1="/svg/send.svg"
                     onChange={(e) => setCoachFeedback(e.target.value)}
-                    onSave={handleFeedbackSave}
+                    onSave={async (feedback) => {
+                      await handleFeedbackSave(feedback);
+                    }}
                     isFeedbackMode={true}
                     copyIcon
                   />
@@ -550,6 +563,21 @@ export default function UserWorkoutDetailPage() {
           </div> */}
         </div>
       </div>
+      <CustomAlert
+        message={
+          copyMessage
+            ? '복사가 완료되었습니다.'
+            : isDisable
+            ? '피드백 작성이 완료되었습니다.'
+            : '피드백 작성이 실패했습니다.'
+        }
+        isVisible={showAlert || copyMessage}
+        onClose={() => {
+          setShowAlert(false);
+          setCopyMessage(false);
+          setIsDisable(false);
+        }}
+      />
     </div>
   );
 }

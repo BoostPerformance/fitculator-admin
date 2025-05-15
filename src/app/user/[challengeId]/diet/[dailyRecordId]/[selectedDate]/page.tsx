@@ -16,30 +16,7 @@ import { useFeedback } from '@/components/hooks/useFeedback';
 import { useChallenge } from '@/components/hooks/useChallenges';
 import logger from '@/lib/logger';
 import Footer from '@/components/layout/footer';
-
-interface CustomAlertProps {
-  message: string;
-  isVisible: boolean;
-  onClose: () => void;
-}
-
-const CustomAlert = ({ message, isVisible, onClose }: CustomAlertProps) => {
-  if (!isVisible) return null;
-
-  return (
-    <div className="fixed top-4 right-4 p-4 bg-white rounded-lg shadow-lg border border-green-500 animate-in fade-in slide-in-from-top-3 z-50">
-      <div className="flex items-center gap-2">
-        <div className="text-green-600">{message}</div>
-        <button
-          onClick={onClose}
-          className="ml-2 text-gray-400 hover:text-gray-600"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  );
-};
+import { CustomAlert } from '@/components/layout/customAlert';
 
 type PageParams = {
   challengeId: string;
