@@ -5,6 +5,8 @@ import LogoutButton from '../buttons/logoutButton';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { DiVim } from 'react-icons/di';
+import NoticeModal from '../input/noticeModal';
 
 interface Challenges {
   challenges: {
@@ -33,7 +35,6 @@ export default function Sidebar({
   username,
 }: SidebarProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isOpenDropdown, setIsOpenDropdown] = useState(true);
   const [isOpenChallengeDropdown, setIsOpenChallengeDropdown] = useState<{
     [id: string]: boolean;
   }>({});
@@ -41,9 +42,26 @@ export default function Sidebar({
   const [selectedTitle, setSelectedTitle] = useState<string>('');
   const [userDropdown, setUserDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  const [isOpenDropdown, setIsOpenDropdown] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedNoticeId, setSelectedNoticeId] = useState<string | null>(null);
+  const [currentChallengeId, setCurrentChallengeId] = useState<string | null>(
+    null
+  );
+  const [notices, setNotices] = useState([
+    { id: '1', title: '첫 번째 공지사항' },
+    { id: '2', title: '두 번째 공지사항' },
+    { id: '3', title: '세 번째 공지사항' },
+  ]);
   const [isInternalOperator, setIsInternalOperator] = useState(false);
   const router = useRouter();
 
+  const dummyNotices = [
+    { id: '1', title: '첫 번째 공지사항' },
+    { id: '2', title: '두 번째 공지사항' },
+    { id: '3', title: '세 번째 공지사항' },
+  ];
   // 사용자 역할 확인
   useEffect(() => {
     // 관리자 정보 가져오기
@@ -142,12 +160,39 @@ export default function Sidebar({
     router.push(`/user/${challenge.challenges.id}`);
   };
 
+  const handleSaveNotice = (updatedNotice: {
+    id?: string;
+    title: string;
+    content: string;
+  }) => {
+    if (updatedNotice.id) {
+      setNotices((prev) =>
+        prev.map((n) =>
+          n.id === updatedNotice.id ? { ...n, ...updatedNotice } : n
+        )
+      );
+    } else {
+      const newId = String(notices.length + 1);
+      setNotices((prev) => [...prev, { ...updatedNotice, id: newId }]);
+    }
+    setModalOpen(false);
+    setSelectedNoticeId(null);
+  };
+
+  const selectedNoticeData =
+    notices.find((n) => n.id === selectedNoticeId) || null;
+
   // console.log("챌린지 데이터:", {
   //   전체데이터: data,
   //   데이터길이: data?.length,
   //   첫번째챌린지: data?.[0]?.challenges,
   //   선택된챌린지ID: selectedChallengeId,
   // });
+
+  const handleAddNotice = () => {
+    setSelectedNoticeId(null);
+    setModalOpen(true);
+  };
 
   return (
     <div className="lg:w-[18.75rem] min-h-fit md:min-h-fit lg:min-h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
@@ -291,6 +336,38 @@ export default function Sidebar({
                                     운동
                                   </div>
                                 </li>
+                                {/* <li>
+                                  <div className="flex items-center justify-between px-8 py-2">
+                                    <span className="text-sm font-medium">
+                                      공지사항
+                                    </span>
+                                    <button onClick={handleAddNotice}>
+                                      <Image
+                                        src="/svg/plus.svg"
+                                        width={16}
+                                        height={16}
+                                        alt="추가"
+                                      />
+                                    </button>
+                                  </div>
+                                  <ul className="ml-2 space-y-1 pb-4">
+                                    {notices.map((notice) => (
+                                      <li
+                                        key={notice.id}
+                                        className="text-sm cursor-pointer text-gray-600 hover:text-black pt-2 pl-8"
+                                        onClick={() => {
+                                          setCurrentChallengeId(
+                                            selectedChallengeId || null
+                                          );
+                                          setSelectedNoticeId(notice.id);
+                                          setModalOpen(true);
+                                        }}
+                                      >
+                                        {notice.title}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </li> */}
                               </ul>
                             )}
                           </li>
@@ -368,6 +445,19 @@ export default function Sidebar({
             </ul>
           </nav>
         </div>
+      )}
+      {modalOpen && (
+        <NoticeModal
+          onClose={() => {
+            setModalOpen(false);
+            setSelectedNoticeId(null);
+          }}
+          challengeId={selectedChallengeId ?? ''}
+          noticeId={selectedNoticeId}
+          defaultTitle={selectedNoticeData?.title || ''}
+          defaultContent={selectedNoticeData?.content || ''}
+          onSave={handleSaveNotice}
+        />
       )}
     </div>
   );
