@@ -133,6 +133,9 @@ export interface WorkoutItem {
   activeThisWeek: boolean;
   actualPercentage?: number;
   totalAchievements: number;
+  label?: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 export interface WeekInfo {
@@ -142,5 +145,5 @@ export interface WeekInfo {
 }
 
 export interface WorkoutTableProps {
-  challengeId: string;
+  challengeId?: string;
 }

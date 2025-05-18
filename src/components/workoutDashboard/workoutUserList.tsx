@@ -53,8 +53,32 @@ const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
   return weeks;
 };
 
+const isWorkoutUploaded = (workoutName: number) => {
+  return workoutName !== 0 ? (
+    <>
+      <div>
+        <Image
+          src="/svg/check-orange.svg"
+          width={30}
+          height={30}
+          alt="meal-done"
+        />
+      </div>
+    </>
+  ) : (
+    <>
+      <Image
+        src="/svg/incomplete-icon.svg"
+        width={30}
+        height={30}
+        alt="meal-incompleted"
+      />
+    </>
+  );
+};
+
 // WorkoutTable component
-const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
+const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   const [workoutItems, setWorkoutItems] = useState<WorkoutItem[]>([]);
   const [weekInfo, setWeekInfo] = useState<WeekInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -243,7 +267,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
             weekNumber: index + 1,
             startDate,
             endDate,
-            aerobicPercentage: cardioPoints,
+            aerobicPercentage: Math.min(Math.round(cardioPoints), 100),
             actualPercentage,
             strengthSessions,
           };
@@ -372,110 +396,47 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
     );
   }
 
-  // Desktop rendering
   return (
-    <div className="mt-6 overflow-x-auto w-full ">
-      {/* Main workout table */}
-      <div className="min-w-[1000px] max-w-full">
-        <table className="w-full bg-white shadow-md rounded-md border border-gray-200">
-          <thead>
-            <tr className="bg-white text-[#A1A1A1]">
-              <th className="w-[5%] p-3 text-left">
-                <div className="flex items-center justify-start gap-1">
-                  <span className="text-sm">ID</span>
-                  <button>
-                    <Image
-                      src="/svg/arrow-down.svg"
-                      width={10}
-                      height={10}
-                      alt="arrow-down"
-                    />
-                  </button>
-                </div>
-              </th>
-              <th className="w-[10%] p-3 text-left">
-                <div className="flex items-center justify-start gap-1">
-                  <span className="text-sm">이름</span>
-                  <button>
-                    <Image
-                      src="/svg/arrow-down.svg"
-                      width={10}
-                      height={10}
-                      alt="arrow-down"
-                    />
-                  </button>
-                </div>
-              </th>
-              {/* Dynamic week headers */}
-              {weekInfo.map((week, index) => (
-                <th
-                  key={index}
-                  className="w-[10%] p-3 text-center cursor-pointer hover:bg-gray-100"
-                  onClick={() =>
-                    router.push(
-                      `/workout/workout-categories?challengeId=${challengeId}&weekLabel=${
-                        typeof week.label === 'string'
-                          ? week.label
-                          : `${week.startDate}-${week.endDate}`
-                      }`
-                    )
-                  }
-                >
-                  <span className="text-sm">
-                    {index + 1}주차
-                    <br />(
-                    {typeof week.label === 'string'
-                      ? week.label
-                      : `${week.startDate}-${week.endDate}`}
-                    )
-                  </span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {workoutItems.map((item, index) => (
-              <tr
-                key={index}
-                ref={index === workoutItems.length - 1 ? lastRowRef : null}
-                className="border-b border-gray-200 hover:bg-[#F4F6FC] cursor-pointer"
-                onClick={() =>
-                  item.id &&
-                  router.push(
-                    `/user/${item.challenge_id}/workout/${item.userId}`
-                  )
-                }
-              >
-                <td className="p-3">
-                  <div>
-                    {item.userName}
-                    <br />#{item.userId.substring(0, 4)}
-                  </div>
-                </td>
-                <td className="p-3">{item.name}</td>
-                {item.weeklyData.map((week, weekIndex) => (
-                  <td key={weekIndex} className="p-3 text-center text-blue-500">
-                    {week.aerobicPercentage.toFixed(1)}% /
-                    <br className="md:block lg:hidden " />
-                    {week.strengthSessions}회
-                  </td>
-                ))}
-                {[
-                  ...Array(
-                    Math.max(0, weekInfo.length - item.weeklyData.length)
-                  ),
-                ].map((_, i) => (
-                  <td key={`empty-${i}`} className="p-3 text-center">
-                    -
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="mt-[3rem]  sm:px-[1rem] lg:hidden md:hidden sm:block w-full">
+      <div className="flex flex-col gap-4">
+        {workoutItems.map((user, index) => {
+          return (
+            <div
+              key={index}
+              className="pt-[0rem] pb-[2rem] sm:bg-white rounded-md shadow"
+              onClick={() =>
+                router.push(`/user/${challengeId}/workout/${user.userId}`)
+              }
+            >
+              <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]">
+                {user.name} 회원
+              </div>
+              <table className="flex flex-col gap-[1.5rem] items-center justify-center w-full">
+                <thead className="flex w-full justify-center gap-[0.7rem]">
+                  <tr className="flex w-full justify-center gap-[0.7rem] text-gray-11 text-1-500">
+                    {user.weeklyData.map((week, i) => (
+                      <th key={i} className="text-center min-w-[2.5rem]">
+                        {week.weekNumber}주
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="flex w-full justify-center gap-[0rem]">
+                    {user.weeklyData.map((week, i) => (
+                      <td key={i} className="text-center p-3">
+                        {isWorkoutUploaded(week.aerobicPercentage)}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 };
 
-export default WorkoutTable;
+export default WorkoutUserList;
