@@ -226,36 +226,20 @@ export default function UserWorkoutDetailPage() {
     id: userId,
     challenge_id: challengeId,
     userId: userId,
-    userName: fetchedUserName.split(' ')[0] || 'User',
+    userName: fetchedUserName || '유저',
     name: fetchedUserName || '유저',
-    weeklyData: userData.weeklyWorkouts.map((week, idx) => {
-      const [start, end] = week.label.split('-').map((s) => s.trim());
+    weeklyData: userData.weeklyWorkouts.map((w, idx) => {
+      // console.log('데이터', userData.weeklyWorkouts);
       return {
         weekNumber: idx + 1,
-        startDate: start || '',
-        endDate: end || '',
-        aerobicPercentage: Math.round(week.cardio || 0),
-        strengthSessions: week.strengthSessions || 0,
-        actualPercentage: Math.round(week.actualCardio || 0),
+        startDate: w.label.split('-')[0],
+        endDate: w.label.split('-')[1],
+        aerobicPercentage: w.totalAchievement,
+        actualPercentage: w.totalAchievement,
+        strengthSessions: w.totalSessions,
       };
     }),
-    hasUploaded: userData.weeklyWorkouts.some(
-      (week) => (week.cardio || 0) > 0 || (week.strengthSessions || 0) > 0
-    ),
-    activeThisWeek:
-      (userData.weeklyWorkouts?.[currentWeekIndex]?.cardio || 0) > 0 ||
-      (userData.weeklyWorkouts?.[currentWeekIndex]?.strengthSessions || 0) > 0,
-    actualPercentage: Math.round(
-      userData.weeklyWorkouts.reduce(
-        (sum, w) => sum + (w.actualCardio || 0),
-        0
-      ) / userData.weeklyWorkouts.length
-    ),
-    totalAchievements: userData.weeklyWorkouts.reduce(
-      (sum, week) => sum + (week.cardio || 0),
-      0
-    ),
-    label: userData.weeklyWorkouts?.[currentWeekIndex]?.label || '',
+    hasUploaded: totalPoints > 0,
   };
 
   return (
@@ -277,7 +261,10 @@ export default function UserWorkoutDetailPage() {
         setCopyMessage={setCopyMessage}
         setIsDisable={setIsDisable}
       />
-      <MobileWorkout challengeId={params.challengeId as string} />
+      <MobileWorkout
+        challengeId={params.challengeId as string}
+        workoutItem={workoutItem}
+      />
     </>
   );
 }
