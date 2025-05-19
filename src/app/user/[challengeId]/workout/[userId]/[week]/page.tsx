@@ -137,6 +137,7 @@ export default function MobileWorkoutDetail() {
     },
     totalSessions: 0,
     requiredSessions: 2,
+    totalAchievement: 0,
   };
   const weeklyRecordId = currentWeekData.recordId;
 
@@ -186,7 +187,7 @@ export default function MobileWorkoutDetail() {
         </div>
         <div className="w-1/3 sm:w-full">
           <TotalFeedbackCounts
-            counts={`${totalPoints}pt`}
+            counts={`${totalPoints.toFixed(1)}pt`}
             title="총 운동포인트"
             borderColor="border-blue-500"
             textColor="text-blue-500"
@@ -210,7 +211,7 @@ export default function MobileWorkoutDetail() {
                   {generateDonutChart(
                     currentWeekData.workoutTypes,
                     false,
-                    totalPoints
+                    currentWeekData.totalAchievement
                   )}
                 </div>
                 <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem] md:px-[0.7rem] ">
