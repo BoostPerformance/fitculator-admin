@@ -84,6 +84,8 @@ export default function UserWorkoutDetailPage() {
   } = useWorkoutData(userId, challengeId);
   const { name: fetchedUserName } = useUserInfo(userId);
 
+  console.log('userData', userData);
+
   const { currentWeekIndex, lastWeekIndex } = useMemo(() => {
     if (!userData || !userData.weeklyWorkouts.length)
       return { currentWeekIndex: 0, lastWeekIndex: 0 };

@@ -122,7 +122,7 @@ const MobileWorkout: React.FC = () => {
     return <div className="p-4 text-red-500">{apiError || '데이터 없음'}</div>;
 
   return (
-    <div className="w-full px-4 mt-6">
+    <div className="w-full px-4 mt-6 lg:hidden md:hidden ">
       <div className="bg-white shadow-md rounded-2xl p-4 space-y-3">
         <div className="text-xl font-semibold text-gray-800">
           {userData.name} 님

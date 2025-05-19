@@ -2,7 +2,7 @@ import { WeeklyWorkout } from '@/components/hooks/useWorkoutData';
 
 interface WeeklyWorkoutChartProps {
   userName: string;
-  weeklyWorkouts?: WeeklyWorkout[]; // API에서 받아온 주간 워크아웃 데이터
+  weeklyWorkouts?: WeeklyWorkout[];
   userId?: string; // 사용자 ID
 }
 
@@ -11,7 +11,6 @@ export default function WeeklyWorkoutChart({
   weeklyWorkouts = [],
   userId = 'USER',
 }: WeeklyWorkoutChartProps) {
-  // 데이터가 없는 경우 메시지 표시
   if (!weeklyWorkouts || weeklyWorkouts.length === 0) {
     return (
       <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">

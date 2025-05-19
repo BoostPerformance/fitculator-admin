@@ -171,7 +171,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         recordId: record.id,
         weekNumber: record.weekNumber || 1,
         label,
-        totalAchievement: Math.min(record.cardio_points_total || 0, 100),
+        totalAchievement: record.cardio_points_total || 0,
         workoutTypes,
         dailyWorkouts,
         totalSessions: record.strength_sessions_count || 0,
