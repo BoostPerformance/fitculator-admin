@@ -65,6 +65,8 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
       const recordStartDate = new Date(record.start_date);
       const recordEndDate = new Date(record.end_date);
 
+      //console.log('dates', recordStartDate, recordEndDate);
+
       const formatDateLabel = (date: Date): string => {
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const day = date.getDate().toString().padStart(2, '0');
@@ -102,7 +104,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
       const cardioWorkoutsByDate: Record<string, number> = {};
 
       recentWorkouts.forEach((workout) => {
-        const workoutDate = new Date(workout.timestamp); // 이미 KST 기준임
+        const workoutDate = new Date(workout.timestamp);
         const dateKey = toDateKey(workoutDate);
         const type = workout.workout_categories?.workout_types?.name;
         // console.log('workout time', new Date(workout.timestamp).toString());
@@ -169,7 +171,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         recordId: record.id,
         weekNumber: record.weekNumber || 1,
         label,
-        totalAchievement: Math.min(record.cardio_points_total || 0, 100),
+        totalAchievement: record.cardio_points_total || 0,
         workoutTypes,
         dailyWorkouts,
         totalSessions: record.strength_sessions_count || 0,

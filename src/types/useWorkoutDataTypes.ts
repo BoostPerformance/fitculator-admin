@@ -27,6 +27,9 @@ export interface WeeklyWorkout {
   totalSessions: number;
   requiredSessions: number;
   feedback: Feedback;
+  cardio?: number;
+  strengthSessions?: number;
+  actualCardio?: number;
 }
 
 export interface UserData {

@@ -130,9 +130,12 @@ export interface WorkoutItem {
   name: string;
   weeklyData: WorkoutWeekData[];
   hasUploaded: boolean;
-  activeThisWeek: boolean;
+  activeThisWeek?: boolean;
   actualPercentage?: number;
-  totalAchievements: number;
+  totalAchievements?: number;
+  label?: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 export interface WeekInfo {
@@ -142,5 +145,9 @@ export interface WeekInfo {
 }
 
 export interface WorkoutTableProps {
-  challengeId: string;
+  challengeId?: string;
+}
+
+export interface MobileWorkoutProps {
+  challengeId?: string;
 }

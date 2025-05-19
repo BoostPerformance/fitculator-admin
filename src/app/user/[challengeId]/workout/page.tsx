@@ -3,15 +3,12 @@ import { useState, useEffect } from 'react';
 import { DietPageSkeleton } from '@/components/layout/skeleton';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useDietData } from '@/components/hooks/useDietData';
-//import { DietStatistics } from '@/components/statistics/dietStatistics';
-//import { DietContent } from '@/components/dietDashboard/dietContent';
 import { useResponsive } from '@/components/hooks/useResponsive';
 import { useChallenge } from '@/components/hooks/useChallenges';
-//import { processMeals } from '@/components/utils/processMeals';
 import Title from '@/components/layout/title';
-//import DateInput from '@/components/input/dateInput';
 import WorkoutTable from '@/components/workoutDashboard/workoutTable';
 import { ExcerciseStatistics } from '@/components/statistics/excerciseStatistics';
+import WorkoutUserList from '@/components/workoutDashboard/workoutUserList';
 
 export default function WorkoutPage() {
   const params = useParams();
@@ -117,8 +114,10 @@ export default function WorkoutPage() {
           연결할 수 없어 목데이터를 사용합니다.
         </div>
       )}
-
-      <WorkoutTable challengeId={params.challengeId as string} />
+      <WorkoutUserList challengeId={params.challengeId as string} />
+      <div className="sm:hidden">
+        <WorkoutTable challengeId={params.challengeId as string} />
+      </div>
     </div>
   );
 }

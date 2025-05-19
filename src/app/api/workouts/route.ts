@@ -273,6 +273,42 @@ export async function GET(request: Request) {
     }
   }
 
+  if (type === 'challenge-weeks') {
+    const challengeId = url.searchParams.get('challengeId');
+    if (!challengeId) {
+      return NextResponse.json(
+        { error: 'Challenge ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const { data: challenge, error } = await supabase
+      .from('challenges')
+      .select('start_date, end_date')
+      .eq('id', challengeId)
+      .single();
+
+    if (error || !challenge) {
+      return NextResponse.json(
+        { error: 'Failed to fetch challenge dates' },
+        { status: 500 }
+      );
+    }
+
+    const start = new Date(challenge.start_date);
+    const end = new Date(challenge.end_date);
+    const diffDays = Math.ceil(
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    const totalWeeks = Math.ceil(diffDays / 7);
+
+    return NextResponse.json({
+      totalWeeks,
+      startDate: challenge.start_date,
+      endDate: challenge.end_date,
+    });
+  }
+
   // console.log('🔄 === Workouts API Request Start ===');
   try {
     // console.log('🔍 Getting server session...');
