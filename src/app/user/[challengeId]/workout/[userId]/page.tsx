@@ -222,26 +222,6 @@ export default function UserWorkoutDetailPage() {
     }
   };
 
-  const workoutItem = {
-    id: userId,
-    challenge_id: challengeId,
-    userId: userId,
-    userName: fetchedUserName || '유저',
-    name: fetchedUserName || '유저',
-    weeklyData: userData.weeklyWorkouts.map((w, idx) => {
-      // console.log('데이터', w);
-      return {
-        weekNumber: idx + 1,
-        startDate: w.label.split('-')[0],
-        endDate: w.label.split('-')[1],
-        aerobicPercentage: w.totalAchievement,
-        actualPercentage: w.totalAchievement,
-        strengthSessions: w.totalSessions,
-      };
-    }),
-    hasUploaded: totalPoints > 0,
-  };
-
   return (
     <>
       <DesktopWorkout
