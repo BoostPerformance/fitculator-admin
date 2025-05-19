@@ -235,8 +235,6 @@ export const useDietData = (
 
         return kstDateOnly === selectedDate && hasMeal && noFeedback;
       });
-
-      console.log('[✅ 미작성 피드백 대상 (KST 보정 후)]', feedbackMissingList);
     }
 
     return dietRecords

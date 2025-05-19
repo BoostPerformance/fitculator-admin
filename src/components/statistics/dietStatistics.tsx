@@ -185,13 +185,13 @@ const DietStatistics = ({
         textColor="text-blue-500"
       /> */}
 
-        <TotalFeedbackCounts
+        {/* <TotalFeedbackCounts
           counts={todayStats.uploadCount.toString()}
           total={`${todayStats.totalMembers}명`}
           title="오늘 식단 업로드"
           borderColor="border-green"
           textColor="text-green"
-        />
+        /> */}
 
         <TotalFeedbackCounts
           counts={`${feedbackStats.pending}명`}

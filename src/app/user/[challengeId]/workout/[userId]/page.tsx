@@ -229,7 +229,7 @@ export default function UserWorkoutDetailPage() {
     userName: fetchedUserName || '유저',
     name: fetchedUserName || '유저',
     weeklyData: userData.weeklyWorkouts.map((w, idx) => {
-      // console.log('데이터', userData.weeklyWorkouts);
+      // console.log('데이터', w);
       return {
         weekNumber: idx + 1,
         startDate: w.label.split('-')[0],
@@ -261,10 +261,7 @@ export default function UserWorkoutDetailPage() {
         setCopyMessage={setCopyMessage}
         setIsDisable={setIsDisable}
       />
-      <MobileWorkout
-        challengeId={params.challengeId as string}
-        workoutItem={workoutItem}
-      />
+      <MobileWorkout />
     </>
   );
 }

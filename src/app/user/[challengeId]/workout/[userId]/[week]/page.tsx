@@ -10,7 +10,7 @@ import Title from '@/components/layout/title';
 import WorkoutUserList from '@/components/workoutDashboard/workoutUserList';
 import { ExcerciseStatistics } from '@/components/statistics/excerciseStatistics';
 
-export default function WeekPage() {
+export default function Page() {
   const params = useParams(); // contains userListId
   const searchParams = useSearchParams();
   const urlDate = searchParams.get('date');

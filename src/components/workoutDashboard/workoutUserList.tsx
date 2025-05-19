@@ -112,7 +112,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
             throw new Error(`주간 차트 API 오류: ${weeklyResponse.status}`);
           }
           weeklyChartData = await weeklyResponse.json();
-          console.log('Weekly chart data received:', weeklyChartData);
+          //console.log('Weekly chart data received:', weeklyChartData);
 
           // ... other API calls
           const todayCountResponse = await fetch(

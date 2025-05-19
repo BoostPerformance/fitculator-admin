@@ -78,7 +78,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
         let weeklyChartData, todayCountData, leaderboardData;
 
         try {
-          console.log('Fetching weekly chart data...');
+          // console.log('Fetching weekly chart data...');
           const weeklyResponse = await fetch(
             `/api/workouts/user-detail?type=weekly-chart${
               challengeId ? `&challengeId=${challengeId}` : ''
@@ -88,7 +88,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
             throw new Error(`주간 차트 API 오류: ${weeklyResponse.status}`);
           }
           weeklyChartData = await weeklyResponse.json();
-          console.log('Weekly chart data received:', weeklyChartData);
+          // console.log('Weekly chart data received:', weeklyChartData);
 
           // ... other API calls
           const todayCountResponse = await fetch(
@@ -453,13 +453,19 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                   </div>
                 </td>
                 <td className="p-3">{item.name}</td>
-                {item.weeklyData.map((week, weekIndex) => (
-                  <td key={weekIndex} className="p-3 text-center text-blue-500">
-                    {week.aerobicPercentage.toFixed(1)}% /
-                    <br className="md:block lg:hidden " />
-                    {week.strengthSessions}회
-                  </td>
-                ))}
+                {item.weeklyData.map((week, weekIndex) => {
+                  // console.log('week', week);
+                  return (
+                    <td
+                      key={weekIndex}
+                      className="p-3 text-center text-blue-500"
+                    >
+                      {week.aerobicPercentage.toFixed(1)}% /
+                      <br className="md:block lg:hidden " />
+                      {week.strengthSessions}회
+                    </td>
+                  );
+                })}
                 {[
                   ...Array(
                     Math.max(0, weekInfo.length - item.weeklyData.length)

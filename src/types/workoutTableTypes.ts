@@ -150,5 +150,4 @@ export interface WorkoutTableProps {
 
 export interface MobileWorkoutProps {
   challengeId?: string;
-  workoutItem: WorkoutItem;
 }
