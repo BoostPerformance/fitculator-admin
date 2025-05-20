@@ -50,6 +50,11 @@ interface DietRecord {
       description: string;
       meal_time: string;
     }>;
+    water: Array<{
+      id: string;
+      description: string;
+      meal_time: string;
+    }>;
   };
 }
 
@@ -293,6 +298,7 @@ export const useDietData = (
               dinner: record.meals.dinner || [],
               snack: record.meals.snack || [],
               supplement: record.meals.supplement || [],
+              water: record.meals.supplement || [],
             },
             updated_at: new Date().toISOString(),
             created_at: new Date().toISOString(),

@@ -3,7 +3,8 @@ export type MealType =
   | 'lunch'
   | 'dinner'
   | 'snack'
-  | 'supplement';
+  | 'supplement'
+  | 'water';
 
 export interface User {
   id: string;
@@ -60,6 +61,7 @@ export interface DailyRecords {
     dinner: Meal[];
     snack: Meal[];
     supplement: Meal[];
+    water: Meal[];
   };
   updated_at: string;
   created_at: string;

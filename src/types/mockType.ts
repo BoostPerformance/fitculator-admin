@@ -3,7 +3,7 @@
 export interface Meal {
   meal_id: string;
   user_id: string;
-  meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
+  meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK' | 'WATER';
   date: string;
   image_url_1?: string | null;
   image_url_2?: string | null;
