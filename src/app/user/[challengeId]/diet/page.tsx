@@ -16,6 +16,7 @@ export default function DietItem() {
   const urlDate = searchParams.get('date');
   const today = new Date().toISOString().split('T')[0];
   const [fullDietData, setFullDietData] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
 
   const [selectedDate, setSelectedDate] = useState<string>(urlDate || today);
   const {
@@ -64,14 +65,14 @@ export default function DietItem() {
     }
   }, [urlDate]);
 
-  useEffect(() => {
-    const loadFullDietData = async () => {
-      const fullRaw = await fetchAllDietData(); // <- from hook
-      const processed = processMeals(fullRaw); // 기존 useMemo 안 로직 재사용
-      setFullDietData(processed);
-    };
-    loadFullDietData();
-  }, [params.challengeId, selectedDate]);
+  // useEffect(() => {
+  //   const loadFullDietData = async () => {
+  //     const fullRaw = await fetchAllDietData(); // <- from hook
+  //     const processed = processMeals(fullRaw);
+  //     setFullDietData(processed);
+  //   };
+  //   loadFullDietData();
+  // }, [params.challengeId, selectedDate]);
 
   if (challengeError) {
     return <div className="p-4 text-red-500">{challengeError}</div>;
@@ -97,6 +98,7 @@ export default function DietItem() {
       {dietError && <div className="p-4 text-red-500">{dietError}</div>}
       <div className="mt-6">
         <DietStatistics
+          fetchAllDietData={fetchAllDietData}
           processedMeals={dietRecords}
           selectedChallengeId={params.challengeId as string}
           selectedDate={selectedDate}

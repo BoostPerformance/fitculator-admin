@@ -13,15 +13,6 @@ export async function GET(request: Request) {
     const userId = searchParams.get('userId');
     const challengeId = searchParams.get('challengeId');
 
-    // console.log("[diet-table API] Received request:", {
-    //   url: request.url,
-    //   params: {
-    //     date,
-    //     userId,
-    //     challengeId,
-    //   },
-    // });
-
     if (!challengeId) {
       return NextResponse.json(
         { error: 'Challenge ID is required' },
@@ -79,22 +70,8 @@ export async function GET(request: Request) {
     }
 
     if (date) {
-      // console.log('[diet-table API] Applying date filter:', {
-      //   date,
-      //   type: typeof date,
-      //   currentServerTime: new Date().toISOString(),
-      //   currentServerTimeKST: new Date().toLocaleString('ko-KR', {
-      //     timeZone: 'Asia/Seoul',
-      //   }),
-      // });
       query = query.eq('record_date', date);
     }
-
-    // console.log('[diet-table API] Executing query with filters:', {
-    //   challengeId,
-    //   userId: userId || 'all',
-    //   date,
-    // });
 
     const {
       data: records,
@@ -107,39 +84,8 @@ export async function GET(request: Request) {
       throw recordsError;
     }
 
-    // console.log('[diet-table API] Query results:', {
-    //   count,
-    //   recordsCount: records?.length,
-    //   firstRecord: records?.[0]
-    //     ? {
-    //         id: records[0].id,
-    //         record_date: records[0].record_date,
-    //         feedbacks: records[0].feedbacks,
-    //         feedbackDetails: Array.isArray(records[0].feedbacks)
-    //           ? {
-    //               id: records[0].feedbacks[0]?.id,
-    //               coach_feedback: records[0].feedbacks[0]?.coach_feedback,
-    //               coach_memo: records[0].feedbacks[0]?.coach_memo,
-    //             }
-    //           : null,
-    //       }
-    //     : null,
-    //   appliedFilters: {
-    //     date,
-    //     userId,
-    //   },
-    // });
-
     // 데이터 변환: 피드백을 단일 객체로 변경하고 meals를 타입별로 그룹화
     const transformedRecords = records?.map((record) => {
-      // console.log('[diet-table API] Processing record feedbacks:', {
-      //   originalFeedbacks: record.feedbacks,
-      //   isArray: Array.isArray(record.feedbacks),
-      //   firstFeedback: Array.isArray(record.feedbacks)
-      //     ? record.feedbacks[0]
-      //     : null,
-      // });
-
       // feedbacks가 배열이거나 단일 객체인 경우 모두 처리
       let feedbackData = null;
       if (Array.isArray(record.feedbacks) && record.feedbacks.length > 0) {
@@ -147,12 +93,6 @@ export async function GET(request: Request) {
       } else if (record.feedbacks && typeof record.feedbacks === 'object') {
         feedbackData = record.feedbacks;
       }
-
-      // console.log("[diet-table API] Processed feedback data:", {
-      //   recordId: record.id,
-      //   originalFeedback: record.feedbacks,
-      //   processedFeedback: feedbackData,
-      // });
 
       return {
         ...record,
@@ -230,12 +170,6 @@ export async function GET(request: Request) {
         },
       };
     });
-
-    // console.log('[diet-table API] Transformed records:', {
-    //   firstRecord: transformedRecords?.[0],
-    //   firstRecordMeals: transformedRecords?.[0]?.meals,
-    //   totalRecords: transformedRecords?.length,
-    // });
 
     return NextResponse.json({
       data: transformedRecords,
