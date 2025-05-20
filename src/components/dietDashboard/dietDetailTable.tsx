@@ -223,8 +223,8 @@ const DietDetaileTable = ({
           <tbody>
             {dietDetailItems
               .filter((item) => {
-                // meal 데이터가 하나라도 있는지 확인
                 const meals = item.daily_records.meals;
+
                 return (
                   meals.breakfast[0]?.description ||
                   meals.lunch[0]?.description ||
@@ -279,15 +279,16 @@ const DietDetaileTable = ({
                         ?.description || ''}
                     </div>
                   </td>
+
                   <td className="p-3 sm:text-sm">
                     <div className="line-clamp-2">
-                      {dietDetailTableItem.daily_records.meals.water[0]
+                      {dietDetailTableItem.daily_records.meals.supplement[0]
                         ?.description || ''}
                     </div>
                   </td>
                   <td className="p-3 sm:text-sm">
                     <div className="line-clamp-2">
-                      {dietDetailTableItem.daily_records.meals.supplement[0]
+                      {dietDetailTableItem.daily_records.meals.water[0]
                         ?.description || ''}
                     </div>
                   </td>

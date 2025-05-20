@@ -298,7 +298,7 @@ export const useDietData = (
               dinner: record.meals.dinner || [],
               snack: record.meals.snack || [],
               supplement: record.meals.supplement || [],
-              water: record.meals.supplement || [],
+              water: record.meals.water || [],
             },
             updated_at: new Date().toISOString(),
             created_at: new Date().toISOString(),
