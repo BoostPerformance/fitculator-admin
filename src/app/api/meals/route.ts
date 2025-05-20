@@ -50,7 +50,13 @@ interface MealPhoto {
 interface Meal {
   id: string;
   daily_record_id: string;
-  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'supplement';
+  meal_type:
+    | 'breakfast'
+    | 'lunch'
+    | 'dinner'
+    | 'snack'
+    | 'supplement'
+    | 'water';
   description: string;
   meal_time: string;
   meal_photos?: MealPhoto[];
@@ -335,6 +341,19 @@ export async function GET(request: Request) {
       supplement:
         meals
           .filter((m) => m.meal_type === 'supplement')
+          .map((m) => ({
+            id: m.id,
+            description: m.description,
+            meal_time: m.meal_time,
+            meal_photos:
+              m.meal_photos?.map((p) => ({
+                id: p.id,
+                url: p.photo_url,
+              })) || [],
+          })) || [],
+      water:
+        meals
+          .filter((m) => m.meal_type === 'water')
           .map((m) => ({
             id: m.id,
             description: m.description,

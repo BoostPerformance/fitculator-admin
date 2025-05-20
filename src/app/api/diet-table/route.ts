@@ -128,6 +128,12 @@ export async function GET(request: Request) {
             meal_time: string;
             meal_photos: Array<{ id: string; url: string }>;
           }>;
+          water: Array<{
+            id: string;
+            description: string;
+            meal_time: string;
+            meal_photos: Array<{ id: string; url: string }>;
+          }>;
         }>(
           (acc, meal) => {
             const mealPhotos =
@@ -141,8 +147,8 @@ export async function GET(request: Request) {
               | 'lunch'
               | 'dinner'
               | 'snack'
-              | 'supplement';
-
+              | 'supplement'
+              | 'water';
             if (!acc[mealType]) {
               acc[mealType] = [];
             }
@@ -160,6 +166,7 @@ export async function GET(request: Request) {
             dinner: [],
             snack: [],
             supplement: [],
+            water: [],
           }
         ) || {
           breakfast: [],
@@ -167,6 +174,7 @@ export async function GET(request: Request) {
           dinner: [],
           snack: [],
           supplement: [],
+          water: [],
         },
       };
     });

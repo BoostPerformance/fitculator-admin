@@ -190,6 +190,9 @@ const DietDetaileTable = ({
               <th className="w-[10%] p-3">
                 <span className="text-sm">영양제</span>
               </th>
+              <th className="w-[10%] p-3">
+                <span className="text-sm">물</span>
+              </th>
               <th className="w-[11%] p-3">
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-sm text-center">
@@ -220,14 +223,15 @@ const DietDetaileTable = ({
           <tbody>
             {dietDetailItems
               .filter((item) => {
-                // meal 데이터가 하나라도 있는지 확인
                 const meals = item.daily_records.meals;
+
                 return (
                   meals.breakfast[0]?.description ||
                   meals.lunch[0]?.description ||
                   meals.dinner[0]?.description ||
                   meals.snack[0]?.description ||
-                  meals.supplement[0]?.description
+                  meals.supplement[0]?.description ||
+                  meals.water[0]?.description
                 );
               })
               .map((dietDetailTableItem, index) => (
@@ -275,9 +279,16 @@ const DietDetaileTable = ({
                         ?.description || ''}
                     </div>
                   </td>
+
                   <td className="p-3 sm:text-sm">
                     <div className="line-clamp-2">
                       {dietDetailTableItem.daily_records.meals.supplement[0]
+                        ?.description || ''}
+                    </div>
+                  </td>
+                  <td className="p-3 sm:text-sm">
+                    <div className="line-clamp-2">
+                      {dietDetailTableItem.daily_records.meals.water[0]
                         ?.description || ''}
                     </div>
                   </td>

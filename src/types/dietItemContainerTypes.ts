@@ -19,6 +19,7 @@ export interface DailyMealData {
     dinner: MealItem[];
     snack: MealItem[];
     supplement: MealItem[];
+    water: MealItem[];
     [key: string]: MealItem[]; // 추가적인 식사 유형을 위한 인덱스 시그니처
   };
   feedbacks: {
@@ -61,7 +62,7 @@ export interface UserData {
 export interface Meals {
   id: string;
   daily_record_id: string;
-  meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
+  meal_type: 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK' | 'WATER';
   description: string;
   meal_photos: [string];
   updated_at: string;

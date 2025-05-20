@@ -51,7 +51,7 @@ export const DietContent = ({
   };
 
   return (
-    <div className="lg:px-[2rem] md:px-[1rem] sm:px-[0.5em]">
+    <div className="lg:px-[2rem] md:px-[1rem] sm:px-[1em]">
       <div className="flex sm:justify-center sm:items-center">
         <DateInput
           onChange={onDateChange}

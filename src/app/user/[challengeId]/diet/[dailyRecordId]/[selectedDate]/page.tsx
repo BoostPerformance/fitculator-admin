@@ -39,6 +39,7 @@ const DEFAULT_DAILY_MEAL = (date: string) => ({
     dinner: { ...DEFAULT_MEAL },
     snack: { ...DEFAULT_MEAL },
     supplement: { ...DEFAULT_MEAL },
+    water: { ...DEFAULT_MEAL },
   },
   feedbacks: {
     coach_feedback: '',
@@ -139,6 +140,7 @@ export default function SelectedDate() {
             dinner: [{ ...DEFAULT_MEAL }],
             snack: [{ ...DEFAULT_MEAL }],
             supplement: [{ ...DEFAULT_MEAL }],
+            water: [{ ...DEFAULT_MEAL }],
           },
           feedbacks: {
             coach_feedback: '',
@@ -192,6 +194,7 @@ export default function SelectedDate() {
           'dinner',
           'snack',
           'supplement',
+          'water',
         ] as const;
 
         const processedMeals: {
@@ -200,12 +203,14 @@ export default function SelectedDate() {
           dinner: MealItem[];
           snack: MealItem[];
           supplement: MealItem[];
+          water: MealItem[];
         } = {
           breakfast: [],
           lunch: [],
           dinner: [],
           snack: [],
           supplement: [],
+          water: [],
         };
 
         mealTypes.forEach((type) => {
@@ -593,7 +598,14 @@ export default function SelectedDate() {
           <div className="relative mb-[2rem]">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:px-4 px-4">
               {(
-                ['breakfast', 'lunch', 'dinner', 'snack', 'supplement'] as const
+                [
+                  'breakfast',
+                  'lunch',
+                  'dinner',
+                  'snack',
+                  'supplement',
+                  'water',
+                ] as const
               ).map((mealType) => {
                 const mealItems = Array.isArray(displayMeal.meals[mealType])
                   ? displayMeal.meals[mealType]
@@ -605,6 +617,7 @@ export default function SelectedDate() {
                   dinner: '저녁',
                   snack: '간식',
                   supplement: '영양제',
+                  water: '물',
                 };
 
                 return (
