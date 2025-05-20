@@ -100,12 +100,18 @@ const DietStatistics = ({
   selectedDate,
 }: DietStatsProps) => {
   const getTotalMealUploads = (meals: ProcessedMeal[]) => {
-    return meals.reduce((total, meal) => {
-      if (meal.record_date === selectedDate) {
+    meals.reduce((total, meal) => {
+      const formattedDate = new Date(meal.record_date)
+        .toISOString()
+        .split('T')[0];
+      console.log(`[업로드 검사] ${formattedDate}`, meal.daily_records.meals);
+
+      if (formattedDate === selectedDate) {
         const hasAnyMeal = Object.values(meal.daily_records.meals).some(
           (mealArray) =>
             mealArray.some((mealItem) => mealItem.description.trim() !== '')
         );
+        console.log(`유저 ${meal.user.id} 업로드 여부:`, hasAnyMeal);
         return total + (hasAnyMeal ? 1 : 0);
       }
       return total;
@@ -116,16 +122,24 @@ const DietStatistics = ({
     const selectedDateMembers = new Set();
 
     meals.forEach((meal) => {
-      if (meal.record_date === selectedDate) {
+      const formattedDate = new Date(meal.record_date)
+        .toISOString()
+        .split('T')[0];
+      if (formattedDate === selectedDate) {
         const hasAnyMeal = Object.values(meal.daily_records.meals).some(
           (mealArray) =>
             mealArray.some((mealItem) => mealItem.description.trim() !== '')
         );
         if (hasAnyMeal) {
-          selectedDateMembers.add(meal.user.id);
+          selectedDateMembers.add(meal.user.id); // ✅ 요걸 넣어야 counts에 반영됨
+
+          console.log(`✅ 업로드한 유저: ${meal.user.name} (${meal.user.id})`);
+        } else {
+          console.log(`❌ 식단 없음: ${meal.user.name} (${meal.user.id})`);
         }
       }
     });
+    console.log('dailyRecords', dailyRecords);
 
     // 챌린지에 참여한 전체 참가자 수 계산
     const totalNoRecords =
@@ -158,11 +172,11 @@ const DietStatistics = ({
       }
     });
 
-    console.log({
-      completed: completedFeedbacks,
-      pending: totalRecords - completedFeedbacks,
-      total: totalRecords,
-    });
+    // console.log({
+    //   completed: completedFeedbacks,
+    //   pending: totalRecords - completedFeedbacks,
+    //   total: totalRecords,
+    // });
     return {
       completed: completedFeedbacks,
       pending: totalRecords - completedFeedbacks,
@@ -185,13 +199,13 @@ const DietStatistics = ({
         textColor="text-blue-500"
       /> */}
 
-        {/* <TotalFeedbackCounts
+        <TotalFeedbackCounts
           counts={todayStats.uploadCount.toString()}
           total={`${todayStats.totalMembers}명`}
           title="오늘 식단 업로드"
           borderColor="border-green"
           textColor="text-green"
-        /> */}
+        />
 
         <TotalFeedbackCounts
           counts={`${feedbackStats.pending}명`}

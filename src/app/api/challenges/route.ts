@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import { createClient, PostgrestError } from '@supabase/supabase-js';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
-import {
-  ChallengeCoach,
-  ChallengeParticipant,
-  SupabaseChallenge,
-  SupabaseUser,
-} from '@/types/challengeTypes';
+// import {
+//   ChallengeCoach,
+//   ChallengeParticipant,
+//   SupabaseChallenge,
+//   SupabaseUser,
+// } from '@/types/challengeTypes';
 import type { Session } from 'next-auth';
 
 const supabase = createClient(
