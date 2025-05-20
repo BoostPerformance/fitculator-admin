@@ -15,17 +15,16 @@ export default function DietItem() {
   const searchParams = useSearchParams();
   const urlDate = searchParams.get('date');
   const today = new Date().toISOString().split('T')[0];
-  // console.log("[Diet Page] Date info:", {
-  //   today,
-  //   urlDate,
-  //   currentTime: new Date().toISOString(),
-  // });
+  const [fullDietData, setFullDietData] = useState<any[]>([]);
+
   const [selectedDate, setSelectedDate] = useState<string>(urlDate || today);
   const {
     dietRecords,
     loading: dietLoading,
     error: dietError,
+    fetchAllDietData,
   } = useDietData(params.challengeId as string, selectedDate);
+
   const { isMobile } = useResponsive();
   const {
     challenges,
@@ -64,6 +63,15 @@ export default function DietItem() {
       }
     }
   }, [urlDate]);
+
+  useEffect(() => {
+    const loadFullDietData = async () => {
+      const fullRaw = await fetchAllDietData(); // <- from hook
+      const processed = processMeals(fullRaw); // 기존 useMemo 안 로직 재사용
+      setFullDietData(processed);
+    };
+    loadFullDietData();
+  }, [params.challengeId, selectedDate]);
 
   if (challengeError) {
     return <div className="p-4 text-red-500">{challengeError}</div>;

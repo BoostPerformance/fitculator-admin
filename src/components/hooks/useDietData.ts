@@ -150,6 +150,7 @@ export const useDietData = (
         const url = new URL('/api/diet-table', window.location.origin);
         url.searchParams.append('challengeId', challengeId);
         url.searchParams.append('page', page.toString());
+        url.searchParams.append('limit', '1000'); // 🔥 무제한에 가깝게
 
         // 페이지 크기 최적화: 첫 페이지는 화면에 표시할 만큼만 가져오기
         const pageSize = page === 1 ? Math.min(initialLimit, 10) : limit;
@@ -295,6 +296,27 @@ export const useDietData = (
   //   allProcessedRecords: sortedRecords,
   // });
 
+  const fetchAllDietData = async (): Promise<any[]> => {
+    try {
+      const url = new URL('/api/diet-table', window.location.origin);
+      url.searchParams.append('challengeId', challengeId);
+      url.searchParams.append('page', '1');
+      url.searchParams.append('limit', '1000'); // 통계용
+
+      if (selectedDate) {
+        url.searchParams.append('date', selectedDate);
+      }
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch all diet records');
+      const data: DietResponse = await response.json();
+      return data.data;
+    } catch (err) {
+      console.error('Error fetching all diet records:', err);
+      return [];
+    }
+  };
+
   return {
     dietRecords: processedAndSortedRecords,
     challenges,
@@ -304,8 +326,7 @@ export const useDietData = (
     totalCount,
     isInitialLoading,
     hasMore,
-
-    // 추가: 데이터 리셋 함수 (메모리 정리용)
+    fetchAllDietData,
     resetData: () => {
       setDietRecords([]);
       setTotalCount(0);
