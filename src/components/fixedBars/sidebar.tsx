@@ -195,7 +195,7 @@ export default function Sidebar({
   };
 
   return (
-    <div className="lg:w-[18.75rem] min-h-fit md:min-h-fit lg:min-h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
+    <div className="lg:w-[18.75rem] min-w-[16rem] sm:min-w-[14rem] md:min-w-[16rem] min-h-fit md:min-h-fit lg:min-h-screen lg:px-[2.375rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
       {/* <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]"> */}
       <div className="flex justify-start gap-[0.5rem] pt-[2.25rem] sm:pt-[0rem] md:hidden">
         {/* <Image src="/svg/logo_light.svg" width={30} height={30} alt="logo" /> */}
@@ -253,11 +253,11 @@ export default function Sidebar({
                 <div
                   role="group"
                   aria-label="챌린지 메뉴"
-                  className="flex flex-row justify-between align-middle cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-4 "
+                  className="flex flex-row justify-between align-middle items-center cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-4"
                   onClick={handleDropdown}
                 >
                   챌린지
-                  <button className="w-[1rem] lg:w-[0.8rem]">
+                  <button className="w-4 h-4 ">
                     <Image
                       src={
                         !isOpenDropdown
@@ -267,6 +267,7 @@ export default function Sidebar({
                       width={30}
                       height={30}
                       alt="드롭다운 아이콘"
+                      className="min-w-[1rem] min-h-[1rem]"
                     />
                   </button>
                 </div>
@@ -280,9 +281,9 @@ export default function Sidebar({
 
                         return (
                           <li key={challenge.challenges.id}>
-                            <div className="font-medium py-2 pl-4 rounded hover:bg-gray-100 dark:hover:bg-blue-3 flex justify-between items-center">
+                            <div className="font-medium py-2 pl-0 rounded  dark:hover:bg-blue-3 flex justify-between items-center">
                               <div
-                                className="cursor-pointer font-medium dark:text-white"
+                                className="cursor-pointer text-1.25-500 dark:text-white hover:bg-gray-100 hover:text-1.25-700 "
                                 onClick={() => handleChallengeClick(challenge)}
                               >
                                 {challenge.challenges.title || '제목 없음'}
@@ -293,7 +294,7 @@ export default function Sidebar({
                                     challenge.challenges.id
                                   )
                                 }
-                                className="ml-2"
+                                className="ml-2 hover:bg-gray-100 hover:text-1.25-700 p-2 min-w-[1rem] min-h-[1rem]"
                               >
                                 <Image
                                   src={
@@ -304,7 +305,7 @@ export default function Sidebar({
                                   width={30}
                                   height={30}
                                   alt="드롭다운 아이콘"
-                                  className="w-[1rem] lg:w-[0.8rem]"
+                                  className="w-[1rem] lg:w-[0.8rem] min-w-[1rem] min-h-[1rem]"
                                 />
                               </button>
                             </div>
