@@ -50,9 +50,9 @@ export default function Sidebar({
     null
   );
   const [notices, setNotices] = useState([
-    { id: '1', title: '첫 번째 공지사항' },
-    { id: '2', title: '두 번째 공지사항' },
-    { id: '3', title: '세 번째 공지사항' },
+    { id: '1', title: '첫 번째 공지사항', content: '' },
+    { id: '2', title: '두 번째 공지사항', content: '' },
+    { id: '3', title: '세 번째 공지사항', content: '' },
   ]);
   const [isInternalOperator, setIsInternalOperator] = useState(false);
   const router = useRouter();
@@ -316,8 +316,11 @@ export default function Sidebar({
                                   <div
                                     className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
                                     onClick={() => {
+                                      const today = new Date()
+                                        .toISOString()
+                                        .split('T')[0]; // YYYY-MM-DD
                                       router.push(
-                                        `/user/${challenge.challenges.id}/diet`
+                                        `/user/${challenge.challenges.id}/diet?date=${today}`
                                       );
                                     }}
                                   >
