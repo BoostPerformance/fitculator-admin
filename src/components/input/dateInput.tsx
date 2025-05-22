@@ -4,6 +4,8 @@ import Calender from './calendar';
 import calendarUtils from '../utils/calendarUtils';
 import { DateInputProps } from '@/types/calendar';
 
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+
 const DateInput = ({
   onChange,
   selectedDate,
@@ -11,6 +13,11 @@ const DateInput = ({
   challengeEndDate = '',
 }: DateInputProps) => {
   // 챌린지 시작일과 종료일을 Date 객체로 변환
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const challengeStart = challengeStartDate
     ? new Date(challengeStartDate)
     : null;
@@ -79,8 +86,13 @@ const DateInput = ({
   };
 
   const handleDateClick = (date: Date) => {
-    onChange(calendarUtils.formatDate(date));
+    const formattedDate = calendarUtils.formatDate(date);
+    onChange(formattedDate);
     setOpen(false);
+
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.set('date', formattedDate);
+    router.push(`${pathname}?${newParams.toString()}`);
   };
 
   return (
