@@ -65,7 +65,9 @@ const config: Config = {
       },
     },
     fontSize: {
+      '0.5-500': [' 0.5rem', { fontWeight: 500 }],
       '0.625-500': [' 0.625rem', { fontWeight: 500 }],
+      '0.625-700': [' 0.625rem', { fontWeight: 700 }],
       '0.65-500': [' 0.65rem', { fontWeight: 500 }],
       '0.7-500': ['0.7rem', { fontWeight: 500 }],
       '0.7-700': ['0.7rem', { fontWeight: 700 }],
