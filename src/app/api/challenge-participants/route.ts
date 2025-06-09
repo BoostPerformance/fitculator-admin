@@ -78,10 +78,10 @@ export async function GET(request: Request) {
       throw participantsError;
     }
 
-    console.log(`가져온 참가자 수: ${participants?.length || 0}`);
+    // console.log(`가져온 참가자 수: ${participants?.length || 0}`);
 
     // 각 참가자의 챌린지 기간 내 모든 daily record 가져오기
-    console.log('참가자 별 일일 기록 가져오기 시작');
+    //  console.log('참가자 별 일일 기록 가져오기 시작');
     const participantsWithRecords = await Promise.all(
       participants.map(async (participant) => {
         // console.log(`참가자 ID: ${participant.id} 처리 중`);
@@ -211,7 +211,7 @@ export async function GET(request: Request) {
           return count;
         }, 0);
 
-        console.log(`참가자 ${participant.id}의 피드백 수: ${feedbacksCount}`);
+        //  console.log(`참가자 ${participant.id}의 피드백 수: ${feedbacksCount}`);
 
         return {
           ...participant,

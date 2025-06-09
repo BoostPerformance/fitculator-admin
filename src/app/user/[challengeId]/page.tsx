@@ -44,6 +44,7 @@ interface Challenges {
     title: string;
     start_date: string;
     end_date: string;
+    challenge_type: 'diet' | 'exercise' | 'diet_and_exercise';
   };
 }
 
@@ -235,6 +236,10 @@ export default function User() {
             );
           }
         );
+
+        console.log('🔍  challengesData:', sortedChallenges);
+
+        // console.log('🔍 Sorted challenges1:', sortedChallenges1);
 
         setChallenges(sortedChallenges);
         // 첫 번째 챌린지를 기본값으로 설정

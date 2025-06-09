@@ -156,7 +156,8 @@ export async function GET(
         })),
       }));
 
-      // console.log("✅ Successfully fetched admin challenges");
+      console.log('🔍 Enriched data:', enrichedData);
+      console.log('✅ Successfully fetched admin challenges');
       return NextResponse.json(enrichedData);
     }
 
@@ -206,6 +207,7 @@ export async function GET(
       }
     );
 
+    console.log('🔍 Coach challenges:', challengeData);
     // Fetch coach's challenges and related data
     // console.log("🔍 Fetching coach challenges...");
     // const { data: challengeData, error: challengeError } = await supabase

@@ -421,7 +421,7 @@ export async function GET(request: Request) {
     }
 
     // First get challenge participants
-    console.log('🔍 Getting challenge participants...');
+    //console.log('🔍 Getting challenge participants...');
     const { data: participants, error: participantsError } = await supabase
       .from('challenge_participants')
       .select('service_user_id')

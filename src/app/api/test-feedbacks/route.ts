@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     }
 
     // 1. 참가자의 챌린지 정보 가져오기 (시작일, 종료일 확인용)
-    console.log('1. 참가자의 챌린지 정보 조회 중...');
+    //console.log('1. 참가자의 챌린지 정보 조회 중...');
     const { data: participantData, error: participantError } = await supabase
       .from('challenge_participants')
       .select(
@@ -132,7 +132,7 @@ export async function GET(request: Request) {
     }
 
     // 피드백 분석 및 카운트
-    console.log('4. 피드백 분석 및 카운트 중...');
+    //console.log('4. 피드백 분석 및 카운트 중...');
     const recordsWithFeedback = new Set();
     const feedbackDetails = [];
 
@@ -155,8 +155,8 @@ export async function GET(request: Request) {
     });
 
     const feedbackCount = recordsWithFeedback.size;
-    console.log(`피드백이 있는 일일 기록 수: ${feedbackCount}개`);
-    console.log('피드백 상세 정보 (최대 5개):', feedbackDetails.slice(0, 5));
+    // console.log(`피드백이 있는 일일 기록 수: ${feedbackCount}개`);
+    // console.log('피드백 상세 정보 (최대 5개):', feedbackDetails.slice(0, 5));
 
     // 결과 객체 생성
     const result = {
@@ -174,8 +174,8 @@ export async function GET(request: Request) {
           : 0,
     };
 
-    console.log('최종 결과:', result);
-    console.log('===== 피드백 테스트 API 종료 =====');
+    // console.log('최종 결과:', result);
+    // console.log('===== 피드백 테스트 API 종료 =====');
 
     // 결과 반환
     return NextResponse.json(result);
