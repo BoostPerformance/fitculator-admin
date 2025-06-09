@@ -71,21 +71,22 @@ export default function UserLayout({
               title = challengeData.title;
               start_date = challengeData.start_date;
               end_date = challengeData.end_date;
-              challenge_type = challengeData.challenge_type;
+              challenge_type =
+                challengeData.challenge_type || 'diet_and_exercise'; // 기본값 설정
             } else if (challenge.challenge_id) {
               // Case 2: RPC 응답 구조
               id = challenge.challenge_id;
               title = challenge.challenge_title;
               start_date = challenge.challenge_start_date;
               end_date = challenge.challenge_end_date;
-              challenge_type = challenge.challenge_type;
+              challenge_type = challenge.challenge_type || 'diet_and_exercise'; // 기본값 설정
             } else {
               // Case 3: 최상위 레벨 데이터
               id = challenge.id;
               title = challenge.title;
               start_date = challenge.start_date;
               end_date = challenge.end_date;
-              challenge_type = challenge.challenge_type;
+              challenge_type = challenge.challenge_type || 'diet_and_exercise'; // 기본값 설정
             }
 
             // console.log('변환된 챌린지:', {
