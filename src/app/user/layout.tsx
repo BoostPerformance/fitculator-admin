@@ -10,6 +10,7 @@ interface Challenges {
     title: string;
     start_date: string;
     end_date: string;
+    challenge_type: 'diet' | 'exercise' | 'diet_and_exercise';
   };
 }
 
@@ -61,7 +62,7 @@ export default function UserLayout({
 
             // 챌린지 데이터 추출 시도
             let challengeData;
-            let id, title, start_date, end_date;
+            let id, title, start_date, end_date, challenge_type;
 
             if (challenge.challenges) {
               // Case 1: challenges 키가 있는 경우
@@ -70,18 +71,21 @@ export default function UserLayout({
               title = challengeData.title;
               start_date = challengeData.start_date;
               end_date = challengeData.end_date;
+              challenge_type = challengeData.challenge_type;
             } else if (challenge.challenge_id) {
               // Case 2: RPC 응답 구조
               id = challenge.challenge_id;
               title = challenge.challenge_title;
               start_date = challenge.challenge_start_date;
               end_date = challenge.challenge_end_date;
+              challenge_type = challenge.challenge_type;
             } else {
               // Case 3: 최상위 레벨 데이터
               id = challenge.id;
               title = challenge.title;
               start_date = challenge.start_date;
               end_date = challenge.end_date;
+              challenge_type = challenge.challenge_type;
             }
 
             // console.log('변환된 챌린지:', {
@@ -98,6 +102,7 @@ export default function UserLayout({
                 title,
                 start_date,
                 end_date,
+                challenge_type,
               },
             };
           });

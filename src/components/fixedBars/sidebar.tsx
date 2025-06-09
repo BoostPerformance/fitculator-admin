@@ -14,6 +14,7 @@ interface Challenges {
     title: string;
     start_date: string;
     end_date: string;
+    challenge_type: 'diet' | 'exercise' | 'diet_and_exercise';
   };
 }
 
@@ -313,65 +314,43 @@ export default function Sidebar({
                             {/* 식단/운동 드롭다운 */}
                             {isDropdownOpen && (
                               <ul className="mt-2 ml-2 border-l-2 border-gray-100 dark:border-blue-3">
-                                <li>
-                                  <div
-                                    className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
-                                    onClick={() => {
-                                      const today = new Date()
-                                        .toISOString()
-                                        .split('T')[0]; // YYYY-MM-DD
-                                      router.push(
-                                        `/user/${challenge.challenges.id}/diet?date=${today}`
-                                      );
-                                    }}
-                                  >
-                                    식단
-                                  </div>
-                                </li>
-                                <li>
-                                  <div
-                                    className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
-                                    onClick={() => {
-                                      router.push(
-                                        `/user/${challenge.challenges.id}/workout`
-                                      );
-                                    }}
-                                  >
-                                    운동
-                                  </div>
-                                </li>
-                                {/* <li>
-                                  <div className="flex items-center justify-between px-8 py-2">
-                                    <span className="text-sm font-medium">
-                                      공지사항
-                                    </span>
-                                    <button onClick={handleAddNotice}>
-                                      <Image
-                                        src="/svg/plus.svg"
-                                        width={16}
-                                        height={16}
-                                        alt="추가"
-                                      />
-                                    </button>
-                                  </div>
-                                  <ul className="ml-2 space-y-1 pb-4">
-                                    {notices.map((notice) => (
-                                      <li
-                                        key={notice.id}
-                                        className="text-sm cursor-pointer text-gray-600 hover:text-black pt-2 pl-8"
-                                        onClick={() => {
-                                          setCurrentChallengeId(
-                                            selectedChallengeId || null
-                                          );
-                                          setSelectedNoticeId(notice.id);
-                                          setModalOpen(true);
-                                        }}
-                                      >
-                                        {notice.title}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </li> */}
+                                {(challenge.challenges.challenge_type ===
+                                  'diet' ||
+                                  challenge.challenges.challenge_type ===
+                                    'diet_and_exercise') && (
+                                  <li>
+                                    <div
+                                      className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                                      onClick={() => {
+                                        const today = new Date()
+                                          .toISOString()
+                                          .split('T')[0]; // YYYY-MM-DD
+                                        router.push(
+                                          `/user/${challenge.challenges.id}/diet?date=${today}`
+                                        );
+                                      }}
+                                    >
+                                      식단
+                                    </div>
+                                  </li>
+                                )}
+                                {(challenge.challenges.challenge_type ===
+                                  'exercise' ||
+                                  challenge.challenges.challenge_type ===
+                                    'diet_and_exercise') && (
+                                  <li>
+                                    <div
+                                      className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
+                                      onClick={() => {
+                                        router.push(
+                                          `/user/${challenge.challenges.id}/workout`
+                                        );
+                                      }}
+                                    >
+                                      운동
+                                    </div>
+                                  </li>
+                                )}
                               </ul>
                             )}
                           </li>
