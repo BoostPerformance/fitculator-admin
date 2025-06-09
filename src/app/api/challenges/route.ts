@@ -207,7 +207,7 @@ export async function GET(
       }
     );
 
-    console.log('🔍 Coach challenges:', challengeData);
+    //console.log('🔍 Coach challenges:', challengeData);
     // Fetch coach's challenges and related data
     // console.log("🔍 Fetching coach challenges...");
     // const { data: challengeData, error: challengeError } = await supabase
@@ -257,7 +257,6 @@ export async function GET(
       return NextResponse.json([]);
     }
 
-    // Get all participant IDs
     //     const participantIds = challengeData.flatMap((challenge) =>
     //       challenge.challenges.challenge_participants.map((p) => p.service_user_id)
     //     );

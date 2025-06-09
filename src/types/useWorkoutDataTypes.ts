@@ -87,6 +87,7 @@ export interface ApiResponse {
   weeklyRecords: WeeklyRecord[];
   stats: ApiStats;
   recentWorkouts?: any[];
+  challengePeriod: ChallengePeriod;
 }
 
 export interface WeeklyChartData {

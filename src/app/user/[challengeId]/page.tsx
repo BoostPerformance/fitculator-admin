@@ -237,7 +237,7 @@ export default function User() {
           }
         );
 
-        console.log('🔍  challengesData:', challengesData);
+        // console.log('🔍  challengesData:', challengesData);
 
         // console.log('🔍 Sorted challenges1:', sortedChallenges1);
 
