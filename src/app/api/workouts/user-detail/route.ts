@@ -226,17 +226,17 @@ async function getWeeklyChartData(
       challengePeriod,
     };
 
-    console.log('🐸 challengeStart:', challengeStart.toISOString());
-    console.log('🐸 challengeEnd:', challengeEnd.toISOString());
-    console.log(
-      '🐸 challengePeriod:',
-      challengePeriod.startDate,
-      challengePeriod.endDate
-    );
-    console.log(
-      'Filtered uniqueWeeks:',
-      uniqueWeeks.map((w) => w.label)
-    );
+    // console.log('🐸 challengeStart:', challengeStart.toISOString());
+    // console.log('🐸 challengeEnd:', challengeEnd.toISOString());
+    // console.log(
+    //   '🐸 challengePeriod:',
+    //   challengePeriod.startDate,
+    //   challengePeriod.endDate
+    // );
+    // console.log(
+    //   'Filtered uniqueWeeks:',
+    //   uniqueWeeks.map((w) => w.label)
+    // );
 
     return NextResponse.json(forTypeCheck);
   } catch (error) {
