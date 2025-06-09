@@ -57,6 +57,15 @@ const calculateChallengeProgress = (startDate: string, endDate: string) => {
   const end = new Date(endDate);
   const today = new Date();
 
+  // 날짜가 유효한지 확인
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    console.error('Invalid date:', { startDate, endDate });
+    return {
+      progressDays: '0',
+      totalDays: '0',
+    };
+  }
+
   // 전체 챌린지 기간 계산
   const totalDays =
     Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -72,6 +81,16 @@ const calculateChallengeProgress = (startDate: string, endDate: string) => {
       (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
     );
   }
+
+  console.log('Progress calculation:', {
+    startDate,
+    endDate,
+    start: start.toISOString(),
+    end: end.toISOString(),
+    today: today.toISOString(),
+    totalDays,
+    progressDays,
+  });
 
   return {
     progressDays: progressDays.toString(),
@@ -228,23 +247,37 @@ export default function User() {
         }
         const challengesData = await challengesResponse.json();
 
-        const sortedChallenges = challengesData.sort(
-          (a: Challenges, b: Challenges) => {
+        const sortedChallenges = challengesData
+          .map((challenge: any) => ({
+            challenges: {
+              id: challenge.id,
+              title: challenge.title,
+              start_date: challenge.start_date,
+              end_date: challenge.end_date,
+              challenge_type: challenge.challenge_type || 'diet_and_exercise',
+            },
+          }))
+          .sort((a: Challenges, b: Challenges) => {
             return (
               new Date(b.challenges.start_date).getTime() -
               new Date(a.challenges.start_date).getTime()
             );
-          }
+          });
+
+        console.log('🔍 Selected Challenge ID:', params.challengeId);
+        console.log('🔍 Sorted Challenges:', sortedChallenges);
+        console.log(
+          '🔍 Selected Challenge Type:',
+          sortedChallenges.find((c) => c.challenges.id === params.challengeId)
+            ?.challenges.challenge_type
         );
-
-        console.log('🔍  challengesData:', sortedChallenges);
-
-        // console.log('🔍 Sorted challenges1:', sortedChallenges1);
 
         setChallenges(sortedChallenges);
         // 첫 번째 챌린지를 기본값으로 설정
         if (sortedChallenges.length > 0) {
-          setSelectedChallengeId(sortedChallenges[0].challenges.id);
+          setSelectedChallengeId(
+            params.challengeId || sortedChallenges[0].challenges.id
+          );
         }
 
         // 코치 데이터 가져오기
@@ -367,6 +400,7 @@ export default function User() {
     const selectedChallenge = challenges.find(
       (challenge) => challenge.challenges.id === selectedChallengeId
     );
+    console.log('Selected challenge:', selectedChallenge);
     return selectedChallenge
       ? {
           startDate: selectedChallenge.challenges.start_date,
@@ -376,12 +410,14 @@ export default function User() {
   };
 
   const challengeDates = getSelectedChallengeDates();
+  console.log('Challenge dates:', challengeDates);
   const progress = challengeDates
     ? calculateChallengeProgress(
         challengeDates.startDate,
         challengeDates.endDate
       )
     : { progressDays: '0', totalDays: '0' };
+  console.log('Progress:', progress);
 
   // 로딩 중일 때 스켈레톤 UI 표시
   if (loading) {
