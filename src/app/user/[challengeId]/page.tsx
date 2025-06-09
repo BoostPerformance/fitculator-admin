@@ -237,7 +237,7 @@ export default function User() {
           }
         );
 
-        console.log('🔍  challengesData:', sortedChallenges);
+        console.log('🔍  challengesData:', challengesData);
 
         // console.log('🔍 Sorted challenges1:', sortedChallenges1);
 
@@ -412,40 +412,63 @@ export default function User() {
                 borderColor="border-green"
                 textColor="text-green"
               />
-              <TotalFeedbackCounts
-                counts={`${workOutCountToday}`}
-                total={`${filteredDailyRecordsbyId.length}명`}
-                title={
-                  <span>
-                    오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
-                    업로드 멤버
-                  </span>
-                }
-                borderColor="border-blue-5"
-                textColor="text-blue-5"
-              />
-              <TotalFeedbackCounts
-                counts={todayDietUploads?.counts || '0'}
-                total={todayDietUploads?.total || '0명'}
-                title={
-                  <span>
-                    오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
-                    업로드 멤버
-                  </span>
-                }
-                borderColor="border-yellow"
-                textColor="text-yellow"
-              />
+              {challenges.find((c) => c.challenges.id === selectedChallengeId)
+                ?.challenges.challenge_type !== 'diet' && (
+                <TotalFeedbackCounts
+                  counts={`${workOutCountToday}`}
+                  total={`${filteredDailyRecordsbyId.length}명`}
+                  title={
+                    <span>
+                      오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
+                      업로드 멤버
+                    </span>
+                  }
+                  borderColor="border-blue-5"
+                  textColor="text-blue-5"
+                />
+              )}
+              {challenges.find((c) => c.challenges.id === selectedChallengeId)
+                ?.challenges.challenge_type !== 'exercise' && (
+                <TotalFeedbackCounts
+                  counts={todayDietUploads?.counts || '0'}
+                  total={todayDietUploads?.total || '0명'}
+                  title={
+                    <span>
+                      오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
+                      업로드 멤버
+                    </span>
+                  }
+                  borderColor="border-yellow"
+                  textColor="text-yellow"
+                />
+              )}
             </div>
 
             <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4 ">
-              <TrafficSourceChart challengeId={selectedChallengeId} />
-              <DailyDietRecord activities={filteredDailyRecordsbyId} />
-              <WorkoutLeaderboard challengeId={selectedChallengeId} />
-              <WeeklyWorkoutChart challengeId={selectedChallengeId} />
+              {challenges.find((c) => c.challenges.id === selectedChallengeId)
+                ?.challenges.challenge_type === 'diet_and_exercise' && (
+                <>
+                  <TrafficSourceChart challengeId={selectedChallengeId} />
+                  <DailyDietRecord activities={filteredDailyRecordsbyId} />
+                  <WorkoutLeaderboard challengeId={selectedChallengeId} />
+                  <WeeklyWorkoutChart challengeId={selectedChallengeId} />
+                </>
+              )}
+              {challenges.find((c) => c.challenges.id === selectedChallengeId)
+                ?.challenges.challenge_type === 'diet' && (
+                <DailyDietRecord activities={filteredDailyRecordsbyId} />
+              )}
+              {challenges.find((c) => c.challenges.id === selectedChallengeId)
+                ?.challenges.challenge_type === 'exercise' && (
+                <>
+                  <TrafficSourceChart challengeId={selectedChallengeId} />
+                  <WorkoutLeaderboard challengeId={selectedChallengeId} />
+                  <WeeklyWorkoutChart challengeId={selectedChallengeId} />
+                </>
+              )}
             </div>
 
-            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem]  bg-white-1 px-4 sm:px-4">
+            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem] bg-white-1 px-4 sm:px-4">
               <DietTable
                 dailyRecordsData={filteredDailyRecordsbyId}
                 challengeId={selectedChallengeId}
