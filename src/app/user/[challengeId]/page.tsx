@@ -57,15 +57,6 @@ const calculateChallengeProgress = (startDate: string, endDate: string) => {
   const end = new Date(endDate);
   const today = new Date();
 
-  // 날짜가 유효한지 확인
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-    console.error('Invalid date:', { startDate, endDate });
-    return {
-      progressDays: '0',
-      totalDays: '0',
-    };
-  }
-
   // 전체 챌린지 기간 계산
   const totalDays =
     Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -81,16 +72,6 @@ const calculateChallengeProgress = (startDate: string, endDate: string) => {
       (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
     );
   }
-
-  console.log('Progress calculation:', {
-    startDate,
-    endDate,
-    start: start.toISOString(),
-    end: end.toISOString(),
-    today: today.toISOString(),
-    totalDays,
-    progressDays,
-  });
 
   return {
     progressDays: progressDays.toString(),
@@ -247,37 +228,23 @@ export default function User() {
         }
         const challengesData = await challengesResponse.json();
 
-        const sortedChallenges = challengesData
-          .map((challenge: any) => ({
-            challenges: {
-              id: challenge.id,
-              title: challenge.title,
-              start_date: challenge.start_date,
-              end_date: challenge.end_date,
-              challenge_type: challenge.challenge_type || 'diet_and_exercise',
-            },
-          }))
-          .sort((a: Challenges, b: Challenges) => {
+        const sortedChallenges = challengesData.sort(
+          (a: Challenges, b: Challenges) => {
             return (
               new Date(b.challenges.start_date).getTime() -
               new Date(a.challenges.start_date).getTime()
             );
-          });
-
-        console.log('🔍 Selected Challenge ID:', params.challengeId);
-        console.log('🔍 Sorted Challenges:', sortedChallenges);
-        console.log(
-          '🔍 Selected Challenge Type:',
-          sortedChallenges.find((c) => c.challenges.id === params.challengeId)
-            ?.challenges.challenge_type
+          }
         );
+
+        console.log('🔍  challengesData:', sortedChallenges);
+
+        // console.log('🔍 Sorted challenges1:', sortedChallenges1);
 
         setChallenges(sortedChallenges);
         // 첫 번째 챌린지를 기본값으로 설정
         if (sortedChallenges.length > 0) {
-          setSelectedChallengeId(
-            params.challengeId || sortedChallenges[0].challenges.id
-          );
+          setSelectedChallengeId(sortedChallenges[0].challenges.id);
         }
 
         // 코치 데이터 가져오기
@@ -400,7 +367,6 @@ export default function User() {
     const selectedChallenge = challenges.find(
       (challenge) => challenge.challenges.id === selectedChallengeId
     );
-    console.log('Selected challenge:', selectedChallenge);
     return selectedChallenge
       ? {
           startDate: selectedChallenge.challenges.start_date,
@@ -410,14 +376,12 @@ export default function User() {
   };
 
   const challengeDates = getSelectedChallengeDates();
-  console.log('Challenge dates:', challengeDates);
   const progress = challengeDates
     ? calculateChallengeProgress(
         challengeDates.startDate,
         challengeDates.endDate
       )
     : { progressDays: '0', totalDays: '0' };
-  console.log('Progress:', progress);
 
   // 로딩 중일 때 스켈레톤 UI 표시
   if (loading) {
@@ -448,60 +412,37 @@ export default function User() {
                 borderColor="border-green"
                 textColor="text-green"
               />
-              {challenges.find((c) => c.challenges.id === selectedChallengeId)
-                ?.challenges.challenge_type !== 'diet' && (
-                <TotalFeedbackCounts
-                  counts={`${workOutCountToday}`}
-                  total={`${filteredDailyRecordsbyId.length}명`}
-                  title={
-                    <span>
-                      오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
-                      업로드 멤버
-                    </span>
-                  }
-                  borderColor="border-blue-5"
-                  textColor="text-blue-5"
-                />
-              )}
-              {challenges.find((c) => c.challenges.id === selectedChallengeId)
-                ?.challenges.challenge_type !== 'exercise' && (
-                <TotalFeedbackCounts
-                  counts={todayDietUploads?.counts || '0'}
-                  total={todayDietUploads?.total || '0명'}
-                  title={
-                    <span>
-                      오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
-                      업로드 멤버
-                    </span>
-                  }
-                  borderColor="border-yellow"
-                  textColor="text-yellow"
-                />
-              )}
+              <TotalFeedbackCounts
+                counts={`${workOutCountToday}`}
+                total={`${filteredDailyRecordsbyId.length}명`}
+                title={
+                  <span>
+                    오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
+                    업로드 멤버
+                  </span>
+                }
+                borderColor="border-blue-5"
+                textColor="text-blue-5"
+              />
+              <TotalFeedbackCounts
+                counts={todayDietUploads?.counts || '0'}
+                total={todayDietUploads?.total || '0명'}
+                title={
+                  <span>
+                    오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
+                    업로드 멤버
+                  </span>
+                }
+                borderColor="border-yellow"
+                textColor="text-yellow"
+              />
             </div>
 
             <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4 ">
-              {challenges.find((c) => c.challenges.id === selectedChallengeId)
-                ?.challenges.challenge_type === 'diet' && (
-                <DailyDietRecord activities={filteredDailyRecordsbyId} />
-              )}
-              {challenges.find((c) => c.challenges.id === selectedChallengeId)
-                ?.challenges.challenge_type === 'exercise' && (
-                <>
-                  <TrafficSourceChart challengeId={selectedChallengeId} />
-                  <WorkoutLeaderboard challengeId={selectedChallengeId} />
-                  <WeeklyWorkoutChart challengeId={selectedChallengeId} />
-                </>
-              )}
-              {challenges.find((c) => c.challenges.id === selectedChallengeId)
-                ?.challenges.challenge_type === 'diet_and_exercise' && (
-                <>
-                  <TrafficSourceChart challengeId={selectedChallengeId} />
-                  <DailyDietRecord activities={filteredDailyRecordsbyId} />
-                  <WorkoutLeaderboard challengeId={selectedChallengeId} />
-                  <WeeklyWorkoutChart challengeId={selectedChallengeId} />
-                </>
-              )}
+              <TrafficSourceChart challengeId={selectedChallengeId} />
+              <DailyDietRecord activities={filteredDailyRecordsbyId} />
+              <WorkoutLeaderboard challengeId={selectedChallengeId} />
+              <WeeklyWorkoutChart challengeId={selectedChallengeId} />
             </div>
 
             <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem]  bg-white-1 px-4 sm:px-4">
