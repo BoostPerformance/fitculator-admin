@@ -23,12 +23,14 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         if (!userId) throw new Error('사용자 ID가 필요합니다.');
 
         const response = await fetch(
-          `/api/workouts/user-detail?userId=${userId}`
+          `/api/workouts/user-detail?userId=${userId}&challengeId=${challengeId}`
         );
 
         if (!response.ok) throw new Error(`API 오류: ${response.status}`);
 
         const data: ApiResponse = await response.json();
+        // console.log('API data', data);
+
         const processedData = await transformApiData(data);
 
         setUserData(processedData);
@@ -53,7 +55,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
   }, [userId, challengeId]);
 
   const transformApiData = async (apiData: ApiResponse): Promise<UserData> => {
-    const { user, weeklyRecords, stats } = apiData;
+    const { user, weeklyRecords, stats, challengePeriod } = apiData;
     const processedWeeklyWorkouts: WeeklyWorkout[] = [];
 
     const toDateKey = (date: Date): string => {
