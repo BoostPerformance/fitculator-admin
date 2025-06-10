@@ -465,9 +465,9 @@ export default function User() {
                 <>
                   <TrafficSourceChart challengeId={selectedChallengeId} />{' '}
                   <DailyWorkoutRecord activities={filteredDailyRecordsbyId} />
-                  <DailyDietRecordMobile
+                  {/* <DailyDietRecordMobile
                     activities={filteredDailyRecordsbyId}
-                  />
+                  /> */}
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
                   <WeeklyWorkoutChart challengeId={selectedChallengeId} />
                 </>
