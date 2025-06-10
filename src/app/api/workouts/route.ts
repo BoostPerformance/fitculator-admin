@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const type = url.searchParams.get('type') || 'leaderboard';
+  const isDaily = url.searchParams.get('daily') === 'true';
 
   // 주별 유산소/근력 운동 데이터를 가져오는 타입 추가
   if (type === 'weekly-chart') {
@@ -774,8 +775,22 @@ function processWeeklyWorkoutData(
     })),
   };
 
-  const userStrengthSessions = new Map();
+  if (isDaily) {
+    const dailyCardio: Record<string, Record<string, number>> = {};
 
+    result.cardio.forEach((item) => {
+      const date = item.date; // YYYY-MM-DD
+      const user = item.user;
+      const point = item.y;
+
+      if (!dailyCardio[date]) dailyCardio[date] = {};
+      if (!dailyCardio[date][user]) dailyCardio[date][user] = 0;
+
+      dailyCardio[date][user] += point;
+    });
+
+    return NextResponse.json(dailyCardio);
+  }
   // 날짜 포맷 변환 헬퍼 함수
   const formatDate = (date: Date): string => {
     const year = date.getFullYear();

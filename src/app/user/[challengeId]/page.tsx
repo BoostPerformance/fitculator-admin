@@ -11,6 +11,8 @@ import Title from '@/components/layout/title';
 import { useParams } from 'next/navigation';
 import { ChallengeDashboardSkeleton } from '@/components/layout/skeleton';
 import WeeklyWorkoutChart from '@/components/graph/WeeklyWorkoutChart';
+import DailyWorkoutRecord from '@/components/graph/dailyWorkoutRecord';
+import DailyDietRecordMobile from '@/components/graph/dailyWorkoutRecordMobile';
 
 interface AdminUser {
   email: string;
@@ -461,7 +463,11 @@ export default function User() {
               {challenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type === 'exercise' && (
                 <>
-                  <TrafficSourceChart challengeId={selectedChallengeId} />
+                  <TrafficSourceChart challengeId={selectedChallengeId} />{' '}
+                  <DailyWorkoutRecord activities={filteredDailyRecordsbyId} />
+                  <DailyDietRecordMobile
+                    activities={filteredDailyRecordsbyId}
+                  />
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
                   <WeeklyWorkoutChart challengeId={selectedChallengeId} />
                 </>
