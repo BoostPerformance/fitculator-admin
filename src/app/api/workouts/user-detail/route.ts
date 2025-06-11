@@ -580,7 +580,17 @@ export async function getUserWorkoutData(
         }
       }
 
-      const weekNumber = weeklyRecords.indexOf(record) + 1;
+      // Calculate weekNumber based on challenge start date
+      let weekNumber = 1;
+      if (challengeStartDate) {
+        const recordStart = new Date(record.start_date);
+        const challengeStart = new Date(challengeStartDate);
+        const diffTime = Math.abs(
+          recordStart.getTime() - challengeStart.getTime()
+        );
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        weekNumber = Math.floor(diffDays / 7) + 1;
+      }
 
       weeklyRecordsWithFeedback.push({
         ...record,

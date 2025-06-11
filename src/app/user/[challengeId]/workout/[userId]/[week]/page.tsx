@@ -145,6 +145,7 @@ export default function MobileWorkoutDetail() {
   };
   const weeklyRecordId = currentWeekData.recordId;
 
+  console.log('!! currentWeekData', currentWeekData);
   const handleFeedbackSave = async (feedback: string) => {
     if (!weeklyRecordId) return alert('주간 운동 데이터 ID가 없습니다.');
 
