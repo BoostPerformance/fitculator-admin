@@ -181,6 +181,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         feedback: feedbackData,
       });
     }
+    // console.log('processedWeeklyWorkouts', processedWeeklyWorkouts);
 
     return {
       name: user.name || user.displayName || '사용자',

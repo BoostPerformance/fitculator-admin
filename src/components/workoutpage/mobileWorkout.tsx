@@ -83,6 +83,16 @@ const MobileWorkout: React.FC = () => {
           (s) => s.userId === userId && s.x === week.label
         ).length;
 
+        // 해당 주차의 weeklyRecord 찾기
+        const weekRecord = userStats.weeklyRecords?.find((record: any) => {
+          const recordStartDate = new Date(record.start_date);
+          const recordEndDate = new Date(record.end_date);
+          return (
+            recordStartDate.getTime() === week.startDate.getTime() &&
+            recordEndDate.getTime() === week.endDate.getTime()
+          );
+        });
+
         return {
           weekNumber: idx + 1,
           startDate: week.label.split('-')[0],
@@ -90,6 +100,7 @@ const MobileWorkout: React.FC = () => {
           aerobicPercentage: cardioPoints,
           actualPercentage: cardioPoints,
           strengthSessions,
+          cardio_points_total: weekRecord?.cardio_points_total || 0,
         };
       });
 
@@ -151,7 +162,8 @@ const MobileWorkout: React.FC = () => {
                 <span className="text-xs text-gray-400">{week.label}</span>
               </div>
               <div className="text-right text-sm font-medium text-blue-600">
-                {data ? data.aerobicPercentage.toFixed(1) : 0}% <br />
+                {data ? (data.cardio_points_total || 0).toFixed(1) : 0}
+                % <br />
                 {data ? data.strengthSessions : 0}회
               </div>
             </div>

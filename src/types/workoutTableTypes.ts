@@ -120,6 +120,7 @@ export interface WorkoutWeekData {
   aerobicPercentage: number;
   strengthSessions: number;
   actualPercentage: number;
+  cardio_points_total?: number;
 }
 
 export interface WorkoutItem {

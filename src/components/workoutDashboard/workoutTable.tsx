@@ -202,10 +202,9 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
     const items = await Promise.all(
       users.map(async (user) => {
         const userStatsResponse = await fetch(
-          `/api/workouts/user-detail?userId=${user.id}`
+          `/api/workouts/user-detail?userId=${user.id}&challengeId=${challengeId}`
         );
         const userStatsData = await userStatsResponse.json();
-        const totalCardioPoints = userStatsData.stats?.totalCardioPoints || 0;
 
         const weeksCount = generatedWeeks.length || 1;
 
@@ -228,22 +227,31 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
             );
           });
 
-          const cardioPoints = userCardioInWeek.reduce(
-            (sum, item) => sum + item.y,
-            0
-          );
           const strengthSessions = userStrengthInWeek.length;
 
           const startDate = formatDateToMMDD(week.startDate);
           const endDate = formatDateToMMDD(week.endDate);
 
+          // 해당 주차의 weeklyRecord 찾기
+          const weekRecord = userStatsData.weeklyRecords?.find(
+            (record: any) => {
+              const recordStartDate = new Date(record.start_date);
+              const recordEndDate = new Date(record.end_date);
+              return (
+                recordStartDate.getTime() === week.startDate.getTime() &&
+                recordEndDate.getTime() === week.endDate.getTime()
+              );
+            }
+          );
+
+          const totalCardioPoints = weekRecord?.cardio_points_total || 0;
           const actualPercentage = Math.round(totalCardioPoints * 10) / 10;
 
           return {
             weekNumber: index + 1,
             startDate,
             endDate,
-            aerobicPercentage: cardioPoints,
+            aerobicPercentage: totalCardioPoints,
             actualPercentage,
             strengthSessions,
           };
@@ -452,7 +460,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                     <br />#{item.userId.substring(0, 4)}
                   </div>
                 </td>
-                <td className="p-3 text-black dark:text-black">{item.name}</td>
+                <td className="p-3 text-black">{item.name}</td>
                 {item.weeklyData.map((week, weekIndex) => {
                   // console.log('week', week);
                   return (
