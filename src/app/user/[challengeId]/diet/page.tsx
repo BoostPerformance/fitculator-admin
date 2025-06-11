@@ -7,7 +7,7 @@ import { DietStatistics } from '@/components/statistics/dietStatistics';
 import { DietContent } from '@/components/dietDashboard/dietContent';
 import { useResponsive } from '@/components/hooks/useResponsive';
 import { useChallenge } from '@/components/hooks/useChallenges';
-import { processMeals } from '@/components/utils/processMeals';
+//import { processMeals } from '@/components/utils/processMeals';
 import Title from '@/components/layout/title';
 
 export default function DietItem() {

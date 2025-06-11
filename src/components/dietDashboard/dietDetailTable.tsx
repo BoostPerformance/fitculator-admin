@@ -144,7 +144,6 @@ const DietDetaileTable = ({
   return (
     <div className="mt-6 overflow-x-auto w-full">
       <div className="min-w-[1000px] max-w-full">
-        {' '}
         {/* 컨테이너 추가 */}
         <table className="w-full bg-white shadow-md rounded-md border border-gray-200">
           <thead>
@@ -245,7 +244,7 @@ const DietDetaileTable = ({
                     )
                   }
                 >
-                  <td className="p-3 sm:text-sm w-[3%]">
+                  <td className="p-3 sm:text-sm w-[3%] ">
                     <div className="truncate ">
                       {dietDetailTableItem.user.username}
                     </div>

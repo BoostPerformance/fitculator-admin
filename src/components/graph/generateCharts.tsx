@@ -9,7 +9,7 @@ const generateBarChart = (
 ): JSX.Element => {
   if (dailyWorkouts.length === 0 || showAsEmpty) {
     return (
-      <div className="h-64 w-full flex items-center justify-center text-gray-400 text-sm">
+      <div className="h-48 sm:h-64 w-full flex items-center justify-center text-gray-400 text-sm">
         운동 기록이 등록되면 여기에 표시됩니다.
       </div>
     );
@@ -27,16 +27,16 @@ const generateBarChart = (
   });
 
   return (
-    <div className="relative h-64 w-full">
+    <div className="relative h-48 sm:h-64 w-full">
       {/* Y축 눈금 */}
-      <div className="absolute left-0 h-[90%] flex flex-col justify-between text-gray-500 text-xs">
+      <div className="absolute left-0 h-[90%] flex flex-col justify-between text-gray-500 text-[10px] sm:text-xs">
         <div>100</div>
         <div>50</div>
         <div>0</div>
       </div>
 
       {/* 바 차트 */}
-      <div className="absolute left-8 right-0 h-[90%] flex items-end justify-between">
+      <div className="absolute left-6 sm:left-8 right-0 h-[90%] flex items-end justify-between">
         {dailyWorkouts.map((day, index) => {
           const barHeight = (day.value / maxValue) * 100;
 
@@ -45,7 +45,7 @@ const generateBarChart = (
               key={index}
               className="flex flex-col items-center h-full relative group"
             >
-              <div className="flex flex-col items-center w-10 h-full justify-end relative">
+              <div className="flex flex-col items-center w-6 sm:w-10 h-full justify-end relative">
                 {/* bar 자체 */}
                 <div
                   className={`relative w-full sm:w-[2rem] ${
@@ -60,7 +60,7 @@ const generateBarChart = (
                   {/* 덤벨 - bar 위에 띄우기 */}
                   {distributedStrengthCounts[index] > 0 && (
                     <div
-                      className="absolute bottom-full mb-1 flex flex-col items-center gap-1 pl-3 sm:pl-2"
+                      className="absolute bottom-full mb-1 flex flex-col items-center gap-1 pl-2 sm:pl-3"
                       style={{
                         transform: `translateY(-${
                           (day.value / maxValue) * 100
@@ -70,7 +70,7 @@ const generateBarChart = (
                       {Array.from({
                         length: distributedStrengthCounts[index],
                       }).map((_, i) => (
-                        <div key={i} className="w-5 h-5">
+                        <div key={i} className="w-4 h-4 sm:w-5 sm:h-5">
                           <Image
                             src="/svg/dumbell.svg"
                             width={20}
@@ -83,7 +83,7 @@ const generateBarChart = (
                     </div>
                   )}
                   {/* 툴팁 - bar 바깥으로 빼기 */}
-                  <div className="absolute bottom-0 mb-2 px-[0.5rem] py-[0.1rem] text-0.625-500 text-white bg-black rounded opacity-0 group-hover:opacity-50 transition-opacity z-10">
+                  <div className="absolute bottom-0 mb-2 px-[0.3rem] sm:px-[0.5rem] py-[0.1rem] text-[10px] sm:text-0.625-500 text-white bg-black rounded opacity-0 group-hover:opacity-50 transition-opacity z-10">
                     {typeof day.value === 'number'
                       ? day.value.toFixed(1)
                       : '0.0'}
@@ -93,7 +93,7 @@ const generateBarChart = (
               </div>
 
               {/* 요일 */}
-              <div className="text-xs text-gray-500 mt-2 absolute -bottom-6 left-0 right-0 text-center">
+              <div className="text-[10px] sm:text-xs text-gray-500 mt-2 absolute -bottom-6 left-0 right-0 text-center">
                 {day.day}
               </div>
             </div>
@@ -117,8 +117,8 @@ const generateDonutChart = (
 
   if (total === 0 || showAsEmpty || totalPoints === 0) {
     return (
-      <div className="relative w-full flex flex-col items-center justify-center py-8 text-gray-400 text-sm">
-        <svg className="w-45 h-45" viewBox="0 0 100 100">
+      <div className="relative w-full flex flex-col items-center justify-center py-4 sm:py-8 text-gray-400 text-xs sm:text-sm">
+        <svg className="w-32 h-32 sm:w-45 sm:h-45" viewBox="0 0 100 100">
           <circle
             cx={center}
             cy={center}
@@ -138,7 +138,7 @@ const generateDonutChart = (
             0%
           </text>
         </svg>
-        <p className="mt-4">운동 기록이 등록되면 여기에 표시됩니다.</p>
+        <p className="mt-2 sm:mt-4">운동 기록이 등록되면 여기에 표시됩니다.</p>
       </div>
     );
   }
@@ -194,7 +194,7 @@ const generateDonutChart = (
   return (
     <div className="relative w-full">
       <div className="flex items-center justify-center">
-        <svg className="w-45 h-45" viewBox="0 0 100 100">
+        <svg className="w-32 h-32 sm:w-45 sm:h-45" viewBox="0 0 100 100">
           {/* 배경 원 */}
           <circle
             cx={center}
@@ -232,11 +232,11 @@ const generateDonutChart = (
       </div>
 
       {/* 범례 */}
-      <div className="flex flex-wrap justify-around text-xs mt-2">
+      <div className="flex flex-wrap justify-around text-[10px] sm:text-xs mt-2">
         {segmentInfo.map((segment, index) => (
           <div key={index} className="flex items-center my-1">
             <div
-              className="w-3 h-3 rounded-full mr-1"
+              className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-1"
               style={{ backgroundColor: segment.color }}
             ></div>
             <div>

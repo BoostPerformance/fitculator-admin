@@ -11,6 +11,8 @@ import Title from '@/components/layout/title';
 import { useParams } from 'next/navigation';
 import { ChallengeDashboardSkeleton } from '@/components/layout/skeleton';
 import WeeklyWorkoutChart from '@/components/graph/WeeklyWorkoutChart';
+import DailyWorkoutRecord from '@/components/graph/dailyWorkoutRecord';
+//import DailyWorkoutRecordMobile from '@/components/graph/dailyWorkoutRecordMobile';
 
 interface AdminUser {
   email: string;
@@ -127,17 +129,17 @@ export default function User() {
       setIsLoadingFeedbacks(true);
 
       // 챌린지 전체 피드백 통계 가져오기
-      const statsResponse = await fetch(
-        `/api/challenge-feedback-counts?challengeId=${challengeId}`
-      );
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        setTotalFeedbackStats({
-          totalFeedbacks: statsData.totalFeedbacks || 0,
-          totalParticipants: statsData.totalParticipants || 0,
-          feedbackPercentage: statsData.feedbackPercentage || 0,
-        });
-      }
+      // const statsResponse = await fetch(
+      //   `/api/challenge-feedback-counts?challengeId=${challengeId}`
+      // );
+      // if (statsResponse.ok) {
+      //   const statsData = await statsResponse.json();
+      //   setTotalFeedbackStats({
+      //     totalFeedbacks: statsData.totalFeedbacks || 0,
+      //     totalParticipants: statsData.totalParticipants || 0,
+      //     feedbackPercentage: statsData.feedbackPercentage || 0,
+      //   });
+      // }
 
       // 챌린지 참가자 목록 가져오기
       const participantsResponse = await fetch(
@@ -450,6 +452,7 @@ export default function User() {
                 <>
                   <TrafficSourceChart challengeId={selectedChallengeId} />
                   <DailyDietRecord activities={filteredDailyRecordsbyId} />
+                  {/* <DailyWorkoutRecord activities={filteredDailyRecordsbyId} /> */}
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
                   <WeeklyWorkoutChart challengeId={selectedChallengeId} />
                 </>
@@ -461,7 +464,11 @@ export default function User() {
               {challenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type === 'exercise' && (
                 <>
-                  <TrafficSourceChart challengeId={selectedChallengeId} />
+                  <TrafficSourceChart challengeId={selectedChallengeId} />{' '}
+                  <DailyWorkoutRecord activities={filteredDailyRecordsbyId} />
+                  {/* <DailyWorkoutRecordMobile
+                    activities={filteredDailyRecordsbyId}
+                  /> */}
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
                   <WeeklyWorkoutChart challengeId={selectedChallengeId} />
                 </>
