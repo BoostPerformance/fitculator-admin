@@ -85,6 +85,8 @@ export default function User() {
   const params = useParams() as ParamsType;
   const [workoutCount, setWorkoutCount] = useState(0);
   const [workOutCountToday, setWorkOutCountToday] = useState<number>(0);
+  const [totalParticipants, setTotalParticipants] = useState<number>(0);
+  const [todayStats, setTodayStats] = useState({ count: 0, total: 0 });
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<any[]>([]);
@@ -221,7 +223,9 @@ export default function User() {
           throw new Error('Failed to fetch workout count');
         }
         const workoutCountData = await workoutCountResponse.json();
+        setTodayStats(workoutCountData);
         setWorkOutCountToday(workoutCountData.count);
+        setTotalParticipants(workoutCountData.total);
 
         // 챌린지 데이터 가져오기
         const challengesResponse = await fetch('/api/challenges');
@@ -333,7 +337,9 @@ export default function User() {
       fetchDailyRecords(1);
 
       // 운동 업로드 수 조회
-      fetch(`/api/workouts?type=today-count&challengeId=${selectedChallengeId}`)
+      fetch(
+        `/api/workouts/user-detail?type=today-count&challengeId=${selectedChallengeId}`
+      )
         .then((response) => {
           if (!response.ok) {
             throw new Error('Failed to fetch workout count');
@@ -341,6 +347,7 @@ export default function User() {
           return response.json();
         })
         .then((data) => {
+          setTodayStats(data);
           setWorkOutCountToday(data.count);
         })
         .catch((error) => {
@@ -418,7 +425,7 @@ export default function User() {
                 ?.challenges.challenge_type !== 'diet' && (
                 <TotalFeedbackCounts
                   counts={`${workOutCountToday}`}
-                  total={`${filteredDailyRecordsbyId.length}명`}
+                  total={`${totalParticipants} 명`}
                   title={
                     <span>
                       오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
