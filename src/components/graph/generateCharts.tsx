@@ -22,8 +22,8 @@ const generateBarChart = (
     rest: 'bg-gray-300',
   };
 
-  const distributedStrengthCounts = dailyWorkouts.map((_, index) => {
-    return index < totalStrength ? 1 : 0;
+  const distributedStrengthCounts = dailyWorkouts.map((day) => {
+    return day.hasStrength ? 1 : 0;
   });
 
   return (
@@ -82,7 +82,7 @@ const generateBarChart = (
                       ))}
                     </div>
                   )}
-                  {/* 툴팁 - bar 바깥으로 빼기 */}
+                  {/* 툴크 - bar 바깥으로 빼기 */}
                   <div className="absolute bottom-0 mb-2 px-[0.3rem] sm:px-[0.5rem] py-[0.1rem] text-[10px] sm:text-0.625-500 text-white bg-black rounded opacity-0 group-hover:opacity-50 transition-opacity z-10">
                     {typeof day.value === 'number'
                       ? day.value.toFixed(1)
