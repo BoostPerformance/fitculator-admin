@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useWorkoutData } from '@/components/hooks/useWorkoutData';
 import DesktopWorkout from '@/components/workoutpage/desktopWorkout';
 import MobileWorkout from '@/components/workoutpage/mobileWorkout';
+import WorkoutTable from '@/components/workoutDashboard/workoutTable';
 
 const useUserInfo = (userId: string) => {
   const [name, setName] = useState<string>('');
@@ -244,6 +245,7 @@ export default function UserWorkoutDetailPage() {
         setIsDisable={setIsDisable}
       />
       <MobileWorkout />
+      {/* <WorkoutTable challengeId={params.challengeId as string} /> */}
     </>
   );
 }

@@ -33,6 +33,8 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
         const processedData = await transformApiData(data);
 
+        console.log('processedData', processedData);
+
         setUserData(processedData);
         setTotalPoints(data.stats.totalCardioPoints);
       } catch (error) {

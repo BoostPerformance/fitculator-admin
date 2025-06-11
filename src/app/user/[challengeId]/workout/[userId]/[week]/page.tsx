@@ -11,6 +11,7 @@ import {
   generateBarChart,
   generateDonutChart,
 } from '@/components/graph/generateCharts';
+import { useSearchParams } from 'next/navigation';
 
 const useUserInfo = (userId: string) => {
   const [name, setName] = useState<string>('');
@@ -43,6 +44,8 @@ export default function MobileWorkoutDetail() {
   const userId = params.userId as string;
   const challengeId = params.challengeId as string;
   const weekNumberParam = parseInt(params.week as string);
+  const searchParams = useSearchParams();
+
   const router = useRouter();
 
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
@@ -123,8 +126,9 @@ export default function MobileWorkoutDetail() {
   if (!userData)
     return <div>사용자 데이터를 불러오는 중 오류가 발생했습니다.</div>;
 
+  const weekLabelParam = searchParams.get('label');
   const currentWeekData = userData.weeklyWorkouts.find(
-    (week) => week.weekNumber === weekNumberParam
+    (week) => week.label === weekLabelParam
   ) || {
     recordId: '',
     label: '데이터 없음',
@@ -141,6 +145,7 @@ export default function MobileWorkoutDetail() {
   };
   const weeklyRecordId = currentWeekData.recordId;
 
+  console.log('!! currentWeekData', currentWeekData);
   const handleFeedbackSave = async (feedback: string) => {
     if (!weeklyRecordId) return alert('주간 운동 데이터 ID가 없습니다.');
 
@@ -199,6 +204,7 @@ export default function MobileWorkoutDetail() {
             userName={userData.name}
             weeklyWorkouts={userData.weeklyWorkouts}
             userId={userId}
+            weekNumberParam={weekNumberParam}
           />
 
           <div className="bg-white rounded-lg p-6 shadow-sm">

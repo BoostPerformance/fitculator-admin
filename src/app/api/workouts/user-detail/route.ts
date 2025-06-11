@@ -1,20 +1,22 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import {
-  ApiResponse,
-  UserData,
-  WeeklyWorkout,
-  Feedback,
-  DailyWorkout,
-  WorkoutTypes,
-  UserWorkoutTypes,
-  WeeklyChartData,
-} from '@/types/useWorkoutDataTypes';
+import { UserWorkoutTypes } from '@/types/useWorkoutDataTypes';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
+
+export interface WorkoutWeeklyRecord {
+  id: string; // uuid
+  user_id: string; // uuid
+  start_date: string; // date (ISO string)
+  end_date: string; // date (ISO string)
+  cardio_points_total: number; // numeric
+  strength_sessions_count: number; // int4
+  created_at: string; // timestamptz (ISO string)
+  updated_at: string;
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -578,7 +580,17 @@ export async function getUserWorkoutData(
         }
       }
 
-      const weekNumber = weeklyRecords.indexOf(record) + 1;
+      // Calculate weekNumber based on challenge start date
+      let weekNumber = 1;
+      if (challengeStartDate) {
+        const recordStart = new Date(record.start_date);
+        const challengeStart = new Date(challengeStartDate);
+        const diffTime = Math.abs(
+          recordStart.getTime() - challengeStart.getTime()
+        );
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        weekNumber = Math.floor(diffDays / 7) + 1;
+      }
 
       weeklyRecordsWithFeedback.push({
         ...record,

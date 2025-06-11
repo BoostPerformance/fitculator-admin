@@ -151,11 +151,13 @@ const MobileWorkout: React.FC = () => {
             <div
               key={idx}
               className="flex justify-between items-center p-3 rounded-xl bg-gray-50 hover:bg-blue-50 transition"
-              onClick={() =>
-                router.push(
-                  `/user/${userData.challenge_id}/workout/${userData.userId}/${weekNumber}`
-                )
-              }
+              onClick={() => {
+                if (week && week.label) {
+                  router.push(
+                    `/user/${userData.challenge_id}/workout/${userData.userId}/${weekNumber}?label=${week.label}`
+                  );
+                }
+              }}
             >
               <div className="text-sm text-gray-600">
                 {weekNumber}주차 <br />
