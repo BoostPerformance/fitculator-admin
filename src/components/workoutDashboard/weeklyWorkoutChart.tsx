@@ -4,12 +4,14 @@ interface WeeklyWorkoutChartProps {
   userName: string;
   weeklyWorkouts?: WeeklyWorkout[];
   userId?: string; // 사용자 ID
+  weekNumberParam?: number;
 }
 
 export default function WeeklyWorkoutChart({
   userName = '사용자',
   weeklyWorkouts = [],
   userId = 'USER',
+  weekNumberParam,
 }: WeeklyWorkoutChartProps) {
   if (!weeklyWorkouts || weeklyWorkouts.length === 0) {
     return (
@@ -35,13 +37,15 @@ export default function WeeklyWorkoutChart({
               <tr className="text-gray-500 text-xs">
                 <th className="py-2 text-left">ID</th>
                 <th className="py-2 text-left">이름</th>
-                {weeklyWorkouts.map((week, index) => (
-                  <th key={index} className="py-2 text-center">
-                    {`${index + 1}주차`}
-                    <br />
-                    {`(${week.label.split('-')[0]}~)`}
-                  </th>
-                ))}
+                {weeklyWorkouts.map((week, index) => {
+                  return (
+                    <th key={index} className="py-2 text-center">
+                      {`${weekNumberParam}주차`}
+                      <br />
+                      {`(${week.label.split('-')[0]}~)`}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
@@ -61,7 +65,6 @@ export default function WeeklyWorkoutChart({
             </tbody>
           </table>
         </div>
-
         {/* 모바일 레이아웃 */}
         <div className="sm:block hidden">
           <div className="flex justify-between text-gray-500 text-xs border-b pb-2">
@@ -78,7 +81,7 @@ export default function WeeklyWorkoutChart({
             >
               <div className="flex justify-between items-center">
                 <div className="text-gray-500">
-                  {`${index + 1}주차`}
+                  {`${weekNumberParam}주차`}
                   <br />
                   {`(${week.label.split('-')[0]}~)`}
                 </div>
