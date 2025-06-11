@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -62,6 +63,7 @@ const isWorkoutUploaded = (workoutName: number) => {
           width={30}
           height={30}
           alt="meal-done"
+          className="w-[1.5rem] h-[1.5rem]"
         />
       </div>
     </>
@@ -72,6 +74,7 @@ const isWorkoutUploaded = (workoutName: number) => {
         width={30}
         height={30}
         alt="meal-incompleted"
+        className="w-[1.5rem] h-[1.5rem]"
       />
     </>
   );
@@ -411,24 +414,33 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
               <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]">
                 {user.name} 회원
               </div>
-              <table className="flex flex-col gap-[1.5rem] items-center justify-center w-full">
-                <thead className="flex w-full justify-center gap-[0.7rem]">
-                  <tr className="flex w-full justify-center gap-[0.7rem] text-gray-11 text-1-500">
-                    {user.weeklyData.map((week, i) => (
-                      <th key={i} className="text-center min-w-[2.5rem]">
-                        {week.weekNumber}주
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
+              <table className="w-full">
                 <tbody>
-                  <tr className="flex w-full justify-center gap-[0rem]">
-                    {user.weeklyData.map((week, i) => (
-                      <td key={i} className="text-center p-3">
-                        {isWorkoutUploaded(week.aerobicPercentage)}
-                      </td>
-                    ))}
-                  </tr>
+                  {Array.from({
+                    length: Math.ceil(user.weeklyData.length / 7),
+                  }).map((_, groupIdx) => {
+                    const start = groupIdx * 7;
+                    const end = start + 7;
+                    const weekSlice = user.weeklyData.slice(start, end);
+                    return (
+                      <React.Fragment key={groupIdx}>
+                        <tr className="sm:pl-[0.5rem] flex w-full justify-start gap-[0.9rem] text-gray-11 text-1-500">
+                          {weekSlice.map((week, i) => (
+                            <th key={i} className="text-center min-w-[2.5rem]">
+                              {week.weekNumber}주
+                            </th>
+                          ))}
+                        </tr>
+                        <tr className="flex w-full justify-start  gap-[0.5rem]">
+                          {weekSlice.map((week, i) => (
+                            <td key={i} className="text-center p-3">
+                              {isWorkoutUploaded(week.aerobicPercentage)}
+                            </td>
+                          ))}
+                        </tr>
+                      </React.Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -74,6 +74,8 @@ export default function TrafficSourceChart({
   };
 
   const options = {
+    responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false,
@@ -91,12 +93,18 @@ export default function TrafficSourceChart({
         },
         font: {
           size: 12,
+          weight: 'bold' as const,
         },
         align: 'center' as const,
         anchor: 'center' as const,
       },
     },
     cutout: '30%',
+    animation: {
+      animateRotate: true,
+      animateScale: true,
+    },
+    devicePixelRatio: 2, // Retina 디스플레이 지원
   };
 
   const exerciseList = chartData.map((item: ChartDataPoint, index: number) => ({
@@ -111,8 +119,10 @@ export default function TrafficSourceChart({
         인기운동
       </h2>
       <div>
-        <div className="w-full h-[13rem] sm:py-[2rem] pb-[1rem] flex items-center justify-center">
-          <Doughnut data={data} options={options} />
+        <div className="w-full h-[13rem] sm:py-[2rem] pb-[1rem] flex items-center justify-center relative">
+          <div className="w-full h-full max-w-[300px] mx-auto">
+            <Doughnut data={data} options={options} />
+          </div>
         </div>
 
         <div className="w-full gap-[2rem] ">
