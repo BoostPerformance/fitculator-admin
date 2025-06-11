@@ -446,13 +446,13 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                   )
                 }
               >
-                <td className="p-3">
-                  <div>
+                <td className="p-3 ">
+                  <div className="text-black dark:text-black">
                     {item.userName}
                     <br />#{item.userId.substring(0, 4)}
                   </div>
                 </td>
-                <td className="p-3">{item.name}</td>
+                <td className="p-3 text-black dark:text-black">{item.name}</td>
                 {item.weeklyData.map((week, weekIndex) => {
                   // console.log('week', week);
                   return (

@@ -110,17 +110,6 @@ const DailyDietRecord = ({
     //   `[${userName}] ${date} - daily_records 길이: ${activity.daily_records.length}`
     // );
 
-    // 모든 daily_records의 날짜 출력 (데이터 확인용)
-    const allDates = activity.daily_records.map((record) => {
-      const recordDateStr =
-        typeof record.record_date === 'string'
-          ? record.record_date.split('T')[0]
-          : new Date(record.record_date).toISOString().split('T')[0];
-      return recordDateStr;
-    });
-
-    //  console.log(`[${userName}] 모든 기록 날짜:`, allDates);
-
     // 해당 날짜의 daily_record를 찾음
     const dailyRecord = activity.daily_records.find((record) => {
       // record.record_date가 문자열이든 Date 객체든 처리할 수 있도록 함

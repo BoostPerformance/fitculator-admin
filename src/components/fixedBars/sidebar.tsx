@@ -282,9 +282,9 @@ export default function Sidebar({
 
                         return (
                           <li key={challenge.challenges.id}>
-                            <div className="font-medium py-2 pl-0 rounded  dark:hover:bg-blue-3 flex justify-between items-center">
+                            <div className="font-medium py-2 pl-0 rounded  dark:hover:bg-blue-3  flex justify-between items-center">
                               <div
-                                className="cursor-pointer text-1.25-500 dark:text-white hover:bg-gray-100 hover:text-1.25-700 "
+                                className="cursor-pointer text-1.25-500 dark:text-white hover:bg-gray-100 dark:hover:text-black hover:text-1.25-700 "
                                 onClick={() => handleChallengeClick(challenge)}
                               >
                                 {challenge.challenges.title || '제목 없음'}
