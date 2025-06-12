@@ -143,6 +143,17 @@ export default function MobileWorkoutDetail() {
     requiredSessions: 2,
     totalAchievement: 0,
   };
+
+  useEffect(() => {
+    if (userData) {
+      console.log('userData from useWorkoutData:', {
+        weeklyWorkouts: userData.weeklyWorkouts,
+        currentWeek: userData.weeklyWorkouts[currentWeekIndex],
+        workoutTypes: currentWeekData.workoutTypes,
+      });
+    }
+  }, [userData, currentWeekIndex, currentWeekData]);
+
   const weeklyRecordId = currentWeekData.recordId;
 
   console.log('!! currentWeekData', currentWeekData);
