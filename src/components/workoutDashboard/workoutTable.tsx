@@ -29,8 +29,9 @@ const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
   // Adjust to the beginning of the week (Sunday or Monday depending on your preference)
   const adjustedStartDate = new Date(startDate);
 
-  const weeks: WeekLabel[] = [];
+  const weeks: WeekInfo[] = [];
   let currentStart = adjustedStartDate;
+  let weekNumber = 1;
 
   while (currentStart < endDate) {
     const currentEnd = new Date(currentStart);
@@ -43,11 +44,13 @@ const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
       label: `${formattedStart}-${formattedEnd}`,
       startDate: new Date(currentStart),
       endDate: new Date(currentEnd),
+      weekNumber: weekNumber,
     });
 
     // Move to next week
     currentStart = new Date(currentEnd);
     currentStart.setDate(currentStart.getDate() + 1);
+    weekNumber++;
   }
 
   return weeks;
@@ -254,6 +257,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
             aerobicPercentage: totalCardioPoints,
             actualPercentage,
             strengthSessions,
+            label: week.label,
           };
         });
 
@@ -416,19 +420,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
               </th>
               {/* Dynamic week headers */}
               {weekInfo.map((week, index) => (
-                <th
-                  key={index}
-                  className="w-[10%] p-3 text-center cursor-pointer hover:bg-gray-100"
-                  onClick={() =>
-                    router.push(
-                      `/workout/workout-categories?challengeId=${challengeId}&weekLabel=${
-                        typeof week.label === 'string'
-                          ? week.label
-                          : `${week.startDate}-${week.endDate}`
-                      }`
-                    )
-                  }
-                >
+                <th key={index} className="w-[10%] p-3 text-center">
                   <span className="text-sm">
                     {index + 1}주차
                     <br />(
@@ -442,49 +434,48 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
             </tr>
           </thead>
           <tbody>
-            {workoutItems.map((item, index) => (
-              <tr
-                key={index}
-                ref={index === workoutItems.length - 1 ? lastRowRef : null}
-                className="border-b border-gray-200 hover:bg-[#F4F6FC] cursor-pointer"
-                onClick={() =>
-                  item.id &&
-                  router.push(
-                    `/user/${item.challenge_id}/workout/${item.userId}`
-                  )
-                }
-              >
-                <td className="p-3 ">
-                  <div className="text-black dark:text-black">
-                    {item.userName}
-                    <br />#{item.userId.substring(0, 4)}
-                  </div>
-                </td>
-                <td className="p-3 text-black">{item.name}</td>
-                {item.weeklyData.map((week, weekIndex) => {
-                  // console.log('week', week);
-                  return (
+            {workoutItems.map((item, index) => {
+              console.log('item', item);
+              return (
+                <tr
+                  key={index}
+                  ref={index === workoutItems.length - 1 ? lastRowRef : null}
+                  className="border-b border-gray-200 hover:bg-[#F4F6FC]"
+                >
+                  <td className="p-3">
+                    <div className="text-black dark:text-black">
+                      {item.userName}
+                      <br />#{item.userId.substring(0, 4)}
+                    </div>
+                  </td>
+                  <td className="p-3 text-black">{item.name}</td>
+                  {item.weeklyData.map((week, weekIndex) => (
                     <td
                       key={weekIndex}
-                      className="p-3 text-center text-blue-500"
+                      className="p-3 text-center text-blue-500 cursor-pointer"
+                      onClick={() =>
+                        router.push(
+                          `/user/${item.challenge_id}/workout/${item.userId}/${week.weekNumber}?label=${week.label}`
+                        )
+                      }
                     >
                       {week.aerobicPercentage.toFixed(1)}% /
-                      <br className="md:block lg:hidden " />
+                      <br className="md:block lg:hidden" />
                       {week.strengthSessions}회
                     </td>
-                  );
-                })}
-                {[
-                  ...Array(
-                    Math.max(0, weekInfo.length - item.weeklyData.length)
-                  ),
-                ].map((_, i) => (
-                  <td key={`empty-${i}`} className="p-3 text-center">
-                    -
-                  </td>
-                ))}
-              </tr>
-            ))}
+                  ))}
+                  {[
+                    ...Array(
+                      Math.max(0, weekInfo.length - item.weeklyData.length)
+                    ),
+                  ].map((_, i) => (
+                    <td key={`empty-${i}`} className="p-3 text-center">
+                      -
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

@@ -103,6 +103,7 @@ export interface WeekInfo {
   label: string;
   startDate: Date;
   endDate: Date;
+  weekNumber: number;
 }
 
 export interface WeeklyData {
@@ -121,6 +122,7 @@ export interface WorkoutWeekData {
   strengthSessions: number;
   actualPercentage: number;
   cardio_points_total?: number;
+  label: string;
 }
 
 export interface WorkoutItem {
