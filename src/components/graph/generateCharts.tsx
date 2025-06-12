@@ -177,13 +177,13 @@ const generateDonutChart = (
 
   let currentAngle = -90;
   const segmentInfo = Object.entries(workoutTypes).map(([type, value], i) => {
-    const ratio = value / total;
-    const sweepAngle = ratio * 360 * (safeTotalPoints / 100); // 100% 기준 내에서만 표시
+    // value는 이미 퍼센테이지이므로 100으로 나누지 않음
+    const sweepAngle = (value / 100) * 360 * (safeTotalPoints / 100);
     const path = describeArc(currentAngle, currentAngle + sweepAngle);
     const color = colors[type] || `hsl(${i * 60}, 70%, 60%)`;
     const segment = {
       type,
-      percentage: ratio * 100,
+      percentage: value, // 이미 퍼센테이지 값
       path,
       color,
     };
