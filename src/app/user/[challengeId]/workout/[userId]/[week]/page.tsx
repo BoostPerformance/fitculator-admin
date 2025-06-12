@@ -81,9 +81,6 @@ export default function MobileWorkoutDetail() {
     setCurrentWeekIndex(foundIndex >= 0 ? foundIndex : 0);
   }, [userData, weekNumberParam]);
 
-  const handleBack = () =>
-    router.push(`/user/${params.challengeId}/workout/${params.userId}`);
-
   useEffect(() => {
     const weeklyRecordId =
       userData?.weeklyWorkouts?.[currentWeekIndex]?.recordId;
@@ -109,6 +106,9 @@ export default function MobileWorkoutDetail() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [params, challengeId]);
+
+  const handleBack = () =>
+    router.push(`/user/${params.challengeId}/workout/${params.userId}`);
 
   if (loading)
     return (
@@ -144,19 +144,14 @@ export default function MobileWorkoutDetail() {
     totalAchievement: 0,
   };
 
-  useEffect(() => {
-    if (userData) {
-      console.log('userData from useWorkoutData:', {
-        weeklyWorkouts: userData.weeklyWorkouts,
-        currentWeek: userData.weeklyWorkouts[currentWeekIndex],
-        workoutTypes: currentWeekData.workoutTypes,
-      });
-    }
-  }, [userData, currentWeekIndex, currentWeekData]);
+  console.log('userData from useWorkoutData:', {
+    weeklyWorkouts: userData.weeklyWorkouts,
+    currentWeek: userData.weeklyWorkouts[currentWeekIndex],
+    workoutTypes: currentWeekData.workoutTypes,
+  });
 
   const weeklyRecordId = currentWeekData.recordId;
 
-  console.log('!! currentWeekData', currentWeekData);
   const handleFeedbackSave = async (feedback: string) => {
     if (!weeklyRecordId) return alert('주간 운동 데이터 ID가 없습니다.');
 
