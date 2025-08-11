@@ -46,7 +46,7 @@ export default function DesktopWorkout({
         <div className="font-bold mb-1">
           {fetchedUserName || userData.name} 님의 운동현황
         </div>
-        <div className="w-1/3 sm:w-full">
+        <div className="w-full">
           <TotalFeedbackCounts
             counts={`${totalPoints.toFixed(1)}pt`}
             title="총 운동포인트"
@@ -62,7 +62,7 @@ export default function DesktopWorkout({
             userId={userId}
           />
 
-          <div className="bg-white rounded-lg p-6 shadow-sm">
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
             <div className="font-bold mb-4">
               이번 주 운동 그래프 ({currentWeekData.label})
             </div>

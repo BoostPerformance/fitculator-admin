@@ -5,8 +5,8 @@ interface GoogleLoginProps {
 }
 export default function GoogleButton({ onClick }: GoogleLoginProps) {
   const handleClick = () => {
-    console.log('🔄 === Google Button Click ===');
-    console.log('📥 Initiating Google sign in...');
+    // console.log('🔄 === Google Button Click ===');
+    // console.log('📥 Initiating Google sign in...');
     onClick();
   };
 

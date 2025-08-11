@@ -56,7 +56,7 @@ const DietTable: React.FC<DietTableProps> = ({
         (feedback) => feedback.coach_feedback
       );
       const result = hasCoachFeedback ? count + 1 : count;
-      console.log('result', result);
+      // console.log('result', result);
       // coach_feedback이 있으면 카운트 증가
       return result;
     }, 0);

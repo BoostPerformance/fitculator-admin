@@ -7,35 +7,35 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function Login() {
-  console.log('🔄 === Login Page Render Start ===');
+  // console.log('🔄 === Login Page Render Start ===');
   const { setTheme, resolvedTheme } = useTheme();
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    console.log('🔄 Login Page useEffect - Theme');
+    // console.log('🔄 Login Page useEffect - Theme');
     const logoTheme = localStorage.getItem('theme') || 'light';
     setTheme(logoTheme);
   }, [setTheme]);
 
   useEffect(() => {
-    console.log('🔄 Login Page useEffect - Session');
-    console.log('📊 Session status:', status);
-    console.log('📊 Session data:', session);
+    // console.log('🔄 Login Page useEffect - Session');
+    // console.log('📊 Session status:', status);
+    // console.log('📊 Session data:', session);
 
     if (status === 'loading') {
-      console.log('⏳ Session is loading...');
+      // console.log('⏳ Session is loading...');
       return;
     }
 
     if (session) {
-      console.log('✅ Already logged in, redirecting to /user');
+      // console.log('✅ Already logged in, redirecting to /user');
       router.push('/user');
     }
   }, [session, status, router]);
 
   const handleGoogleSignIn = async () => {
-    console.log('📤 Initiating Google Sign In');
+    // console.log('📤 Initiating Google Sign In');
     try {
       await signIn('google', {
         callbackUrl: '/user',

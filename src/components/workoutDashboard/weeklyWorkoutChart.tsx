@@ -15,7 +15,7 @@ export default function WeeklyWorkoutChart({
 }: WeeklyWorkoutChartProps) {
   if (!weeklyWorkouts || weeklyWorkouts.length === 0) {
     return (
-      <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
+      <div className="bg-white rounded-lg p-6 mb-4 shadow-sm border border-gray-200">
         <p className="text-center text-gray-500">
           주간 운동 데이터가 없습니다.
         </p>
@@ -29,10 +29,10 @@ export default function WeeklyWorkoutChart({
 
   return (
     <>
-      <div className="bg-white rounded-lg p-6 mb-4 shadow-sm">
+      <div className="bg-white rounded-lg p-6 mb-4 shadow-sm border border-gray-200 w-full overflow-x-auto">
         {/* 데스크탑 레이아웃 */}
-        <div className="sm:hidden block">
-          <table className="w-full text-sm">
+        <div className="sm:hidden block w-full overflow-x-auto">
+          <table className="w-full text-sm min-w-max">
             <thead>
               <tr className="text-gray-500 text-xs">
                 <th className="py-2 text-left">ID</th>

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { DietPageSkeleton } from '@/components/layout/skeleton';
+import { WorkoutPageSkeleton } from '@/components/layout/skeleton';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useDietData } from '@/components/hooks/useDietData';
 import { useResponsive } from '@/components/hooks/useResponsive';
@@ -83,7 +83,7 @@ export default function WorkoutPage() {
   }
 
   if (challengesLoading || dietLoading) {
-    return <DietPageSkeleton />;
+    return <WorkoutPageSkeleton />;
   }
 
   if (!challenges) {

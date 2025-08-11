@@ -135,7 +135,7 @@ const DietStatistics = ({
 
           // console.log(`✅ 업로드한 유저: ${meal.user.name} (${meal.user.id})`);
         } else {
-          console.log(`❌ 식단 없음: ${meal.user.name} (${meal.user.id})`);
+          // console.log(`❌ 식단 없음: ${meal.user.name} (${meal.user.id})`);
         }
       }
     });

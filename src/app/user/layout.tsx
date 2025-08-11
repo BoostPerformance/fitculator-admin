@@ -40,9 +40,9 @@ export default function UserLayout({
         });
 
         // 챌린지 데이터 가져오기
-        console.log('챌린지 API 호출 시작...');
+        // console.log('챌린지 API 호출 시작...');
         const challengesResponse = await fetch('/api/challenges');
-        console.log('챌린지 API 응답 상태:', challengesResponse.status);
+        // console.log('챌린지 API 응답 상태:', challengesResponse.status);
         
         if (!challengesResponse.ok) {
           const errorData = await challengesResponse.json();
@@ -50,7 +50,7 @@ export default function UserLayout({
           throw new Error('Failed to fetch challenges');
         }
         const challengesData = await challengesResponse.json();
-        console.log('받아온 챌린지 데이터:', challengesData);
+        // console.log('받아온 챌린지 데이터:', challengesData);
         // console.log("받아온 챌린지 데이터:", {
         //   원본데이터: challengesData,
         //   데이터타입: typeof challengesData,

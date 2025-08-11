@@ -172,6 +172,141 @@ export const DietPageSkeleton = () => {
   );
 };
 
+export const MainPageSkeleton = () => {
+  return (
+    <div className="bg-white-1 dark:bg-blue-4 flex flex-col min-h-screen sm:px-[1rem] md:px-[0.4rem]">
+      <div className="flex gap-[1rem] flex-1 sm:flex-col md:flex-col">
+        {/* 메인 컨텐츠 스켈레톤 (사이드바 없음) */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="pt-[2rem] pb-[2rem] sm:pt-0">
+            {/* 타이틀 섹션 스켈레톤 */}
+            <div className="px-4 sm:px-4 relative lg:mb-8 md:mb-4 sm:my-4">
+              {/* 챌린지 기간 스켈레톤 */}
+              <Skeleton className="h-4 w-48 mb-2" />
+              {/* 타이틀 스켈레톤 */}
+              <Skeleton className="h-8 w-64" />
+            </div>
+
+            {/* 통계 카드 스켈레톤 */}
+            <div className="grid grid-cols-4 gap-1 px-4 sm:px-4 sm:grid-cols-1 sm:mt-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2">
+                  <Skeleton className="h-6 w-20 mb-2" />
+                  <Skeleton className="h-8 w-16 mb-1" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
+              ))}
+            </div>
+
+            {/* 그래프 섹션 스켈레톤 */}
+            <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4">
+              {/* 도넛 차트 스켈레톤 */}
+              <div className="col-span-2 bg-white dark:bg-gray-8 p-4 rounded-lg h-[36rem]">
+                <Skeleton className="h-6 w-20 mb-4" />
+                <div className="w-full h-[13rem] flex items-center justify-center">
+                  <Skeleton className="h-32 w-32 rounded-full" />
+                </div>
+                <div className="space-y-2 mt-4">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 다른 차트들 스켈레톤 */}
+              <div className="col-span-2 bg-white dark:bg-gray-8 p-4 rounded-lg h-[36rem]">
+                <Skeleton className="h-6 w-24 mb-4" />
+                <Skeleton className="h-full w-full" />
+              </div>
+
+              <div className="col-span-2 bg-white dark:bg-gray-8 p-4 rounded-lg h-[36rem]">
+                <Skeleton className="h-6 w-20 mb-4" />
+                <Skeleton className="h-full w-full" />
+              </div>
+            </div>
+
+            {/* 테이블 섹션 스켈레톤 */}
+            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem] bg-white-1 px-4 sm:px-4">
+              <div className="bg-white dark:bg-gray-8 p-4 rounded-lg">
+                <DietTableSkeleton />
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      
+      {/* Footer 스켈레톤 */}
+      <div className="h-16 bg-white dark:bg-gray-800 border-t">
+        <div className="flex justify-center items-center h-full">
+          <Skeleton className="h-4 w-48" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const WorkoutPageSkeleton = () => {
+  return (
+    <div className="flex-1 p-4 sm:p-0">
+      {/* 헤더 섹션 스켈레톤 */}
+      <div className="px-8 pt-4 sm:px-4 sm:pt-4">
+        <Skeleton className="h-6 w-48 mb-2" />
+        <Skeleton className="h-8 w-32" />
+      </div>
+
+      {/* PC 테이블 스켈레톤 */}
+      <div className="mt-6 px-8 overflow-x-auto w-full sm:hidden">
+        <div className="w-full overflow-x-auto">
+          <div className="w-full bg-white rounded-lg border border-gray-200 min-w-[1000px] p-4">
+            {/* 테이블 헤더 */}
+            <div className="flex gap-4 mb-4">
+              <Skeleton className="h-6 w-16" />
+              <Skeleton className="h-6 w-20" />
+              {[...Array(8)].map((_, i) => (
+                <Skeleton key={i} className="h-6 w-24" />
+              ))}
+            </div>
+            {/* 테이블 로우 */}
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="flex gap-4 py-3 border-t">
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-6 w-20" />
+                {[...Array(8)].map((_, j) => (
+                  <Skeleton key={j} className="h-6 w-24" />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 모바일 리스트 스켈레톤 */}
+      <div className="mt-[3rem] sm:px-[1rem] lg:hidden md:hidden sm:block w-full">
+        <div className="flex flex-col gap-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="pb-[2rem] sm:bg-white rounded-md shadow">
+              <Skeleton className="h-6 w-32 mt-4 ml-4 mb-4" />
+              <div className="px-4">
+                <div className="flex gap-2 mb-3">
+                  {[...Array(7)].map((_, j) => (
+                    <div key={j} className="flex flex-col items-center">
+                      <Skeleton className="h-4 w-8 mb-2" />
+                      <Skeleton className="h-6 w-6 rounded-full" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const MobileChartSkeleton = () => {
   return (
     <div className="mt-[3rem] sm:bg-white sm:px-[1rem] space-y-8">

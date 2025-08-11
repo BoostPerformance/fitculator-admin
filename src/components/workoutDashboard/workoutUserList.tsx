@@ -3,7 +3,7 @@ import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { DietTableSkeleton } from '../layout/skeleton';
+import { WorkoutPageSkeleton } from '../layout/skeleton';
 import {
   WeekLabel,
   WeeklyChartData,
@@ -105,7 +105,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
         let weeklyChartData, todayCountData, leaderboardData;
 
         try {
-          console.log('Fetching weekly chart data...');
+          // console.log('Fetching weekly chart data...');
           const weeklyResponse = await fetch(
             `/api/workouts/user-detail?type=weekly-chart${
               challengeId ? `&challengeId=${challengeId}` : ''
@@ -387,7 +387,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   }, [handleObserver, workoutItems]);
 
   if (loading) {
-    return <DietTableSkeleton />;
+    return <WorkoutPageSkeleton />;
   }
 
   if (apiError) {

@@ -216,6 +216,7 @@ async function getWeeklyChartData(
       return {
         id: user.id,
         name: user.name || user.username,
+        username: user.username,
         strengthWorkoutCount,
       };
     });

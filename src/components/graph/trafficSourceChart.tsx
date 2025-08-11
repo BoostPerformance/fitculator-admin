@@ -100,7 +100,7 @@ export default function TrafficSourceChart({
         인기운동
       </h2>
       <div>
-        <div className="w-full h-[13rem] sm:py-[2rem] pb-[1rem] flex items-center justify-center relative">
+        <div className="w-full h-[13rem] sm:py-[0.5rem] pb-[1rem] flex items-center justify-center relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

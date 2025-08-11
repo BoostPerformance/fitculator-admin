@@ -9,9 +9,10 @@ import DietTable from '@/components/dietDashboard/dietTable';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import Title from '@/components/layout/title';
 import { useParams } from 'next/navigation';
-import { ChallengeDashboardSkeleton } from '@/components/layout/skeleton';
+import { MainPageSkeleton } from '@/components/layout/skeleton';
 import WeeklyWorkoutChart from '@/components/graph/WeeklyWorkoutChart';
 import DailyWorkoutRecord from '@/components/graph/dailyWorkoutRecord';
+// import { cachedAPI } from '@/utils/api';
 //import DailyWorkoutRecordMobile from '@/components/graph/dailyWorkoutRecordMobile';
 
 interface AdminUser {
@@ -215,6 +216,7 @@ export default function User() {
     const fetchData = async () => {
       try {
         setLoading(true); // 데이터 로딩 시작
+        
         // 오늘 운동한 멤버 수 조회
         const workoutCountResponse = await fetch(
           `/api/workouts?type=today-count&challengeId=${params.challengeId}`
@@ -242,10 +244,6 @@ export default function User() {
             );
           }
         );
-
-        // console.log('🔍  challengesData:', challengesData);
-
-        // console.log('🔍 Sorted challenges1:', sortedChallenges1);
 
         setChallenges(sortedChallenges);
         // 첫 번째 챌린지를 기본값으로 설정
@@ -394,7 +392,7 @@ export default function User() {
 
   // 로딩 중일 때 스켈레톤 UI 표시
   if (loading) {
-    return <ChallengeDashboardSkeleton />;
+    return <MainPageSkeleton />;
   }
 
   return (
@@ -403,6 +401,20 @@ export default function User() {
         <main className="flex-1 overflow-y-auto">
           <div className="pt-[2rem] pb-[2rem] sm:pt-0">
             <div className="px-4 sm:px-4 relative lg:mb-8 md:mb-4 sm:my-4">
+              {/* 챌린지 기간 표시 */}
+              {challengeDates && (
+                <div className="text-0.875-400 text-gray-6 dark:text-gray-7 mb-2">
+                  {new Date(challengeDates.startDate).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })} - {new Date(challengeDates.endDate).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </div>
+              )}
               <Title
                 title={
                   challenges.find(

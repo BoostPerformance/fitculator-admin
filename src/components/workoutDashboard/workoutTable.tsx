@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { DietTableSkeleton } from '../layout/skeleton';
+import { WorkoutPageSkeleton } from '../layout/skeleton';
 import {
   WeekLabel,
   WeeklyChartData,
@@ -276,7 +276,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
           id: user.id,
           challenge_id: challengeId || 'default-challenge',
           userId: user.id,
-          userName: user.name.split(' ')[0] || 'User',
+          userName: user.username || '-',
           name: user.name || '유저',
           weeklyData: userWeeklyData,
           hasUploaded: userPointsMap[user.id] > 0,
@@ -372,7 +372,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   }, [handleObserver, workoutItems]);
 
   if (loading) {
-    return <DietTableSkeleton />;
+    return <WorkoutPageSkeleton />;
   }
 
   if (apiError) {
@@ -386,12 +386,15 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
 
   // Desktop rendering
   return (
-    <div className="mt-6 overflow-x-auto w-full ">
+    <div className="mt-6 px-8 overflow-x-auto w-full">
       {/* Main workout table */}
-      <div className="min-w-[1000px] max-w-full">
-        <table className="w-full bg-white shadow-md rounded-md border border-gray-200">
+      <div className="w-full overflow-x-auto">
+        <table className="w-full bg-white rounded-lg border border-gray-200 min-w-[1000px]">
           <thead>
             <tr className="bg-white text-[#A1A1A1]">
+              <th className="w-[3%] p-3 text-center">
+                <span className="text-sm">#</span>
+              </th>
               <th className="w-[5%] p-3 text-left">
                 <div className="flex items-center justify-start gap-1">
                   <span className="text-sm">ID</span>
@@ -421,31 +424,33 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
               {/* Dynamic week headers */}
               {weekInfo.map((week, index) => (
                 <th key={index} className="w-[10%] p-3 text-center">
-                  <span className="text-sm">
-                    {index + 1}주차
-                    <br />(
-                    {typeof week.label === 'string'
-                      ? week.label
-                      : `${week.startDate}-${week.endDate}`}
-                    )
-                  </span>
+                  <div className="text-sm">
+                    <div className="font-semibold">W{index + 1}</div>
+                    <div className="text-[10px] font-normal text-gray-500 mt-1">
+                      {typeof week.label === 'string'
+                        ? week.label
+                        : `${week.startDate}-${week.endDate}`}
+                    </div>
+                  </div>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {workoutItems.map((item, index) => {
-              console.log('item', item);
+              // console.log('item', item);
               return (
                 <tr
                   key={index}
                   ref={index === workoutItems.length - 1 ? lastRowRef : null}
                   className="border-b border-gray-200 hover:bg-[#F4F6FC]"
                 >
+                  <td className="p-3 text-center text-gray-500">
+                    {index + 1}
+                  </td>
                   <td className="p-3">
                     <div className="text-black dark:text-black">
-                      {item.userName}
-                      <br />#{item.userId.substring(0, 4)}
+                      {item.userName || '-'}
                     </div>
                   </td>
                   <td className="p-3 text-black">{item.name}</td>

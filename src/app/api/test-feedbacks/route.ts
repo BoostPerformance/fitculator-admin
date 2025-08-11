@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     // console.log('요청 받은 participantId:', participantId);
 
     if (!participantId) {
-      console.log('참가자 ID가 없음, 400 반환');
+      // console.log('참가자 ID가 없음, 400 반환');
       return NextResponse.json(
         { error: '참가자 ID가 필요합니다.' },
         { status: 400 }
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
     if (dailyRecords?.length > 0) {
       // console.log('첫 번째 기록 샘플:', dailyRecords[0]);
     } else {
-      console.log('일일 기록이 없습니다.');
+      // console.log('일일 기록이 없습니다.');
     }
 
     // 3. 각 daily_record에 대한 피드백 수 계산

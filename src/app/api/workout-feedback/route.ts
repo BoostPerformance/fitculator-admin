@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // ✅ 디버깅용 로그 추가
-    console.log('📥 POST body:', body);
+    // console.log('📥 POST body:', body);
 
     // ✅ 엄격하게 타입 검사
     if (

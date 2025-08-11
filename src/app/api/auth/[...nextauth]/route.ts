@@ -82,7 +82,7 @@ export const authOptions: NextAuthConfig = {
 
         // 기존 사용자가 있으면 로그인 허용
         if (existingUser) {
-          console.log('✅ Existing user found, allowing login');
+          // console.log('✅ Existing user found, allowing login');
           return true;
         }
 

@@ -332,7 +332,7 @@ export default function Sidebar({
                                       'diet_and_exercise') && (
                                     <li>
                                       <div
-                                        className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                                        className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
                                         onClick={() => {
                                           const today = new Date()
                                             .toISOString()
@@ -352,7 +352,7 @@ export default function Sidebar({
                                       'diet_and_exercise') && (
                                     <li>
                                       <div
-                                        className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
+                                        className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded"
                                         onClick={() => {
                                           router.push(
                                             `/user/${challenge.challenges.id}/workout`
@@ -436,7 +436,7 @@ export default function Sidebar({
                                         'diet_and_exercise') && (
                                       <li>
                                         <div
-                                          className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                                          className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
                                           onClick={() => {
                                             const today = new Date()
                                               .toISOString()
@@ -456,7 +456,7 @@ export default function Sidebar({
                                         'diet_and_exercise') && (
                                       <li>
                                         <div
-                                          className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded"
+                                          className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded"
                                           onClick={() => {
                                             router.push(
                                               `/user/${challenge.challenges.id}/workout`

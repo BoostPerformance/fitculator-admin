@@ -129,7 +129,7 @@ const ExcerciseStatistics = ({
 
   return (
     <>
-      <div className="grid grid-cols-3 sm:grid-cols-1 gap-4 px-[2rem] pb-[3rem] sm:px-3">
+      <div className="grid grid-cols-3 sm:grid-cols-1 gap-4 px-8 pb-[3rem] sm:px-3">
         <div>
           <TotalFeedbackCounts
             counts={`${totalWorkouts}개`}

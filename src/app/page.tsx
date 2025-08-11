@@ -15,7 +15,7 @@ export default function Home() {
     // console.log("📊 Session data:", session);
 
     if (status === 'loading') {
-      console.log('⏳ Session is loading...');
+      // console.log('⏳ Session is loading...');
       return;
     }
 

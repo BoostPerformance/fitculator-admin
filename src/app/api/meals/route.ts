@@ -387,7 +387,7 @@ export async function GET(request: Request) {
       meals: groupedMeals,
     };
 
-    console.log('✅ Transformed data ready');
+    // console.log('✅ Transformed data ready');
 
     return new NextResponse(JSON.stringify(transformedData), {
       headers: {
