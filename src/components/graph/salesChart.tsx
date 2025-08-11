@@ -1,56 +1,33 @@
-import { Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { ChartData } from 'chart.js';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function SalesChart() {
-  const data: ChartData<'bar'> = {
-    labels: [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ],
-    datasets: [
-      {
-        label: 'Sales',
-        data: [
-          30000, 45000, 25000, 50000, 40000, 35000, 60000, 70000, 80000, 75000,
-          65000, 50000,
-        ],
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-      },
-    ],
-  };
+  const data = [
+    { month: 'Jan', sales: 30000 },
+    { month: 'Feb', sales: 45000 },
+    { month: 'Mar', sales: 25000 },
+    { month: 'Apr', sales: 50000 },
+    { month: 'May', sales: 40000 },
+    { month: 'Jun', sales: 35000 },
+    { month: 'Jul', sales: 60000 },
+    { month: 'Aug', sales: 70000 },
+    { month: 'Sep', sales: 80000 },
+    { month: 'Oct', sales: 75000 },
+    { month: 'Nov', sales: 65000 },
+    { month: 'Dec', sales: 50000 },
+  ];
 
   return (
     <div className="bg-white p-4 shadow rounded-lg">
       <h2 className="text-lg font-semibold mb-4">Sales</h2>
-      <Bar data={data} />
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="month" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="sales" fill="rgba(54, 162, 235, 0.6)" />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }
