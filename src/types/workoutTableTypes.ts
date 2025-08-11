@@ -52,6 +52,7 @@ export interface WeekLabel {
   label: string;
   startDate: Date;
   endDate: Date;
+  weekNumber?: number;
 }
 
 export interface WeeklyChartData {
@@ -141,11 +142,6 @@ export interface WorkoutItem {
   endDate?: Date;
 }
 
-export interface WeekInfo {
-  label: string;
-  startDate: Date;
-  endDate: Date;
-}
 
 export interface WorkoutTableProps {
   challengeId?: string;

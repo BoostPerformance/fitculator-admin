@@ -50,7 +50,8 @@ export async function POST(req: NextRequest) {
     if (
       !body.workout_weekly_records_id ||
       typeof body.workout_weekly_records_id !== 'string' ||
-      !body.coach_feedback
+      !body.coach_feedback ||
+      !body.challenge_id
     ) {
       return NextResponse.json({ error: '필수 필드 누락' }, { status: 400 });
     }
@@ -68,6 +69,7 @@ export async function POST(req: NextRequest) {
         .from('workout_feedbacks')
         .update({
           coach_feedback: body.coach_feedback,
+          challenge_id: body.challenge_id,
           updated_at: new Date().toISOString(),
         })
         .eq('id', existingFeedback.id)
@@ -83,6 +85,7 @@ export async function POST(req: NextRequest) {
           workout_weekly_records_id: body.workout_weekly_records_id,
           coach_id: coach.id,
           coach_feedback: body.coach_feedback,
+          challenge_id: body.challenge_id,
           ai_feedback: 'AI 피드백',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),

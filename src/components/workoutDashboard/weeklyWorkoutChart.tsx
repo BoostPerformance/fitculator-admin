@@ -5,6 +5,7 @@ interface WeeklyWorkoutChartProps {
   weeklyWorkouts?: WeeklyWorkout[];
   userId?: string; // 사용자 ID
   weekNumberParam?: number;
+  fetchedUserName?: string; // 사용자명
 }
 
 export default function WeeklyWorkoutChart({
@@ -12,6 +13,7 @@ export default function WeeklyWorkoutChart({
   weeklyWorkouts = [],
   userId = 'USER',
   weekNumberParam,
+  fetchedUserName,
 }: WeeklyWorkoutChartProps) {
   if (!weeklyWorkouts || weeklyWorkouts.length === 0) {
     return (
@@ -23,9 +25,9 @@ export default function WeeklyWorkoutChart({
     );
   }
 
-  // 사용자 ID의 마지막 3자리 (또는 전체)를 표시
-  const displayId =
-    userId.length > 3 ? userId.substring(userId.length - 3) : userId;
+  // fetchedUserName이 null이면 '-', 있으면 그것을 사용
+  const displayName = fetchedUserName === null || fetchedUserName === undefined ? '-' : fetchedUserName;
+  const displayId = displayName === '-' ? '-' : (displayName.length > 5 ? displayName.substring(0, 5) : displayName);
 
   return (
     <>
@@ -40,7 +42,7 @@ export default function WeeklyWorkoutChart({
                 {weeklyWorkouts.map((week, index) => {
                   return (
                     <th key={index} className="py-2 text-center">
-                      {`${weekNumberParam}주차`}
+                      W{weekNumberParam}
                       <br />
                       {`(${week.label.split('-')[0]}~)`}
                     </th>
@@ -51,9 +53,9 @@ export default function WeeklyWorkoutChart({
             <tbody>
               <tr className="border-t border-gray-100">
                 <td className="py-4 text-left">
-                  {userName.substring(0, 5)}
+                  {displayId}
                   <br />
-                  ###{displayId}
+                  ###{displayName}
                 </td>
                 <td className="py-4 text-left">{userName}</td>
                 {weeklyWorkouts.map((week, index) => (
@@ -81,7 +83,7 @@ export default function WeeklyWorkoutChart({
             >
               <div className="flex justify-between items-center">
                 <div className="text-gray-500">
-                  {`${weekNumberParam}주차`}
+                  W{weekNumberParam}
                   <br />
                   {`(${week.label.split('-')[0]}~)`}
                 </div>

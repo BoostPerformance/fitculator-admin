@@ -60,6 +60,7 @@ export default function DesktopWorkout({
             userName={userData.name}
             weeklyWorkouts={userData.weeklyWorkouts}
             userId={userId}
+            fetchedUserName={fetchedUserName}
           />
 
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">

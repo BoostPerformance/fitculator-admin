@@ -60,9 +60,35 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     const { user, weeklyRecords, stats, challengePeriod } = apiData;
     const processedWeeklyWorkouts: WeeklyWorkout[] = [];
 
-    const toDateKey = (date: Date): string => {
-      // timestamp는 이미 KST로 제공됨 → UTC 보정 불필요
-      return date.toISOString().split('T')[0];
+    // Calculate correct week numbers with W0 logic
+    const calculateWeekNumber = (recordStartDate: Date, challengeStartDate: Date): number => {
+      const startDay = challengeStartDate.getDay();
+      
+      // Calculate the Monday of the week containing the challenge start date
+      let challengeWeekStart = new Date(challengeStartDate);
+      if (startDay !== 1) {
+        // If not Monday, go back to the previous Monday
+        const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
+        challengeWeekStart.setDate(challengeWeekStart.getDate() - daysSinceMonday);
+      }
+      
+      // Calculate week difference
+      const timeDiff = recordStartDate.getTime() - challengeWeekStart.getTime();
+      const weeksDiff = Math.floor(timeDiff / (7 * 24 * 60 * 60 * 1000));
+      
+      // If challenge doesn't start on Monday, first week is W0
+      if (startDay !== 1) {
+        return weeksDiff;
+      } else {
+        return weeksDiff;
+      }
+    };
+
+    const toDateKey = (dateString: string): string => {
+      // timestamp에 +9시간 적용 (한국 시간대)
+      const date = new Date(dateString);
+      const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+      return kstDate.toISOString().split('T')[0];
     };
 
     for (const record of weeklyRecords) {
@@ -103,23 +129,26 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         console.error('운동 카테고리 데이터 가져오기 실패:', error);
       }
 
-      const recentWorkouts = apiData.recentWorkouts || [];
+      // 해당 주차의 운동 데이터만 가져오기
+      const weeklyWorkouts = apiData.recentWorkouts || [];
       const strengthWorkoutsByDate: Record<string, number> = {};
       const cardioWorkoutsByDate: Record<string, number> = {};
 
-      recentWorkouts.forEach((workout) => {
+      weeklyWorkouts.forEach((workout) => {
         const workoutDate = new Date(workout.timestamp);
-        const dateKey = toDateKey(workoutDate);
+        const dateKey = toDateKey(workout.timestamp);
         const type = workout.workout_categories?.workout_types?.name;
-        // console.log('workout time', new Date(workout.timestamp).toString());
-
-        if (type === 'STRENGTH') {
-          strengthWorkoutsByDate[dateKey] =
-            (strengthWorkoutsByDate[dateKey] || 0) + 1;
-        }
-        if (type === 'CARDIO') {
-          cardioWorkoutsByDate[dateKey] =
-            (cardioWorkoutsByDate[dateKey] || 0) + (workout.points || 0);
+        
+        // 해당 주차 범위 내의 운동만 처리
+        if (workoutDate >= recordStartDate && workoutDate <= recordEndDate) {
+          if (type === 'STRENGTH') {
+            strengthWorkoutsByDate[dateKey] =
+              (strengthWorkoutsByDate[dateKey] || 0) + 1;
+          }
+          if (type === 'CARDIO') {
+            cardioWorkoutsByDate[dateKey] =
+              (cardioWorkoutsByDate[dateKey] || 0) + (workout.points || 0);
+          }
         }
       });
 
@@ -139,7 +168,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         let strengthCount = 0;
         let cardioValue = 0;
         if (dayDate) {
-          const dateKey = toDateKey(dayDate);
+          const dateKey = dayDate.toISOString().split('T')[0];
           strengthCount = strengthWorkoutsByDate[dateKey] || 0;
           cardioValue = cardioWorkoutsByDate[dateKey] || 0;
         }
@@ -171,9 +200,16 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         date: record.feedback?.created_at || new Date().toISOString(),
       };
 
+      // Calculate correct week number
+      let correctWeekNumber = record.weekNumber || 1;
+      if (challengePeriod && challengePeriod.startDate) {
+        const challengeStartDate = new Date(challengePeriod.startDate);
+        correctWeekNumber = calculateWeekNumber(recordStartDate, challengeStartDate);
+      }
+
       processedWeeklyWorkouts.push({
         recordId: record.id,
-        weekNumber: record.weekNumber || 1,
+        weekNumber: correctWeekNumber,
         label,
         totalAchievement: record.cardio_points_total || 0,
         workoutTypes,

@@ -115,7 +115,7 @@ const generateDonutChart = (
   const safeTotalPoints = Math.min(totalPoints, 100); // 최대 100%
   const total = Object.values(workoutTypes).reduce((sum, v) => sum + v, 0);
 
-  if (total === 0 || showAsEmpty || totalPoints === 0) {
+  if ((total === 0 && totalPoints === 0) || showAsEmpty) {
     return (
       <div className="relative w-full flex flex-col items-center justify-center py-4 sm:py-8 text-gray-400 text-xs sm:text-sm">
         <svg className="w-32 h-32 sm:w-45 sm:h-45" viewBox="0 0 100 100">
@@ -175,12 +175,18 @@ const generateDonutChart = (
     ].join(' ');
   };
 
+  // workoutTypes가 비어있지만 totalPoints가 있는 경우 기본 처리
+  let processedWorkoutTypes = workoutTypes;
+  if (total === 0 && totalPoints > 0) {
+    processedWorkoutTypes = { '운동': safeTotalPoints };
+  }
+
   let currentAngle = -90;
-  const segmentInfo = Object.entries(workoutTypes).map(([type, value], i) => {
-    // value는 이미 퍼센테이지이므로 100으로 나누지 않음
-    const sweepAngle = (value / 100) * 360 * (safeTotalPoints / 100);
+  const segmentInfo = Object.entries(processedWorkoutTypes).map(([type, value], i) => {
+    // safeTotalPoints를 기준으로 비율 계산
+    const sweepAngle = (safeTotalPoints / 100) * 360;
     const path = describeArc(currentAngle, currentAngle + sweepAngle);
-    const color = colors[type] || `hsl(${i * 60}, 70%, 60%)`;
+    const color = colors[type] || '#26CBFF'; // 기본 색상
     const segment = {
       type,
       percentage: value, // 이미 퍼센테이지 값

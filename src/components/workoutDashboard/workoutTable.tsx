@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { WorkoutPageSkeleton } from '../layout/skeleton';
 import {
-  WeekLabel,
   WeeklyChartData,
   LeaderboardEntry,
   TodayCountData,
@@ -26,34 +25,78 @@ const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
   const startDate = new Date(startDateStr);
   const endDate = new Date(endDateStr);
 
-  // Adjust to the beginning of the week (Sunday or Monday depending on your preference)
-  const adjustedStartDate = new Date(startDate);
-
   const weeks: WeekInfo[] = [];
-  let currentStart = adjustedStartDate;
-  let weekNumber = 1;
-
-  while (currentStart < endDate) {
+  let weekNumber = 0;
+  
+  // Get the day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+  const startDay = startDate.getDay();
+  
+  // Calculate the Monday of the week containing the start date
+  let currentStart = new Date(startDate);
+  if (startDay !== 1) {
+    // If not Monday, go back to the previous Monday
+    const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
+    currentStart.setDate(currentStart.getDate() - daysSinceMonday);
+  }
+  
+  // If start date is not Monday, create W0 from that week's Monday
+  if (startDay !== 1) {
     const currentEnd = new Date(currentStart);
-    currentEnd.setDate(currentEnd.getDate() + 6); // 7-day week
-
-    const formattedStart = formatDateToMMDD(currentStart.toISOString());
-    const formattedEnd = formatDateToMMDD(currentEnd.toISOString());
-
+    currentEnd.setDate(currentEnd.getDate() + 6); // Sunday
+    
+    const formattedStart = formatDateToMMDD(currentStart);
+    const formattedEnd = formatDateToMMDD(currentEnd);
+    
     weeks.push({
       label: `${formattedStart}-${formattedEnd}`,
       startDate: new Date(currentStart),
       endDate: new Date(currentEnd),
       weekNumber: weekNumber,
     });
-
-    // Move to next week
+    weekNumber++;
+    
+    // Move to next Monday for W1
+    currentStart = new Date(currentEnd);
+    currentStart.setDate(currentStart.getDate() + 1);
+  }
+  
+  // Generate full weeks starting from Monday
+  while (currentStart < endDate) {
+    const currentEnd = new Date(currentStart);
+    currentEnd.setDate(currentEnd.getDate() + 6); // Sunday (7-day week)
+    
+    // Don't exceed the end date
+    const actualEnd = currentEnd > endDate ? endDate : currentEnd;
+    
+    const formattedStart = formatDateToMMDD(currentStart);
+    const formattedEnd = formatDateToMMDD(actualEnd);
+    
+    weeks.push({
+      label: `${formattedStart}-${formattedEnd}`,
+      startDate: new Date(currentStart),
+      endDate: new Date(actualEnd),
+      weekNumber: weekNumber,
+    });
+    
+    // Move to next Monday
     currentStart = new Date(currentEnd);
     currentStart.setDate(currentStart.getDate() + 1);
     weekNumber++;
   }
 
   return weeks;
+};
+
+// Helper function to check if current date is within a week range
+const isCurrentWeek = (startDate: Date, endDate: Date): boolean => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(endDate);
+  end.setHours(23, 59, 59, 999);
+  
+  return today >= start && today <= end;
 };
 
 // WorkoutTable component
@@ -208,6 +251,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
           `/api/workouts/user-detail?userId=${user.id}&challengeId=${challengeId}`
         );
         const userStatsData = await userStatsResponse.json();
+        
 
         const weeksCount = generatedWeeks.length || 1;
 
@@ -240,10 +284,13 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
             (record: any) => {
               const recordStartDate = new Date(record.start_date);
               const recordEndDate = new Date(record.end_date);
-              return (
+              const isMatch = (
                 recordStartDate.getTime() === week.startDate.getTime() &&
                 recordEndDate.getTime() === week.endDate.getTime()
               );
+              
+              
+              return isMatch;
             }
           );
 
@@ -251,7 +298,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
           const actualPercentage = Math.round(totalCardioPoints * 10) / 10;
 
           return {
-            weekNumber: index + 1,
+            weekNumber: week.weekNumber,
             startDate,
             endDate,
             aerobicPercentage: totalCardioPoints,
@@ -422,18 +469,30 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                 </div>
               </th>
               {/* Dynamic week headers */}
-              {weekInfo.map((week, index) => (
-                <th key={index} className="w-[10%] p-3 text-center">
-                  <div className="text-sm">
-                    <div className="font-semibold">W{index + 1}</div>
-                    <div className="text-[10px] font-normal text-gray-500 mt-1">
-                      {typeof week.label === 'string'
-                        ? week.label
-                        : `${week.startDate}-${week.endDate}`}
+              {weekInfo.map((week, index) => {
+                const isCurrent = isCurrentWeek(week.startDate, week.endDate);
+                return (
+                  <th 
+                    key={index} 
+                    className={`w-[10%] p-3 text-center ${
+                      isCurrent ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200' : ''
+                    }`}
+                  >
+                    <div className="text-sm">
+                      <div className={`font-semibold ${isCurrent ? 'text-blue-600' : ''}`}>
+                        W{week.weekNumber}
+                      </div>
+                      <div className={`text-[10px] font-normal mt-1 ${
+                        isCurrent ? 'text-blue-500' : 'text-gray-500'
+                      }`}>
+                        {typeof week.label === 'string'
+                          ? week.label
+                          : `${week.startDate}-${week.endDate}`}
+                      </div>
                     </div>
-                  </div>
-                </th>
-              ))}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -454,30 +513,53 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                     </div>
                   </td>
                   <td className="p-3 text-black">{item.name}</td>
-                  {item.weeklyData.map((week, weekIndex) => (
-                    <td
-                      key={weekIndex}
-                      className="p-3 text-center text-blue-500 cursor-pointer"
-                      onClick={() =>
-                        router.push(
-                          `/user/${item.challenge_id}/workout/${item.userId}/${week.weekNumber}?label=${week.label}`
-                        )
-                      }
-                    >
-                      {week.aerobicPercentage.toFixed(1)}% /
-                      <br className="md:block lg:hidden" />
-                      {week.strengthSessions}회
-                    </td>
-                  ))}
+                  {item.weeklyData.map((week, weekIndex) => {
+                    const currentWeekInfo = weekInfo[weekIndex];
+                    const isCurrent = currentWeekInfo ? isCurrentWeek(currentWeekInfo.startDate, currentWeekInfo.endDate) : false;
+                    
+                    return (
+                      <td
+                        key={weekIndex}
+                        className={`p-3 text-center cursor-pointer ${
+                          isCurrent ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200' : ''
+                        }`}
+                        onClick={() =>
+                          router.push(
+                            `/user/${item.challenge_id}/workout/${item.userId}/${week.weekNumber}?label=${week.label}`
+                          )
+                        }
+                      >
+                      <div className="flex flex-col">
+                        <span className={week.aerobicPercentage === 0 ? "text-gray-400" : "text-blue-500"}>
+                          {week.aerobicPercentage === 0 ? '-' : `${week.aerobicPercentage.toFixed(1)}%`}
+                        </span>
+                        <span className="text-gray-400 text-sm">
+                          {week.strengthSessions === 0 ? '-' : `${week.strengthSessions}회`}
+                        </span>
+                      </div>
+                      </td>
+                    );
+                  })}
                   {[
                     ...Array(
                       Math.max(0, weekInfo.length - item.weeklyData.length)
                     ),
-                  ].map((_, i) => (
-                    <td key={`empty-${i}`} className="p-3 text-center">
-                      -
-                    </td>
-                  ))}
+                  ].map((_, i) => {
+                    const emptyWeekIndex = item.weeklyData.length + i;
+                    const currentWeekInfo = weekInfo[emptyWeekIndex];
+                    const isCurrent = currentWeekInfo ? isCurrentWeek(currentWeekInfo.startDate, currentWeekInfo.endDate) : false;
+                    
+                    return (
+                      <td 
+                        key={`empty-${i}`} 
+                        className={`p-3 text-center ${
+                          isCurrent ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200' : ''
+                        }`}
+                      >
+                        -
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}

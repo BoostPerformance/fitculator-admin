@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { WorkoutPageSkeleton } from '../layout/skeleton';
 import {
-  WeekLabel,
   WeeklyChartData,
   LeaderboardEntry,
   TodayCountData,
@@ -27,26 +26,61 @@ const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
   const startDate = new Date(startDateStr);
   const endDate = new Date(endDateStr);
 
-  // Adjust to the beginning of the week (Sunday or Monday depending on your preference)
-  const adjustedStartDate = new Date(startDate);
-
-  const weeks: WeekLabel[] = [];
-  let currentStart = adjustedStartDate;
-
-  while (currentStart < endDate) {
+  const weeks: WeekInfo[] = [];
+  let weekNumber = 0;
+  
+  // Get the day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+  const startDay = startDate.getDay();
+  
+  // Calculate the Monday of the week containing the start date
+  let currentStart = new Date(startDate);
+  if (startDay !== 1) {
+    // If not Monday, go back to the previous Monday
+    const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
+    currentStart.setDate(currentStart.getDate() - daysSinceMonday);
+  }
+  
+  // If start date is not Monday, create W0 from that week's Monday
+  if (startDay !== 1) {
     const currentEnd = new Date(currentStart);
-    currentEnd.setDate(currentEnd.getDate() + 6); // 7-day week
-
-    const formattedStart = formatDateToMMDD(currentStart.toISOString());
-    const formattedEnd = formatDateToMMDD(currentEnd.toISOString());
-
+    currentEnd.setDate(currentEnd.getDate() + 6); // Sunday
+    
+    const formattedStart = formatDateToMMDD(currentStart);
+    const formattedEnd = formatDateToMMDD(currentEnd);
+    
     weeks.push({
       label: `${formattedStart}-${formattedEnd}`,
       startDate: new Date(currentStart),
       endDate: new Date(currentEnd),
+      weekNumber: weekNumber,
     });
-
-    // Move to next week
+    weekNumber++;
+    
+    // Move to next Monday for W1
+    currentStart = new Date(currentEnd);
+    currentStart.setDate(currentStart.getDate() + 1);
+  }
+  
+  // Generate full weeks starting from Monday
+  while (currentStart < endDate) {
+    const currentEnd = new Date(currentStart);
+    currentEnd.setDate(currentEnd.getDate() + 6); // Sunday (7-day week)
+    
+    // Don't exceed the end date
+    const actualEnd = currentEnd > endDate ? endDate : currentEnd;
+    
+    const formattedStart = formatDateToMMDD(currentStart);
+    const formattedEnd = formatDateToMMDD(actualEnd);
+    
+    weeks.push({
+      label: `${formattedStart}-${formattedEnd}`,
+      startDate: new Date(currentStart),
+      endDate: new Date(actualEnd),
+      weekNumber: weekNumber,
+    });
+    weekNumber++;
+    
+    // Move to next Monday
     currentStart = new Date(currentEnd);
     currentStart.setDate(currentStart.getDate() + 1);
   }
@@ -267,7 +301,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
           const actualPercentage = Math.round(totalCardioPoints * 10) / 10;
 
           return {
-            weekNumber: index + 1,
+            weekNumber: week.weekNumber !== undefined ? week.weekNumber : index,
             startDate,
             endDate,
             aerobicPercentage: Math.min(Math.round(cardioPoints), 100),

@@ -160,7 +160,7 @@ const MobileWorkout: React.FC = () => {
               }}
             >
               <div className="text-sm text-gray-600">
-                {weekNumber}주차 <br />
+                W{weekNumber} <br />
                 <span className="text-xs text-gray-400">{week.label}</span>
               </div>
               <div className="text-right text-sm font-medium text-blue-600">

@@ -165,6 +165,7 @@ export default function MobileWorkoutDetail() {
         body: JSON.stringify({
           workout_weekly_records_id: weeklyRecordId,
           coach_feedback: feedback,
+          challenge_id: challengeId,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -211,11 +212,12 @@ export default function MobileWorkoutDetail() {
             weeklyWorkouts={userData.weeklyWorkouts}
             userId={userId}
             weekNumberParam={weekNumberParam}
+            fetchedUserName={fetchedUserName}
           />
 
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="font-bold mb-4">
-              {weekNumberParam}주차 운동 그래프 ({currentWeekData.label})
+              W{weekNumberParam} 운동 그래프 ({currentWeekData.label})
             </div>
             <div className="flex gap-6 mb-6 sm:flex-col sm:gap-6">
               <div className="flex flex-col items-center w-1/3 sm:w-full">

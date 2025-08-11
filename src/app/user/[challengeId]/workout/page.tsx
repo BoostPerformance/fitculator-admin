@@ -90,12 +90,27 @@ export default function WorkoutPage() {
     return <div className="p-4">챌린지 정보가 없습니다.</div>;
   }
 
+  const currentChallenge = challenges?.find((c) => c.challenges.id === params.challengeId);
+  
   return (
     <div className="flex-1 p-4 sm:p-0">
       <div className="px-8 pt-4 sm:px-4 sm:pt-4">
+        {/* 챌린지 기간 표시 */}
+        {currentChallenge && (
+          <div className="text-0.875-400 text-gray-6 mb-2">
+            {new Date(currentChallenge.challenges.start_date).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })} - {new Date(currentChallenge.challenges.end_date).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </div>
+        )}
         <div className="text-gray-2 text-1.25-700">
-          {challenges?.find((c) => c.challenges.id === params.challengeId)
-            ?.challenges.title || ''}
+          {currentChallenge?.challenges.title || ''}
         </div>
         <Title title="운동 현황" />
       </div>

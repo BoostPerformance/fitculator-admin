@@ -606,7 +606,8 @@ export async function getUserWorkoutData(
       });
     }
 
-    const { data: recentWorkouts, error: workoutsError } = await supabase
+    // 챌린지 기간 내의 모든 운동 데이터 가져오기
+    let workoutsQuery = supabase
       .from('workouts')
       .select(
         `
@@ -625,8 +626,16 @@ export async function getUserWorkoutData(
       `
       )
       .eq('user_id', userId)
-      .order('timestamp', { ascending: false })
-      .limit(5);
+      .order('timestamp', { ascending: false });
+
+    // 챌린지 기간이 있으면 해당 기간으로 필터링
+    if (challengeStartDate && challengeEndDate) {
+      workoutsQuery = workoutsQuery
+        .gte('timestamp', challengeStartDate)
+        .lte('timestamp', challengeEndDate);
+    }
+
+    const { data: recentWorkouts, error: workoutsError } = await workoutsQuery;
 
     if (workoutsError) {
       console.error('Error fetching recent workouts:', workoutsError);
