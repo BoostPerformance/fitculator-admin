@@ -16,9 +16,12 @@ export default function ClientProviders({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // 1분
+            staleTime: 5 * 60 * 1000, // 5분 - 더 길게 캐시
             retry: 1,
             refetchOnWindowFocus: false,
+            refetchOnMount: false, // 마운트시 자동 refetch 비활성화
+            refetchOnReconnect: 'always', // 재연결시에만 refetch
+            gcTime: 10 * 60 * 1000, // 10분 가비지 컬렉션 시간
           },
         },
       })

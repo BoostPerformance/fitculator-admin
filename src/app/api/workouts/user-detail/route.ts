@@ -24,20 +24,25 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const userId = url.searchParams.get('userId');
+    const userIds = url.searchParams.get('userIds'); // 여러 사용자 ID 지원
     const challengeId = url.searchParams.get('challengeId'); // 챌린지 ID 추가
     const type = url.searchParams.get('type') || 'user-data'; // 기본값 추가
 
-    console.log(
-      'Request received for type:',
-      type,
-      'user ID:',
-      userId,
-      'challenge ID:',
-      challengeId
-    );
+    // console.log(
+    //   'Request received for type:',
+    //   type,
+    //   'user ID:',
+    //   userId,
+    //   'challenge ID:',
+    //   challengeId
+    // );
 
     if (type === 'test-connection') {
       return NextResponse.json({ status: 'OK' });
+    } else if (type === 'batch-user-data' && userIds) {
+      // 배치 처리를 위한 새 엔드포인트
+      const userIdArray = userIds.split(',');
+      return await getBatchUserWorkoutData(userIdArray, challengeId);
     } else if (type === 'weekly-chart') {
       // 챌린지 ID 필수 확인
       if (!challengeId) {
@@ -529,8 +534,19 @@ export async function getUserWorkoutData(
       .eq('user_id', userId);
 
     if (challengeStartDate && challengeEndDate) {
+      // W0를 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
+      const challengeStart = new Date(challengeStartDate);
+      const startDay = challengeStart.getDay();
+      
+      // 챌린지 시작일이 포함된 주의 월요일 계산
+      let w0StartDate = new Date(challengeStart);
+      if (startDay !== 1) {
+        const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
+        w0StartDate.setDate(w0StartDate.getDate() - daysSinceMonday);
+      }
+      
       query = query
-        .gte('start_date', challengeStartDate)
+        .gte('start_date', w0StartDate.toISOString().split('T')[0])
         .lte('end_date', challengeEndDate);
     }
 
@@ -570,13 +586,23 @@ export async function getUserWorkoutData(
       if (feedback && feedback.coach_id) {
         const { data: coachData, error: coachError } = await supabase
           .from('coaches')
-          .select('id, name, profile_image_url')
+          .select(`
+            id, 
+            profile_image_url,
+            admin_users!admin_user_id (
+              username
+            )
+          `)
           .eq('id', feedback.coach_id)
           .maybeSingle();
 
-        if (!coachError) {
-          coach = coachData;
-        } else {
+        if (!coachError && coachData) {
+          coach = {
+            id: coachData.id,
+            name: coachData.admin_users?.[0]?.username || 'Unknown Coach',
+            profile_image_url: coachData.profile_image_url
+          };
+        } else if (coachError) {
           console.error('Error fetching coach:', coachError);
         }
       }
@@ -687,4 +713,145 @@ export async function getUserWorkoutData(
 function getDayLabel(date: Date): string {
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
   return dayNames[date.getDay()];
+}
+
+// 배치 사용자 데이터 조회
+async function getBatchUserWorkoutData(
+  userIds: string[],
+  challengeId?: string | null
+): Promise<NextResponse> {
+  try {
+    // 모든 사용자의 데이터를 병렬로 가져오기
+    const promises = userIds.map(async (userId) => {
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('id, name, username')
+        .eq('id', userId)
+        .single();
+
+      if (userError) {
+        console.error(`Error fetching user ${userId}:`, userError);
+        return null;
+      }
+
+      // 챌린지 정보 가져오기
+      let challengeStartDate: string | null = null;
+      let challengeEndDate: string | null = null;
+
+      if (challengeId) {
+        const { data: challenge } = await supabase
+          .from('challenges')
+          .select('start_date, end_date')
+          .eq('id', challengeId)
+          .single();
+
+        if (challenge) {
+          challengeStartDate = challenge.start_date;
+          challengeEndDate = challenge.end_date;
+        }
+      }
+
+      // 주간 기록 가져오기 (피드백 포함)
+      let query = supabase
+        .from('workout_weekly_records')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (challengeStartDate && challengeEndDate) {
+        // W0를 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
+        const challengeStart = new Date(challengeStartDate);
+        const startDay = challengeStart.getDay();
+        
+        // 챌린지 시작일이 포함된 주의 월요일 계산
+        let w0StartDate = new Date(challengeStart);
+        if (startDay !== 1) {
+          const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
+          w0StartDate.setDate(w0StartDate.getDate() - daysSinceMonday);
+        }
+        
+        query = query
+          .gte('start_date', w0StartDate.toISOString().split('T')[0])
+          .lte('end_date', challengeEndDate);
+      }
+
+      const { data: weeklyRecords } = await query.order('start_date', {
+        ascending: true,
+      });
+
+      // 각 주간 기록에 피드백 정보 추가
+      const weeklyRecordsWithFeedback = [];
+      for (const record of weeklyRecords || []) {
+        const { data: feedback } = await supabase
+          .from('workout_feedbacks')
+          .select('id, ai_feedback, coach_feedback, coach_memo, coach_id, created_at')
+          .eq('workout_weekly_records_id', record.id)
+          .maybeSingle();
+
+        let coach = null;
+        if (feedback && feedback.coach_id) {
+          const { data: coachData } = await supabase
+            .from('coaches')
+            .select(`
+              id, 
+              profile_image_url,
+              admin_users!admin_user_id (
+                username
+              )
+            `)
+            .eq('id', feedback.coach_id)
+            .maybeSingle();
+
+          if (coachData) {
+            coach = {
+              id: coachData.id,
+              name: coachData.admin_users?.[0]?.username || 'Unknown Coach',
+              profile_image_url: coachData.profile_image_url
+            };
+          }
+        }
+
+        weeklyRecordsWithFeedback.push({
+          ...record,
+          feedback: feedback || null,
+          coach: coach || null,
+        });
+      }
+
+      const totalCardioPoints = weeklyRecords?.reduce(
+        (sum, record) => sum + (record.cardio_points_total || 0),
+        0
+      ) || 0;
+
+      const totalStrengthSessions = weeklyRecords?.reduce(
+        (sum, record) => sum + (record.strength_sessions_count || 0),
+        0
+      ) || 0;
+
+      return {
+        userId,
+        user: {
+          id: user.id,
+          name: user.name,
+          displayName: user.username,
+        },
+        weeklyRecords: weeklyRecordsWithFeedback,
+        stats: {
+          totalWeeks: weeklyRecords?.length || 0,
+          totalCardioPoints,
+          totalStrengthSessions,
+        },
+      };
+    });
+
+    const results = await Promise.all(promises);
+    const validResults = results.filter((result) => result !== null);
+
+    return NextResponse.json(validResults);
+  } catch (error) {
+    console.error('Error fetching batch user workout data:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch batch user workout data' },
+      { status: 500 }
+    );
+  }
 }

@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { DietTableSkeleton } from '../layout/skeleton';
+import { useWorkoutDataQuery, useSingleUserWorkoutQuery } from '../hooks/useWorkoutDataQuery';
 import {
   WeekInfo,
   WorkoutItem,
@@ -45,27 +46,19 @@ const MobileWorkout: React.FC = () => {
   const router = useRouter();
   const [userData, setUserData] = useState<WorkoutItem | null>(null);
   const [weekInfo, setWeekInfo] = useState<WeekInfo[]>([]);
-  const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
+  
+  // React Query hooks for data fetching
+  const { weeklyChart, leaderboard, isLoading: challengeLoading } = useWorkoutDataQuery(challengeId as string);
+  const { data: userStats, isLoading: userLoading } = useSingleUserWorkoutQuery(userId as string, challengeId as string);
 
-  const fetchUserWorkoutData = useCallback(async () => {
+  const loading = challengeLoading || userLoading;
+
+  const processUserWorkoutData = useCallback(() => {
+    if (!weeklyChart || !leaderboard || !userStats) return;
+
     try {
-      setLoading(true);
-
-      const [chartRes, leaderboardRes] = await Promise.all([
-        fetch(
-          `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}`
-        ),
-        fetch(
-          `/api/workouts/user-detail?type=leaderboard&challengeId=${challengeId}`
-        ),
-      ]);
-
-      const chartData: WeeklyChartData = await chartRes.json();
-      const leaderboard: LeaderboardEntry[] = await leaderboardRes.json();
-
-      const userRes = await fetch(`/api/workouts/user-detail?userId=${userId}`);
-      const userStats = await userRes.json();
+      const chartData = weeklyChart;
       const user = chartData.users.find((u) => u.id === userId);
 
       const weeks = generateWeekLabels(
@@ -116,17 +109,17 @@ const MobileWorkout: React.FC = () => {
         activeThisWeek: true,
       });
 
-      setLoading(false);
     } catch (err) {
       console.error(err);
       setApiError('유저 데이터를 불러오는 데 실패했습니다.');
-      setLoading(false);
     }
-  }, [challengeId, userId]);
+  }, [weeklyChart, leaderboard, userStats, userId, challengeId]);
 
   useEffect(() => {
-    fetchUserWorkoutData();
-  }, [fetchUserWorkoutData]);
+    if (weeklyChart && leaderboard && userStats) {
+      processUserWorkoutData();
+    }
+  }, [weeklyChart, leaderboard, userStats, processUserWorkoutData]);
 
   if (loading) return <DietTableSkeleton />;
   if (apiError || !userData)

@@ -252,6 +252,17 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
         );
         const userStatsData = await userStatsResponse.json();
         
+        // 데이터 연결 확인을 위한 로그 (첫 번째 사용자만)
+        if (user.id === users[0]?.id) {
+          console.log('첫 번째 사용자 데이터:', {
+            userId: user.id,
+            userName: user.name,
+            weeklyRecordsCount: userStatsData.weeklyRecords?.length || 0,
+            generatedWeeksCount: generatedWeeks.length,
+            weeklyRecords: userStatsData.weeklyRecords
+          });
+        }
+        
 
         const weeksCount = generatedWeeks.length || 1;
 
@@ -279,18 +290,51 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
           const startDate = formatDateToMMDD(week.startDate);
           const endDate = formatDateToMMDD(week.endDate);
 
-          // 해당 주차의 weeklyRecord 찾기
+          // 해당 주차의 weeklyRecord 찾기 (W0 포함 개선된 매핑)
           const weekRecord = userStatsData.weeklyRecords?.find(
             (record: any) => {
               const recordStartDate = new Date(record.start_date);
               const recordEndDate = new Date(record.end_date);
-              const isMatch = (
-                recordStartDate.getTime() === week.startDate.getTime() &&
-                recordEndDate.getTime() === week.endDate.getTime()
+              
+              // W0의 경우 특별 처리: W0 기간과 실제로 겹치는 기록 찾기
+              if (week.weekNumber === 0) {
+                // W0 기간(월요일~일요일)과 record 기간이 겹치는지 확인
+                const isW0Record = (
+                  recordStartDate <= week.endDate && 
+                  recordEndDate >= week.startDate
+                );
+                
+                console.log(`W0 매핑 확인:`, {
+                  weekStart: week.startDate,
+                  weekEnd: week.endDate,
+                  recordStart: recordStartDate,
+                  recordEnd: recordEndDate,
+                  isW0Record,
+                  cardio_points_total: record.cardio_points_total
+                });
+                
+                return isW0Record;
+              }
+              
+              // W1 이후는 기존 로직 사용
+              const isOverlapping = (
+                recordStartDate <= week.endDate && 
+                recordEndDate >= week.startDate
               );
               
+              // W1 디버깅을 위한 로그 (임시)
+              if (week.weekNumber === 1) {
+                console.log(`W1 매핑 확인:`, {
+                  weekStart: week.startDate,
+                  weekEnd: week.endDate,
+                  recordStart: recordStartDate,
+                  recordEnd: recordEndDate,
+                  isOverlapping,
+                  cardio_points_total: record.cardio_points_total
+                });
+              }
               
-              return isMatch;
+              return isOverlapping;
             }
           );
 

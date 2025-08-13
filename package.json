@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:quiet": "next dev 2>&1 | grep -v '/api/workouts/user-detail'",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
