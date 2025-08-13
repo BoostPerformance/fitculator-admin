@@ -192,7 +192,7 @@ export default function Sidebar({
   };
 
   return (
-    <div className="lg:w-[18.75rem] min-w-[16rem] sm:min-w-[14rem] md:min-w-[16rem] min-h-fit md:min-h-fit lg:min-h-screen lg:px-[1rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
+    <div className="lg:w-[16rem] min-w-[14rem] sm:min-w-[12rem] md:min-w-[14rem] min-h-fit md:min-h-fit lg:min-h-screen lg:px-[1rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
       {/* <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]"> */}
       <div className="flex justify-start gap-[0.5rem] pt-[2.25rem] sm:pt-[0rem] md:hidden">
         {/* <Image src="/svg/logo_light.svg" width={30} height={30} alt="logo" /> */}
@@ -281,9 +281,15 @@ export default function Sidebar({
 
                           return (
                             <li key={challenge.challenges.id}>
-                              <div className="font-medium py-2 pl-2 rounded  dark:hover:bg-blue-3  flex justify-between items-center">
+                              <div className={`font-medium py-2 pl-2 rounded dark:hover:bg-blue-3 flex justify-between items-center ${
+                                challenge.challenges.id === selectedChallengeId ? 'bg-blue-50 dark:bg-blue-4' : ''
+                              }`}>
                                 <div
-                                  className="cursor-pointer text-1-500 dark:text-white hover:bg-gray-100 dark:hover:text-black hover:text-1-500 "
+                                  className={`cursor-pointer hover:bg-gray-100 dark:hover:text-black hover:text-1-500 ${
+                                    challenge.challenges.id === selectedChallengeId 
+                                      ? 'text-blue-600 dark:text-blue-300 font-semibold' 
+                                      : 'text-1-500 dark:text-white'
+                                  }`}
                                   onClick={() => handleChallengeClick(challenge)}
                                 >
                                   {challenge.challenges.title || '제목 없음'}
@@ -385,9 +391,15 @@ export default function Sidebar({
 
                             return (
                               <li key={challenge.challenges.id} className="opacity-60">
-                                <div className="font-medium py-2 pl-2 rounded  dark:hover:bg-blue-3  flex justify-between items-center">
+                                <div className={`font-medium py-2 pl-2 rounded dark:hover:bg-blue-3 flex justify-between items-center ${
+                                  challenge.challenges.id === selectedChallengeId ? 'bg-blue-50 dark:bg-blue-4 opacity-100' : ''
+                                }`}>
                                   <div
-                                    className="cursor-pointer text-1-500 dark:text-white hover:bg-gray-100 dark:hover:text-black hover:text-1-500 "
+                                    className={`cursor-pointer hover:bg-gray-100 dark:hover:text-black hover:text-1-500 ${
+                                      challenge.challenges.id === selectedChallengeId 
+                                        ? 'text-blue-600 dark:text-blue-300 font-semibold' 
+                                        : 'text-1-500 dark:text-white'
+                                    }`}
                                     onClick={() => handleChallengeClick(challenge)}
                                   >
                                     {challenge.challenges.title || '제목 없음'}
