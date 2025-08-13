@@ -108,7 +108,7 @@ export default function MobileWorkoutDetail() {
   }, [params, challengeId]);
 
   const handleBack = () =>
-    router.push(`/user/${params.challengeId}/workout/${params.userId}`);
+    router.push(`/user/${params.challengeId}/workout`);
 
   if (loading)
     return (
