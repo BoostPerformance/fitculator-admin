@@ -12,12 +12,12 @@ interface ExcerciseStatsProps {
   selectedDate: string;
 }
 
-const ExcerciseStatistics = memo(({
+const ExcerciseStatistics = memo(function ExcerciseStatistics({
   processedMeals,
   selectedChallengeId,
   dailyRecords,
   selectedDate,
-}: ExcerciseStatsProps) => {
+}: ExcerciseStatsProps) {
   // React Query 훅 사용
   const { weeklyChart, todayCount, isLoading } = useWorkoutDataQuery(selectedChallengeId || '');
 

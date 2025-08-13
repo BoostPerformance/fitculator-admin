@@ -1,4 +1,5 @@
 "use client";
+import Image from 'next/image';
 
 interface SkeletonProps {
   className?: string;
@@ -43,7 +44,7 @@ export const LoadingSkeleton = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen space-y-8">
       {/* 로고 */}
-      <img src="/image/logo.png" alt="Fitculator Logo" className="w-48 mb-8" />
+      <Image src="/image/logo.png" alt="Fitculator Logo" width={192} height={64} className="mb-8" loading="lazy" />
 
       {/* 로딩 인디케이터 */}
       <div className="flex space-x-3">

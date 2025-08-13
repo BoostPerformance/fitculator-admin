@@ -4,6 +4,7 @@ import { SessionProvider } from 'next-auth/react';
 import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
+import ServiceWorkerRegister from '../ServiceWorkerRegister';
 
 export default function ClientProviders({
   children,
@@ -16,12 +17,16 @@ export default function ClientProviders({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 1 * 60 * 1000, // 1분으로 줄임
+            staleTime: 5 * 60 * 1000, // 5분 - 더 길게 캐싱
             retry: 1,
             refetchOnWindowFocus: false,
-            refetchOnMount: true, // 기본값으로 복원
-            refetchOnReconnect: false, // 불필요한 재연결 방지
-            gcTime: 5 * 60 * 1000, // 5분으로 줄임
+            refetchOnMount: false, // 마운트 시 재요청 방지
+            refetchOnReconnect: false,
+            gcTime: 30 * 60 * 1000, // 30분 - 메모리에 더 오래 유지
+            notifyOnChangeProps: ['data', 'error'], // 필요한 props만 구독
+          },
+          mutations: {
+            retry: 1,
           },
         },
       })
@@ -31,6 +36,7 @@ export default function ClientProviders({
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
         <ThemeProvider enableSystem={true} attribute="class">
+          <ServiceWorkerRegister />
           {children}
         </ThemeProvider>
       </SessionProvider>

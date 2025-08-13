@@ -27,9 +27,9 @@ export default function DarkModeButton({ className }: ButtonProps) {
         onClick={() => setTheme(resolvedTheme === 'light' ? 'dark' : 'light')}
       >
         {theme === 'light' ? (
-          <Image src="/svg/dark-mode.svg" alt="" width={30} height={30} />
+          <Image src="/svg/dark-mode.svg" alt="" width={30} height={30} loading="lazy" />
         ) : (
-          <Image src="/svg/light-mode.svg" alt="" width={30} height={30} />
+          <Image src="/svg/light-mode.svg" alt="" width={30} height={30} loading="lazy" />
         )}
       </button>
     </>

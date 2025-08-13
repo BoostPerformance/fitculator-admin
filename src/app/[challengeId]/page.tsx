@@ -173,7 +173,7 @@ export default function User() {
       const feedbackCounts: Record<string, number> = {};
 
       await Promise.all(
-        participants.map(async (participant) => {
+        participants.map(async (participant: any) => {
           if (!participant.id) return;
 
           try {

@@ -246,8 +246,8 @@ export async function GET(request: Request) {
     if (feedbackError && feedbackError.code !== 'PGRST116') throw feedbackError;
 
     // 5. 식단 업로드 일수 조회
-    const challengeStartDate = new Date(participantData.challenge.start_date);
-    const challengeEndDate = new Date(participantData.challenge.end_date);
+    const challengeStartDate = new Date((participantData.challenge as any).start_date);
+    const challengeEndDate = new Date((participantData.challenge as any).end_date);
 
     const { data: daysWithMeals, error: daysWithMealsError } = await supabase
       .from('daily_records')
@@ -373,10 +373,10 @@ export async function GET(request: Request) {
       user: participantData.users,
       challenge: participantData.challenge // 배열 참조 제거
         ? {
-            title: participantData.challenge.title,
-            start_date: participantData.challenge.start_date,
-            end_date: participantData.challenge.end_date,
-            organization: participantData.challenge.organization || null,
+            title: (participantData.challenge as any).title,
+            start_date: (participantData.challenge as any).start_date,
+            end_date: (participantData.challenge as any).end_date,
+            organization: (participantData.challenge as any).organization || null,
           }
         : null,
       feedbacks: feedback || {

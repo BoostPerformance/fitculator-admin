@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import type { Session } from 'next-auth';
 
 const supabase = createClient(
@@ -96,15 +96,15 @@ export async function GET(request: Request) {
         //   `참가자 ${participant.id}의 daily_records 수: ${count || 0}`
         // );
 
-        let dailyRecords = [];
+        let dailyRecords: any[] = [];
 
         // If we need the actual records (for the weekly view)
         if (withRecords) {
           // 챌린지 기간 가져오기
           const challengeStartDate = new Date(
-            participant.challenges.start_date
+            (participant.challenges as any).start_date
           );
-          const challengeEndDate = new Date(participant.challenges.end_date);
+          const challengeEndDate = new Date((participant.challenges as any).end_date);
 
           const formattedStartDate = challengeStartDate
             .toISOString()
@@ -185,7 +185,7 @@ export async function GET(request: Request) {
             if (record.feedbacks.length > 0) {
               // 배열 내 피드백 내용 체크
               const hasFeedbackContent = record.feedbacks.some(
-                (feedback) => feedback.ai_feedback || feedback.coach_feedback
+                (feedback: any) => feedback.ai_feedback || feedback.coach_feedback
               );
 
               if (hasFeedbackContent) {

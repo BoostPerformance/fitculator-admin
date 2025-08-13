@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient, PostgrestError } from '@supabase/supabase-js';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 // import {
 //   ChallengeCoach,
 //   ChallengeParticipant,

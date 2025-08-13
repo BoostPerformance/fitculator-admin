@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { WorkoutPageSkeleton } from '../layout/skeleton';
@@ -538,4 +538,4 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   );
 };
 
-export default WorkoutTable;
+export default memo(WorkoutTable);

@@ -74,7 +74,7 @@ export default function AdminLayout({
       </div>
       <div className="flex md:flex-col sm:flex-col min-h-screen">
         <Sidebar
-          data={formattedChallenges}
+          data={formattedChallenges as any}
           onSelectChallenge={handleChallengeSelect}
           coach={adminData?.username}
           selectedChallengeId={selectedChallengeId}

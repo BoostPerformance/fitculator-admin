@@ -466,7 +466,7 @@ const convertToKoreanTime = (utcString: string): string => {
   return koreanDate.toISOString();
 };
 
-export async function getUserWorkoutData(
+async function getUserWorkoutData(
   userId: string,
   challengeId?: string | null
 ): Promise<NextResponse> {

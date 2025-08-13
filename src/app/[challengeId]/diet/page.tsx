@@ -98,17 +98,16 @@ export default function DietItem() {
       {dietError && <div className="p-4 text-red-500">{dietError}</div>}
       <div className="mt-6">
         <DietStatistics
-          fetchAllDietData={fetchAllDietData}
           processedMeals={dietRecords}
           selectedChallengeId={params.challengeId as string}
           selectedDate={selectedDate}
-          dailyRecords={challenges
+          dailyRecords={(challenges as any)
             ?.filter(
-              (challenge) => challenge.challenges.id === params.challengeId
+              (challenge: any) => challenge.challenges.id === params.challengeId
             )
-            .flatMap((challenge) =>
+            .flatMap((challenge: any) =>
               challenge.challenges.challenge_participants.map(
-                (participant) => ({
+                (participant: any) => ({
                   id: challenge.challenges.id,
                   users: {
                     id: participant.service_user_id || '',
@@ -120,6 +119,9 @@ export default function DietItem() {
                     challenge_type: 'diet',
                   },
                   daily_records: [],
+                  coach_memo: '',
+                  memo_updated_at: '',
+                  service_user_id: participant.service_user_id || '',
                 })
               )
             )}
