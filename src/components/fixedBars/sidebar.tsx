@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DiVim } from 'react-icons/di';
 import NoticeModal from '../input/noticeModal';
+import { useAdminData } from '../hooks/useAdminData';
 
 interface Challenges {
   challenges: {
@@ -56,31 +57,17 @@ export default function Sidebar({
     { id: '2', title: '두 번째 공지사항', content: '' },
     { id: '3', title: '세 번째 공지사항', content: '' },
   ]);
-  const [isInternalOperator, setIsInternalOperator] = useState(false);
   const router = useRouter();
+  
+  // React Query hook 사용으로 API 호출 최적화
+  const { adminData } = useAdminData();
+  const isInternalOperator = adminData?.admin_role === 'internal_operator';
 
   const dummyNotices = [
     { id: '1', title: '첫 번째 공지사항' },
     { id: '2', title: '두 번째 공지사항' },
     { id: '3', title: '세 번째 공지사항' },
   ];
-  // 사용자 역할 확인
-  useEffect(() => {
-    // 관리자 정보 가져오기
-    const fetchAdminRole = async () => {
-      try {
-        const response = await fetch('/api/admin-users');
-        if (response.ok) {
-          const data = await response.json();
-          setIsInternalOperator(data.admin_role === 'internal_operator');
-        }
-      } catch (error) {
-        console.error('관리자 정보 가져오기 실패:', error);
-      }
-    };
-
-    fetchAdminRole();
-  }, []);
 
   // 선택된 챌린지 변경 시 타이틀 업데이트
   useEffect(() => {

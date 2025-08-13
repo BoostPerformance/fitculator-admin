@@ -133,7 +133,17 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
 
   // Process data when React Query data changes
   const processWorkoutData = useCallback(async () => {
-    if (!weeklyChart || !leaderboard || !todayCount) return;
+    console.log('🔧 processWorkoutData 시작', { 
+      weeklyChart: !!weeklyChart, 
+      leaderboard: !!leaderboard, 
+      todayCount: !!todayCount,
+      challengeId 
+    });
+    
+    if (!weeklyChart || !leaderboard || !todayCount) {
+      console.log('❌ 필수 데이터 없음, 종료');
+      return;
+    }
 
     try {
       // Generate proper week info based on challenge period
@@ -345,6 +355,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   }, [handleObserver, workoutItems]);
 
   if (isLoading) {
+    console.log('🔄 WorkoutUserList 로딩 중...', { challengeId, isLoading });
     return <WorkoutPageSkeleton />;
   }
 
@@ -364,10 +375,33 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
           return (
             <div
               key={index}
-              className="pt-[0rem] pb-[2rem] sm:bg-white rounded-md shadow"
-              onClick={() =>
-                router.push(`/user/${challengeId}/workout/${user.userId}`)
-              }
+              className="pt-[0rem] pb-[2rem] sm:bg-white rounded-md shadow cursor-pointer"
+              onClick={() => {
+                console.log('👤 사용자 카드 클릭됨!', {
+                  user: user.name,
+                  userId: user.userId,
+                  challengeId,
+                  weeklyDataLength: user.weeklyData.length
+                });
+                
+                // 첫 번째 주차로 이동
+                const firstWeek = user.weeklyData[0];
+                if (firstWeek) {
+                  const weekLabel = firstWeek.startDate && firstWeek.endDate 
+                    ? `${firstWeek.startDate}-${firstWeek.endDate}` 
+                    : `W${firstWeek.weekNumber}`;
+                  
+                  const targetUrl = `/user/${challengeId}/workout/${user.userId}/${firstWeek.weekNumber}?label=${weekLabel}`;
+                  console.log('🚀 이동할 URL (카드 클릭):', targetUrl);
+                  
+                  router.push(targetUrl);
+                } else {
+                  // fallback: 기본 사용자 페이지
+                  const fallbackUrl = `/user/${challengeId}/workout/${user.userId}/0`;
+                  console.log('🚀 이동할 URL (fallback):', fallbackUrl);
+                  router.push(fallbackUrl);
+                }
+              }}
             >
               <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]">
                 {user.name} 회원
@@ -391,7 +425,30 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                         </tr>
                         <tr className="flex w-full justify-start  gap-[0.5rem]">
                           {weekSlice.map((week, i) => (
-                            <td key={i} className="text-center p-3">
+                            <td 
+                              key={i} 
+                              className="text-center p-3 cursor-pointer hover:bg-gray-50"
+                              onClick={(e) => {
+                                e.stopPropagation(); // 부모 클릭 이벤트 방지
+                                console.log('🎯 주차별 운동량 칸 클릭됨!', {
+                                  user: user.name,
+                                  userId: user.userId,
+                                  weekNumber: week.weekNumber,
+                                  challengeId,
+                                  week
+                                });
+                                
+                                // startDate와 endDate가 있으면 MM.DD-MM.DD 형식으로, 아니면 기본 라벨 사용
+                                const weekLabel = week.startDate && week.endDate 
+                                  ? `${week.startDate}-${week.endDate}` 
+                                  : `W${week.weekNumber}`;
+                                
+                                const targetUrl = `/user/${challengeId}/workout/${user.userId}/${week.weekNumber}?label=${weekLabel}`;
+                                console.log('🚀 이동할 URL:', targetUrl);
+                                
+                                router.push(targetUrl);
+                              }}
+                            >
                               {isWorkoutUploaded(week.aerobicPercentage)}
                             </td>
                           ))}

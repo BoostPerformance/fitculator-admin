@@ -12,6 +12,9 @@ import { useParams } from 'next/navigation';
 import { MainPageSkeleton } from '@/components/layout/skeleton';
 import WeeklyWorkoutChart from '@/components/graph/WeeklyWorkoutChart';
 import DailyWorkoutRecord from '@/components/graph/dailyWorkoutRecord';
+import { useAdminData } from '@/components/hooks/useAdminData';
+import { useChallenge } from '@/components/hooks/useChallenges';
+import { useWorkoutDataQuery } from '@/components/hooks/useWorkoutDataQuery';
 // import { cachedAPI } from '@/utils/api';
 //import DailyWorkoutRecordMobile from '@/components/graph/dailyWorkoutRecordMobile';
 
@@ -87,9 +90,8 @@ export default function User() {
   const [workoutCount, setWorkoutCount] = useState(0);
   const [workOutCountToday, setWorkOutCountToday] = useState<number>(0);
   const [totalParticipants, setTotalParticipants] = useState<number>(0);
-  const [todayStats, setTodayStats] = useState({ count: 0, total: 0 });
+  // todayStats는 React Query의 todayCount로 대체
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
-  const [challenges, setChallenges] = useState<Challenges[]>([]);
   const [dailyRecords, setDailyRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -103,10 +105,6 @@ export default function User() {
     totalFeedbacks: 0,
     totalParticipants: 0,
     feedbackPercentage: 0,
-  });
-  const [adminData, setAdminData] = useState({
-    admin_role: '',
-    username: '',
   });
   const [coachData, setCoachData] = useState<CoachData>({
     id: '',
@@ -125,6 +123,22 @@ export default function User() {
     },
     challenge_coaches: [],
   });
+
+  // React Query hooks 사용으로 API 호출 최적화
+  const { adminData } = useAdminData();
+  const { challenges } = useChallenge();
+  const { todayCount } = useWorkoutDataQuery(selectedChallengeId);
+  
+  // 챌린지 데이터 변환
+  const formattedChallenges: Challenges[] = challenges?.map((challenge) => ({
+    challenges: {
+      id: challenge.challenges.id,
+      title: challenge.challenges.title,
+      start_date: challenge.challenges.start_date,
+      end_date: challenge.challenges.end_date,
+      challenge_type: (challenge.challenges as any).challenge_type || 'diet_and_exercise',
+    },
+  })) || [];
 
   // 피드백 데이터 가져오기
   const fetchFeedbackData = async (challengeId: string) => {
@@ -217,39 +231,9 @@ export default function User() {
       try {
         setLoading(true); // 데이터 로딩 시작
         
-        // 오늘 운동한 멤버 수 조회
-        const workoutCountResponse = await fetch(
-          `/api/workouts?type=today-count&challengeId=${params.challengeId}`
-        );
-        if (!workoutCountResponse.ok) {
-          throw new Error('Failed to fetch workout count');
-        }
-        const workoutCountData = await workoutCountResponse.json();
-        setTodayStats(workoutCountData);
-        setWorkOutCountToday(workoutCountData.count);
-        setTotalParticipants(workoutCountData.total);
+        // React Query로 운동 데이터 최적화됨
 
-        // 챌린지 데이터 가져오기
-        const challengesResponse = await fetch('/api/challenges');
-        if (!challengesResponse.ok) {
-          throw new Error('Failed to fetch challenges');
-        }
-        const challengesData = await challengesResponse.json();
-
-        const sortedChallenges = challengesData.sort(
-          (a: Challenges, b: Challenges) => {
-            return (
-              new Date(b.challenges.start_date).getTime() -
-              new Date(a.challenges.start_date).getTime()
-            );
-          }
-        );
-
-        setChallenges(sortedChallenges);
-        // 첫 번째 챌린지를 기본값으로 설정
-        if (sortedChallenges.length > 0) {
-          setSelectedChallengeId(sortedChallenges[0].challenges.id);
-        }
+        // React Query로 데이터 가져오기로 대체됨
 
         // 코치 데이터 가져오기
         const coachResponse = await fetch('/api/coach-info');
@@ -259,13 +243,7 @@ export default function User() {
         const coachData = await coachResponse.json();
         setCoachData(coachData);
 
-        // 어드민 데이터 가져오기
-        const adminResponse = await fetch('/api/admin-users');
-        if (!adminResponse.ok) {
-          throw new Error('Failed to fetch admin data');
-        }
-        const adminData = await adminResponse.json();
-        setAdminData(adminData);
+        // React Query로 어드민 데이터 가져오기로 대체됨
 
         // 데일리레코드(테이블 정보) 가져오기
         await fetchDailyRecords(1);
@@ -320,11 +298,14 @@ export default function User() {
 
     if (
       urlChallengeId &&
-      challenges.some((c) => c.challenges.id === urlChallengeId)
+      formattedChallenges.some((c) => c.challenges.id === urlChallengeId)
     ) {
       setSelectedChallengeId(urlChallengeId);
+    } else if (formattedChallenges.length > 0 && !selectedChallengeId) {
+      // 첫 번째 챌린지를 기본값으로 설정
+      setSelectedChallengeId(formattedChallenges[0].challenges.id);
     }
-  }, [challenges, params.challengeId]);
+  }, [formattedChallenges, params.challengeId, selectedChallengeId]);
 
   // 챌린지 ID가 변경될 때마다 데이터 업데이트
   useEffect(() => {
@@ -334,28 +315,20 @@ export default function User() {
       fetchFeedbackData(selectedChallengeId);
       fetchDailyRecords(1);
 
-      // 운동 업로드 수 조회
-      fetch(
-        `/api/workouts/user-detail?type=today-count&challengeId=${selectedChallengeId}`
-      )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('Failed to fetch workout count');
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setTodayStats(data);
-          setWorkOutCountToday(data.count);
-        })
-        .catch((error) => {
-          console.error('Error fetching workout count:', error);
-        });
+      // React Query hook으로 운동 데이터 가져오기 최적화됨
     }
   }, [selectedChallengeId]);
 
+  // React Query 데이터로 상태 업데이트
+  useEffect(() => {
+    if (todayCount) {
+      setWorkOutCountToday(todayCount.count || 0);
+      setTotalParticipants(todayCount.total || 0);
+    }
+  }, [todayCount]);
+
   const handleChallengeSelect = (challengeId: string) => {
-    const selectedChallenge = challenges.find(
+    const selectedChallenge = formattedChallenges.find(
       (challenge) => challenge.challenges.id === challengeId
     );
 
@@ -371,7 +344,7 @@ export default function User() {
     : [];
 
   const getSelectedChallengeDates = () => {
-    const selectedChallenge = challenges.find(
+    const selectedChallenge = formattedChallenges.find(
       (challenge) => challenge.challenges.id === selectedChallengeId
     );
     return selectedChallenge
@@ -417,7 +390,7 @@ export default function User() {
               )}
               <Title
                 title={
-                  challenges.find(
+                  formattedChallenges.find(
                     (challenge) =>
                       challenge.challenges.id === selectedChallengeId
                   )?.challenges.title || ''
@@ -433,7 +406,7 @@ export default function User() {
                 borderColor="border-green"
                 textColor="text-green"
               />
-              {challenges.find((c) => c.challenges.id === selectedChallengeId)
+              {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type !== 'diet' && (
                 <TotalFeedbackCounts
                   counts={`${workOutCountToday}`}
@@ -448,7 +421,7 @@ export default function User() {
                   textColor="text-blue-5"
                 />
               )}
-              {challenges.find((c) => c.challenges.id === selectedChallengeId)
+              {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type !== 'exercise' && (
                 <TotalFeedbackCounts
                   counts={todayDietUploads?.counts || '0'}
@@ -466,7 +439,7 @@ export default function User() {
             </div>
 
             <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4 ">
-              {challenges.find((c) => c.challenges.id === selectedChallengeId)
+              {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type === 'diet_and_exercise' && (
                 <>
                   <TrafficSourceChart challengeId={selectedChallengeId} />
@@ -476,11 +449,11 @@ export default function User() {
                   <WeeklyWorkoutChart challengeId={selectedChallengeId} />
                 </>
               )}
-              {challenges.find((c) => c.challenges.id === selectedChallengeId)
+              {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type === 'diet' && (
                 <DailyDietRecord activities={filteredDailyRecordsbyId} />
               )}
-              {challenges.find((c) => c.challenges.id === selectedChallengeId)
+              {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type === 'exercise' && (
                 <>
                   <TrafficSourceChart challengeId={selectedChallengeId} />{' '}

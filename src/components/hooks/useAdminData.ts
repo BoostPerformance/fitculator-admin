@@ -1,23 +1,40 @@
 'use client';
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+
+interface AdminData {
+  admin_role: string;
+  username: string;
+}
+
+const fetchAdminData = async (): Promise<AdminData> => {
+  const response = await fetch('/api/admin-users');
+  if (!response.ok) throw new Error('Failed to fetch admin data');
+  return response.json();
+};
 
 export const useAdminData = () => {
-  const [adminData, setAdminData] = useState({
-    admin_role: '',
-    username: '',
+  const { data: adminData, isLoading, error, refetch } = useQuery({
+    queryKey: ['admin-users'],
+    queryFn: fetchAdminData,
+    staleTime: 15 * 60 * 1000, // 15분
+    gcTime: 60 * 60 * 1000, // 1시간
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    initialData: {
+      admin_role: '',
+      username: '',
+    },
   });
 
-  const fetchAdminData = async () => {
-    try {
-      const response = await fetch('/api/admin-users');
-      if (!response.ok) throw new Error('Failed to fetch admin data');
-      const data = await response.json();
-      setAdminData(data);
-      return data;
-    } catch (error) {
-      console.error('Error fetching admin data:', error);
-    }
+  const fetchAdminDataRefresh = async () => {
+    const result = await refetch();
+    return result.data;
   };
 
-  return { adminData, fetchAdminData };
+  return { 
+    adminData: adminData || { admin_role: '', username: '' }, 
+    fetchAdminData: fetchAdminDataRefresh,
+    isLoading,
+    error,
+  };
 };

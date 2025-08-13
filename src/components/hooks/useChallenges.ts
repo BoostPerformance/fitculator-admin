@@ -1,6 +1,6 @@
 'use client';
 import { useState, useCallback } from 'react';
-// import { Challenges } from '@/types/userPageTypes';
+import { useQuery } from '@tanstack/react-query';
 
 interface Challenges {
   challenge_id: string;
@@ -41,31 +41,27 @@ interface Challenges {
   created_at: string;
   id: string;
 }
+
+const fetchChallengesApi = async (): Promise<Challenges[]> => {
+  const response = await fetch('/api/challenges');
+  if (!response.ok) throw new Error('Failed to fetch challenges');
+  return response.json();
+};
+
 export const useChallenge = () => {
-  const [challenges, setChallenges] = useState<Challenges[] | null>(null);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challengeTitle, setChallengeTitle] = useState('');
-  const [loading, setLoading] = useState(true);
 
-  const fetchChallenges = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/challenges');
-      if (!response.ok) throw new Error('Failed to fetch challenges');
+  const { data: challenges, isLoading: loading, error, refetch } = useQuery({
+    queryKey: ['challenges'],
+    queryFn: fetchChallengesApi,
+    staleTime: 10 * 60 * 1000, // 10분
+    gcTime: 30 * 60 * 1000, // 30분
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
 
-      const data = await response.json();
-      // console.log(data);
-      setChallenges(data);
-      setLoading(false);
-      return data;
-    } catch (error) {
-      console.error('Error fetching challenges:', error);
-      setLoading(false);
-      throw error;
-    }
-  }, []);
-
-  const handleChallengeSelect = (challengeId: string) => {
+  const handleChallengeSelect = useCallback((challengeId: string) => {
     if (!challenges) return;
 
     const selectedChallenge = challenges.find(
@@ -75,7 +71,12 @@ export const useChallenge = () => {
       setSelectedChallengeId(challengeId);
       setChallengeTitle(selectedChallenge.challenges.title);
     }
-  };
+  }, [challenges]);
+
+  const fetchChallenges = useCallback(async () => {
+    const result = await refetch();
+    return result.data;
+  }, [refetch]);
 
   return {
     challenges,
@@ -84,5 +85,6 @@ export const useChallenge = () => {
     fetchChallenges,
     handleChallengeSelect,
     loading,
+    error,
   };
 };

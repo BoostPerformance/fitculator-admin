@@ -2,7 +2,7 @@
 import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import { ChallengeParticipant } from '@/types/userPageTypes';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo, useMemo } from 'react';
 import { useWorkoutDataQuery } from '../hooks/useWorkoutDataQuery';
 
 interface ExcerciseStatsProps {
@@ -12,71 +12,66 @@ interface ExcerciseStatsProps {
   selectedDate: string;
 }
 
-const ExcerciseStatistics = ({
+const ExcerciseStatistics = memo(({
   processedMeals,
   selectedChallengeId,
   dailyRecords,
   selectedDate,
 }: ExcerciseStatsProps) => {
-  const [totalWorkouts, setTotalWorkouts] = useState(0);
-  const [todayStats, setTodayStats] = useState({ count: 0, total: 0 });
-  const [weeklyAverage, setWeeklyAverage] = useState(0);
-
   // React Query 훅 사용
   const { weeklyChart, todayCount, isLoading } = useWorkoutDataQuery(selectedChallengeId || '');
 
-  useEffect(() => {
-    if (todayCount) {
-      setTodayStats(todayCount);
+  // 계산 결과를 useMemo로 캐싱하여 불필요한 재계산 방지
+  const { totalWorkouts, weeklyAverage } = useMemo(() => {
+    if (!weeklyChart) return { totalWorkouts: 0, weeklyAverage: 0 };
+
+    // Calculate total workouts (total entries in cardio and strength)
+    let totalCount = 0;
+    if (weeklyChart.cardio && Array.isArray(weeklyChart.cardio)) {
+      totalCount += weeklyChart.cardio.length;
+    }
+    if (weeklyChart.strength && Array.isArray(weeklyChart.strength)) {
+      totalCount += weeklyChart.strength.length;
     }
 
-    if (weeklyChart) {
-      // Calculate total workouts (total entries in cardio and strength)
-      let totalCount = 0;
+    // Calculate weekly average
+    let avgPercentage = 0;
+    if (weeklyChart.cardio && weeklyChart.cardio.length > 0) {
+      // Get current week's data
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - dayOfWeek);
+      startOfWeek.setHours(0, 0, 0, 0);
 
-      if (weeklyChart.cardio && Array.isArray(weeklyChart.cardio)) {
-        totalCount += weeklyChart.cardio.length;
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+
+      // Filter cardio data for current week
+      const currentWeekData = weeklyChart.cardio.filter((item) => {
+        const itemDate = new Date(item.date);
+        return itemDate >= startOfWeek && itemDate <= endOfWeek;
+      });
+
+      if (currentWeekData.length > 0) {
+        const totalPercentage = currentWeekData.reduce(
+          (sum, item) => sum + item.y,
+          0
+        );
+        avgPercentage = parseFloat(
+          (totalPercentage / currentWeekData.length).toFixed(1)
+        );
       }
-
-      if (weeklyChart.strength && Array.isArray(weeklyChart.strength)) {
-        totalCount += weeklyChart.strength.length;
-      }
-
-      setTotalWorkouts(totalCount);
-
-      // Calculate weekly average
-      let avgPercentage = 0;
-      if (weeklyChart.cardio && weeklyChart.cardio.length > 0) {
-        // Get current week's data
-        const now = new Date();
-        const dayOfWeek = now.getDay();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - dayOfWeek);
-        startOfWeek.setHours(0, 0, 0, 0);
-
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
-        endOfWeek.setHours(23, 59, 59, 999);
-
-        // Filter cardio data for current week
-        const currentWeekData = weeklyChart.cardio.filter((item) => {
-          const itemDate = new Date(item.date);
-          return itemDate >= startOfWeek && itemDate <= endOfWeek;
-        });
-
-        if (currentWeekData.length > 0) {
-          const totalPercentage = currentWeekData.reduce(
-            (sum, item) => sum + item.y,
-            0
-          );
-          avgPercentage = parseFloat(
-            (totalPercentage / currentWeekData.length).toFixed(1)
-          );
-        }
-      }
-      setWeeklyAverage(avgPercentage);
     }
-  }, [weeklyChart, todayCount]);
+
+    return { totalWorkouts: totalCount, weeklyAverage: avgPercentage };
+  }, [weeklyChart]);
+
+  const todayStats = useMemo(() => 
+    todayCount || { count: 0, total: 0 }, 
+    [todayCount]
+  );
 
   return (
     <>
@@ -112,6 +107,6 @@ const ExcerciseStatistics = ({
       </div>
     </>
   );
-};
+});
 
 export { ExcerciseStatistics };

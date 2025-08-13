@@ -9,6 +9,7 @@ import Title from '@/components/layout/title';
 import WorkoutTable from '@/components/workoutDashboard/workoutTable';
 import { ExcerciseStatistics } from '@/components/statistics/excerciseStatistics';
 import WorkoutUserList from '@/components/workoutDashboard/workoutUserList';
+import { useQuery } from '@tanstack/react-query';
 
 export default function WorkoutPage() {
   const params = useParams();
@@ -31,7 +32,7 @@ export default function WorkoutPage() {
   } = useChallenge();
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challengeError, setChallengeError] = useState<string | null>(null);
-  const [isApiConnected, setIsApiConnected] = useState<boolean>(false);
+  // API 연결 상태 체크 제거
 
   const handleSelectChallenge = (challengeId: string) => {
     setSelectedChallengeId(challengeId);
@@ -50,25 +51,7 @@ export default function WorkoutPage() {
     loadChallenges();
   }, [fetchChallenges]);
 
-  // API 연결 확인은 한 번만 수행
-  useEffect(() => {
-    const checkApiConnection = async () => {
-      try {
-        const response = await fetch(
-          '/api/workouts/user-detail?type=test-connection'
-        );
-        setIsApiConnected(response.ok);
-      } catch (error) {
-        console.error('API 연결 확인 실패:', error);
-        setIsApiConnected(false);
-      }
-    };
-    
-    // API 연결 상태가 아직 확인되지 않은 경우에만 확인
-    if (isApiConnected === false) {
-      checkApiConnection();
-    }
-  }, []); // 빈 의존성 배열로 한 번만 실행
+  // API 연결 테스트 제거 - 불필요한 경고 메시지 방지
 
   useEffect(() => {
     if (urlDate) {
@@ -127,12 +110,7 @@ export default function WorkoutPage() {
         />
       </div>
 
-      {!isApiConnected && (
-        <div className="p-3 bg-yellow-100 text-yellow-800 rounded mb-4">
-          <span className="font-medium">⚠️ API 연결 안됨:</span> 실제 API에
-          연결할 수 없어 목데이터를 사용합니다.
-        </div>
-      )}
+      {/* API 연결 경고 메시지 제거 */}
       <WorkoutUserList challengeId={params.challengeId as string} />
       <div className="sm:hidden">
         <WorkoutTable challengeId={params.challengeId as string} />
