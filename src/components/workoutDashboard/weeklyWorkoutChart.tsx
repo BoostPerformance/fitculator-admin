@@ -6,6 +6,7 @@ interface WeeklyWorkoutChartProps {
   userId?: string; // 사용자 ID
   weekNumberParam?: number;
   fetchedUserName?: string; // 사용자명
+  username?: string | null; // 사용자 username
 }
 
 export default function WeeklyWorkoutChart({
@@ -14,6 +15,7 @@ export default function WeeklyWorkoutChart({
   userId = 'USER',
   weekNumberParam,
   fetchedUserName,
+  username,
 }: WeeklyWorkoutChartProps) {
   if (!weeklyWorkouts || weeklyWorkouts.length === 0) {
     return (
@@ -40,11 +42,18 @@ export default function WeeklyWorkoutChart({
                 <th className="py-2 text-left">ID</th>
                 <th className="py-2 text-left">이름</th>
                 {weeklyWorkouts.map((week, index) => {
+                  const [startDate, endDate] = week.label.split('-');
+                  const formatDate = (date: string) => {
+                    const [month, day] = date.split('.');
+                    return `${month.replace(/^0/, '')}.${day.replace(/^0/, '')}`;
+                  };
                   return (
                     <th key={index} className="py-2 text-center">
-                      W{weekNumberParam}
+                      W{week.weekNumber}
                       <br />
-                      {`(${week.label.split('-')[0]}~)`}
+                      <span className="text-xs font-light">
+                        {formatDate(startDate)}-{formatDate(endDate)}
+                      </span>
                     </th>
                   );
                 })}
@@ -53,14 +62,17 @@ export default function WeeklyWorkoutChart({
             <tbody>
               <tr className="border-t border-gray-100">
                 <td className="py-4 text-left">
-                  {displayId}
-                  <br />
-                  ###{displayName}
+                  {username || '-'}
                 </td>
                 <td className="py-4 text-left">{userName}</td>
                 {weeklyWorkouts.map((week, index) => (
-                  <td key={index} className="py-4 text-center text-blue-500">
-                    {`${week.totalAchievement}% / ${week.totalSessions}회`}
+                  <td key={index} className="py-4 text-center">
+                    <div className="text-blue-500">
+                      {`${week.totalAchievement}%`}
+                    </div>
+                    <div className="text-gray-500 text-sm">
+                      {week.totalSessions}
+                    </div>
                   </td>
                 ))}
               </tr>
@@ -83,12 +95,26 @@ export default function WeeklyWorkoutChart({
             >
               <div className="flex justify-between items-center">
                 <div className="text-gray-500">
-                  W{weekNumberParam}
+                  W{week.weekNumber}
                   <br />
-                  {`(${week.label.split('-')[0]}~)`}
+                  <span className="text-xs font-light">
+                    {(() => {
+                      const [startDate, endDate] = week.label.split('-');
+                      const formatDate = (date: string) => {
+                        const [month, day] = date.split('.');
+                        return `${month.replace(/^0/, '')}.${day.replace(/^0/, '')}`;
+                      };
+                      return `${formatDate(startDate)}-${formatDate(endDate)}`;
+                    })()}
+                  </span>
                 </div>
-                <div className="text-blue-500">
-                  {`${week.totalAchievement}% / ${week.totalSessions}회`}
+                <div className="text-right">
+                  <div className="text-blue-500">
+                    {`${week.totalAchievement}%`}
+                  </div>
+                  <div className="text-gray-500 text-sm">
+                    {week.totalSessions}
+                  </div>
                 </div>
               </div>
             </div>

@@ -29,7 +29,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         if (!response.ok) throw new Error(`API 오류: ${response.status}`);
 
         const data: ApiResponse = await response.json();
-        // console.log('API data', data);
+        console.log('API data user info:', data.user);
 
         const processedData = await transformApiData(data);
 
@@ -58,6 +58,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
   const transformApiData = async (apiData: ApiResponse): Promise<UserData> => {
     const { user, weeklyRecords, stats, challengePeriod } = apiData;
+    console.log('API Response challengePeriod:', challengePeriod);
     const processedWeeklyWorkouts: WeeklyWorkout[] = [];
 
     // Calculate correct week numbers with W0 logic
@@ -72,15 +73,23 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         challengeWeekStart.setDate(challengeWeekStart.getDate() - daysSinceMonday);
       }
       
-      // Calculate week difference
-      const timeDiff = recordStartDate.getTime() - challengeWeekStart.getTime();
+      // Calculate week difference using the Monday of the record's week
+      const recordDay = recordStartDate.getDay();
+      let recordWeekStart = new Date(recordStartDate);
+      if (recordDay !== 1) {
+        const daysSinceMonday = recordDay === 0 ? 6 : recordDay - 1;
+        recordWeekStart.setDate(recordWeekStart.getDate() - daysSinceMonday);
+      }
+      
+      const timeDiff = recordWeekStart.getTime() - challengeWeekStart.getTime();
       const weeksDiff = Math.floor(timeDiff / (7 * 24 * 60 * 60 * 1000));
       
-      // If challenge doesn't start on Monday, first week is W0
-      if (startDay !== 1) {
-        return weeksDiff;
+      // If challenge starts on Monday, weeks start from W1
+      // If challenge starts on other days, weeks start from W0
+      if (startDay === 1) {
+        return weeksDiff + 1; // W1, W2, W3...
       } else {
-        return weeksDiff;
+        return weeksDiff; // W0, W1, W2...
       }
     };
 
@@ -202,9 +211,18 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
       // Calculate correct week number
       let correctWeekNumber = record.weekNumber || 1;
+      
       if (challengePeriod && challengePeriod.startDate) {
         const challengeStartDate = new Date(challengePeriod.startDate);
         correctWeekNumber = calculateWeekNumber(recordStartDate, challengeStartDate);
+      } else {
+        // Fallback: use first record as reference for week numbering (always start from W0)
+        if (weeklyRecords.length > 0) {
+          const firstRecordStart = new Date(weeklyRecords[0].start_date);
+          const timeDiff = recordStartDate.getTime() - firstRecordStart.getTime();
+          const weeksDiff = Math.floor(timeDiff / (7 * 24 * 60 * 60 * 1000));
+          correctWeekNumber = weeksDiff; // Always start from W0 when no challengePeriod
+        }
       }
 
       processedWeeklyWorkouts.push({
@@ -223,6 +241,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
     return {
       name: user.name || user.displayName || '사용자',
+      username: user.displayName || null,
       achievement:
         Math.round(stats.totalCardioPoints / weeklyRecords.length) || 0,
       weeklyWorkouts: processedWeeklyWorkouts,

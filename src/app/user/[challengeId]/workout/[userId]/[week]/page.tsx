@@ -146,6 +146,7 @@ export default function MobileWorkoutDetail() {
 
   console.log('userData from useWorkoutData:', {
     weeklyWorkouts: userData.weeklyWorkouts,
+    weekNumbers: userData.weeklyWorkouts.map(w => ({ weekNumber: w.weekNumber, label: w.label })),
     currentWeek: userData.weeklyWorkouts[currentWeekIndex],
     workoutTypes: currentWeekData.workoutTypes,
   });
@@ -213,6 +214,7 @@ export default function MobileWorkoutDetail() {
             userId={userId}
             weekNumberParam={weekNumberParam}
             fetchedUserName={fetchedUserName}
+            username={userData.username}
           />
 
           <div className="bg-white rounded-lg p-6 shadow-sm">

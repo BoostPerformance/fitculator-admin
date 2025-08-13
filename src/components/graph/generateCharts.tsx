@@ -112,7 +112,6 @@ const generateDonutChart = (
   const radius = 35;
   const center = 50;
   const strokeWidth = 23;
-  const safeTotalPoints = Math.min(totalPoints, 100); // 최대 100%
   const total = Object.values(workoutTypes).reduce((sum, v) => sum + v, 0);
 
   if ((total === 0 && totalPoints === 0) || showAsEmpty) {
@@ -178,14 +177,22 @@ const generateDonutChart = (
   // workoutTypes가 비어있지만 totalPoints가 있는 경우 기본 처리
   let processedWorkoutTypes = workoutTypes;
   if (total === 0 && totalPoints > 0) {
-    processedWorkoutTypes = { '운동': safeTotalPoints };
+    processedWorkoutTypes = { '운동': totalPoints };
   }
 
   let currentAngle = -90;
   const segmentInfo = Object.entries(processedWorkoutTypes).map(([type, value], i) => {
-    // safeTotalPoints를 기준으로 비율 계산
-    const sweepAngle = (safeTotalPoints / 100) * 360;
-    const path = describeArc(currentAngle, currentAngle + sweepAngle);
+    // 100% 이상일 때는 전체 원을 채우도록 설정
+    const sweepAngle = Math.min((totalPoints / 100) * 360, 360);
+    
+    let path;
+    if (sweepAngle >= 360) {
+      // 전체 원을 그릴 때는 circle로 그리기
+      path = `M ${center - radius} ${center} A ${radius} ${radius} 0 1 1 ${center + radius} ${center} A ${radius} ${radius} 0 1 1 ${center - radius} ${center}`;
+    } else {
+      path = describeArc(currentAngle, currentAngle + sweepAngle);
+    }
+    
     const color = colors[type] || '#26CBFF'; // 기본 색상
     const segment = {
       type,
