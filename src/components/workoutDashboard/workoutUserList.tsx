@@ -391,13 +391,13 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                     ? `${firstWeek.startDate}-${firstWeek.endDate}` 
                     : `W${firstWeek.weekNumber}`;
                   
-                  const targetUrl = `/user/${challengeId}/workout/${user.userId}/${firstWeek.weekNumber}?label=${weekLabel}`;
+                  const targetUrl = `/${challengeId}/workout/${user.userId}/${firstWeek.weekNumber}?label=${weekLabel}`;
                   console.log('🚀 이동할 URL (카드 클릭):', targetUrl);
                   
                   router.push(targetUrl);
                 } else {
                   // fallback: 기본 사용자 페이지
-                  const fallbackUrl = `/user/${challengeId}/workout/${user.userId}/0`;
+                  const fallbackUrl = `/${challengeId}/workout/${user.userId}/0`;
                   console.log('🚀 이동할 URL (fallback):', fallbackUrl);
                   router.push(fallbackUrl);
                 }
@@ -443,7 +443,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                                   ? `${week.startDate}-${week.endDate}` 
                                   : `W${week.weekNumber}`;
                                 
-                                const targetUrl = `/user/${challengeId}/workout/${user.userId}/${week.weekNumber}?label=${weekLabel}`;
+                                const targetUrl = `/${challengeId}/workout/${user.userId}/${week.weekNumber}?label=${weekLabel}`;
                                 console.log('🚀 이동할 URL:', targetUrl);
                                 
                                 router.push(targetUrl);

@@ -137,7 +137,7 @@ const DailyDietRecordMobile = ({ activities }: any) => {
 
                                   if (data) {
                                     router.push(
-                                      `/user/${activity.challenges.id}/diet/${data.id}/${date}`
+                                      `/${activity.challenges.id}/diet/${data.id}/${date}`
                                     );
                                   }
                                 } catch (error) {

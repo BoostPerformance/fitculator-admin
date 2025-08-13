@@ -131,7 +131,7 @@ export default function MobileChart({
             <div
               onClick={() =>
                 router.push(
-                  `/user/${meal.challenge_id}/diet/${meal.user.id}/${selectedDate}`
+                  `/${meal.challenge_id}/diet/${meal.user.id}/${selectedDate}`
                 )
               }
               className="text-[#6F6F6F] text-1.125-700 pl-[1rem] pb-[1rem]"
@@ -191,7 +191,7 @@ export default function MobileChart({
               className="min-w-[16rem] max-w-[22rem] text-center pt-[2rem]"
               onClick={() =>
                 router.push(
-                  `/user/${meal.challenge_id}/diet/${meal.daily_records.id}/${selectedDate}`
+                  `/${meal.challenge_id}/diet/${meal.daily_records.id}/${selectedDate}`
                 )
               }
             >

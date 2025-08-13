@@ -493,7 +493,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                         }`}
                         onClick={() =>
                           router.push(
-                            `/user/${item.challenge_id}/workout/${item.userId}/${week.weekNumber}?label=${week.label}`
+                            `/${item.challenge_id}/workout/${item.userId}/${week.weekNumber}?label=${week.label}`
                           )
                         }
                       >

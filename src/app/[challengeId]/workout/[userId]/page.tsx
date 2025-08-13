@@ -117,7 +117,7 @@ export default function UserWorkoutDetailPage() {
     return { currentWeekIndex: currentIdx, lastWeekIndex: lastIdx };
   }, [userData]);
 
-  const handleBack = () => router.push(`/user/${params.challengeId}/workout`);
+  const handleBack = () => router.push(`/${params.challengeId}/workout`);
 
   useEffect(() => {
     const weeklyRecordId =

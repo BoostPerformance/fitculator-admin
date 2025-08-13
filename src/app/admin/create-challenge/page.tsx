@@ -150,7 +150,7 @@ export default function CreateChallenge() {
 
       const data = await response.json();
       alert('챌린지가 성공적으로 생성되었습니다!');
-      router.push(`/user/${data.id}`);
+      router.push(`/${data.id}`);
     } catch (error) {
       console.error('Error creating challenge:', error);
       alert('챌린지 생성 중 오류가 발생했습니다.');

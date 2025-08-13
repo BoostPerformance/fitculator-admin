@@ -240,7 +240,7 @@ const DietDetaileTable = ({
                   className="text-[#6F6F6F] hover:bg-[#F4F6FC] cursor-pointer border-gray-13 border-b-[0.1rem]"
                   onClick={() =>
                     router.push(
-                      `/user/${dietDetailTableItem.challenge_id}/diet/${dietDetailTableItem.daily_records.id}/${selectedDate}`
+                      `/${dietDetailTableItem.challenge_id}/diet/${dietDetailTableItem.daily_records.id}/${selectedDate}`
                     )
                   }
                 >

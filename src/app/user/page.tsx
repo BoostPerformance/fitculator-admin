@@ -25,7 +25,7 @@ export default function User() {
               new Date(a.challenges.start_date).getTime()
           );
 
-          await router.push(`/user/${sortedChallenges[0].challenges.id}`);
+          await router.push(`/${sortedChallenges[0].challenges.id}`);
         } else {
           throw new Error('참여 중인 챌린지가 없습니다');
         }

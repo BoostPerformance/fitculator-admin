@@ -178,7 +178,7 @@ export default function MobileWorkoutDetail() {
   }, [challengeId]);
 
   const handleBack = () =>
-    router.push(`/user/${params.challengeId}/workout`);
+    router.push(`/${params.challengeId}/workout`);
 
   if (loading)
     return (
@@ -246,7 +246,7 @@ export default function MobileWorkoutDetail() {
     const newMember = members[newIndex];
     const weekLabel = searchParams.get('label');
     router.push(
-      `/user/${challengeId}/workout/${newMember.service_user_id}/${weekNumberParam}${weekLabel ? `?label=${weekLabel}` : ''}`
+      `/${challengeId}/workout/${newMember.service_user_id}/${weekNumberParam}${weekLabel ? `?label=${weekLabel}` : ''}`
     );
   };
 
@@ -254,7 +254,7 @@ export default function MobileWorkoutDetail() {
   const handleMemberSelect = (selectedUserId: string) => {
     const weekLabel = searchParams.get('label');
     router.push(
-      `/user/${challengeId}/workout/${selectedUserId}/${weekNumberParam}${weekLabel ? `?label=${weekLabel}` : ''}`
+      `/${challengeId}/workout/${selectedUserId}/${weekNumberParam}${weekLabel ? `?label=${weekLabel}` : ''}`
     );
     setShowMemberDropdown(false);
   };
@@ -262,7 +262,7 @@ export default function MobileWorkoutDetail() {
   // 주차 선택
   const handleWeekSelect = (weekNumber: number, label: string) => {
     router.push(
-      `/user/${challengeId}/workout/${userId}/${weekNumber}?label=${label}`
+      `/${challengeId}/workout/${userId}/${weekNumber}?label=${label}`
     );
     setShowWeekDropdown(false);
   };

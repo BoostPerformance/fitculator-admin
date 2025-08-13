@@ -146,7 +146,7 @@ export default function Sidebar({
     setSelectedTitle(challenge.challenges.title);
     onSelectChallenge(challenge.challenges.id);
     // console.log('challenge.challenges.id', challenge.challenges.id);
-    router.push(`/user/${challenge.challenges.id}`);
+    router.push(`/${challenge.challenges.id}`);
   };
 
   const handleSaveNotice = (updatedNotice: {
@@ -331,7 +331,7 @@ export default function Sidebar({
                                             .toISOString()
                                             .split('T')[0]; // YYYY-MM-DD
                                           router.push(
-                                            `/user/${challenge.challenges.id}/diet?date=${today}`
+                                            `/${challenge.challenges.id}/diet?date=${today}`
                                           );
                                         }}
                                       >
@@ -348,7 +348,7 @@ export default function Sidebar({
                                         className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded"
                                         onClick={() => {
                                           router.push(
-                                            `/user/${challenge.challenges.id}/workout`
+                                            `/${challenge.challenges.id}/workout`
                                           );
                                         }}
                                       >
@@ -441,7 +441,7 @@ export default function Sidebar({
                                               .toISOString()
                                               .split('T')[0]; // YYYY-MM-DD
                                             router.push(
-                                              `/user/${challenge.challenges.id}/diet?date=${today}`
+                                              `/${challenge.challenges.id}/diet?date=${today}`
                                             );
                                           }}
                                         >
@@ -458,7 +458,7 @@ export default function Sidebar({
                                           className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded"
                                           onClick={() => {
                                             router.push(
-                                              `/user/${challenge.challenges.id}/workout`
+                                              `/${challenge.challenges.id}/workout`
                                             );
                                           }}
                                         >

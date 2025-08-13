@@ -147,7 +147,7 @@ const MobileWorkout: React.FC = () => {
               onClick={() => {
                 if (week && week.label) {
                   router.push(
-                    `/user/${userData.challenge_id}/workout/${userData.userId}/${weekNumber}?label=${week.label}`
+                    `/${userData.challenge_id}/workout/${userData.userId}/${weekNumber}?label=${week.label}`
                   );
                 }
               }}
@@ -167,7 +167,7 @@ const MobileWorkout: React.FC = () => {
       </div>
       <button
         className="mt-6 text-gray-400 font-bold hover:font-extrabold"
-        onClick={() => router.push(`/user/${challengeId}/workout`)}
+        onClick={() => router.push(`/${challengeId}/workout`)}
       >
         ← 목록으로 돌아가기
       </button>

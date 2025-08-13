@@ -369,10 +369,9 @@ export default function User() {
   }
 
   return (
-    <div className="bg-white-1 dark:bg-blue-4 flex flex-col min-h-screen sm:px-[1rem] md:px-[0.4rem]">
-      <div className="flex gap-[1rem] flex-1 sm:flex-col md:flex-col">
-        <main className="flex-1 overflow-y-auto">
-          <div className="pt-[2rem] pb-[2rem] sm:pt-0">
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-1">
+        <div className="pt-[2rem] pb-[2rem] sm:pt-0">
             <div className="px-4 sm:px-4 relative lg:mb-8 md:mb-4 sm:my-4">
               {/* 챌린지 기간 표시 */}
               {challengeDates && (
@@ -476,8 +475,7 @@ export default function User() {
               />
             </div>
           </div>
-        </main>
-      </div>
+        </div>
       <Footer />
     </div>
   );

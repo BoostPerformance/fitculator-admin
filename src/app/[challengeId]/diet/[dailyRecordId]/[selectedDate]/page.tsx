@@ -378,7 +378,7 @@ export default function SelectedDate() {
 
       if (data) {
         router.push(
-          `/user/${params.challengeId}/diet/${data.id}/${formattedDate}`
+          `/${params.challengeId}/diet/${data.id}/${formattedDate}`
         );
       }
     } catch (error) {
@@ -468,7 +468,7 @@ export default function SelectedDate() {
   };
 
   const handleBack = () => {
-    router.push(`/user/${params.challengeId}/diet?date=${params.selectedDate}`);
+    router.push(`/${params.challengeId}/diet?date=${params.selectedDate}`);
   };
 
   const displayMeal = useMemo(() => {
@@ -580,7 +580,7 @@ export default function SelectedDate() {
 
                       if (data) {
                         router.push(
-                          `/user/${params.challengeId}/diet/${data.id}/${newDate}`
+                          `/${params.challengeId}/diet/${data.id}/${newDate}`
                         );
                       }
                     } catch (error) {

@@ -132,7 +132,7 @@ const TextBox = ({
 
           {button2 && (
             <button
-              className={`${Btn2className} flex flex-row gap-1 justify-center items-center rounded-md text-0.875-400 w-[149px] sm:w-full`}
+              className={`${Btn2className} flex flex-row gap-1 justify-center items-center rounded-md text-0.875-400 w-[149px] p-[0.375rem] sm:w-full`}
               onClick={onClick2}
             >
               {svg2 && (
