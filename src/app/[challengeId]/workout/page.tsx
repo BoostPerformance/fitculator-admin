@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { WorkoutPageSkeleton } from '@/components/layout/skeleton';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useDietData } from '@/components/hooks/useDietData';
+import { useWorkoutDataQuery } from '@/components/hooks/useWorkoutDataQuery';
 import { useResponsive } from '@/components/hooks/useResponsive';
 import { useChallenge } from '@/components/hooks/useChallenges';
 import Title from '@/components/layout/title';
@@ -19,10 +19,31 @@ export default function WorkoutPage() {
 
   const [selectedDate, setSelectedDate] = useState<string>(urlDate || today);
   const {
-    dietRecords,
-    loading: dietLoading,
-    error: dietError,
-  } = useDietData(params.challengeId as string, selectedDate);
+    weeklyChart,
+    leaderboard,
+    todayCount,
+    batchUserData,
+    isLoading: workoutLoading,
+    error: workoutError,
+    hasAnyData,
+    isApiConnected
+  } = useWorkoutDataQuery(params.challengeId as string);
+  
+  // 디버깅을 위한 로그
+  useEffect(() => {
+    console.log('🔍 Workout 페이지 데이터 상태:', {
+      challengeId: params.challengeId,
+      workoutLoading,
+      hasAnyData,
+      isApiConnected,
+      weeklyChart: !!weeklyChart,
+      leaderboard: !!leaderboard,
+      todayCount: !!todayCount,
+      batchUserData: batchUserData?.length || 0,
+      workoutError: workoutError?.message
+    });
+  }, [params.challengeId, workoutLoading, hasAnyData, isApiConnected, weeklyChart, leaderboard, todayCount, batchUserData, workoutError]);
+  
   const { isMobile } = useResponsive();
   const {
     challenges,
@@ -69,7 +90,7 @@ export default function WorkoutPage() {
     return <div className="p-4 text-red-500">{challengeError}</div>;
   }
 
-  if (challengesLoading || dietLoading) {
+  if (challengesLoading || workoutLoading) {
     return <WorkoutPageSkeleton />;
   }
 
@@ -101,10 +122,24 @@ export default function WorkoutPage() {
         </div>
         <Title title="운동 현황" />
       </div>
-      {dietError && <div className="p-4 text-red-500">{dietError}</div>}
+      {workoutError && (
+        <div className="p-4 text-red-500 bg-red-50 rounded-lg mx-4">
+          <h4 className="font-semibold mb-2">운동 데이터 로드 오류</h4>
+          <p>오류 내용: {workoutError.message}</p>
+          <p className="text-sm mt-1">Challenge ID: {params.challengeId}</p>
+        </div>
+      )}
+      
+      {!workoutLoading && !hasAnyData && !workoutError && (
+        <div className="p-4 text-yellow-600 bg-yellow-50 rounded-lg mx-4">
+          <h4 className="font-semibold mb-2">데이터 없음</h4>
+          <p>현재 챌린지에 대한 운동 데이터가 없습니다.</p>
+          <p className="text-sm mt-1">API 연결 상태: {isApiConnected ? '연결됨' : '연결 안됨'}</p>
+        </div>
+      )}
       <div className="mt-6">
         <ExcerciseStatistics
-          processedMeals={dietRecords}
+          processedMeals={[]}
           selectedChallengeId={params.challengeId as string}
           selectedDate={selectedDate}
         />

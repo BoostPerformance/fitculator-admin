@@ -13,48 +13,120 @@ export interface WorkoutDataResponse {
 // API 호출 함수들
 const fetchWeeklyChart = async (challengeId: string) => {
   try {
-    const response = await fetch(
-      `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}`
-    );
+    const url = `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}`;
+    console.log('🔗 Weekly chart API 호출:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Production 환경에서 캐시 이슈 방지
+      cache: 'no-store',
+    });
+    
+    console.log('📡 Weekly chart 응답 상태:', response.status, response.statusText);
+    console.log('🌍 현재 환경:', process.env.NODE_ENV);
+    console.log('🔗 요청 URL:', response.url);
+    
     if (!response.ok) {
-      console.error(`❌ Weekly chart API 오류: ${response.status} ${response.statusText}`);
-      throw new Error(`Weekly chart API failed: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`❌ Weekly chart API 오류:`, {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        error: errorText
+      });
+      throw new Error(`Weekly chart API failed: ${response.status} - ${errorText}`);
     }
-    return response.json();
+    
+    const data = await response.json();
+    console.log('✅ Weekly chart 데이터 수신:', !!data, Object.keys(data || {}));
+    return data;
   } catch (error) {
-    console.error('❌ Weekly chart fetch 실패:', error);
+    console.error('❌ Weekly chart fetch 실패:', {
+      error: error.message,
+      challengeId,
+      environment: process.env.NODE_ENV
+    });
     throw error;
   }
 };
 
 const fetchLeaderboard = async (challengeId: string) => {
   try {
-    const response = await fetch(
-      `/api/workouts/user-detail?type=leaderboard&challengeId=${challengeId}`
-    );
+    const url = `/api/workouts/user-detail?type=leaderboard&challengeId=${challengeId}`;
+    console.log('🔗 Leaderboard API 호출:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    
+    console.log('📡 Leaderboard 응답 상태:', response.status, response.statusText);
+    
     if (!response.ok) {
-      console.error(`❌ Leaderboard API 오류: ${response.status} ${response.statusText}`);
-      throw new Error(`Leaderboard API failed: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`❌ Leaderboard API 오류:`, {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        error: errorText
+      });
+      throw new Error(`Leaderboard API failed: ${response.status} - ${errorText}`);
     }
-    return response.json();
+    
+    const data = await response.json();
+    console.log('✅ Leaderboard 데이터 수신:', !!data, Object.keys(data || {}));
+    return data;
   } catch (error) {
-    console.error('❌ Leaderboard fetch 실패:', error);
+    console.error('❌ Leaderboard fetch 실패:', {
+      error: error.message,
+      challengeId,
+      environment: process.env.NODE_ENV
+    });
     throw error;
   }
 };
 
 const fetchTodayCount = async (challengeId: string) => {
   try {
-    const response = await fetch(
-      `/api/workouts/user-detail?type=today-count&challengeId=${challengeId}`
-    );
+    const url = `/api/workouts/user-detail?type=today-count&challengeId=${challengeId}`;
+    console.log('🔗 Today count API 호출:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    
+    console.log('📡 Today count 응답 상태:', response.status, response.statusText);
+    
     if (!response.ok) {
-      console.error(`❌ Today count API 오류: ${response.status} ${response.statusText}`);
-      throw new Error(`Today count API failed: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`❌ Today count API 오류:`, {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        error: errorText
+      });
+      throw new Error(`Today count API failed: ${response.status} - ${errorText}`);
     }
-    return response.json();
+    
+    const data = await response.json();
+    console.log('✅ Today count 데이터 수신:', !!data, Object.keys(data || {}));
+    return data;
   } catch (error) {
-    console.error('❌ Today count fetch 실패:', error);
+    console.error('❌ Today count fetch 실패:', {
+      error: error.message,
+      challengeId,
+      environment: process.env.NODE_ENV
+    });
     throw error;
   }
 };
@@ -83,13 +155,15 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'weekly-chart', challengeId],
     queryFn: () => fetchWeeklyChart(challengeId),
     enabled: !!challengeId,
-    staleTime: 5 * 60 * 1000, // 5분
-    gcTime: 10 * 60 * 1000, // 10분 (이전 cacheTime)
+    staleTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000, // Production: 2분, Development: 5분
+    gcTime: process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 10 * 60 * 1000, // Production: 5분, Development: 10분
     retry: (failureCount, error) => {
       console.log(`🔄 Weekly chart 재시도 ${failureCount}회:`, error);
-      return failureCount < 2; // 최대 2번 재시도
+      return failureCount < 3; // Production 환경에서 더 많은 재시도
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프
+    refetchOnMount: process.env.NODE_ENV === 'production', // Production에서 항상 새로 가져오기
+    refetchOnWindowFocus: false, // 윈도우 포커스 시 재요청 비활성화
   });
 
   // 2. Leaderboard 데이터
@@ -97,13 +171,15 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'leaderboard', challengeId],
     queryFn: () => fetchLeaderboard(challengeId),
     enabled: !!challengeId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000,
+    gcTime: process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 10 * 60 * 1000,
     retry: (failureCount, error) => {
       console.log(`🔄 Leaderboard 재시도 ${failureCount}회:`, error);
-      return failureCount < 2;
+      return failureCount < 3;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnMount: process.env.NODE_ENV === 'production',
+    refetchOnWindowFocus: false,
   });
 
   // 3. Today Count 데이터
@@ -111,13 +187,15 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'today-count', challengeId],
     queryFn: () => fetchTodayCount(challengeId),
     enabled: !!challengeId,
-    staleTime: 1 * 60 * 1000, // 1분 (더 자주 업데이트)
-    gcTime: 5 * 60 * 1000,
+    staleTime: process.env.NODE_ENV === 'production' ? 30 * 1000 : 1 * 60 * 1000, // Production: 30초, Development: 1분
+    gcTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000, // Production: 2분, Development: 5분
     retry: (failureCount, error) => {
       console.log(`🔄 Today count 재시도 ${failureCount}회:`, error);
-      return failureCount < 2;
+      return failureCount < 3;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnMount: process.env.NODE_ENV === 'production',
+    refetchOnWindowFocus: false,
   });
 
   // 4. Batch User Data - 임시로 단일 요청으로 변경 (성능 문제 해결)
@@ -126,16 +204,45 @@ export const useWorkoutDataQuery = (challengeId: string) => {
   const batchUserDataQuery = useQuery({
     queryKey: ['workout', 'batch-user-data-single', challengeId, userIds.sort().join(',')],
     queryFn: async () => {
-      if (!userIds.length) return [];
-      const response = await fetch(
-        `/api/workouts/user-detail?type=batch-user-data&userIds=${userIds.join(',')}&challengeId=${challengeId}`
-      );
-      if (!response.ok) throw new Error('Failed to fetch batch user data');
-      return response.json();
+      if (!userIds.length) {
+        console.log('🚫 Batch user data: userIds가 비어있음');
+        return [];
+      }
+      
+      const url = `/api/workouts/user-detail?type=batch-user-data&userIds=${userIds.join(',')}&challengeId=${challengeId}`;
+      console.log('🔗 Batch user data API 호출:', url, `(${userIds.length}명)`);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      });
+      
+      console.log('📡 Batch user data 응답 상태:', response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Batch user data API 오류:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url,
+          error: errorText
+        });
+        throw new Error(`Failed to fetch batch user data: ${response.status} - ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Batch user data 수신:', Array.isArray(data) ? data.length : 'Invalid data', '개 사용자');
+      return data;
     },
     enabled: !!challengeId && userIds.length > 0 && userIds.length <= 50, // 50명 이하일 때만
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000,
+    gcTime: process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 10 * 60 * 1000,
+    refetchOnMount: process.env.NODE_ENV === 'production',
+    refetchOnWindowFocus: false,
+    retry: 3,
   });
   
   const batchUserData = batchUserDataQuery.data || [];
@@ -159,11 +266,43 @@ export const useWorkoutDataQuery = (challengeId: string) => {
   const isApiConnected = !error && (weeklyChartQuery.data || leaderboardQuery.data || todayCountQuery.data);
   const hasAnyData = weeklyChartQuery.data || leaderboardQuery.data || todayCountQuery.data || batchUserData?.length > 0;
   
-  // 연결 상태 로깅
+  // 연결 상태 로깅 - Production 환경에서 더 상세히
   if (error) {
-    console.warn('⚠️ API 연결 문제 감지:', error);
+    console.error('⚠️ API 연결 문제 감지:', {
+      error: error.message,
+      challengeId,
+      environment: process.env.NODE_ENV,
+      queries: {
+        weeklyChart: weeklyChartQuery.status,
+        leaderboard: leaderboardQuery.status,
+        todayCount: todayCountQuery.status,
+        batchUserData: batchUserDataQuery.status,
+      }
+    });
   } else if (hasAnyData) {
-    console.log('✅ API 연결 정상, 데이터 로드됨');
+    console.log('✅ API 연결 정상, 데이터 로드됨:', {
+      challengeId,
+      environment: process.env.NODE_ENV,
+      data: {
+        weeklyChart: !!weeklyChartQuery.data,
+        leaderboard: !!leaderboardQuery.data,
+        todayCount: !!todayCountQuery.data,
+        batchUserData: batchUserData?.length || 0,
+      }
+    });
+  } else if (!isLoading) {
+    console.warn('⚠️ 로딩 완료되었지만 데이터가 없음:', {
+      challengeId,
+      environment: process.env.NODE_ENV,
+      isLoading,
+      hasAnyData,
+      queries: {
+        weeklyChart: weeklyChartQuery.status,
+        leaderboard: leaderboardQuery.status,
+        todayCount: todayCountQuery.status,
+        batchUserData: batchUserDataQuery.status,
+      }
+    });
   }
 
   return {
