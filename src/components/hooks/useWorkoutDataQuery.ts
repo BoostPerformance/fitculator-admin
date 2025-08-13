@@ -78,7 +78,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
   const userIds = weeklyChartQuery.data?.users?.map((user: any) => user.id) || [];
   
   const batchUserDataQuery = useQuery({
-    queryKey: ['workout', 'batch-user-data', challengeId, userIds.join(',')],
+    queryKey: ['workout', 'batch-user-data', challengeId, userIds.sort().join(',')],
     queryFn: () => fetchBatchUserData(userIds, challengeId),
     enabled: !!challengeId && userIds.length > 0,
     staleTime: 5 * 60 * 1000,

@@ -50,7 +50,7 @@ export default function WorkoutPage() {
     loadChallenges();
   }, [fetchChallenges]);
 
-  // API 연결 확인
+  // API 연결 확인은 한 번만 수행
   useEffect(() => {
     const checkApiConnection = async () => {
       try {
@@ -63,8 +63,12 @@ export default function WorkoutPage() {
         setIsApiConnected(false);
       }
     };
-    checkApiConnection();
-  }, []);
+    
+    // API 연결 상태가 아직 확인되지 않은 경우에만 확인
+    if (isApiConnected === false) {
+      checkApiConnection();
+    }
+  }, []); // 빈 의존성 배열로 한 번만 실행
 
   useEffect(() => {
     if (urlDate) {
