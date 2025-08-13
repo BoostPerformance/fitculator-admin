@@ -7,6 +7,66 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const dailyRecordId = searchParams.get('daily_record_id');
+
+    if (!dailyRecordId) {
+      return NextResponse.json(
+        { error: 'daily_record_id is required' },
+        { status: 400 }
+      );
+    }
+
+    // 1. daily_record_id로 participant_id 조회
+    const { data: dailyRecord, error: dailyRecordError } = await supabase
+      .from('daily_records')
+      .select('participant_id')
+      .eq('id', dailyRecordId)
+      .single();
+
+    if (dailyRecordError) throw dailyRecordError;
+    if (!dailyRecord) throw new Error('Daily record not found');
+
+    // 2. participant_id로 challenge_id 조회
+    const { data: participantData, error: participantError } = await supabase
+      .from('challenge_participants')
+      .select('challenge_id')
+      .eq('id', dailyRecord.participant_id)
+      .single();
+
+    if (participantError) throw participantError;
+    if (!participantData) throw new Error('Challenge participant not found');
+
+    // 3. 피드백 조회
+    const { data: feedback, error: feedbackError } = await supabase
+      .from('feedbacks')
+      .select('*')
+      .eq('daily_record_id', dailyRecordId)
+      .single();
+
+    if (feedbackError && feedbackError.code !== 'PGRST116') throw feedbackError;
+
+    // 4. 응답에 challenge_id 포함
+    const responseData = {
+      ...feedback,
+      challenge_id: participantData.challenge_id,
+    };
+
+    return NextResponse.json({ success: true, data: responseData });
+  } catch (error) {
+    console.error('[Feedback GET Error]:', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch feedback',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession();

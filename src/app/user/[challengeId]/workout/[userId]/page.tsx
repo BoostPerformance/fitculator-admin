@@ -126,7 +126,7 @@ export default function UserWorkoutDetailPage() {
 
     const fetchCoachFeedback = async () => {
       const res = await fetch(
-        `/api/workout-feedback?workout_weekly_records_id=${weeklyRecordId}`
+        `/api/workout-feedback?workout_weekly_records_id=${weeklyRecordId}&challenge_id=${challengeId}`
       );
       const data = await res.json();
       if (res.ok && data.data) {

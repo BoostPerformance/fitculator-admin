@@ -5,6 +5,10 @@ interface FeedbackData {
   coach_feedback: string;
 }
 
+interface FeedbackWithChallengeId extends FeedbackData {
+  challenge_id: string;
+}
+
 export const useFeedback = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,8 +45,37 @@ export const useFeedback = () => {
     }
   };
 
+  const getFeedback = async (dailyRecordId: string): Promise<FeedbackWithChallengeId | null> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/coach-feedback?daily_record_id=${dailyRecordId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch feedback');
+      }
+
+      const result = await response.json();
+      return result.data;
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch feedback'
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     saveFeedback,
+    getFeedback,
     isLoading,
     error,
   };

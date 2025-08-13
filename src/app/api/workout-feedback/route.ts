@@ -114,6 +114,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const workoutWeeklyId = searchParams.get('workout_weekly_records_id');
+    const challengeId = searchParams.get('challenge_id');
 
     if (!workoutWeeklyId) {
       return NextResponse.json(
@@ -122,10 +123,18 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    if (!challengeId) {
+      return NextResponse.json(
+        { error: 'challenge_id 쿼리 필요' },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase
       .from('workout_feedbacks')
       .select()
       .eq('workout_weekly_records_id', workoutWeeklyId)
+      .eq('challenge_id', challengeId)
       .single();
 
     if (error && error.code !== 'PGRST116') {

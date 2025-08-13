@@ -572,6 +572,7 @@ export async function getUserWorkoutData(
           'id, ai_feedback, coach_feedback, coach_memo, coach_id, created_at'
         )
         .eq('workout_weekly_records_id', record.id)
+        .eq('challenge_id', challengeId)
         .maybeSingle();
 
       if (feedbackError) {
@@ -785,6 +786,7 @@ async function getBatchUserWorkoutData(
           .from('workout_feedbacks')
           .select('id, ai_feedback, coach_feedback, coach_memo, coach_id, created_at')
           .eq('workout_weekly_records_id', record.id)
+          .eq('challenge_id', challengeId)
           .maybeSingle();
 
         let coach = null;
