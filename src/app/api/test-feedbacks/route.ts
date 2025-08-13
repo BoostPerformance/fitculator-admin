@@ -90,7 +90,10 @@ export async function GET(request: Request) {
 
     // console.log(`조회할 daily_record_id 개수: ${dailyRecordIds.length}`);
     if (dailyRecordIds.length === 0) {
-      console.log('일일 기록이 없어 피드백도 없습니다.');
+      // 개발 환경에서만 로그 출력
+      // if (process.env.NODE_ENV === 'development') {
+      //   console.log(`📝 참가자 ${participantId}: 일일 기록 없음`);
+      // }
       return NextResponse.json({
         participantId: participantId,
         challengePeriod: {

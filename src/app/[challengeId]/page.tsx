@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Footer from '@/components/layout/footer';
 import TrafficSourceChart from '@/components/graph/trafficSourceChart';
 import DailyDietRecord from '@/components/graph/dailyDietRecord';
@@ -140,23 +140,10 @@ export default function User() {
     },
   })) || [];
 
-  // 피드백 데이터 가져오기
+  // 피드백 데이터 가져오기 - 배치 처리로 최적화
   const fetchFeedbackData = async (challengeId: string) => {
     try {
       setIsLoadingFeedbacks(true);
-
-      // 챌린지 전체 피드백 통계 가져오기
-      // const statsResponse = await fetch(
-      //   `/api/challenge-feedback-counts?challengeId=${challengeId}`
-      // );
-      // if (statsResponse.ok) {
-      //   const statsData = await statsResponse.json();
-      //   setTotalFeedbackStats({
-      //     totalFeedbacks: statsData.totalFeedbacks || 0,
-      //     totalParticipants: statsData.totalParticipants || 0,
-      //     feedbackPercentage: statsData.feedbackPercentage || 0,
-      //   });
-      // }
 
       // 챌린지 참가자 목록 가져오기
       const participantsResponse = await fetch(
@@ -169,31 +156,39 @@ export default function User() {
       const participantsData = await participantsResponse.json();
       const participants = participantsData.data;
 
-      // 참가자별 피드백 데이터 가져오기
+      // 참가자별 피드백 데이터를 배치로 가져오기 (최대 5개씩)
       const feedbackCounts: Record<string, number> = {};
+      const batchSize = 5;
+      
+      for (let i = 0; i < participants.length; i += batchSize) {
+        const batch = participants.slice(i, i + batchSize);
+        
+        await Promise.all(
+          batch.map(async (participant: any) => {
+            if (!participant.id) return;
 
-      await Promise.all(
-        participants.map(async (participant: any) => {
-          if (!participant.id) return;
-
-          try {
-            const feedbackResponse = await fetch(
-              `/api/test-feedbacks?participantId=${participant.id}`
-            );
-            if (feedbackResponse.ok) {
-              const data = await feedbackResponse.json();
-              feedbackCounts[participant.id] =
-                data.dailyRecordsWithFeedback || 0;
+            try {
+              const feedbackResponse = await fetch(
+                `/api/test-feedbacks?participantId=${participant.id}`
+              );
+              if (feedbackResponse.ok) {
+                const data = await feedbackResponse.json();
+                feedbackCounts[participant.id] = data.dailyRecordsWithFeedback || 0;
+              }
+            } catch (error) {
+              if (process.env.NODE_ENV === 'development') {
+                console.error(`Error fetching feedback for participant ${participant.id}:`, error);
+              }
+              feedbackCounts[participant.id] = 0;
             }
-          } catch (error) {
-            console.error(
-              `Error fetching feedback for participant ${participant.id}:`,
-              error
-            );
-            feedbackCounts[participant.id] = 0;
-          }
-        })
-      );
+          })
+        );
+        
+        // 배치 간 지연 (서버 부하 방지)
+        if (i + batchSize < participants.length) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
 
       setFeedbackData(feedbackCounts);
     } catch (error) {
@@ -258,7 +253,28 @@ export default function User() {
     return () => window.removeEventListener('resize', handleResize);
   }, [params.challengeId]);
 
-  const fetchDailyRecords = async (pageNum: number) => {
+  // 중복 제거를 위한 캐시 메모리 (컴포넌트 외부에 선언하여 전역으로 관리)
+  const dailyRecordsCache = useRef(new Map<string, any>());
+
+  // 컴포넌트 마운트 시 캐시 초기화
+  useEffect(() => {
+    dailyRecordsCache.current.clear();
+  }, []); // 컴포넌트 최초 마운트 시에만 실행
+
+  const fetchDailyRecords = async (pageNum: number, loadAll: boolean = false) => {
+    const cacheKey = `${selectedChallengeId}_${pageNum}_${loadAll}`;
+    
+    // 캐시된 데이터가 있으면 사용
+    if (dailyRecordsCache.current.has(cacheKey)) {
+      const cachedData = dailyRecordsCache.current.get(cacheKey);
+      if (pageNum === 1) {
+        setDailyRecords(cachedData);
+      } else {
+        setDailyRecords((prev) => [...prev, ...cachedData]);
+      }
+      return cachedData.length > 0;
+    }
+
     try {
       setLoading(true);
       const url = new URL(
@@ -266,7 +282,8 @@ export default function User() {
         window.location.origin
       );
       url.searchParams.append('page', pageNum.toString());
-      url.searchParams.append('limit', '30');
+      // 모든 멤버를 가져오기 위해 limit을 크게 설정
+      url.searchParams.append('limit', loadAll ? '100' : '30');
       url.searchParams.append('with_records', 'true');
 
       if (selectedChallengeId) {
@@ -278,10 +295,19 @@ export default function User() {
         throw new Error('Failed to fetch daily-records data');
       }
       const data = await response.json();
+      
+      // 캐시에 저장 (useRef 사용)
+      dailyRecordsCache.current.set(cacheKey, data.data);
+
       if (pageNum === 1) {
         setDailyRecords(data.data);
       } else {
         setDailyRecords((prev) => [...prev, ...data.data]);
+      }
+
+      // loadAll이 true이고 더 많은 데이터가 있으면 재귀적으로 호출
+      if (loadAll && data.data.length === 100) {
+        await fetchDailyRecords(pageNum + 1, true);
       }
 
       return data.data.length > 0;
@@ -310,10 +336,14 @@ export default function User() {
   // 챌린지 ID가 변경될 때마다 데이터 업데이트
   useEffect(() => {
     if (selectedChallengeId) {
+      // 챌린지가 변경되면 캐시 초기화
+      dailyRecordsCache.current.clear();
+      
       // 데이터 불러오기
       fetchTodayDietUploads(selectedChallengeId);
       fetchFeedbackData(selectedChallengeId);
-      fetchDailyRecords(1);
+      // 모든 멤버를 가져오기 위해 loadAll을 true로 설정
+      fetchDailyRecords(1, true);
 
       // React Query hook으로 운동 데이터 가져오기 최적화됨
     }
@@ -443,7 +473,7 @@ export default function User() {
                 <>
                   <TrafficSourceChart challengeId={selectedChallengeId} />
                   <DailyDietRecord activities={filteredDailyRecordsbyId} />
-                  {/* <DailyWorkoutRecord activities={filteredDailyRecordsbyId} /> */}
+                  <DailyWorkoutRecord activities={filteredDailyRecordsbyId} />
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
                   <WeeklyWorkoutChart challengeId={selectedChallengeId} />
                 </>

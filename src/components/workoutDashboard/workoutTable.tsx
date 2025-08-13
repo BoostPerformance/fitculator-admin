@@ -28,10 +28,10 @@ const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
 
   const weeks: WeekInfo[] = [];
   let weekNumber = 0;
-  
+
   // Get the day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
   const startDay = startDate.getDay();
-  
+
   // Calculate the Monday of the week containing the start date
   let currentStart = new Date(startDate);
   if (startDay !== 1) {
@@ -39,15 +39,15 @@ const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
     const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
     currentStart.setDate(currentStart.getDate() - daysSinceMonday);
   }
-  
+
   // If start date is not Monday, create W0 from that week's Monday
   if (startDay !== 1) {
     const currentEnd = new Date(currentStart);
     currentEnd.setDate(currentEnd.getDate() + 6); // Sunday
-    
+
     const formattedStart = formatDateToMMDD(currentStart);
     const formattedEnd = formatDateToMMDD(currentEnd);
-    
+
     weeks.push({
       label: `${formattedStart}-${formattedEnd}`,
       startDate: new Date(currentStart),
@@ -55,30 +55,30 @@ const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
       weekNumber: weekNumber,
     });
     weekNumber++;
-    
+
     // Move to next Monday for W1
     currentStart = new Date(currentEnd);
     currentStart.setDate(currentStart.getDate() + 1);
   }
-  
+
   // Generate full weeks starting from Monday
   while (currentStart < endDate) {
     const currentEnd = new Date(currentStart);
     currentEnd.setDate(currentEnd.getDate() + 6); // Sunday (7-day week)
-    
+
     // Don't exceed the end date
     const actualEnd = currentEnd > endDate ? endDate : currentEnd;
-    
+
     const formattedStart = formatDateToMMDD(currentStart);
     const formattedEnd = formatDateToMMDD(actualEnd);
-    
+
     weeks.push({
       label: `${formattedStart}-${formattedEnd}`,
       startDate: new Date(currentStart),
       endDate: new Date(actualEnd),
       weekNumber: weekNumber,
     });
-    
+
     // Move to next Monday
     currentStart = new Date(currentEnd);
     currentStart.setDate(currentStart.getDate() + 1);
@@ -96,7 +96,7 @@ const isCurrentWeek = (startDate: Date, endDate: Date): boolean => {
   start.setHours(0, 0, 0, 0);
   const end = new Date(endDate);
   end.setHours(23, 59, 59, 999);
-  
+
   return today >= start && today <= end;
 };
 
@@ -112,9 +112,16 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastRowRef = useRef(null);
   const router = useRouter();
-  
+
   // React Query 훅 사용으로 API 호출 최적화
-  const { weeklyChart, leaderboard, todayCount, batchUserData, isLoading, error } = useWorkoutDataQuery(challengeId);
+  const {
+    weeklyChart,
+    leaderboard,
+    todayCount,
+    batchUserData,
+    isLoading,
+    error,
+  } = useWorkoutDataQuery(challengeId);
 
   // Process data when React Query data changes
   const processWorkoutData = useCallback(async () => {
@@ -175,132 +182,106 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
     });
 
     const items = users.map((user) => {
-        // batchUserData에서 해당 사용자 데이터 찾기
-        const userStatsData = batchUserData?.find((data: any) => data.userId === user.id) || { weeklyRecords: [] };
-        
-        // 데이터 연결 확인을 위한 로그 (첫 번째 사용자만)
-        if (user.id === users[0]?.id) {
-          console.log('첫 번째 사용자 데이터:', {
-            userId: user.id,
-            userName: user.name,
-            weeklyRecordsCount: userStatsData.weeklyRecords?.length || 0,
-            generatedWeeksCount: generatedWeeks.length,
-            weeklyRecords: userStatsData.weeklyRecords
-          });
-        }
-        
+      // batchUserData에서 해당 사용자 데이터 찾기
+      const userStatsData = batchUserData?.find(
+        (data: any) => data.userId === user.id
+      ) || { weeklyRecords: [] };
 
-        const weeksCount = generatedWeeks.length || 1;
+      // 데이터 연결 확인을 위한 로그 (첫 번째 사용자만)
+      if (user.id === users[0]?.id) {
+        console.log('첫 번째 사용자 데이터:', {
+          userId: user.id,
+          userName: user.name,
+          weeklyRecordsCount: userStatsData.weeklyRecords?.length || 0,
+          generatedWeeksCount: generatedWeeks.length,
+          weeklyRecords: userStatsData.weeklyRecords,
+        });
+      }
 
-        const userWeeklyData = generatedWeeks.map((week, index) => {
-          const userCardioInWeek = cardioData.filter((item) => {
-            const workoutDate = new Date(item.date);
-            return (
-              item.userId === user.id &&
-              workoutDate >= week.startDate &&
-              workoutDate <= week.endDate
-            );
-          });
+      const weeksCount = generatedWeeks.length || 1;
 
-          const userStrengthInWeek = strengthData.filter((item) => {
-            const workoutDate = new Date(item.date);
-            return (
-              item.userId === user.id &&
-              workoutDate >= week.startDate &&
-              workoutDate <= week.endDate
-            );
-          });
-
-          const strengthSessions = userStrengthInWeek.length;
-
-          const startDate = formatDateToMMDD(week.startDate);
-          const endDate = formatDateToMMDD(week.endDate);
-
-          // 해당 주차의 weeklyRecord 찾기 (W0 포함 개선된 매핑)
-          const weekRecord = userStatsData.weeklyRecords?.find(
-            (record: any) => {
-              const recordStartDate = new Date(record.start_date);
-              const recordEndDate = new Date(record.end_date);
-              
-              // W0의 경우 특별 처리: W0 기간과 실제로 겹치는 기록 찾기
-              if (week.weekNumber === 0) {
-                // W0 기간(월요일~일요일)과 record 기간이 겹치는지 확인
-                const isW0Record = (
-                  recordStartDate <= week.endDate && 
-                  recordEndDate >= week.startDate
-                );
-                
-                console.log(`W0 매핑 확인:`, {
-                  weekStart: week.startDate,
-                  weekEnd: week.endDate,
-                  recordStart: recordStartDate,
-                  recordEnd: recordEndDate,
-                  isW0Record,
-                  cardio_points_total: record.cardio_points_total
-                });
-                
-                return isW0Record;
-              }
-              
-              // W1 이후는 기존 로직 사용
-              const isOverlapping = (
-                recordStartDate <= week.endDate && 
-                recordEndDate >= week.startDate
-              );
-              
-              // W1 디버깅을 위한 로그 (임시)
-              if (week.weekNumber === 1) {
-                console.log(`W1 매핑 확인:`, {
-                  weekStart: week.startDate,
-                  weekEnd: week.endDate,
-                  recordStart: recordStartDate,
-                  recordEnd: recordEndDate,
-                  isOverlapping,
-                  cardio_points_total: record.cardio_points_total
-                });
-              }
-              
-              return isOverlapping;
-            }
+      const userWeeklyData = generatedWeeks.map((week, index) => {
+        const userCardioInWeek = cardioData.filter((item) => {
+          const workoutDate = new Date(item.date);
+          return (
+            item.userId === user.id &&
+            workoutDate >= week.startDate &&
+            workoutDate <= week.endDate
           );
-
-          const totalCardioPoints = weekRecord?.cardio_points_total || 0;
-          const actualPercentage = Math.round(totalCardioPoints * 10) / 10;
-
-          return {
-            weekNumber: week.weekNumber,
-            startDate,
-            endDate,
-            aerobicPercentage: totalCardioPoints,
-            actualPercentage,
-            strengthSessions,
-            label: week.label,
-          };
         });
 
-        const lastWeek = userWeeklyData.at(-1);
-        const isActiveThisWeek =
-          userWeeklyData.length > 0 &&
-          ((lastWeek?.aerobicPercentage ?? 0) > 0 ||
-            (lastWeek?.strengthSessions ?? 0) > 0);
+        const userStrengthInWeek = strengthData.filter((item) => {
+          const workoutDate = new Date(item.date);
+          return (
+            item.userId === user.id &&
+            workoutDate >= week.startDate &&
+            workoutDate <= week.endDate
+          );
+        });
 
-        const totalAchievement = userWeeklyData.reduce(
-          (sum, week) => sum + week.aerobicPercentage,
-          0
-        );
+        const startDate = formatDateToMMDD(week.startDate);
+        const endDate = formatDateToMMDD(week.endDate);
+
+        // 해당 주차의 weeklyRecord 찾기 (W0 포함 개선된 매핑)
+        const weekRecord = userStatsData.weeklyRecords?.find((record: any) => {
+          const recordStartDate = new Date(record.start_date);
+          const recordEndDate = new Date(record.end_date);
+
+          // W0의 경우 특별 처리: W0 기간과 실제로 겹치는 기록 찾기
+          if (week.weekNumber === 0) {
+            // W0 기간(월요일~일요일)과 record 기간이 겹치는지 확인
+            const isW0Record =
+              recordStartDate <= week.endDate &&
+              recordEndDate >= week.startDate;
+
+            return isW0Record;
+          }
+
+          // W1 이후는 기존 로직 사용
+          const isOverlapping =
+            recordStartDate <= week.endDate && recordEndDate >= week.startDate;
+
+          return isOverlapping;
+        });
+
+        const totalCardioPoints = weekRecord?.cardio_points_total || 0;
+        const strengthSessions = weekRecord?.strength_sessions_count || 0;
+        const actualPercentage = Math.round(totalCardioPoints * 10) / 10;
 
         return {
-          id: user.id,
-          challenge_id: challengeId || 'default-challenge',
-          userId: user.id,
-          userName: user.username || '-',
-          name: user.name || '유저',
-          weeklyData: userWeeklyData,
-          hasUploaded: userPointsMap[user.id] > 0,
-          activeThisWeek: isActiveThisWeek,
-          totalAchievements: totalAchievement,
+          weekNumber: week.weekNumber,
+          startDate,
+          endDate,
+          aerobicPercentage: totalCardioPoints,
+          actualPercentage,
+          strengthSessions,
+          label: week.label,
         };
       });
+
+      const lastWeek = userWeeklyData.at(-1);
+      const isActiveThisWeek =
+        userWeeklyData.length > 0 &&
+        ((lastWeek?.aerobicPercentage ?? 0) > 0 ||
+          (lastWeek?.strengthSessions ?? 0) > 0);
+
+      const totalAchievement = userWeeklyData.reduce(
+        (sum, week) => sum + week.aerobicPercentage,
+        0
+      );
+
+      return {
+        id: user.id,
+        challenge_id: challengeId || 'default-challenge',
+        userId: user.id,
+        userName: user.username || '-',
+        name: user.name || '유저',
+        weeklyData: userWeeklyData,
+        hasUploaded: userPointsMap[user.id] > 0,
+        activeThisWeek: isActiveThisWeek,
+        totalAchievements: totalAchievement,
+      };
+    });
 
     return items.sort((a, b) => {
       const aTotal = a.weeklyData.reduce(
@@ -440,19 +421,27 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
               {weekInfo.map((week, index) => {
                 const isCurrent = isCurrentWeek(week.startDate, week.endDate);
                 return (
-                  <th 
-                    key={index} 
+                  <th
+                    key={index}
                     className={`w-[10%] p-3 text-center ${
-                      isCurrent ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200' : ''
+                      isCurrent
+                        ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200'
+                        : ''
                     }`}
                   >
                     <div className="text-sm">
-                      <div className={`font-semibold ${isCurrent ? 'text-blue-600' : ''}`}>
+                      <div
+                        className={`font-semibold ${
+                          isCurrent ? 'text-blue-600' : ''
+                        }`}
+                      >
                         W{week.weekNumber}
                       </div>
-                      <div className={`text-[10px] font-normal mt-1 ${
-                        isCurrent ? 'text-blue-500' : 'text-gray-500'
-                      }`}>
+                      <div
+                        className={`text-[10px] font-normal mt-1 ${
+                          isCurrent ? 'text-blue-500' : 'text-gray-500'
+                        }`}
+                      >
                         {typeof week.label === 'string'
                           ? week.label
                           : `${week.startDate}-${week.endDate}`}
@@ -472,9 +461,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                   ref={index === workoutItems.length - 1 ? lastRowRef : null}
                   className="border-b border-gray-200 hover:bg-[#F4F6FC]"
                 >
-                  <td className="p-3 text-center text-gray-500">
-                    {index + 1}
-                  </td>
+                  <td className="p-3 text-center text-gray-500">{index + 1}</td>
                   <td className="p-3">
                     <div className="text-black dark:text-black">
                       {item.userName || '-'}
@@ -483,13 +470,20 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                   <td className="p-3 text-black">{item.name}</td>
                   {item.weeklyData.map((week, weekIndex) => {
                     const currentWeekInfo = weekInfo[weekIndex];
-                    const isCurrent = currentWeekInfo ? isCurrentWeek(currentWeekInfo.startDate, currentWeekInfo.endDate) : false;
-                    
+                    const isCurrent = currentWeekInfo
+                      ? isCurrentWeek(
+                          currentWeekInfo.startDate,
+                          currentWeekInfo.endDate
+                        )
+                      : false;
+
                     return (
                       <td
                         key={weekIndex}
                         className={`p-3 text-center cursor-pointer ${
-                          isCurrent ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200' : ''
+                          isCurrent
+                            ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200'
+                            : ''
                         }`}
                         onClick={() =>
                           router.push(
@@ -497,14 +491,24 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                           )
                         }
                       >
-                      <div className="flex flex-col">
-                        <span className={week.aerobicPercentage === 0 ? "text-gray-400" : "text-blue-500"}>
-                          {week.aerobicPercentage === 0 ? '-' : `${week.aerobicPercentage.toFixed(1)}%`}
-                        </span>
-                        <span className="text-gray-400 text-sm">
-                          {week.strengthSessions === 0 ? '-' : `${week.strengthSessions}회`}
-                        </span>
-                      </div>
+                        <div className="flex flex-col">
+                          <span
+                            className={
+                              week.aerobicPercentage === 0
+                                ? 'text-gray-400'
+                                : 'text-blue-500'
+                            }
+                          >
+                            {week.aerobicPercentage === 0
+                              ? '-'
+                              : `${week.aerobicPercentage.toFixed(1)}%`}
+                          </span>
+                          <span className="text-gray-400 text-sm">
+                            {week.strengthSessions === 0
+                              ? '-'
+                              : `${week.strengthSessions}`}
+                          </span>
+                        </div>
                       </td>
                     );
                   })}
@@ -515,13 +519,20 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                   ].map((_, i) => {
                     const emptyWeekIndex = item.weeklyData.length + i;
                     const currentWeekInfo = weekInfo[emptyWeekIndex];
-                    const isCurrent = currentWeekInfo ? isCurrentWeek(currentWeekInfo.startDate, currentWeekInfo.endDate) : false;
-                    
+                    const isCurrent = currentWeekInfo
+                      ? isCurrentWeek(
+                          currentWeekInfo.startDate,
+                          currentWeekInfo.endDate
+                        )
+                      : false;
+
                     return (
-                      <td 
-                        key={`empty-${i}`} 
+                      <td
+                        key={`empty-${i}`}
                         className={`p-3 text-center ${
-                          isCurrent ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200' : ''
+                          isCurrent
+                            ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200'
+                            : ''
                         }`}
                       >
                         -

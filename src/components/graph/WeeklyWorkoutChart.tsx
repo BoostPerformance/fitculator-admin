@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
+import { logger, handleApiError } from '@/utils/logger';
 
 // 타입 정의
 interface WeeklyWorkoutChartProps {
@@ -19,6 +20,7 @@ interface WeeklyWorkoutChartProps {
 interface User {
   id: string;
   name: string;
+  username?: string;
 }
 
 interface ChartDataPoint {
@@ -26,9 +28,8 @@ interface ChartDataPoint {
   y: number; // 운동량 값
   user: string; // 사용자 이름
   userId: string; // 사용자 ID
-  dayOfMonth?: number; // 날짜 (1-31)
+  weekNumber: string; // W0, W1, W2...
   position?: number; // 주 내에서의 상대적 위치 (0.0-1.0)
-  timestamp?: string; // 타임스탬프 (ISO 형식)
 }
 
 // 요일 레이블 정의
@@ -40,12 +41,8 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
 }) => {
   const [cardioData, setCardioData] = useState<ChartDataPoint[]>([]);
   const [strengthData, setStrengthData] = useState<ChartDataPoint[]>([]);
-  const [weeklyCardioData, setWeeklyCardioData] = useState<ChartDataPoint[]>(
-    []
-  );
-  const [weeklyStrengthData, setWeeklyStrengthData] = useState<
-    ChartDataPoint[]
-  >([]);
+  const [weeklyCardioData, setWeeklyCardioData] = useState<ChartDataPoint[]>([]);
+  const [weeklyStrengthData, setWeeklyStrengthData] = useState<ChartDataPoint[]>([]);
   const [userColors, setUserColors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,36 +50,11 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
 
   // 색상 팔레트 정의
   const colors = [
-    '#FF6B6B',
-    '#FF5252',
-    '#FF7F7F',
-    '#6B66FF',
-    '#5151FF',
-    '#8A85FF',
-    '#66D7FF',
-    '#33CCFF',
-    '#99E2FF',
-    '#66FF8D',
-    '#33FF66',
-    '#99FFB3',
-    '#FFD166',
-    '#FFCC33',
-    '#FFDB99',
-    '#FF66D4',
-    '#FF33CC',
-    '#FF99E0',
-    '#66FFE3',
-    '#33FFDD',
-    '#99FFEC',
-    '#ADFF66',
-    '#99FF33',
-    '#C6FF99',
-    '#FF9866',
-    '#FF8033',
-    '#FFB399',
-    '#C466FF',
-    '#B233FF',
-    '#D699FF',
+    '#FF6B6B', '#FF5252', '#FF7F7F', '#6B66FF', '#5151FF', '#8A85FF',
+    '#66D7FF', '#33CCFF', '#99E2FF', '#66FF8D', '#33FF66', '#99FFB3',
+    '#FFD166', '#FFCC33', '#FFDB99', '#FF66D4', '#FF33CC', '#FF99E0',
+    '#66FFE3', '#33FFDD', '#99FFEC', '#ADFF66', '#99FF33', '#C6FF99',
+    '#FF9866', '#FF8033', '#FFB399', '#C466FF', '#B233FF', '#D699FF',
   ];
 
   // 사용자별 일관된 색상 할당
@@ -93,41 +65,6 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
       .split('')
       .reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return colors[hash % colors.length] || colors[index % colors.length];
-  };
-
-  // 주차 범위 생성 함수
-  const generateWeekRanges = (startDate: Date, endDate: Date) => {
-    const weeks = [];
-    let currentDate = new Date(startDate);
-
-    while (currentDate <= endDate) {
-      const weekStart = new Date(currentDate);
-      let weekEnd = new Date(currentDate);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-
-      if (weekEnd > endDate) {
-        weekEnd = new Date(endDate);
-      }
-
-      const startMonth = (weekStart.getMonth() + 1).toString().padStart(2, '0');
-      const startDay = weekStart.getDate().toString().padStart(2, '0');
-      const endMonth = (weekEnd.getMonth() + 1).toString().padStart(2, '0');
-      const endDay = weekEnd.getDate().toString().padStart(2, '0');
-
-      const weekLabel = `${startMonth}.${startDay}-${endMonth}.${endDay}`;
-
-      weeks.push({
-        label: weekLabel,
-        startDate: new Date(weekStart),
-        endDate: new Date(weekEnd),
-      });
-
-      // 다음 주로 이동
-      currentDate = new Date(weekEnd);
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return weeks;
   };
 
   // 개별 데이터 포인트를 주간 누적 데이터로 집계하는 함수
@@ -161,12 +98,8 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
     const aggregatedData: ChartDataPoint[] = [];
 
     Object.entries(weeklyUserTotals).forEach(([week, users]) => {
-      // 한 주 내에서 사용자 수에 따라 적절한 jitter 범위 결정
-      const userCount = Object.keys(users).length;
-
       Object.entries(users).forEach(([userName, userData], index) => {
-        // jitter 효과: 주 안에서 랜덤하게 위치 설정 (0.2~0.8 범위에서)
-        // 같은 사용자는 항상 같은 패턴으로 배치되도록 사용자 이름에서 시드값 생성
+        // jitter 효과: 주 안에서 사용자별 고정된 위치 설정
         const nameSeed = userName
           .split('')
           .reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -180,91 +113,13 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
           y: userData.total,
           user: userName,
           userId: userData.userId,
-          position: position, // jitter 효과 적용된 위치
+          weekNumber: week,
+          position: position,
         });
       });
     });
 
     return aggregatedData;
-  };
-
-  // 타임스탬프 정보를 기반으로 일자(day of month) 및 주 내 위치 계산
-  const extractDateInfoFromData = (data: any[]) => {
-    if (!data || !Array.isArray(data)) return [];
-
-    return data
-      .map((item) => {
-        if (!item) return item;
-
-        try {
-          // timestamp 정보가 있으면 실제 날짜 기반으로 처리
-          if (item.timestamp) {
-            const date = new Date(item.timestamp);
-            const dayOfMonth = date.getDate();
-
-            // 주 레이블에서 시작일과 종료일 추출 (예: "02.10-02.16")
-            const parts = item.x.split('-');
-            if (parts.length < 2) return item; // 잘못된 형식이면 원본 반환
-
-            const startDayStr = parts[0].split('.')[1];
-            const endDayStr = parts[1].split('.')[1];
-
-            if (!startDayStr || !endDayStr) return item; // 잘못된 형식이면 원본 반환
-
-            const startDay = parseInt(startDayStr);
-            const endDay = parseInt(endDayStr);
-
-            if (isNaN(startDay) || isNaN(endDay)) return item; // 숫자가 아니면 원본 반환
-
-            // 주 내에서의 상대적 위치 계산 (0.0 ~ 1.0 사이 값)
-            const daysInWeek = endDay - startDay + 1;
-            const position = Math.max(
-              0,
-              Math.min(1, (dayOfMonth - startDay) / daysInWeek)
-            );
-
-            return {
-              ...item,
-              dayOfMonth,
-              position,
-            };
-          }
-        } catch (e) {
-          console.error('날짜 정보 추출 중 오류:', e);
-        }
-
-        // timestamp 정보가 없거나 오류 발생 시 그대로 반환
-        return item;
-      })
-      .filter(Boolean); // null/undefined 제거
-  };
-
-  // 챌린지 정보 가져오기
-  const fetchChallengeInfo = async () => {
-    try {
-      const response = await fetch(`/api/challenges?id=${challengeId}`);
-
-      if (!response.ok) {
-        throw new Error('챌린지 정보를 가져오는데 실패했습니다');
-      }
-
-      const data = await response.json();
-
-      // 응답이 배열인 경우 첫 번째 항목 사용
-      const challengeInfo = Array.isArray(data) ? data[0] : data;
-      if (
-        !challengeInfo ||
-        !challengeInfo.challenges.start_date ||
-        !challengeInfo.challenges.end_date
-      ) {
-        throw new Error('챌린지 시작일과 종료일 정보가 없습니다');
-      }
-
-      return challengeInfo;
-    } catch (error) {
-      console.error('챌린지 정보 로딩 오류:', error);
-      throw error;
-    }
   };
 
   // X축 변환 함수 - 주차와 날짜 정보를 조합하여 X 좌표 생성
@@ -273,21 +128,9 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
     const weekIndex = weekLabels.findIndex((label) => label === data.x);
     if (weekIndex === -1) return 0;
 
-    // position 값이 있으면 (실제 날짜 기반) 사용
+    // position 값이 있으면 사용
     if (data.position !== undefined) {
       return weekIndex + data.position;
-    }
-
-    // 일자 정보가 있으면 사용
-    if (data.dayOfMonth !== undefined) {
-      // 주 레이블에서 시작일 추출 (예: "02.10-02.16" => 10)
-      const startDay = parseInt(data.x.split('-')[0].split('.')[1]);
-      // 주 레이블에서 종료일 추출 (예: "02.10-02.16" => 16)
-      const endDay = parseInt(data.x.split('-')[1].split('.')[1]);
-
-      // 주 내에서의 상대적 위치 계산
-      const daysInWeek = endDay - startDay + 1;
-      return weekIndex + (data.dayOfMonth - startDay) / daysInWeek;
     }
 
     // 모든 정보가 없으면 주 가운데에 배치
@@ -299,30 +142,10 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
 
-      // 날짜 포맷 - MM.DD 형식
-      const dateText = data.timestamp
-        ? new Date(data.timestamp)
-            .toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })
-            .replace(/\. /g, '.')
-            .replace(/\.$/, '')
-        : data.dayOfMonth
-        ? data.x.split('-')[0].split('.')[0] + '.' + data.dayOfMonth // 02.10-02.16 => 02.13
-        : data.x; // 날짜 정보가 없으면 주차 표시
-
       return (
         <div className="bg-white p-2 border border-gray-200 shadow-md rounded text-xs">
-          <p className="font-bold">{dateText}</p>
-          <p className="text-gray-700">{`${data.user}: ${data.y.toFixed(
-            1
-          )}`}</p>
-          {data.timestamp && (
-            <p className="text-gray-500 text-xs">
-              {new Date(data.timestamp).toLocaleTimeString('ko-KR', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </p>
-          )}
+          <p className="font-bold">{data.weekNumber} ({data.x})</p>
+          <p className="text-gray-700">{`${data.user}: ${data.y.toFixed(1)}`}</p>
         </div>
       );
     }
@@ -333,9 +156,9 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   useEffect(() => {
     const loadData = async () => {
       if (!challengeId) {
-        console.error('유효하지 않은 challengeId:', challengeId);
-        setLoading(false);
+        logger.warn('WeeklyWorkoutChart: challengeId가 비어있습니다');
         setError('유효한 챌린지 ID가 필요합니다.');
+        setLoading(false);
         return;
       }
 
@@ -343,57 +166,31 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
       setError(null);
 
       try {
-        // 1. 챌린지 정보 가져오기
-        const challengeInfo = await fetchChallengeInfo();
+        const apiUrl = `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}`;
+        logger.api('WeeklyWorkoutChart API 호출:', apiUrl);
 
-        // 2. 챌린지 기간에 맞는 모든 주차 생성
-        let startDate, endDate;
+        const startTime = Date.now();
+        const response = await fetch(apiUrl);
 
-        try {
-          startDate = new Date(challengeInfo.challenges.start_date);
-          endDate = new Date(challengeInfo.challenges.end_date);
-
-          if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-            throw new Error('유효하지 않은 날짜 형식');
-          }
-        } catch (err) {
-          console.error('날짜 파싱 오류:', err);
-          throw new Error('챌린지 날짜를 파싱할 수 없습니다');
+        if (!response.ok) {
+          throw new Error(`API 호출 실패 (${response.status})`);
         }
 
-        if (endDate < startDate) {
-          console.warn('종료일이 시작일보다 빠름, 순서 교체');
-          [startDate, endDate] = [endDate, startDate];
+        const data = await response.json();
+        logger.perf('WeeklyWorkoutChart API 응답', startTime);
+
+        if (!data.weeks || !data.cardioData || !data.strengthData) {
+          throw new Error('API 응답 데이터 형식이 올바르지 않습니다');
         }
 
-        const allWeeks = generateWeekRanges(startDate, endDate);
-        const allWeekLabels = allWeeks.map((week) => week.label);
+        // 주차 레이블 설정
+        const weekLabels = data.weeks.map((week: any) => week.weekLabel);
+        setWeekLabels(weekLabels);
 
-        if (allWeekLabels.length === 0) {
-          throw new Error('주차 데이터를 생성할 수 없습니다');
-        }
-
-        setWeekLabels(allWeekLabels);
-
-        // 3. 운동 데이터 API 호출
-        const workoutResponse = await fetch(
-          `/api/workouts?type=weekly-chart&challengeId=${challengeId}`
-        );
-
-        if (!workoutResponse.ok) {
-          throw new Error(`API 호출 실패 (${workoutResponse.status})`);
-        }
-
-        const workoutData = await workoutResponse.json();
-
-        if (!workoutData) {
-          throw new Error('API 응답 데이터가 없습니다');
-        }
-
-        // 4. 사용자별 색상 매핑
+        // 사용자별 색상 매핑
         const colorMapping: Record<string, string> = {};
-        if (workoutData?.users && Array.isArray(workoutData.users)) {
-          workoutData.users.forEach((user: User, index: number) => {
+        if (data.users && Array.isArray(data.users)) {
+          data.users.forEach((user: User, index: number) => {
             if (user && user.name) {
               colorMapping[user.name] = getUserColor(user.name, index);
             }
@@ -401,25 +198,45 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
           setUserColors(colorMapping);
         }
 
-        // 5. API 데이터에 날짜 정보 추가
-        const cardioWithDates =
-          workoutData?.cardio && Array.isArray(workoutData.cardio)
-            ? extractDateInfoFromData(workoutData.cardio)
-            : [];
+        // 유산소 운동 데이터 변환
+        const cardioPoints = data.cardioData.map((item: any) => ({
+          x: item.weekLabel,
+          y: item.points || 0,
+          user: item.user,
+          userId: item.userId,
+          weekNumber: item.weekNumber,
+        }));
 
-        const strengthWithDates =
-          workoutData?.strength && Array.isArray(workoutData.strength)
-            ? extractDateInfoFromData(workoutData.strength)
-            : [];
+        // 근력 운동 데이터 변환 (세션 수만큼 개별 포인트 생성)
+        const strengthPoints: ChartDataPoint[] = [];
+        data.strengthData.forEach((item: any) => {
+          const sessions = item.sessions || 0;
+          for (let i = 0; i < sessions; i++) {
+            strengthPoints.push({
+              x: item.weekLabel,
+              y: 1,
+              user: item.user,
+              userId: item.userId,
+              weekNumber: item.weekNumber,
+            });
+          }
+        });
 
-        setCardioData(cardioWithDates);
-        setStrengthData(strengthWithDates);
+        setCardioData(cardioPoints);
+        setStrengthData(strengthPoints);
 
-        // 6. 주간 누적 데이터 계산
-        setWeeklyCardioData(aggregateWeeklyData(cardioWithDates));
-        setWeeklyStrengthData(aggregateWeeklyData(strengthWithDates));
+        // 주간 누적 데이터 계산
+        setWeeklyCardioData(aggregateWeeklyData(cardioPoints));
+        setWeeklyStrengthData(aggregateWeeklyData(strengthPoints));
+
+        logger.data('WeeklyWorkoutChart 데이터 처리 완료:', {
+          weeks: weekLabels.length,
+          cardio: cardioPoints.length,
+          strength: strengthPoints.length
+        });
+
       } catch (err) {
-        console.error('데이터 로딩 오류:', err);
+        handleApiError(err, 'WeeklyWorkoutChart');
         setError(
           err instanceof Error
             ? err.message
@@ -436,7 +253,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   // 차트에 표시될 사용자별 산점도 생성
   const renderScatters = (data: ChartDataPoint[]) => {
     if (!data || !Array.isArray(data) || data.length === 0) {
-      return null; // 데이터가 없으면 아무것도 렌더링하지 않음
+      return null;
     }
 
     const userGroups: Record<string, ChartDataPoint[]> = {};
@@ -510,13 +327,6 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
     );
   }
 
-  // 차트 너비 계산 (주차별로 최소 150px 할당)
-  const calculateChartWidth = () => {
-    const minWidth = 100; // 최소 너비(%)
-    const perWeekWidth = 150; // 주당 픽셀 너비
-    return Math.max(minWidth, weekLabels.length * perWeekWidth);
-  };
-
   // 주차 데이터가 너무 많아 가로 스크롤이 필요한지 확인
   const needsHorizontalScroll = weekLabels.length > 3;
 
@@ -545,7 +355,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                   right: needsHorizontalScroll ? 30 : 10,
                   bottom: 20,
                   left: 10,
-                  ...(window.innerWidth >= 768
+                  ...(typeof window !== 'undefined' && window.innerWidth >= 768
                     ? {
                         top: 20,
                         right: needsHorizontalScroll ? 40 : 20,
@@ -564,11 +374,10 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                   type="number"
                   dataKey={(data) => xAxisCalculator(data)}
                   domain={xAxisDomain}
-                  ticks={weekLabels.map((_, i) => i + 0.5)} // 각 주의 중앙
+                  ticks={weekLabels.map((_, i) => i + 0.5)}
                   tickFormatter={(value) => {
                     const weekIndex = Math.floor(value);
-                    // 모바일에서는 짧은 형식으로 표시 (예: 02.10)
-                    if (window.innerWidth < 640) {
+                    if (typeof window !== 'undefined' && window.innerWidth < 640) {
                       const weekLabel = weekLabels[weekIndex] || '';
                       return weekLabel.split('-')[0] || '';
                     }
@@ -576,19 +385,19 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                   }}
                   allowDecimals={true}
                   interval={0}
-                  tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
+                  tick={{ fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12 }}
                 />
                 <YAxis
                   dataKey="y"
                   name="운동량"
                   domain={[0, 'auto']}
-                  tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
+                  tick={{ fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12 }}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend
                   wrapperStyle={{
-                    fontSize: window.innerWidth < 640 ? 10 : 12,
-                    marginTop: window.innerWidth < 640 ? 0 : 10,
+                    fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12,
+                    marginTop: typeof window !== 'undefined' && window.innerWidth < 640 ? 0 : 10,
                   }}
                 />
 
@@ -629,7 +438,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                   right: needsHorizontalScroll ? 30 : 10,
                   bottom: 20,
                   left: 10,
-                  ...(window.innerWidth >= 768
+                  ...(typeof window !== 'undefined' && window.innerWidth >= 768
                     ? {
                         top: 20,
                         right: needsHorizontalScroll ? 40 : 20,
@@ -648,11 +457,10 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                   type="number"
                   dataKey={(data) => xAxisCalculator(data)}
                   domain={xAxisDomain}
-                  ticks={weekLabels.map((_, i) => i + 0.5)} // 각 주의 중앙
+                  ticks={weekLabels.map((_, i) => i + 0.5)}
                   tickFormatter={(value) => {
                     const weekIndex = Math.floor(value);
-                    // 모바일에서는 짧은 형식으로 표시 (예: 02.10)
-                    if (window.innerWidth < 640) {
+                    if (typeof window !== 'undefined' && window.innerWidth < 640) {
                       const weekLabel = weekLabels[weekIndex] || '';
                       return weekLabel.split('-')[0] || '';
                     }
@@ -660,19 +468,19 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                   }}
                   allowDecimals={true}
                   interval={0}
-                  tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
+                  tick={{ fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12 }}
                 />
                 <YAxis
                   dataKey="y"
                   name="운동량"
                   domain={[0, 'auto']}
-                  tick={{ fontSize: window.innerWidth < 640 ? 10 : 12 }}
+                  tick={{ fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12 }}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend
                   wrapperStyle={{
-                    fontSize: window.innerWidth < 640 ? 10 : 12,
-                    marginTop: window.innerWidth < 640 ? 0 : 10,
+                    fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12,
+                    marginTop: typeof window !== 'undefined' && window.innerWidth < 640 ? 0 : 10,
                   }}
                 />
 

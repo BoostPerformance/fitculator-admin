@@ -26,10 +26,9 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log(
-        '1. Starting weekly-chart data fetch for challenge:',
-        challengeId
-      );
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Weekly-chart 데이터 조회:', challengeId);
+      }
 
       // 1. 챌린지 참가자 목록 조회
       const { data: participants, error: participantsError } = await supabase
@@ -46,10 +45,8 @@ export async function GET(request: Request) {
       }
 
       const participantIds = participants?.map((p) => p.service_user_id) || [];
-      console.log('2. Found participants:', participantIds.length);
 
       if (participantIds.length === 0) {
-        console.log('No participants found, returning empty data');
         return NextResponse.json({
           cardio: [],
           strength: [],
@@ -72,10 +69,6 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log('3. Challenge period:', {
-        start_date: challenge.start_date,
-        end_date: challenge.end_date,
-      });
 
       // 3. 이번 주의 시작일(월요일)과 종료일(일요일) 계산
       const today = new Date();
@@ -88,10 +81,6 @@ export async function GET(request: Request) {
       sunday.setDate(monday.getDate() + 6);
       sunday.setHours(23, 59, 59, 999);
 
-      console.log('4. Current week range:', {
-        monday: monday.toISOString(),
-        sunday: sunday.toISOString(),
-      });
 
       // 4. 사용자 정보 조회
       const { data: users, error: usersError } = await supabase
@@ -107,7 +96,6 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log('5. Found users:', users?.length);
 
       // 5. 운동 타입 정보 가져오기
       const { data: workoutTypes, error: typesError } = await supabase
@@ -122,7 +110,6 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log('6. Found workout types:', workoutTypes?.length);
 
       // 타입 ID를 이름에 매핑
       const typeIdToName: Record<string, string> = {};
@@ -143,7 +130,6 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log('7. Found categories:', categories?.length);
 
       // 카테고리 ID를 타입으로 매핑
       const categoryToType: Record<string, string> = {};
@@ -179,7 +165,6 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log('8. Found workouts for current week:', workoutsData?.length);
 
       // 8. 데이터 가공
       const result = processWeeklyWorkoutData(
@@ -197,11 +182,6 @@ export async function GET(request: Request) {
         users
       );
 
-      console.log('9. Processed data:', {
-        cardioCount: result.cardio.length,
-        strengthCount: result.strength.length,
-        usersCount: result.users.length,
-      });
 
       return NextResponse.json({
         ...result,

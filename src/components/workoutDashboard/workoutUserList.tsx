@@ -203,44 +203,57 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
         // batchUserData에서 해당 사용자 데이터 찾기
         const userData = batchUserData?.find((data: any) => data.userId === user.id);
         const totalCardioPoints = userData?.stats?.totalCardioPoints || 0;
+        
+        // 디버깅: 첫 번째 사용자만 로그 출력
+        if (user.id === users[0]?.id) {
+          console.log('🔍 WorkoutUserList 디버깅:', {
+            userId: user.id,
+            userName: user.name,
+            hasBatchUserData: !!userData,
+            weeklyRecordsCount: userData?.weeklyRecords?.length || 0,
+            firstRecord: userData?.weeklyRecords?.[0]
+          });
+        }
 
         const weeksCount = generatedWeeks.length || 1;
 
         const userWeeklyData = generatedWeeks.map((week, index) => {
-          const userCardioInWeek = cardioData.filter((item) => {
-            const workoutDate = new Date(item.date);
-            return (
-              item.userId === user.id &&
-              workoutDate >= week.startDate &&
-              workoutDate <= week.endDate
-            );
-          });
-
-          const userStrengthInWeek = strengthData.filter((item) => {
-            const workoutDate = new Date(item.date);
-            return (
-              item.userId === user.id &&
-              workoutDate >= week.startDate &&
-              workoutDate <= week.endDate
-            );
-          });
-
-          const cardioPoints = userCardioInWeek.reduce(
-            (sum, item) => sum + item.y,
-            0
-          );
-          const strengthSessions = userStrengthInWeek.length;
-
           const startDate = formatDateToMMDD(week.startDate);
           const endDate = formatDateToMMDD(week.endDate);
 
+          // batchUserData에서 해당 주차의 weeklyRecord 찾기
+          const weekRecord = userData?.weeklyRecords?.find(
+            (record: any) => {
+              const recordStartDate = new Date(record.start_date);
+              const recordEndDate = new Date(record.end_date);
+              
+              // W0의 경우 특별 처리
+              if (week.weekNumber === 0) {
+                const isW0Record = (
+                  recordStartDate <= week.endDate && 
+                  recordEndDate >= week.startDate
+                );
+                return isW0Record;
+              }
+              
+              // W1 이후는 기존 로직
+              const isOverlapping = (
+                recordStartDate <= week.endDate && 
+                recordEndDate >= week.startDate
+              );
+              return isOverlapping;
+            }
+          );
+
+          const cardioPoints = weekRecord?.cardio_points_total || 0;
+          const strengthSessions = weekRecord?.strength_sessions_count || 0;
           const actualPercentage = Math.round(totalCardioPoints * 10) / 10;
 
           return {
             weekNumber: week.weekNumber !== undefined ? week.weekNumber : index,
             startDate,
             endDate,
-            aerobicPercentage: Math.min(Math.round(cardioPoints), 100),
+            aerobicPercentage: cardioPoints,
             actualPercentage,
             strengthSessions,
           };
@@ -449,7 +462,12 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                                 router.push(targetUrl);
                               }}
                             >
-                              {isWorkoutUploaded(week.aerobicPercentage)}
+                              <div className="flex flex-col items-center">
+                                {isWorkoutUploaded(week.aerobicPercentage)}
+                                <div className="text-xs text-gray-400 mt-1">
+                                  {week.strengthSessions === 0 ? '-' : `${week.strengthSessions}`}
+                                </div>
+                              </div>
                             </td>
                           ))}
                         </tr>

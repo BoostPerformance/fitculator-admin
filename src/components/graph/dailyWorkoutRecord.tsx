@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ChallengeParticipant } from '@/types/userPageTypes';
+import { logger, handleApiError } from '@/utils/logger';
 
 const days = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -31,29 +32,58 @@ const DailyWorkoutRecord = ({
     const fetchWorkoutRecords = async () => {
       try {
         const challengeId = activities[0]?.challenges?.id;
-        if (!challengeId) return;
+        if (!challengeId) {
+          logger.warn('DailyWorkoutRecord: challengeId가 비어있습니다', { activities });
+          setWorkoutRecords([]);
+          return;
+        }
 
-        const response = await fetch(
-          `/api/workouts?type=daily-records&challengeId=${challengeId}`
-        );
-        if (!response.ok) throw new Error('Failed to fetch workout records');
+        const apiUrl = `/api/workouts?type=daily-records&challengeId=${challengeId}`;
+        logger.api('DailyWorkoutRecord API 호출:', apiUrl);
+        
+        const startTime = Date.now();
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to fetch workout records: ${response.status} - ${errorText}`);
+        }
 
         const data = await response.json();
-        setWorkoutRecords(data);
+        logger.perf('DailyWorkoutRecord API 응답', startTime);
+        logger.data('DailyWorkoutRecord 데이터 수신:', Array.isArray(data) ? `${data.length}개 기록` : 'Invalid data');
+        setWorkoutRecords(data || []);
       } catch (error) {
-        console.error('Error fetching workout records:', error);
+        handleApiError(error, 'DailyWorkoutRecord');
+        setWorkoutRecords([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchWorkoutRecords();
+    if (activities && activities.length > 0) {
+      fetchWorkoutRecords();
+    } else {
+      logger.warn('DailyWorkoutRecord: activities가 비어있습니다');
+      setLoading(false);
+    }
   }, [activities]);
 
   if (loading) {
     return (
       <div className="bg-white rounded-lg p-3 col-span-2 h-[36rem] flex items-center justify-center">
         <div className="text-gray-500">로딩 중...</div>
+      </div>
+    );
+  }
+
+  if (!workoutRecords || workoutRecords.length === 0) {
+    return (
+      <div className="bg-white rounded-lg p-3 col-span-2 h-[36rem] flex items-center justify-center shadow-[0_0_12px_0_rgba(121,120,132,0.15)]">
+        <div className="text-center">
+          <div className="text-gray-500 mb-2">일별 운동 기록 현황</div>
+          <div className="text-gray-400 text-sm">운동 기록이 없습니다.</div>
+        </div>
       </div>
     );
   }
