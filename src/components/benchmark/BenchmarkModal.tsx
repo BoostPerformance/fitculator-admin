@@ -108,9 +108,9 @@ export default function BenchmarkModal({ benchmark, onClose, onSave }: Benchmark
             >
               <option value="time">시간</option>
               <option value="distance">거리</option>
-              <option value="weight">무게</option>
+              {/* <option value="weight">무게</option>
               <option value="reps">횟수</option>
-              <option value="custom">사용자 정의</option>
+              <option value="custom">사용자 정의</option> */}
             </select>
           </div>
 
