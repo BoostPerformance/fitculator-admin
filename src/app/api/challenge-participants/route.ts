@@ -51,7 +51,8 @@ export async function GET(request: Request) {
           id,
           username,
           name,
-          email
+          email,
+          birth
         ),
         challenges: challenge_id (
           id,

@@ -368,6 +368,18 @@ export default function Sidebar({
                                       멤버
                                     </div>
                                   </li>
+                                  <li>
+                                    <div
+                                      className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded"
+                                      onClick={() => {
+                                        router.push(
+                                          `/${challenge.challenges.id}/benchmarks`
+                                        );
+                                      }}
+                                    >
+                                      벤치마크
+                                    </div>
+                                  </li>
                                 </ul>
                               )}
                             </li>
@@ -488,6 +500,18 @@ export default function Sidebar({
                                         }}
                                       >
                                         멤버
+                                      </div>
+                                    </li>
+                                    <li>
+                                      <div
+                                        className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded"
+                                        onClick={() => {
+                                          router.push(
+                                            `/${challenge.challenges.id}/benchmarks`
+                                          );
+                                        }}
+                                      >
+                                        벤치마크
                                       </div>
                                     </li>
                                   </ul>
