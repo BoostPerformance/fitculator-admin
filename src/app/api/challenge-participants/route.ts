@@ -59,6 +59,18 @@ export async function GET(request: Request) {
           challenge_type,
           start_date,
           end_date
+        ),
+        challenge_group_participants!left (
+          id,
+          is_active,
+          assignment_reason,
+          created_at,
+          challenge_groups (
+            id,
+            name,
+            color_code,
+            sort_order
+          )
         )
       `
     );
@@ -213,10 +225,16 @@ export async function GET(request: Request) {
 
         //  console.log(`참가자 ${participant.id}의 피드백 수: ${feedbacksCount}`);
 
+        // 현재 활성 그룹 찾기
+        const activeGroup = participant.challenge_group_participants?.find(
+          (gp: any) => gp.is_active === true
+        );
+
         return {
           ...participant,
           daily_records_count: count || 0,
           feedbacks_count: feedbacksCount,
+          current_group: activeGroup?.challenge_groups || null,
           ...(withRecords && { daily_records: dailyRecords }),
         };
       })

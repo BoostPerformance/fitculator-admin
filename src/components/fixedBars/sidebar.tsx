@@ -356,6 +356,18 @@ export default function Sidebar({
                                       </div>
                                     </li>
                                   )}
+                                  <li>
+                                    <div
+                                      className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                                      onClick={() => {
+                                        router.push(
+                                          `/${challenge.challenges.id}/members`
+                                        );
+                                      }}
+                                    >
+                                      멤버
+                                    </div>
+                                  </li>
                                 </ul>
                               )}
                             </li>
@@ -466,6 +478,18 @@ export default function Sidebar({
                                         </div>
                                       </li>
                                     )}
+                                    <li>
+                                      <div
+                                        className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded"
+                                        onClick={() => {
+                                          router.push(
+                                            `/${challenge.challenges.id}/members`
+                                          );
+                                        }}
+                                      >
+                                        멤버
+                                      </div>
+                                    </li>
                                   </ul>
                                 )}
                               </li>
