@@ -92,6 +92,8 @@ export async function GET(
           cover_image_url,
           challenge_type,
           organization_id,
+          enable_benchmark,
+          enable_mission,
           challenge_participants (
             id,
             service_user_id
@@ -145,6 +147,8 @@ export async function GET(
         cover_image_url: challenge.cover_image_url,
         challenge_type: challenge.challenge_type,
         organization_id: challenge.organization_id,
+        enable_benchmark: challenge.enable_benchmark,
+        enable_mission: challenge.enable_mission,
         challenge_participants: challenge.challenge_participants.map((p) => ({
           id: p.id,
           service_user_id: p.service_user_id,
@@ -198,36 +202,28 @@ export async function GET(
       );
     }
 
-    // Use the new database function
-    // console.log("🔍 Fetching coach challenges using DB function...");
-    const { data: challengeData, error: challengeError } = await supabase.rpc(
-      'get_coach_challenges_grouped',
-      {
-        coach_uuid: coach.id,
-      }
-    );
-
-    //console.log('🔍 Coach challenges:', challengeData);
     // Fetch coach's challenges and related data
-    // console.log("🔍 Fetching coach challenges...");
-    // const { data: challengeData, error: challengeError } = await supabase
-    //   .from("challenge_coaches")
-    //   .select(
-    //     `
-    //     id,
-    //     challenges!inner (
-    //       id,
-    //       title,
-    //       start_date,
-    //       end_date,
-    //       challenge_participants!inner (
-    //         id,
-    //         service_user_id
-    //       )
-    //     )
-    //   `
-    //   )
-    //   .eq("coach_id", coach.id);
+    const { data: challengeData, error: challengeError } = await supabase
+      .from("challenge_coaches")
+      .select(
+        `
+        id,
+        challenges!inner (
+          id,
+          title,
+          start_date,
+          end_date,
+          challenge_type,
+          enable_benchmark,
+          enable_mission,
+          challenge_participants!inner (
+            id,
+            service_user_id
+          )
+        )
+      `
+      )
+      .eq("coach_id", coach.id);
 
     if (challengeError) {
       console.error('❌ Error fetching coach challenges:', {

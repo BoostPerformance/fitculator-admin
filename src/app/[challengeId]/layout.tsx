@@ -36,6 +36,8 @@ export default function ChallengeLayout({
       start_date: challenge.challenges.start_date,
       end_date: challenge.challenges.end_date,
       challenge_type: (challenge.challenges as any).challenge_type || 'diet_and_exercise',
+      enable_benchmark: (challenge.challenges as any).enable_benchmark,
+      enable_mission: (challenge.challenges as any).enable_mission,
     },
   })) || [];
   
