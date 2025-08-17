@@ -20,7 +20,7 @@ export default function BenchmarkModal({ benchmark, onClose, onSave }: Benchmark
     title: '',
     description: '',
     unit: 'time' as 'time' | 'distance' | 'weight' | 'reps' | 'custom',
-    unit_label: '초',
+    unit_label: 'mm:ss',
     is_lower_better: true,
   });
 
@@ -37,10 +37,10 @@ export default function BenchmarkModal({ benchmark, onClose, onSave }: Benchmark
   }, [benchmark]);
 
   const unitOptions = {
-    time: ['초', '분:초', '시:분:초'],
+    time: ['mm:ss', 'hh:mm:ss'],
     distance: ['m', 'km', 'mile'],
     weight: ['kg', 'lbs'],
-    reps: ['회', '개', '세트'],
+    reps: ['reps', 'count', 'sets'],
     custom: [],
   };
 

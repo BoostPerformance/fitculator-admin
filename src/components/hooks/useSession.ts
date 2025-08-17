@@ -3,9 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 
 interface SessionData {
   user?: {
-    id: string;
-    email: string;
-    name: string;
+    email?: string | null;
+    name?: string | null;
+    image?: string | null;
+    admin_role?: string;
+    organization_id?: string;
+    admin_user_id?: string;
+    organization_name?: string;
   };
   expires?: string;
 }

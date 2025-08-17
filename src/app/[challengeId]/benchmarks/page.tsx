@@ -8,6 +8,7 @@ import { FaPlus, FaEdit, FaTrash, FaTrophy, FaMedal } from 'react-icons/fa';
 import BenchmarkModal from '@/components/benchmark/BenchmarkModal';
 import BenchmarkRecordModal from '@/components/benchmark/BenchmarkRecordModal';
 import { useChallenge } from '@/components/hooks/useChallenges';
+import { useSession } from '@/components/hooks/useSession';
 
 interface Benchmark {
   id: string;
@@ -49,6 +50,32 @@ export default function BenchmarksPage() {
   const [editingRecord, setEditingRecord] = useState<BenchmarkRecord | null>(null);
   const { challenges } = useChallenge();
   const currentChallenge = challenges?.find((c) => c.challenges.id === challengeId);
+  const { session } = useSession();
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
+  
+  // Get auth_users ID from email
+  useEffect(() => {
+    const fetchAuthUserId = async () => {
+      if (session?.user?.email) {
+        const { data: authUser, error } = await supabase
+          .from('auth_users')
+          .select('id, user_id')
+          .eq('email', session.user.email)
+          .single();
+        
+        if (authUser) {
+          console.log('Auth user data:', authUser);
+          // Use user_id if it exists, otherwise use id
+          setAuthUserId(authUser.user_id || authUser.id);
+        }
+        if (error) {
+          console.error('Error fetching auth user:', error);
+        }
+      }
+    };
+    
+    fetchAuthUserId();
+  }, [session]);
 
   // 벤치마크 목록 조회
   const { data: benchmarks, isLoading: benchmarksLoading } = useQuery({
@@ -162,10 +189,21 @@ export default function BenchmarksPage() {
           .eq('id', benchmark.id);
         if (error) throw error;
       } else {
+        const newBenchmark = {
+          ...benchmark,
+          challenge_id: challengeId,
+          created_by: authUserId
+        };
+        console.log('Creating benchmark with data:', newBenchmark);
+        console.log('Auth user ID for created_by:', authUserId);
+        
         const { error } = await supabase
           .from('benchmarks')
-          .insert({ ...benchmark, challenge_id: challengeId });
-        if (error) throw error;
+          .insert(newBenchmark);
+        if (error) {
+          console.error('Error creating benchmark:', error);
+          throw error;
+        }
       }
     },
     onSuccess: () => {
