@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { ChallengeMission, MissionCompletion } from '@/types/missionTypes';
 import { useChallenge } from '@/components/hooks/useChallenges';
@@ -34,6 +34,15 @@ interface Workout {
   duration_minutes?: number;
   points?: number;
   type?: string;
+  distance?: number;
+  calories?: number;
+  avg_heart_rate?: number;
+  max_heart_rate?: number;
+  rpe?: number;
+  workout_category?: {
+    name_ko?: string;
+    name_en?: string;
+  };
 }
 
 export default function MissionsPage() {
@@ -76,6 +85,13 @@ export default function MissionsPage() {
   const [selectedWorkouts, setSelectedWorkouts] = useState<Set<string>>(new Set());
   const [showWorkouts, setShowWorkouts] = useState(false);
   const [existingCompletions, setExistingCompletions] = useState<any[]>([]);
+  
+  // 완료된 미션 운동 보기 모달 상태
+  const [showCompletedWorkoutsModal, setShowCompletedWorkoutsModal] = useState(false);
+  const [completedWorkouts, setCompletedWorkouts] = useState<Workout[]>([]);
+  const [viewingCompletionUser, setViewingCompletionUser] = useState<string>('');
+  const [viewingCompletionMission, setViewingCompletionMission] = useState<string>('');
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchData();
@@ -142,6 +158,31 @@ export default function MissionsPage() {
       return memberSortOrder === 'asc' ? rateA - rateB : rateB - rateA;
     }
   });
+
+  const truncateDescription = (description: string, lines: number = 2) => {
+    if (!description) return '';
+    
+    // 줄바꿈을 기준으로 분할
+    const textLines = description.split('\n');
+    
+    // 지정된 줄 수보다 적거나 같으면 그대로 반환
+    if (textLines.length <= lines) {
+      return description;
+    }
+    
+    // 지정된 줄 수만큼 잘라내고 '...' 추가
+    return textLines.slice(0, lines).join('\n') + '...';
+  };
+
+  const toggleRowExpansion = (workoutId: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(workoutId)) {
+      newExpanded.delete(workoutId);
+    } else {
+      newExpanded.add(workoutId);
+    }
+    setExpandedRows(newExpanded);
+  };
 
   const handleMemberSortToggle = (field: 'name' | 'completion_rate') => {
     if (memberSortField === field) {
@@ -247,6 +288,76 @@ export default function MissionsPage() {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCompletedWorkouts = async (userId: string, missionId: string) => {
+    console.log('fetchCompletedWorkouts called with:', { userId, missionId });
+    try {
+      const mission = missions.find(m => m.id === missionId);
+      const user = users.find(u => u.id === userId);
+      
+      console.log('Found mission:', mission);
+      console.log('Found user:', user);
+      
+      if (!mission || !user) {
+        console.log('Mission or user not found, returning');
+        return;
+      }
+      
+      setViewingCompletionUser(user.name);
+      setViewingCompletionMission(mission.title);
+      
+      // 해당 미션의 완료 정보 가져오기
+      const completionResponse = await fetch(
+        `/api/mission-completions?missionId=${missionId}&userId=${userId}`
+      );
+      const completionData = await completionResponse.json();
+      
+      // workout_id가 있는 완료 정보들의 운동 데이터 가져오기
+      const workoutIds = completionData
+        ?.map((c: any) => c.workout_id)
+        .filter(Boolean) || [];
+      
+      if (workoutIds.length > 0) {
+        // 해당 기간의 운동 목록 가져오기
+        const workoutsResponse = await fetch(
+          `/api/workouts/user-workouts?userId=${userId}&startDate=${mission.start_date}&endDate=${mission.end_date}`
+        );
+        
+        console.log('Workouts response status:', workoutsResponse.status);
+        
+        if (!workoutsResponse.ok) {
+          console.error('Failed to fetch workouts:', workoutsResponse.statusText);
+          setCompletedWorkouts([]);
+          return;
+        }
+        
+        const allWorkouts = await workoutsResponse.json();
+        console.log('All workouts received:', allWorkouts);
+        
+        // 응답이 배열인지 확인
+        if (!Array.isArray(allWorkouts)) {
+          console.error('Workouts response is not an array:', allWorkouts);
+          setCompletedWorkouts([]);
+          return;
+        }
+        
+        // workout_id와 매칭되는 운동만 필터링
+        const mappedWorkouts = allWorkouts.filter((w: Workout) => 
+          workoutIds.includes(w.id)
+        );
+        
+        console.log('Mapped workouts:', mappedWorkouts);
+        setCompletedWorkouts(mappedWorkouts);
+      } else {
+        setCompletedWorkouts([]);
+      }
+      
+      setShowCompletedWorkoutsModal(true);
+    } catch (error) {
+      console.error('Error fetching completed workouts:', error);
+      setCompletedWorkouts([]);
     }
   };
 
@@ -656,7 +767,7 @@ export default function MissionsPage() {
                     <td className="sticky left-16 bg-white px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                        <div className="text-sm text-gray-500">@{user.username}</div>
+                        <div className="text-xs text-gray-400">@{user.username}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -672,11 +783,33 @@ export default function MissionsPage() {
                         <span className="text-sm font-medium text-gray-900">{completionRate}%</span>
                       </div>
                     </td>
-                    {filteredMissions.map((mission) => (
-                      <td key={mission.id} className="px-6 py-4 whitespace-nowrap text-center">
-                        {getStatusBadge(user.completions[mission.id])}
-                      </td>
-                    ))}
+                    {filteredMissions.map((mission) => {
+                      const completion = user.completions[mission.id];
+                      const isCompleted = completion && 
+                        (completion.verification_status === 'approved' || 
+                         completion.verification_status === 'auto_approved');
+                      
+                      return (
+                        <td key={mission.id} className="px-6 py-4 whitespace-nowrap text-center">
+                          {isCompleted ? (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Button clicked for user:', user.id, 'mission:', mission.id);
+                                fetchCompletedWorkouts(user.id, mission.id);
+                              }}
+                              className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-colors cursor-pointer border-none"
+                              title="클릭하여 등록된 운동 보기"
+                            >
+                              완료
+                            </button>
+                          ) : (
+                            getStatusBadge(completion)
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
                 );
               })}
@@ -942,6 +1075,184 @@ export default function MissionsPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* 완료된 미션 운동 보기 모달 */}
+        {showCompletedWorkoutsModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h2 className="text-xl font-bold">등록된 운동 목록</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {viewingCompletionUser} - {viewingCompletionMission}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowCompletedWorkoutsModal(false);
+                    setCompletedWorkouts([]);
+                    setViewingCompletionUser('');
+                    setViewingCompletionMission('');
+                    setExpandedRows(new Set());
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {completedWorkouts.length > 0 ? (
+                <div className="border rounded-lg overflow-hidden">
+                  <table className="min-w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="w-8 px-2 py-2 text-xs font-medium text-gray-500"></th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          운동명
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          날짜/시간
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">
+                          카테고리
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[70px]">
+                          운동시간
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          심박
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[60px]">
+                          포인트
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {completedWorkouts.map((workout) => {
+                        const isExpanded = expandedRows.has(workout.id);
+                        const hasDescription = workout.note;
+                        
+                        return (
+                          <React.Fragment key={workout.id}>
+                            <tr className="hover:bg-gray-50">
+                              <td className="px-2 py-3 text-center">
+                                {hasDescription && (
+                                  <button
+                                    onClick={() => toggleRowExpansion(workout.id)}
+                                    className="text-gray-400 hover:text-gray-600 transition-transform duration-200"
+                                    style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </td>
+                              <td className="px-4 py-3">
+                                <div>
+                                  <div className="text-xs font-medium text-gray-900">{workout.title}</div>
+                                  {hasDescription && !isExpanded && (
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {truncateDescription(workout.note || '', 2)}
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
+                                <div>
+                                  <div>{new Date(workout.start_time).toLocaleDateString('ko-KR')}</div>
+                                  <div className="text-xs text-gray-400">
+                                    {new Date(workout.start_time).toLocaleTimeString('ko-KR', { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit' 
+                                    })}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap">
+                                <div className="flex flex-col gap-1">
+                                  {workout.type && (
+                                    <span className={`text-xs px-2 py-1 rounded w-fit ${
+                                      workout.type === 'STRENGTH' ? 'bg-blue-100 text-blue-800' : 
+                                      workout.type === 'CARDIO' ? 'bg-green-100 text-green-800' : 
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {workout.type === 'STRENGTH' ? '근력' : 
+                                       workout.type === 'CARDIO' ? '유산소' : workout.type}
+                                    </span>
+                                  )}
+                                  {workout.workout_category?.name_ko && (
+                                    <span className="text-xs text-gray-500">{workout.workout_category.name_ko}</span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
+                                {workout.duration_minutes ? `${workout.duration_minutes}분` : '-'}
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
+                                <div className="flex flex-col gap-1">
+                                  {workout.distance && (
+                                    <div>🏃 {workout.distance}km</div>
+                                  )}
+                                  {workout.avg_heart_rate && (
+                                    <div>평균: {workout.avg_heart_rate}bpm</div>
+                                  )}
+                                  {workout.max_heart_rate && (
+                                    <div>최대: {workout.max_heart_rate}bpm</div>
+                                  )}
+                                  {workout.rpe && (
+                                    <div>🔥 RPE: {workout.rpe}/10</div>
+                                  )}
+                                  {!workout.distance && !workout.avg_heart_rate && !workout.max_heart_rate && !workout.rpe && '-'}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
+                                {workout.points || '-'}
+                              </td>
+                            </tr>
+                            {isExpanded && hasDescription && (
+                              <tr>
+                                <td colSpan={7} className="px-6 py-4 bg-gray-50">
+                                  <div className="text-sm text-gray-700">
+                                    <div className="font-medium mb-2">운동 노트:</div>
+                                    <div className="whitespace-pre-wrap">
+                                      {workout.note}
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  등록된 운동이 없습니다.
+                </div>
+              )}
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={() => {
+                    setShowCompletedWorkoutsModal(false);
+                    setCompletedWorkouts([]);
+                    setViewingCompletionUser('');
+                    setViewingCompletionMission('');
+                    setExpandedRows(new Set());
+                  }}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                  닫기
+                </button>
+              </div>
             </div>
           </div>
         )}
