@@ -61,7 +61,7 @@ export default function MissionMappingPage() {
       }));
       setUsers(usersData);
     } catch (error) {
-      console.error('Error fetching initial data:', error);
+// console.error('Error fetching initial data:', error);
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ export default function MissionMappingPage() {
       setWorkouts(data);
       setShowWorkouts(true);
     } catch (error) {
-      console.error('Error fetching workouts:', error);
+// console.error('Error fetching workouts:', error);
     }
   };
 
@@ -103,7 +103,7 @@ export default function MissionMappingPage() {
       });
       setSelectedWorkouts(mappedWorkouts);
     } catch (error) {
-      console.error('Error fetching existing mappings:', error);
+// console.error('Error fetching existing mappings:', error);
     }
   };
 
@@ -152,7 +152,7 @@ export default function MissionMappingPage() {
       alert('매핑이 저장되었습니다.');
       fetchExistingMappings();
     } catch (error) {
-      console.error('Error saving mapping:', error);
+// console.error('Error saving mapping:', error);
       alert('매핑 저장 중 오류가 발생했습니다.');
     }
   };

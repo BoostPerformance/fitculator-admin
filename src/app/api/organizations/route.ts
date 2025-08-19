@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       .order('name');
 
     if (organizationsError) {
-      console.error('조직 목록 가져오기 오류:', organizationsError);
+// console.error('조직 목록 가져오기 오류:', organizationsError);
       return NextResponse.json(
         {
           error: 'Failed to fetch organizations',
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(organizations || []);
   } catch (error) {
-    console.error('❌ === Organizations API Error ===', {
+// console.error('❌ === Organizations API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
       .single();
 
     if (createError) {
-      console.error('조직 생성 오류:', createError);
+// console.error('조직 생성 오류:', createError);
       return NextResponse.json(
         {
           error: '조직 생성에 실패했습니다.',
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newOrganization);
   } catch (error) {
-    console.error('❌ === Organizations Create API Error ===', {
+// console.error('❌ === Organizations Create API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,

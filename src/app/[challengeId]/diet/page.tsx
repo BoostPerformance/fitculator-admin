@@ -47,7 +47,7 @@ export default function DietItem() {
         setChallengeError(null);
       } catch (err) {
         setChallengeError('챌린지 정보를 불러오는데 실패했습니다.');
-        console.error('Failed to fetch challenges:', err);
+// console.error('Failed to fetch challenges:', err);
       }
     };
     loadChallenges();

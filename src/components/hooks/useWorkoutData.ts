@@ -29,7 +29,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         if (!response.ok) throw new Error(`API 오류: ${response.status}`);
 
         const data: ApiResponse = await response.json();
-        console.log('API data user info:', data.user);
+// console.log('API data user info:', data.user);
 
         const processedData = await transformApiData(data);
 
@@ -38,7 +38,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         setUserData(processedData);
         setTotalPoints(data.stats.totalCardioPoints);
       } catch (error) {
-        console.error('API 호출 중 오류 발생:', error);
+// console.error('API 호출 중 오류 발생:', error);
         setError((error as Error).message);
         setUserData({ name: '사용자', achievement: 0, weeklyWorkouts: [] });
         setTotalPoints(0);
@@ -58,7 +58,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
   const transformApiData = async (apiData: ApiResponse): Promise<UserData> => {
     const { user, weeklyRecords, stats, challengePeriod } = apiData;
-    console.log('API Response challengePeriod:', challengePeriod);
+// console.log('API Response challengePeriod:', challengePeriod);
     const processedWeeklyWorkouts: WeeklyWorkout[] = [];
 
     // Calculate correct week numbers with W0 logic
@@ -135,7 +135,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
           }
         }
       } catch (error) {
-        console.error('운동 카테고리 데이터 가져오기 실패:', error);
+// console.error('운동 카테고리 데이터 가져오기 실패:', error);
       }
 
       // 해당 주차의 운동 데이터만 가져오기

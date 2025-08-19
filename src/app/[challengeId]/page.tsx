@@ -177,7 +177,7 @@ export default function User() {
               }
             } catch (error) {
               if (process.env.NODE_ENV === 'development') {
-                console.error(`Error fetching feedback for participant ${participant.id}:`, error);
+// console.error(`Error fetching feedback for participant ${participant.id}:`, error);
               }
               feedbackCounts[participant.id] = 0;
             }
@@ -192,7 +192,7 @@ export default function User() {
 
       setFeedbackData(feedbackCounts);
     } catch (error) {
-      console.error('Error fetching feedback data:', error);
+// console.error('Error fetching feedback data:', error);
     } finally {
       setIsLoadingFeedbacks(false);
     }
@@ -210,7 +210,7 @@ export default function User() {
       const data = await response.json();
       setTodayDietUploads(data);
     } catch (error) {
-      console.error('Error fetching diet uploads:', error);
+// console.error('Error fetching diet uploads:', error);
     }
   };
 
@@ -243,7 +243,7 @@ export default function User() {
         // 데일리레코드(테이블 정보) 가져오기
         await fetchDailyRecords(1);
       } catch (error) {
-        console.error('Error fetching data:', error);
+// console.error('Error fetching data:', error);
       } finally {
         setLoading(false); // 데이터 로딩 완료
       }
@@ -312,7 +312,7 @@ export default function User() {
 
       return data.data.length > 0;
     } catch (error) {
-      console.error('Error fetching daily records:', error);
+// console.error('Error fetching daily records:', error);
       return false;
     } finally {
       setLoading(false);

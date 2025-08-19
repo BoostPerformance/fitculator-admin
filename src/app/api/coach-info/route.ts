@@ -146,7 +146,7 @@ export async function GET() {
 
     return NextResponse.json(formattedData);
   } catch (error) {
-    console.error('Error fetching Data', error);
+// console.error('Error fetching Data', error);
     return NextResponse.json(
       {
         error: 'failed to fetch data',

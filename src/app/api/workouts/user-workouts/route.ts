@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const startDate = url.searchParams.get('startDate');
     const endDate = url.searchParams.get('endDate');
 
-    console.log('user-workouts API called with:', { userId, startDate, endDate });
+// console.log('user-workouts API called with:', { userId, startDate, endDate });
 
     if (!userId || !startDate || !endDate) {
       return NextResponse.json(
@@ -57,14 +57,14 @@ export async function GET(request: Request) {
       .order('timestamp', { ascending: false });
 
     if (error) {
-      console.error('Error fetching workouts:', error);
+// console.error('Error fetching workouts:', error);
       return NextResponse.json(
         { error: 'Failed to fetch workouts', details: error.message },
         { status: 500 }
       );
     }
 
-    console.log('Fetched workouts count:', workouts?.length || 0);
+// console.log('Fetched workouts count:', workouts?.length || 0);
 
     // 운동 데이터 변환 - 추가 필드들 포함
     const filteredWorkouts = workouts?.map(workout => {
@@ -89,15 +89,15 @@ export async function GET(request: Request) {
           }
         };
       } catch (error) {
-        console.error('Error processing workout:', workout, error);
+// console.error('Error processing workout:', workout, error);
         return null;
       }
     }).filter(Boolean) || [];
 
-    console.log('Returning filtered workouts count:', filteredWorkouts.length);
+// console.log('Returning filtered workouts count:', filteredWorkouts.length);
     return NextResponse.json(filteredWorkouts);
   } catch (error) {
-    console.error('Error in user-workouts API:', error);
+// console.error('Error in user-workouts API:', error);
     return NextResponse.json(
       { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

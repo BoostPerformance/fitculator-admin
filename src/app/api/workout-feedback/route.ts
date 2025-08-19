@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error('[WorkoutFeedback Error]:', error);
+// console.error('[WorkoutFeedback Error]:', error);
     return NextResponse.json(
       {
         error: '피드백 저장 실패',

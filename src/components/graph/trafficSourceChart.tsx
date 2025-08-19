@@ -59,7 +59,7 @@ export default function TrafficSourceChart({
     const fetchData = async () => {
       try {
         if (!challengeId) {
-          console.error('유효하지 않은 challengeId:', challengeId);
+// console.error('유효하지 않은 challengeId:', challengeId);
           setChartData([{ category: '데이터 없음', percentage: 100 }]);
           return;
         }
@@ -72,11 +72,11 @@ export default function TrafficSourceChart({
         if (Array.isArray(data)) {
           setChartData(data);
         } else {
-          console.error('Invalid data format:', data);
+// console.error('Invalid data format:', data);
           setChartData([{ category: '데이터 없음', percentage: 100 }]);
         }
       } catch (error) {
-        console.error('Error fetching workout data:', error);
+// console.error('Error fetching workout data:', error);
         setChartData([{ category: '데이터 없음', percentage: 100 }]);
       }
     };

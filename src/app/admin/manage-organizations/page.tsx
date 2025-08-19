@@ -57,7 +57,7 @@ export default function ManageOrganizationsPage() {
         setError(
           err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.'
         );
-        console.error('조직 데이터 가져오기 오류:', err);
+// console.error('조직 데이터 가져오기 오류:', err);
       } finally {
         setLoading(false);
       }
@@ -83,7 +83,7 @@ export default function ManageOrganizationsPage() {
         const data = await response.json();
         setOrganizationMembers(data);
       } catch (err) {
-        console.error('조직 멤버 데이터 가져오기 오류:', err);
+// console.error('조직 멤버 데이터 가져오기 오류:', err);
         // 실제 API가 없으므로 임시 데이터 사용
         setOrganizationMembers([]);
       } finally {
@@ -127,7 +127,7 @@ export default function ManageOrganizationsPage() {
       setError(
         err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.'
       );
-      console.error('조직 추가 오류:', err);
+// console.error('조직 추가 오류:', err);
     } finally {
       setLoading(false);
     }

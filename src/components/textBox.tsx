@@ -70,7 +70,7 @@ const TextBox = ({
           setCopyMessage(false);
         }, 5000);
       } catch (err) {
-        console.error('복사 실패:', err);
+// console.error('복사 실패:', err);
       }
     }
   };

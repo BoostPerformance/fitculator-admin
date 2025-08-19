@@ -45,7 +45,7 @@ export async function GET(
       .single();
 
     if (adminError) {
-      console.error('❌ Admin User Error:', {
+// console.error('❌ Admin User Error:', {
         error: adminError,
         code: adminError.code,
         details: adminError.details,
@@ -101,7 +101,7 @@ export async function GET(
         `);
 
       if (error) {
-        console.error('❌ Error fetching challenges:', {
+// console.error('❌ Error fetching challenges:', {
           error,
           code: error.code,
           details: error.details,
@@ -160,8 +160,8 @@ export async function GET(
         })),
       }));
 
-      console.log('🔍 Enriched data:', enrichedData);
-      console.log('✅ Successfully fetched admin challenges');
+// console.log('🔍 Enriched data:', enrichedData);
+// console.log('✅ Successfully fetched admin challenges');
       return NextResponse.json(enrichedData);
     }
 
@@ -174,7 +174,7 @@ export async function GET(
       .single();
 
     if (coachError) {
-      console.error('❌ Coach Error:', {
+// console.error('❌ Coach Error:', {
         error: coachError,
         code: coachError.code,
         details: coachError.details,
@@ -192,7 +192,7 @@ export async function GET(
     }
 
     if (!coach) {
-      console.error('❌ No coach found for admin ID:', adminUser.id);
+// console.error('❌ No coach found for admin ID:', adminUser.id);
       return NextResponse.json(
         {
           error: 'Coach not found',
@@ -226,7 +226,7 @@ export async function GET(
       .eq("coach_id", coach.id);
 
     if (challengeError) {
-      console.error('❌ Error fetching coach challenges:', {
+// console.error('❌ Error fetching coach challenges:', {
         error: challengeError,
         code: challengeError.code,
         details: challengeError.details,
@@ -301,7 +301,7 @@ export async function GET(
     // console.log("✅ Successfully fetched and enriched coach challenges");
     return NextResponse.json(challengeData);
   } catch (error) {
-    console.error('❌ === Challenges API Error ===', {
+// console.error('❌ === Challenges API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
@@ -418,7 +418,7 @@ export async function POST(request: Request) {
       .single();
 
     if (challengeError) {
-      console.error('챌린지 생성 오류:', challengeError);
+// console.error('챌린지 생성 오류:', challengeError);
       return NextResponse.json(
         {
           error: 'Failed to create challenge',
@@ -431,7 +431,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(challenge);
   } catch (error) {
-    console.error('❌ === Challenge Creation API Error ===', {
+// console.error('❌ === Challenge Creation API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,

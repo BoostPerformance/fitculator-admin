@@ -64,12 +64,12 @@ export default function BenchmarksPage() {
           .single();
         
         if (authUser) {
-          console.log('Auth user data:', authUser);
+// console.log('Auth user data:', authUser);
           // Use user_id if it exists, otherwise use id
           setAuthUserId(authUser.user_id || authUser.id);
         }
         if (error) {
-          console.error('Error fetching auth user:', error);
+// console.error('Error fetching auth user:', error);
         }
       }
     };
@@ -99,7 +99,7 @@ export default function BenchmarksPage() {
     queryFn: async () => {
       if (!selectedBenchmark) return [];
       
-      console.log('리더보드 조회 시작:', selectedBenchmark.id);
+// console.log('리더보드 조회 시작:', selectedBenchmark.id);
       
       const { data, error } = await supabase
         .from('benchmark_records')
@@ -114,10 +114,10 @@ export default function BenchmarksPage() {
         .eq('benchmark_id', selectedBenchmark.id)
         .order('record_value', { ascending: selectedBenchmark.is_lower_better });
 
-      console.log('리더보드 쿼리 결과:', { data, error });
+// console.log('리더보드 쿼리 결과:', { data, error });
       
       if (error) {
-        console.error('리더보드 쿼리 에러:', error);
+// console.error('리더보드 쿼리 에러:', error);
         throw error;
       }
       
@@ -170,10 +170,10 @@ export default function BenchmarksPage() {
           }))
           .filter(Boolean) || [];
         
-        console.log('API로 조회된 멤버:', members);
+// console.log('API로 조회된 멤버:', members);
         return members;
       } catch (error) {
-        console.error('멤버 조회 실패:', error);
+// console.error('멤버 조회 실패:', error);
         return [];
       }
     },
@@ -194,14 +194,14 @@ export default function BenchmarksPage() {
           challenge_id: challengeId,
           created_by: authUserId
         };
-        console.log('Creating benchmark with data:', newBenchmark);
-        console.log('Auth user ID for created_by:', authUserId);
+// console.log('Creating benchmark with data:', newBenchmark);
+// console.log('Auth user ID for created_by:', authUserId);
         
         const { error } = await supabase
           .from('benchmarks')
           .insert(newBenchmark);
         if (error) {
-          console.error('Error creating benchmark:', error);
+// console.error('Error creating benchmark:', error);
           throw error;
         }
       }
@@ -231,7 +231,7 @@ export default function BenchmarksPage() {
   // 벤치마크 기록 추가/수정
   const recordMutation = useMutation({
     mutationFn: async (record: Partial<BenchmarkRecord>) => {
-      console.log('기록 저장 데이터:', record);
+// console.log('기록 저장 데이터:', record);
       
       if (record.id) {
         const { data, error } = await supabase
@@ -241,10 +241,10 @@ export default function BenchmarksPage() {
           .select();
         
         if (error) {
-          console.error('기록 수정 에러:', error);
+// console.error('기록 수정 에러:', error);
           throw error;
         }
-        console.log('기록 수정 성공:', data);
+// console.log('기록 수정 성공:', data);
       } else {
         const { data, error } = await supabase
           .from('benchmark_records')
@@ -252,10 +252,10 @@ export default function BenchmarksPage() {
           .select();
         
         if (error) {
-          console.error('기록 추가 에러:', error);
+// console.error('기록 추가 에러:', error);
           throw error;
         }
-        console.log('기록 추가 성공:', data);
+// console.log('기록 추가 성공:', data);
       }
     },
     onSuccess: () => {
@@ -266,10 +266,10 @@ export default function BenchmarksPage() {
       // 강제로 리더보드 다시 가져오기
       queryClient.refetchQueries({ queryKey: ['benchmark-leaderboard', selectedBenchmark?.id] });
       setIsRecordModalOpen(false);
-      console.log('기록 저장 완료 - 순위 테이블 업데이트');
+// console.log('기록 저장 완료 - 순위 테이블 업데이트');
     },
     onError: (error) => {
-      console.error('기록 저장 실패:', error);
+// console.error('기록 저장 실패:', error);
       alert('기록 저장에 실패했습니다: ' + error.message);
     },
   });

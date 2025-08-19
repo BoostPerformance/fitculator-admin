@@ -110,7 +110,7 @@ const MobileWorkout: React.FC = () => {
       });
 
     } catch (err) {
-      console.error(err);
+// console.error(err);
       setApiError('유저 데이터를 불러오는 데 실패했습니다.');
     }
   }, [weeklyChart, leaderboard, userStats, userId, challengeId]);

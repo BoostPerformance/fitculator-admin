@@ -203,25 +203,25 @@ export default function MissionsPage() {
       // 챌린지 참가자 가져오기 (페이지네이션 없이 전체 가져오기)
       const participantsResponse = await fetch(`/api/challenge-participants?challenge_id=${challengeId}&limit=1000`);
       const participantsResult = await participantsResponse.json();
-      console.log('Participants response status:', participantsResponse.status);
-      console.log('Participants result:', participantsResult);
+// console.log('Participants response status:', participantsResponse.status);
+// console.log('Participants result:', participantsResult);
       
       // API 응답 구조에 따라 data 추출
       const participantsData = participantsResult.data || [];
-      console.log('Extracted participants data:', participantsData);
-      console.log('Is array?', Array.isArray(participantsData));
+// console.log('Extracted participants data:', participantsData);
+// console.log('Is array?', Array.isArray(participantsData));
       
       if (participantsData.length > 0) {
-        console.log('First participant structure:', participantsData[0]);
-        console.log('Users data:', participantsData[0].users);
-        console.log('Group data:', participantsData[0].challenge_group_participants);
-        console.log('Current group:', participantsData[0].current_group);
+// console.log('First participant structure:', participantsData[0]);
+// console.log('Users data:', participantsData[0].users);
+// console.log('Group data:', participantsData[0].challenge_group_participants);
+// console.log('Current group:', participantsData[0].current_group);
       }
 
       // 미션 완료 정보 가져오기
       const completionsResponse = await fetch(`/api/mission-completions?challengeId=${challengeId}`);
       const completionsData = await completionsResponse.json();
-      console.log('Completions data:', completionsData);
+// console.log('Completions data:', completionsData);
 
       // 유저별로 완료 정보 매핑
       const usersWithCompletions = (Array.isArray(participantsData) ? participantsData : []).map((participant: any) => {
@@ -253,7 +253,7 @@ export default function MissionsPage() {
           group = activeGroup?.challenge_groups || null;
         }
         
-        console.log(`User ${p.users?.name}: group =`, group);
+// console.log(`User ${p.users?.name}: group =`, group);
         
         return {
           id: p.service_user_id,
@@ -285,23 +285,23 @@ export default function MissionsPage() {
       setMappingUsers(sortedMappingUsers);
 
     } catch (error) {
-      console.error('Error fetching data:', error);
+// console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchCompletedWorkouts = async (userId: string, missionId: string) => {
-    console.log('fetchCompletedWorkouts called with:', { userId, missionId });
+// console.log('fetchCompletedWorkouts called with:', { userId, missionId });
     try {
       const mission = missions.find(m => m.id === missionId);
       const user = users.find(u => u.id === userId);
       
-      console.log('Found mission:', mission);
-      console.log('Found user:', user);
+// console.log('Found mission:', mission);
+// console.log('Found user:', user);
       
       if (!mission || !user) {
-        console.log('Mission or user not found, returning');
+// console.log('Mission or user not found, returning');
         return;
       }
       
@@ -325,20 +325,20 @@ export default function MissionsPage() {
           `/api/workouts/user-workouts?userId=${userId}&startDate=${mission.start_date}&endDate=${mission.end_date}`
         );
         
-        console.log('Workouts response status:', workoutsResponse.status);
+// console.log('Workouts response status:', workoutsResponse.status);
         
         if (!workoutsResponse.ok) {
-          console.error('Failed to fetch workouts:', workoutsResponse.statusText);
+// console.error('Failed to fetch workouts:', workoutsResponse.statusText);
           setCompletedWorkouts([]);
           return;
         }
         
         const allWorkouts = await workoutsResponse.json();
-        console.log('All workouts received:', allWorkouts);
+// console.log('All workouts received:', allWorkouts);
         
         // 응답이 배열인지 확인
         if (!Array.isArray(allWorkouts)) {
-          console.error('Workouts response is not an array:', allWorkouts);
+// console.error('Workouts response is not an array:', allWorkouts);
           setCompletedWorkouts([]);
           return;
         }
@@ -348,7 +348,7 @@ export default function MissionsPage() {
           workoutIds.includes(w.id)
         );
         
-        console.log('Mapped workouts:', mappedWorkouts);
+// console.log('Mapped workouts:', mappedWorkouts);
         setCompletedWorkouts(mappedWorkouts);
       } else {
         setCompletedWorkouts([]);
@@ -356,7 +356,7 @@ export default function MissionsPage() {
       
       setShowCompletedWorkoutsModal(true);
     } catch (error) {
-      console.error('Error fetching completed workouts:', error);
+// console.error('Error fetching completed workouts:', error);
       setCompletedWorkouts([]);
     }
   };
@@ -400,7 +400,7 @@ export default function MissionsPage() {
       );
       setSelectedWorkouts(mappedWorkoutIds);
     } catch (error) {
-      console.error('Error fetching workouts:', error);
+// console.error('Error fetching workouts:', error);
       setWorkouts([]);
       setExistingCompletions([]);
       setShowWorkouts(true);
@@ -429,7 +429,7 @@ export default function MissionsPage() {
         resetForm();
       }
     } catch (error) {
-      console.error('Error saving mission:', error);
+// console.error('Error saving mission:', error);
     }
   };
 
@@ -445,7 +445,7 @@ export default function MissionsPage() {
         fetchData();
       }
     } catch (error) {
-      console.error('Error deleting mission:', error);
+// console.error('Error deleting mission:', error);
     }
   };
 
@@ -796,7 +796,7 @@ export default function MissionsPage() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                console.log('Button clicked for user:', user.id, 'mission:', mission.id);
+// console.log('Button clicked for user:', user.id, 'mission:', mission.id);
                                 fetchCompletedWorkouts(user.id, mission.id);
                               }}
                               className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-colors cursor-pointer border-none"
@@ -1531,7 +1531,7 @@ export default function MissionsPage() {
                             alert('운동 매핑에 실패했습니다.');
                           }
                         } catch (error) {
-                          console.error('Error mapping workouts:', error);
+// console.error('Error mapping workouts:', error);
                           alert('운동 매핑 중 오류가 발생했습니다.');
                         }
                       }}

@@ -160,7 +160,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
       setActiveMembersPercent(calculateActiveMembersPercent(workoutData));
       setHasMore(false);
     } catch (error) {
-      console.error('운동 데이터 처리 실패:', error);
+// console.error('운동 데이터 처리 실패:', error);
     }
   }, [weeklyChart, leaderboard, todayCount, batchUserData]);
 
@@ -189,7 +189,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
 
       // 데이터 연결 확인을 위한 로그 (첫 번째 사용자만)
       if (user.id === users[0]?.id) {
-        console.log('첫 번째 사용자 데이터:', {
+// console.log('첫 번째 사용자 데이터:', {
           userId: user.id,
           userName: user.name,
           weeklyRecordsCount: userStatsData.weeklyRecords?.length || 0,

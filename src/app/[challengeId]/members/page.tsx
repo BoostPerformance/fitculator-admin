@@ -57,7 +57,7 @@ export default function MembersPage() {
       
       setParticipants(data.data.filter((p: Participant) => p.status !== 'dropped'));
     } catch (error) {
-      console.error('참가자 목록 로딩 실패:', error);
+// console.error('참가자 목록 로딩 실패:', error);
     }
   };
 
@@ -68,7 +68,7 @@ export default function MembersPage() {
       const data = await res.json();
       setGroups(data.data || []);
     } catch (error) {
-      console.error('그룹 목록 로딩 실패:', error);
+// console.error('그룹 목록 로딩 실패:', error);
     }
   };
 
@@ -99,7 +99,7 @@ export default function MembersPage() {
         setMemoText('');
       }
     } catch (error) {
-      console.error('메모 저장 실패:', error);
+// console.error('메모 저장 실패:', error);
     }
   };
 
@@ -124,7 +124,7 @@ export default function MembersPage() {
         setGroupForm({ name: '', color_code: '#FFD700', sort_order: 0 });
       }
     } catch (error) {
-      console.error('그룹 저장 실패:', error);
+// console.error('그룹 저장 실패:', error);
     }
   };
 
@@ -144,7 +144,7 @@ export default function MembersPage() {
         alert(data.error);
       }
     } catch (error) {
-      console.error('그룹 삭제 실패:', error);
+// console.error('그룹 삭제 실패:', error);
     }
   };
 
@@ -164,7 +164,7 @@ export default function MembersPage() {
         await fetchParticipants();
       }
     } catch (error) {
-      console.error('그룹 할당 실패:', error);
+// console.error('그룹 할당 실패:', error);
     }
   };
 

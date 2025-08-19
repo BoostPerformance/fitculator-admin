@@ -51,7 +51,7 @@ export async function GET() {
 
     return NextResponse.json(coachInfo);
   } catch (error) {
-    console.error('Error fetching Data', error);
+// console.error('Error fetching Data', error);
     return NextResponse.json(
       {
         error: 'failed to fetch data',

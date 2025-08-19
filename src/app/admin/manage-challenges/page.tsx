@@ -63,7 +63,7 @@ export default function ManageChallenges() {
           setChallenges(challengeList);
         }
       } catch (error) {
-        console.error('챌린지 목록 가져오기 오류:', error);
+// console.error('챌린지 목록 가져오기 오류:', error);
       } finally {
         setIsLoading(false);
       }
@@ -82,7 +82,7 @@ export default function ManageChallenges() {
           setOrganizations(data);
         }
       } catch (error) {
-        console.error('조직 목록 가져오기 오류:', error);
+// console.error('조직 목록 가져오기 오류:', error);
       }
     };
 

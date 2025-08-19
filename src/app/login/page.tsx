@@ -42,7 +42,7 @@ export default function Login() {
         redirect: true,
       });
     } catch (error) {
-      console.error('❌ Sign in error:', error);
+// console.error('❌ Sign in error:', error);
     }
   };
 

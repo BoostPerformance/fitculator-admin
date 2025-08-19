@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     .eq('record_date', date);
 
   if (error) {
-    console.error('Supabase count error:', error);
+// console.error('Supabase count error:', error);
     return NextResponse.json({ error: 'Query failed' }, { status: 500 });
   }
 

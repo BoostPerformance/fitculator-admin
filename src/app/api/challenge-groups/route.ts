@@ -29,7 +29,7 @@ export async function GET(request: Request) {
       .order('sort_order', { ascending: true });
 
     if (error) {
-      console.error('그룹 조회 에러:', error);
+// console.error('그룹 조회 에러:', error);
       return NextResponse.json(
         { error: '그룹 조회에 실패했습니다.' },
         { status: 500 }
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ data: groupsWithCount });
   } catch (error) {
-    console.error('그룹 조회 에러:', error);
+// console.error('그룹 조회 에러:', error);
     return NextResponse.json(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      console.error('그룹 생성 에러:', error);
+// console.error('그룹 생성 에러:', error);
       if (error.code === '23505') {
         return NextResponse.json(
           { error: '이미 존재하는 그룹명이거나 정렬 순서입니다.' },
@@ -128,7 +128,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newGroup);
   } catch (error) {
-    console.error('그룹 생성 에러:', error);
+// console.error('그룹 생성 에러:', error);
     return NextResponse.json(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }
@@ -187,7 +187,7 @@ export async function PUT(request: Request) {
       .single();
 
     if (error) {
-      console.error('그룹 수정 에러:', error);
+// console.error('그룹 수정 에러:', error);
       return NextResponse.json(
         { error: '그룹 수정에 실패했습니다.' },
         { status: 500 }
@@ -196,7 +196,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedGroup);
   } catch (error) {
-    console.error('그룹 수정 에러:', error);
+// console.error('그룹 수정 에러:', error);
     return NextResponse.json(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }
@@ -260,7 +260,7 @@ export async function DELETE(request: Request) {
       .eq('id', groupId);
 
     if (error) {
-      console.error('그룹 삭제 에러:', error);
+// console.error('그룹 삭제 에러:', error);
       return NextResponse.json(
         { error: '그룹 삭제에 실패했습니다.' },
         { status: 500 }
@@ -269,7 +269,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('그룹 삭제 에러:', error);
+// console.error('그룹 삭제 에러:', error);
     return NextResponse.json(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }

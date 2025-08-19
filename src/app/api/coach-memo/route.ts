@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("[Coach Memo Error]:", error);
+// console.error("[Coach Memo Error]:", error);
     return NextResponse.json(
       { error: "Failed to save coach memo" },
       { status: 500 }
@@ -113,7 +113,7 @@ export async function PUT(request: Request) {
       .single();
 
     if (error) {
-      console.error('코치메모 업데이트 에러:', error);
+// console.error('코치메모 업데이트 에러:', error);
       return NextResponse.json(
         { error: '코치메모 업데이트에 실패했습니다.' },
         { status: 500 }
@@ -122,7 +122,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error('코치메모 API 에러:', error);
+// console.error('코치메모 API 에러:', error);
     return NextResponse.json(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }

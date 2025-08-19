@@ -86,7 +86,7 @@ export async function GET(
 
     return NextResponse.json(challenge);
   } catch (error) {
-    console.error('❌ === Challenge API Error ===', {
+// console.error('❌ === Challenge API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
@@ -204,7 +204,7 @@ export async function PUT(
       .single();
 
     if (updateError) {
-      console.error('챌린지 수정 오류:', updateError);
+// console.error('챌린지 수정 오류:', updateError);
       return NextResponse.json(
         {
           error: 'Failed to update challenge',
@@ -217,7 +217,7 @@ export async function PUT(
 
     return NextResponse.json(updatedChallenge);
   } catch (error) {
-    console.error('❌ === Challenge Update API Error ===', {
+// console.error('❌ === Challenge Update API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,

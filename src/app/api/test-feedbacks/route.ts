@@ -42,7 +42,7 @@ export async function GET(request: Request) {
       .single();
 
     if (participantError) {
-      console.error('참가자 정보 조회 실패:', participantError);
+// console.error('참가자 정보 조회 실패:', participantError);
       return NextResponse.json(
         {
           error: '참가자 정보를 찾을 수 없습니다.',
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
       .eq('participant_id', participantId);
 
     if (recordsError) {
-      console.error('일일 기록 조회 실패:', recordsError);
+// console.error('일일 기록 조회 실패:', recordsError);
       return NextResponse.json(
         {
           error: '일일 기록을 가져오는 데 실패했습니다.',
@@ -113,7 +113,7 @@ export async function GET(request: Request) {
       .in('daily_record_id', dailyRecordIds);
 
     if (feedbacksError) {
-      console.error('피드백 조회 실패:', feedbacksError);
+// console.error('피드백 조회 실패:', feedbacksError);
       return NextResponse.json(
         {
           error: '피드백을 가져오는 데 실패했습니다.',
@@ -183,21 +183,21 @@ export async function GET(request: Request) {
     // 결과 반환
     return NextResponse.json(result);
   } catch (error) {
-    console.error('===== 피드백 테스트 API 에러 =====');
-    console.error('오류 내용:', error);
-    console.error(
+// console.error('===== 피드백 테스트 API 에러 =====');
+// console.error('오류 내용:', error);
+// console.error(
       '오류 타입:',
       error instanceof Error ? error.constructor.name : typeof error
     );
-    console.error(
+// console.error(
       '오류 메시지:',
       error instanceof Error ? error.message : String(error)
     );
-    console.error(
+// console.error(
       '오류 스택:',
       error instanceof Error ? error.stack : '스택 정보 없음'
     );
-    console.error('===== 피드백 테스트 API 에러 종료 =====');
+// console.error('===== 피드백 테스트 API 에러 종료 =====');
 
     return NextResponse.json(
       {

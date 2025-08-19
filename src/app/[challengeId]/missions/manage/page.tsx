@@ -41,19 +41,19 @@ export default function MissionManagePage() {
   const fetchMissions = async () => {
     try {
       const response = await fetch(`/api/missions?challengeId=${challengeId}`);
-      console.log('Fetching missions for challenge:', challengeId);
+// console.log('Fetching missions for challenge:', challengeId);
       
       if (!response.ok) {
-        console.error('Failed to fetch missions:', response.status, response.statusText);
+// console.error('Failed to fetch missions:', response.status, response.statusText);
         const errorData = await response.json();
-        console.error('Error details:', errorData);
+// console.error('Error details:', errorData);
       } else {
         const data = await response.json();
-        console.log('Missions fetched:', data);
+// console.log('Missions fetched:', data);
         setMissions(data || []);
       }
     } catch (error) {
-      console.error('Error fetching missions:', error);
+// console.error('Error fetching missions:', error);
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export default function MissionManagePage() {
         resetForm();
       }
     } catch (error) {
-      console.error('Error saving mission:', error);
+// console.error('Error saving mission:', error);
     }
   };
 
@@ -96,7 +96,7 @@ export default function MissionManagePage() {
         fetchMissions();
       }
     } catch (error) {
-      console.error('Error deleting mission:', error);
+// console.error('Error deleting mission:', error);
     }
   };
 

@@ -216,7 +216,7 @@ export default function UserWorkoutDetailPage() {
         setIsDisable(false);
       }, 3000);
     } catch (e) {
-      console.error('저장 중 에러:', e);
+// console.error('저장 중 에러:', e);
       alert('피드백 저장에 실패했습니다.');
       setShowAlert(false);
       setIsDisable(false);

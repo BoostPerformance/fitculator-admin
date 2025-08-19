@@ -80,7 +80,7 @@ export async function GET(request: Request) {
     } = await query.order('record_date', { ascending: false });
 
     if (recordsError) {
-      console.error('[diet-table API] Supabase query error:', recordsError);
+// console.error('[diet-table API] Supabase query error:', recordsError);
       throw recordsError;
     }
 
@@ -184,7 +184,7 @@ export async function GET(request: Request) {
       count: count || 0,
     });
   } catch (error) {
-    console.error('[diet-table API] Error:', error);
+// console.error('[diet-table API] Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch data' },
       { status: 500 }

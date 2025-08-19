@@ -275,7 +275,7 @@ export async function GET(request: Request) {
     const uploadDaysCount = uniqueDatesWithMeals.size;
 
     // 콘솔에 결과 기록 (디버깅용)
-    console.log('식단 업로드 일수 계산:', {
+// console.log('식단 업로드 일수 계산:', {
       participantId,
       챌린지시작일: challengeStartDate,
       챌린지종료일: challengeEndDate,
@@ -401,9 +401,9 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error('❌ === Meals API Error ===');
-    console.error(error);
-    console.error('Error details:', {
+// console.error('❌ === Meals API Error ===');
+// console.error(error);
+// console.error('Error details:', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       timestamp: new Date().toISOString(),

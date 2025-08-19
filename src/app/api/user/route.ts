@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
         // Not found
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
-      console.error('Supabase 오류:', error);
+// console.error('Supabase 오류:', error);
       return NextResponse.json({ error: 'DB Error' }, { status: 500 });
     }
 
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
       phoneNumber: data.phone_number,
     });
   } catch (err) {
-    console.error('서버 오류:', err);
+// console.error('서버 오류:', err);
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

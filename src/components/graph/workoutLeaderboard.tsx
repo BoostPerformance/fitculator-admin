@@ -42,7 +42,7 @@ export default function WorkoutLeaderboard({
       try {
         // challengeId가 유효한지 확인
         if (!challengeId) {
-          console.error('유효하지 않은 challengeId:', challengeId);
+// console.error('유효하지 않은 challengeId:', challengeId);
           setLeaderboardData([]);
           return;
         }
@@ -120,7 +120,7 @@ export default function WorkoutLeaderboard({
         );
         setMaxPoints(maxPoints || 1);
       } catch (error) {
-        console.error('리더보드 데이터 가져오기 실패:', error);
+// console.error('리더보드 데이터 가져오기 실패:', error);
       }
     }
 

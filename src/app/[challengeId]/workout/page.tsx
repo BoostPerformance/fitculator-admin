@@ -31,7 +31,7 @@ export default function WorkoutPage() {
   
   // 디버깅을 위한 로그
   useEffect(() => {
-    console.log('🔍 Workout 페이지 데이터 상태:', {
+// console.log('🔍 Workout 페이지 데이터 상태:', {
       challengeId: params.challengeId,
       workoutLoading,
       hasAnyData,
@@ -66,7 +66,7 @@ export default function WorkoutPage() {
         setChallengeError(null);
       } catch (err) {
         setChallengeError('챌린지 정보를 불러오는데 실패했습니다.');
-        console.error('Failed to fetch challenges:', err);
+// console.error('Failed to fetch challenges:', err);
       }
     };
     loadChallenges();

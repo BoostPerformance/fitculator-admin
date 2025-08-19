@@ -83,10 +83,10 @@ export default function ChallengeDetail({
           setSelectedOrganization(data.organization_id);
           setChallengeType(data.challenge_type || 'diet_and_exercise');
         } else {
-          console.error('챌린지 정보 가져오기 실패:', await response.text());
+// console.error('챌린지 정보 가져오기 실패:', await response.text());
         }
       } catch (error) {
-        console.error('챌린지 정보 가져오기 오류:', error);
+// console.error('챌린지 정보 가져오기 오류:', error);
       } finally {
         setIsLoading(false);
       }
@@ -105,7 +105,7 @@ export default function ChallengeDetail({
           setOrganizations(data);
         }
       } catch (error) {
-        console.error('조직 목록 가져오기 오류:', error);
+// console.error('조직 목록 가져오기 오류:', error);
       }
     };
 
@@ -133,7 +133,7 @@ export default function ChallengeDetail({
           );
         }
       } catch (error) {
-        console.error('참가자 목록 가져오기 오류:', error);
+// console.error('참가자 목록 가져오기 오류:', error);
       }
     };
 
@@ -196,7 +196,7 @@ export default function ChallengeDetail({
 
       return urlData.publicUrl;
     } catch (error) {
-      console.error('이미지 업로드 오류:', error);
+// console.error('이미지 업로드 오류:', error);
       alert('이미지 업로드 중 오류가 발생했습니다.');
       return '';
     }
@@ -250,7 +250,7 @@ export default function ChallengeDetail({
       setChallenge(updatedChallenge);
       alert('챌린지가 성공적으로 수정되었습니다!');
     } catch (error) {
-      console.error('Error updating challenge:', error);
+// console.error('Error updating challenge:', error);
       alert('챌린지 수정 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
@@ -309,7 +309,7 @@ export default function ChallengeDetail({
         )
       );
     } catch (error) {
-      console.error('참가자 상태 변경 오류:', error);
+// console.error('참가자 상태 변경 오류:', error);
       alert(
         error instanceof Error
           ? error.message
@@ -345,7 +345,7 @@ export default function ChallengeDetail({
       // 참가자 목록 업데이트
       setParticipants(participants.filter((p) => p.id !== participantId));
     } catch (error) {
-      console.error('참가자 삭제 오류:', error);
+// console.error('참가자 삭제 오류:', error);
       alert(
         error instanceof Error
           ? error.message
@@ -406,7 +406,7 @@ export default function ChallengeDetail({
 
       alert('참가자가 성공적으로 추가되었습니다!');
     } catch (error) {
-      console.error('참가자 추가 오류:', error);
+// console.error('참가자 추가 오류:', error);
       alert(
         error instanceof Error
           ? error.message

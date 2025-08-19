@@ -43,7 +43,7 @@ export default function CreateChallenge() {
           }
         }
       } catch (error) {
-        console.error('조직 목록 가져오기 오류:', error);
+// console.error('조직 목록 가져오기 오류:', error);
       }
     };
 
@@ -104,7 +104,7 @@ export default function CreateChallenge() {
 
       return urlData.publicUrl;
     } catch (error) {
-      console.error('이미지 업로드 오류:', error);
+// console.error('이미지 업로드 오류:', error);
       alert('이미지 업로드 중 오류가 발생했습니다.');
       return '';
     }
@@ -152,7 +152,7 @@ export default function CreateChallenge() {
       alert('챌린지가 성공적으로 생성되었습니다!');
       router.push(`/${data.id}`);
     } catch (error) {
-      console.error('Error creating challenge:', error);
+// console.error('Error creating challenge:', error);
       alert('챌린지 생성 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);

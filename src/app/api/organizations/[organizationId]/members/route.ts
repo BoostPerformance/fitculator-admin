@@ -54,7 +54,7 @@ export async function GET(
       .eq('is_active', true);
 
     if (membersError) {
-      console.error('조직 멤버 목록 가져오기 오류:', membersError);
+// console.error('조직 멤버 목록 가져오기 오류:', membersError);
       return NextResponse.json(
         {
           error: '조직 멤버 목록을 가져오는데 실패했습니다.',
@@ -77,7 +77,7 @@ export async function GET(
 
     return NextResponse.json(formattedMembers || []);
   } catch (error) {
-    console.error('❌ === Organization Members API Error ===', {
+// console.error('❌ === Organization Members API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,

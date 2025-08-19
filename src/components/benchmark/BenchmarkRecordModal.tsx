@@ -112,15 +112,15 @@ export default function BenchmarkRecordModal({
         .limit(200);
 
       if (error) {
-        console.error('운동 기록 조회 에러:', error);
-        console.error('사용자 ID:', formData.user_id);
+// console.error('운동 기록 조회 에러:', error);
+// console.error('사용자 ID:', formData.user_id);
         throw error;
       }
       
-      console.log('조회된 운동 기록:', data);
-      console.log('벤치마크 단위:', benchmark.unit);
-      console.log('챌린지 기간:', challengeStartDate, '~', challengeEndDate);
-      console.log('사용자 ID:', formData.user_id);
+// console.log('조회된 운동 기록:', data);
+// console.log('벤치마크 단위:', benchmark.unit);
+// console.log('챌린지 기간:', challengeStartDate, '~', challengeEndDate);
+// console.log('사용자 ID:', formData.user_id);
       
       return data || [];
     },
@@ -159,7 +159,7 @@ export default function BenchmarkRecordModal({
       used_original_value: formData.used_original_value,
     };
     
-    console.log('전송할 데이터:', recordData);
+// console.log('전송할 데이터:', recordData);
     onSave(recordData);
   };
 

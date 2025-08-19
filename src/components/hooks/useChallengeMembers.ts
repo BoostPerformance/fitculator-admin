@@ -52,7 +52,7 @@ export const useChallengeMembers = (challengeId: string) => {
         
         setMembers(sortedMembers);
       } catch (err) {
-        console.error('멤버 목록 로딩 에러:', err);
+// console.error('멤버 목록 로딩 에러:', err);
         setError(err instanceof Error ? err.message : '알 수 없는 에러');
       } finally {
         setLoading(false);

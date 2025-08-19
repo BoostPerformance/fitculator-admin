@@ -22,7 +22,7 @@ export const authOptions: NextAuthConfig = {
     async signIn({ user }) {
       try {
         if (!user.email) {
-          console.error('No email provided');
+// console.error('No email provided');
           return false;
         }
 
@@ -33,7 +33,7 @@ export const authOptions: NextAuthConfig = {
           .single();
 
         if (userError && userError.code !== 'PGRST116') {
-          console.error('❌ Error checking user:', userError);
+// console.error('❌ Error checking user:', userError);
           return false;
         }
 
@@ -54,13 +54,13 @@ export const authOptions: NextAuthConfig = {
           ]);
 
         if (insertError) {
-          console.error('❌ Error creating user:', insertError);
+// console.error('❌ Error creating user:', insertError);
           return false;
         }
 
         return true;
       } catch (error) {
-        console.error('Error in signIn callback:', error);
+// console.error('Error in signIn callback:', error);
         return false;
       }
     },
@@ -75,7 +75,7 @@ export const authOptions: NextAuthConfig = {
             .single();
 
           if (adminError) {
-            console.error('Error fetching admin user:', adminError);
+// console.error('Error fetching admin user:', adminError);
             return token;
           }
 
@@ -88,7 +88,7 @@ export const authOptions: NextAuthConfig = {
         }
         return token;
       } catch (error) {
-        console.error('Error in jwt callback:', error);
+// console.error('Error in jwt callback:', error);
         return token;
       }
     },
@@ -117,7 +117,7 @@ export const authOptions: NextAuthConfig = {
         }
         return session;
       } catch (error) {
-        console.error('Error in session callback:', error);
+// console.error('Error in session callback:', error);
         return session;
       }
     },
@@ -132,7 +132,7 @@ export const authOptions: NextAuthConfig = {
             .eq('email', user.email);
         }
       } catch (error) {
-        console.error('Error in signIn event:', error);
+// console.error('Error in signIn event:', error);
       }
     },
   },

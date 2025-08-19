@@ -43,13 +43,13 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching mission completions:', error);
+// console.error('Error fetching mission completions:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error in mission-completions GET:', error);
+// console.error('Error in mission-completions GET:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -94,13 +94,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating mission completion:', error);
+// console.error('Error creating mission completion:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error in mission-completions POST:', error);
+// console.error('Error in mission-completions POST:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -131,13 +131,13 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error updating mission completion:', error);
+// console.error('Error updating mission completion:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error in mission-completions PUT:', error);
+// console.error('Error in mission-completions PUT:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -166,13 +166,13 @@ export async function DELETE(request: NextRequest) {
       .eq('id', completionId);
 
     if (error) {
-      console.error('Error deleting mission completion:', error);
+// console.error('Error deleting mission completion:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in mission-completions DELETE:', error);
+// console.error('Error in mission-completions DELETE:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

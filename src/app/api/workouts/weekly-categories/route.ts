@@ -29,7 +29,7 @@ export async function GET(request: Request) {
       .eq('challenge_id', challengeId);
 
     if (participantsError) {
-      console.error('❌ Error fetching participants:', participantsError);
+// console.error('❌ Error fetching participants:', participantsError);
       return NextResponse.json(
         { error: 'Failed to fetch participants' },
         { status: 500 }
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
       .single();
 
     if (challengeError) {
-      console.error('❌ Error getting challenge:', challengeError);
+// console.error('❌ Error getting challenge:', challengeError);
       return NextResponse.json(
         { error: 'Failed to fetch challenge' },
         { status: 500 }
@@ -88,7 +88,7 @@ export async function GET(request: Request) {
       .single();
 
     if (cardioTypeError) {
-      console.error('❌ Error getting CARDIO type:', cardioTypeError);
+// console.error('❌ Error getting CARDIO type:', cardioTypeError);
       return NextResponse.json(
         { error: 'Failed to fetch workout types' },
         { status: 500 }
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
       .eq('type_id', cardioType.id);
 
     if (categoriesError) {
-      console.error('❌ Error fetching cardio categories:', categoriesError);
+// console.error('❌ Error fetching cardio categories:', categoriesError);
       return NextResponse.json(
         { error: 'Failed to fetch categories' },
         { status: 500 }
@@ -153,7 +153,7 @@ export async function GET(request: Request) {
     const { data: workouts, error: workoutsError } = await workoutQuery;
 
     if (workoutsError) {
-      console.error('❌ Error fetching workouts:', workoutsError);
+// console.error('❌ Error fetching workouts:', workoutsError);
       return NextResponse.json(
         { error: 'Failed to fetch workouts' },
         { status: 500 }
@@ -253,7 +253,7 @@ export async function GET(request: Request) {
     // 결과 반환
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error in weekly categories API:', error);
+// console.error('Error in weekly categories API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

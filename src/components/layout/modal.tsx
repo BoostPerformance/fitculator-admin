@@ -67,7 +67,7 @@ export default function Modal({
       router.refresh();
       onClose();
     } catch (err) {
-      console.error("Error submitting coach memo:", err);
+// console.error("Error submitting coach memo:", err);
       alert("메모 저장 중 오류가 발생했습니다.");
     }
   };

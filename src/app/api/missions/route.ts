@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     // 환경변수 체크
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.error('Missing environment variables');
+// console.error('Missing environment variables');
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const challengeId = searchParams.get('challengeId');
 
-    console.log('Missions API - Challenge ID:', challengeId);
+// console.log('Missions API - Challenge ID:', challengeId);
 
     if (!challengeId) {
       return NextResponse.json({ error: 'Challenge ID is required' }, { status: 400 });
@@ -36,16 +36,16 @@ export async function GET(request: NextRequest) {
       .eq('challenge_id', challengeId)
       .order('sort_order', { ascending: true });
 
-    console.log('Missions API - Query result:', { data, error });
+// console.log('Missions API - Query result:', { data, error });
 
     if (error) {
-      console.error('Error fetching missions from DB:', error);
+// console.error('Error fetching missions from DB:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data || []);
   } catch (error) {
-    console.error('Error in missions GET:', error);
+// console.error('Error in missions GET:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -86,13 +86,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating mission:', error);
+// console.error('Error creating mission:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error in missions POST:', error);
+// console.error('Error in missions POST:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -127,13 +127,13 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error updating mission:', error);
+// console.error('Error updating mission:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error in missions PUT:', error);
+// console.error('Error in missions PUT:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -163,13 +163,13 @@ export async function DELETE(request: NextRequest) {
       .eq('id', missionId);
 
     if (error) {
-      console.error('Error deleting mission:', error);
+// console.error('Error deleting mission:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in missions DELETE:', error);
+// console.error('Error in missions DELETE:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

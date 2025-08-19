@@ -66,7 +66,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(dailyRecord);
   } catch (error) {
-    console.error("Error in daily-records GET API:", error);
+// console.error("Error in daily-records GET API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
       .single();
 
     if (dailyRecordError) {
-      console.error("Failed to create daily record:", dailyRecordError);
+// console.error("Failed to create daily record:", dailyRecordError);
       return NextResponse.json(
         { error: "Failed to create daily record" },
         { status: 500 }
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(dailyRecord);
   } catch (error) {
-    console.error("Error in daily-records API:", error);
+// console.error("Error in daily-records API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

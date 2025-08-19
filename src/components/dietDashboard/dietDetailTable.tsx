@@ -133,7 +133,7 @@ const DietDetaileTable = ({
         </div>
       );
     } catch (error) {
-      console.error('Date formatting error:', error);
+// console.error('Date formatting error:', error);
       return <div>날짜 정보 없음</div>;
     }
   };

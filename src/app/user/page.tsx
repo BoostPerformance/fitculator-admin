@@ -30,7 +30,7 @@ export default function User() {
           throw new Error('참여 중인 챌린지가 없습니다');
         }
       } catch (error) {
-        console.error('Error fetching first challenge:', error);
+// console.error('Error fetching first challenge:', error);
         alert(
           error instanceof Error
             ? error.message

@@ -13,7 +13,7 @@ export const useDailyRecords = () => {
       setDailyRecords(data);
       return data;
     } catch (error) {
-      console.error('Error fetching daily records:', error);
+// console.error('Error fetching daily records:', error);
     }
   };
 

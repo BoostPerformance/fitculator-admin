@@ -14,7 +14,7 @@ export interface WorkoutDataResponse {
 const fetchWeeklyChart = async (challengeId: string) => {
   try {
     const url = `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}`;
-    console.log('🔗 Weekly chart API 호출:', url);
+// console.log('🔗 Weekly chart API 호출:', url);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -25,13 +25,13 @@ const fetchWeeklyChart = async (challengeId: string) => {
       cache: 'no-store',
     });
     
-    console.log('📡 Weekly chart 응답 상태:', response.status, response.statusText);
-    console.log('🌍 현재 환경:', process.env.NODE_ENV);
-    console.log('🔗 요청 URL:', response.url);
+// console.log('📡 Weekly chart 응답 상태:', response.status, response.statusText);
+// console.log('🌍 현재 환경:', process.env.NODE_ENV);
+// console.log('🔗 요청 URL:', response.url);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ Weekly chart API 오류:`, {
+// console.error(`❌ Weekly chart API 오류:`, {
         status: response.status,
         statusText: response.statusText,
         url: response.url,
@@ -41,10 +41,10 @@ const fetchWeeklyChart = async (challengeId: string) => {
     }
     
     const data = await response.json();
-    console.log('✅ Weekly chart 데이터 수신:', !!data, Object.keys(data || {}));
+// console.log('✅ Weekly chart 데이터 수신:', !!data, Object.keys(data || {}));
     return data;
   } catch (error) {
-    console.error('❌ Weekly chart fetch 실패:', {
+// console.error('❌ Weekly chart fetch 실패:', {
       error: error.message,
       challengeId,
       environment: process.env.NODE_ENV
@@ -56,7 +56,7 @@ const fetchWeeklyChart = async (challengeId: string) => {
 const fetchLeaderboard = async (challengeId: string) => {
   try {
     const url = `/api/workouts/user-detail?type=leaderboard&challengeId=${challengeId}`;
-    console.log('🔗 Leaderboard API 호출:', url);
+// console.log('🔗 Leaderboard API 호출:', url);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -66,11 +66,11 @@ const fetchLeaderboard = async (challengeId: string) => {
       cache: 'no-store',
     });
     
-    console.log('📡 Leaderboard 응답 상태:', response.status, response.statusText);
+// console.log('📡 Leaderboard 응답 상태:', response.status, response.statusText);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ Leaderboard API 오류:`, {
+// console.error(`❌ Leaderboard API 오류:`, {
         status: response.status,
         statusText: response.statusText,
         url: response.url,
@@ -80,10 +80,10 @@ const fetchLeaderboard = async (challengeId: string) => {
     }
     
     const data = await response.json();
-    console.log('✅ Leaderboard 데이터 수신:', !!data, Object.keys(data || {}));
+// console.log('✅ Leaderboard 데이터 수신:', !!data, Object.keys(data || {}));
     return data;
   } catch (error) {
-    console.error('❌ Leaderboard fetch 실패:', {
+// console.error('❌ Leaderboard fetch 실패:', {
       error: error.message,
       challengeId,
       environment: process.env.NODE_ENV
@@ -95,7 +95,7 @@ const fetchLeaderboard = async (challengeId: string) => {
 const fetchTodayCount = async (challengeId: string) => {
   try {
     const url = `/api/workouts/user-detail?type=today-count&challengeId=${challengeId}`;
-    console.log('🔗 Today count API 호출:', url);
+// console.log('🔗 Today count API 호출:', url);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -105,11 +105,11 @@ const fetchTodayCount = async (challengeId: string) => {
       cache: 'no-store',
     });
     
-    console.log('📡 Today count 응답 상태:', response.status, response.statusText);
+// console.log('📡 Today count 응답 상태:', response.status, response.statusText);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ Today count API 오류:`, {
+// console.error(`❌ Today count API 오류:`, {
         status: response.status,
         statusText: response.statusText,
         url: response.url,
@@ -119,10 +119,10 @@ const fetchTodayCount = async (challengeId: string) => {
     }
     
     const data = await response.json();
-    console.log('✅ Today count 데이터 수신:', !!data, Object.keys(data || {}));
+// console.log('✅ Today count 데이터 수신:', !!data, Object.keys(data || {}));
     return data;
   } catch (error) {
-    console.error('❌ Today count fetch 실패:', {
+// console.error('❌ Today count fetch 실패:', {
       error: error.message,
       challengeId,
       environment: process.env.NODE_ENV
@@ -158,7 +158,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     staleTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000, // Production: 2분, Development: 5분
     gcTime: process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 10 * 60 * 1000, // Production: 5분, Development: 10분
     retry: (failureCount, error) => {
-      console.log(`🔄 Weekly chart 재시도 ${failureCount}회:`, error);
+// console.log(`🔄 Weekly chart 재시도 ${failureCount}회:`, error);
       return failureCount < 3; // Production 환경에서 더 많은 재시도
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프
@@ -174,7 +174,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     staleTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000,
     gcTime: process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 10 * 60 * 1000,
     retry: (failureCount, error) => {
-      console.log(`🔄 Leaderboard 재시도 ${failureCount}회:`, error);
+// console.log(`🔄 Leaderboard 재시도 ${failureCount}회:`, error);
       return failureCount < 3;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -190,7 +190,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     staleTime: process.env.NODE_ENV === 'production' ? 30 * 1000 : 1 * 60 * 1000, // Production: 30초, Development: 1분
     gcTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000, // Production: 2분, Development: 5분
     retry: (failureCount, error) => {
-      console.log(`🔄 Today count 재시도 ${failureCount}회:`, error);
+// console.log(`🔄 Today count 재시도 ${failureCount}회:`, error);
       return failureCount < 3;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -205,12 +205,12 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'batch-user-data-single', challengeId, userIds.sort().join(',')],
     queryFn: async () => {
       if (!userIds.length) {
-        console.log('🚫 Batch user data: userIds가 비어있음');
+// console.log('🚫 Batch user data: userIds가 비어있음');
         return [];
       }
       
       const url = `/api/workouts/user-detail?type=batch-user-data&userIds=${userIds.join(',')}&challengeId=${challengeId}`;
-      console.log('🔗 Batch user data API 호출:', url, `(${userIds.length}명)`);
+// console.log('🔗 Batch user data API 호출:', url, `(${userIds.length}명)`);
       
       const response = await fetch(url, {
         method: 'GET',
@@ -220,11 +220,11 @@ export const useWorkoutDataQuery = (challengeId: string) => {
         cache: 'no-store',
       });
       
-      console.log('📡 Batch user data 응답 상태:', response.status, response.statusText);
+// console.log('📡 Batch user data 응답 상태:', response.status, response.statusText);
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Batch user data API 오류:', {
+// console.error('❌ Batch user data API 오류:', {
           status: response.status,
           statusText: response.statusText,
           url: response.url,
@@ -234,7 +234,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
       }
       
       const data = await response.json();
-      console.log('✅ Batch user data 수신:', Array.isArray(data) ? data.length : 'Invalid data', '개 사용자');
+// console.log('✅ Batch user data 수신:', Array.isArray(data) ? data.length : 'Invalid data', '개 사용자');
       return data;
     },
     enabled: !!challengeId && userIds.length > 0 && userIds.length <= 50, // 50명 이하일 때만
@@ -268,7 +268,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
   
   // 연결 상태 로깅 - Production 환경에서 더 상세히
   if (error) {
-    console.error('⚠️ API 연결 문제 감지:', {
+// console.error('⚠️ API 연결 문제 감지:', {
       error: error.message,
       challengeId,
       environment: process.env.NODE_ENV,
@@ -280,7 +280,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
       }
     });
   } else if (hasAnyData) {
-    console.log('✅ API 연결 정상, 데이터 로드됨:', {
+// console.log('✅ API 연결 정상, 데이터 로드됨:', {
       challengeId,
       environment: process.env.NODE_ENV,
       data: {
@@ -291,7 +291,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
       }
     });
   } else if (!isLoading) {
-    console.warn('⚠️ 로딩 완료되었지만 데이터가 없음:', {
+// console.warn('⚠️ 로딩 완료되었지만 데이터가 없음:', {
       challengeId,
       environment: process.env.NODE_ENV,
       isLoading,

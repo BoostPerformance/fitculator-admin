@@ -87,7 +87,7 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false });
 
     if (participantsError) {
-      console.error('참가자 정보 쿼리 오류:', participantsError);
+// console.error('참가자 정보 쿼리 오류:', participantsError);
       throw participantsError;
     }
 
@@ -267,21 +267,21 @@ export async function GET(request: Request) {
     //console.log('===== challenge-participants API 종료 =====');
     return NextResponse.json(result);
   } catch (error) {
-    console.error('===== challenge-participants API 에러 =====');
-    console.error('오류 내용:', error);
-    console.error(
+// console.error('===== challenge-participants API 에러 =====');
+// console.error('오류 내용:', error);
+// console.error(
       '오류 타입:',
       error instanceof Error ? error.constructor.name : typeof error
     );
-    console.error(
+// console.error(
       '오류 메시지:',
       error instanceof Error ? error.message : String(error)
     );
-    console.error(
+// console.error(
       '오류 스택:',
       error instanceof Error ? error.stack : '스택 정보 없음'
     );
-    console.error('===== challenge-participants API 에러 종료 =====');
+// console.error('===== challenge-participants API 에러 종료 =====');
 
     return NextResponse.json(
       {
@@ -391,7 +391,7 @@ export async function PUT(request: Request) {
     // 응답 반환
     return NextResponse.json(updatedParticipant);
   } catch (error) {
-    console.error('❌ === Challenge Participant API Error ===', {
+// console.error('❌ === Challenge Participant API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
@@ -491,7 +491,7 @@ export async function DELETE(request: Request) {
     // 성공 응답 반환
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('❌ === Challenge Participant API Error ===', {
+// console.error('❌ === Challenge Participant API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
@@ -657,7 +657,7 @@ export async function POST(request: Request) {
       user_info: userInfo,
     });
   } catch (error) {
-    console.error('❌ === Challenge Participant API Error ===', {
+// console.error('❌ === Challenge Participant API Error ===', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,

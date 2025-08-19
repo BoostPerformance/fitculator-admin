@@ -70,7 +70,7 @@ export async function GET(request: Request) {
       total: `${totalParticipants}명`,
     });
   } catch (error) {
-    console.error("Error fetching diet uploads:", error);
+// console.error("Error fetching diet uploads:", error);
     return NextResponse.json(
       { error: "Failed to fetch diet uploads" },
       { status: 500 }

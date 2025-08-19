@@ -53,7 +53,7 @@ export async function GET(request: Request) {
     const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
-      console.error('그룹 참가자 조회 에러:', error);
+// console.error('그룹 참가자 조회 에러:', error);
       return NextResponse.json(
         { error: '그룹 참가자 조회에 실패했습니다.' },
         { status: 500 }
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error('그룹 참가자 조회 에러:', error);
+// console.error('그룹 참가자 조회 에러:', error);
     return NextResponse.json(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }
@@ -130,7 +130,7 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      console.error('그룹 할당 에러:', error);
+// console.error('그룹 할당 에러:', error);
       return NextResponse.json(
         { error: '그룹 할당에 실패했습니다.' },
         { status: 500 }
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newAssignment);
   } catch (error) {
-    console.error('그룹 할당 에러:', error);
+// console.error('그룹 할당 에러:', error);
     return NextResponse.json(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }
@@ -207,7 +207,7 @@ export async function PUT(request: Request) {
       .single();
 
     if (error) {
-      console.error('그룹 변경 에러:', error);
+// console.error('그룹 변경 에러:', error);
       return NextResponse.json(
         { error: '그룹 변경에 실패했습니다.' },
         { status: 500 }
@@ -216,7 +216,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(newAssignment);
   } catch (error) {
-    console.error('그룹 변경 에러:', error);
+// console.error('그룹 변경 에러:', error);
     return NextResponse.json(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }
@@ -268,7 +268,7 @@ export async function DELETE(request: Request) {
       .eq('is_active', true);
 
     if (error) {
-      console.error('그룹 할당 해제 에러:', error);
+// console.error('그룹 할당 해제 에러:', error);
       return NextResponse.json(
         { error: '그룹 할당 해제에 실패했습니다.' },
         { status: 500 }
@@ -277,7 +277,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('그룹 할당 해제 에러:', error);
+// console.error('그룹 할당 해제 에러:', error);
     return NextResponse.json(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }

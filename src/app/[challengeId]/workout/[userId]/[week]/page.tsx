@@ -168,7 +168,7 @@ export default function MobileWorkoutDetail() {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch challenge info:', error);
+// console.error('Failed to fetch challenge info:', error);
       }
     };
     
@@ -297,7 +297,7 @@ export default function MobileWorkoutDetail() {
         setIsDisable(false);
       }, 3000);
     } catch (e) {
-      console.error('저장 중 에러:', e);
+// console.error('저장 중 에러:', e);
       alert('피드백 저장에 실패했습니다.');
       setShowAlert(false);
       setIsDisable(false);

@@ -126,7 +126,7 @@ export const useDietData = (
           setError(null);
         }
       } catch (error) {
-        console.error('Error fetching initial data:', error);
+// console.error('Error fetching initial data:', error);
         if (isMounted) {
           setError('초기 데이터를 불러오는데 실패했습니다.');
         }
@@ -194,7 +194,7 @@ export const useDietData = (
 
         setError(null);
       } catch (error) {
-        console.error('Error fetching diet data:', error);
+// console.error('Error fetching diet data:', error);
         if (isMounted) {
           setError('식단 데이터를 불러오는데 실패했습니다.');
         }
@@ -218,7 +218,7 @@ export const useDietData = (
 
         setUploadCount(data.uploadCount ?? 0);
       } catch (err) {
-        console.error('업로드 수 fetch 실패:', err);
+// console.error('업로드 수 fetch 실패:', err);
         setUploadCount(null);
       }
     };
@@ -337,7 +337,7 @@ export const useDietData = (
       const data: DietResponse = await response.json();
       return data.data;
     } catch (err) {
-      console.error('Error fetching all diet records:', err);
+// console.error('Error fetching all diet records:', err);
       return [];
     }
   };

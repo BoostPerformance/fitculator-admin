@@ -133,7 +133,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
 
   // Process data when React Query data changes
   const processWorkoutData = useCallback(async () => {
-    console.log('🔧 processWorkoutData 시작', { 
+// console.log('🔧 processWorkoutData 시작', { 
       weeklyChart: !!weeklyChart, 
       leaderboard: !!leaderboard, 
       todayCount: !!todayCount,
@@ -141,7 +141,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
     });
     
     if (!weeklyChart || !leaderboard || !todayCount) {
-      console.log('❌ 필수 데이터 없음, 종료');
+// console.log('❌ 필수 데이터 없음, 종료');
       return;
     }
 
@@ -178,7 +178,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
       setActiveMembersPercent(calculateActiveMembersPercent(workoutData));
       setHasMore(false);
     } catch (error) {
-      console.error('운동 데이터 처리 실패:', error);
+// console.error('운동 데이터 처리 실패:', error);
     }
   }, [weeklyChart, leaderboard, todayCount, batchUserData]);
 
@@ -206,7 +206,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
         
         // 디버깅: 첫 번째 사용자만 로그 출력
         if (user.id === users[0]?.id) {
-          console.log('🔍 WorkoutUserList 디버깅:', {
+// console.log('🔍 WorkoutUserList 디버깅:', {
             userId: user.id,
             userName: user.name,
             hasBatchUserData: !!userData,
@@ -368,7 +368,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   }, [handleObserver, workoutItems]);
 
   if (isLoading) {
-    console.log('🔄 WorkoutUserList 로딩 중...', { challengeId, isLoading });
+// console.log('🔄 WorkoutUserList 로딩 중...', { challengeId, isLoading });
     return <WorkoutPageSkeleton />;
   }
 
@@ -390,7 +390,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
               key={index}
               className="pt-[0rem] pb-[2rem] sm:bg-white rounded-md shadow cursor-pointer"
               onClick={() => {
-                console.log('👤 사용자 카드 클릭됨!', {
+// console.log('👤 사용자 카드 클릭됨!', {
                   user: user.name,
                   userId: user.userId,
                   challengeId,
@@ -405,13 +405,13 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                     : `W${firstWeek.weekNumber}`;
                   
                   const targetUrl = `/${challengeId}/workout/${user.userId}/${firstWeek.weekNumber}?label=${weekLabel}`;
-                  console.log('🚀 이동할 URL (카드 클릭):', targetUrl);
+// console.log('🚀 이동할 URL (카드 클릭):', targetUrl);
                   
                   router.push(targetUrl);
                 } else {
                   // fallback: 기본 사용자 페이지
                   const fallbackUrl = `/${challengeId}/workout/${user.userId}/0`;
-                  console.log('🚀 이동할 URL (fallback):', fallbackUrl);
+// console.log('🚀 이동할 URL (fallback):', fallbackUrl);
                   router.push(fallbackUrl);
                 }
               }}
@@ -443,7 +443,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                               className="text-center p-3 cursor-pointer hover:bg-gray-50"
                               onClick={(e) => {
                                 e.stopPropagation(); // 부모 클릭 이벤트 방지
-                                console.log('🎯 주차별 운동량 칸 클릭됨!', {
+// console.log('🎯 주차별 운동량 칸 클릭됨!', {
                                   user: user.name,
                                   userId: user.userId,
                                   weekNumber: week.weekNumber,
@@ -457,7 +457,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                                   : `W${week.weekNumber}`;
                                 
                                 const targetUrl = `/${challengeId}/workout/${user.userId}/${week.weekNumber}?label=${weekLabel}`;
-                                console.log('🚀 이동할 URL:', targetUrl);
+// console.log('🚀 이동할 URL:', targetUrl);
                                 
                                 router.push(targetUrl);
                               }}

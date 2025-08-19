@@ -81,7 +81,7 @@ export async function GET(request: Request) {
       return await getUserWorkoutData(userId, challengeId);
     }
   } catch (error) {
-    console.error('Error in workout API:', error);
+// console.error('Error in workout API:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -103,7 +103,7 @@ async function getWeeklyChartData(
       .single();
 
     if (challengeError) {
-      console.error('Error getting challenge:', challengeError);
+// console.error('Error getting challenge:', challengeError);
       return NextResponse.json(
         { error: 'Failed to fetch challenge' },
         { status: 500 }
@@ -251,7 +251,7 @@ async function getWeeklyChartData(
       },
     });
   } catch (error) {
-    console.error('Error in weekly chart data:', error);
+// console.error('Error in weekly chart data:', error);
     return NextResponse.json(
       { error: 'Failed to process weekly chart data' },
       { status: 500 }
@@ -274,7 +274,7 @@ async function getLeaderboardData(
       .eq('status', 'active');
 
     if (participantsError) {
-      console.error(
+// console.error(
         'Error fetching challenge participants:',
         participantsError
       );
@@ -311,7 +311,7 @@ async function getLeaderboardData(
       .in('id', participantIds);
 
     if (usersError) {
-      console.error('Error fetching users:', usersError);
+// console.error('Error fetching users:', usersError);
       return NextResponse.json(
         { error: 'Failed to fetch users' },
         { status: 500 }
@@ -325,7 +325,7 @@ async function getLeaderboardData(
       .in('user_id', participantIds);
 
     if (weeklyError) {
-      console.error('Error fetching weekly records:', weeklyError);
+// console.error('Error fetching weekly records:', weeklyError);
       return NextResponse.json(
         { error: 'Failed to fetch weekly workout records' },
         { status: 500 }
@@ -372,7 +372,7 @@ async function getLeaderboardData(
 
     return NextResponse.json(leaderboardData);
   } catch (error) {
-    console.error('Error in leaderboard data:', error);
+// console.error('Error in leaderboard data:', error);
     return NextResponse.json(
       { error: 'Failed to process leaderboard data' },
       { status: 500 }
@@ -395,7 +395,7 @@ async function getTodayCountData(
       .eq('status', 'active');
 
     if (participantsError) {
-      console.error(
+// console.error(
         'Error fetching challenge participants:',
         participantsError
       );
@@ -428,7 +428,7 @@ async function getTodayCountData(
       .lte('timestamp', `${today}T23:59:59`);
 
     if (workoutsError) {
-      console.error("Error fetching today's workouts:", workoutsError);
+// console.error("Error fetching today's workouts:", workoutsError);
       return NextResponse.json(
         { error: "Failed to fetch today's workouts" },
         { status: 500 }
@@ -446,7 +446,7 @@ async function getTodayCountData(
       total: participantIds.length,
     });
   } catch (error) {
-    console.error('Error in today count data:', error);
+// console.error('Error in today count data:', error);
     return NextResponse.json(
       { error: 'Failed to process today count data' },
       { status: 500 }
@@ -478,7 +478,7 @@ async function getUserWorkoutData(
       .single();
 
     if (userError) {
-      console.error('Error fetching user:', userError);
+// console.error('Error fetching user:', userError);
       return NextResponse.json(
         { error: 'Failed to fetch user' },
         { status: 500 }
@@ -497,7 +497,7 @@ async function getUserWorkoutData(
         .single();
 
       if (challengeError) {
-        console.error('Error fetching challenge:', challengeError);
+// console.error('Error fetching challenge:', challengeError);
       } else if (challenge) {
         challengeStartDate = challenge.start_date;
         challengeEndDate = challenge.end_date;
@@ -512,12 +512,12 @@ async function getUserWorkoutData(
         .maybeSingle();
 
       if (participationError) {
-        console.error(
+// console.error(
           'Error checking challenge participation:',
           participationError
         );
       } else if (!participation) {
-        console.warn(
+// console.warn(
           `User ${userId} is not an active participant in challenge ${challengeId}`
         );
       }
@@ -552,7 +552,7 @@ async function getUserWorkoutData(
     );
 
     if (weeklyError) {
-      console.error('Error fetching weekly records:', weeklyError);
+// console.error('Error fetching weekly records:', weeklyError);
       return NextResponse.json(
         { error: 'Failed to fetch weekly workout records' },
         { status: 500 }
@@ -572,7 +572,7 @@ async function getUserWorkoutData(
         .maybeSingle();
 
       if (feedbackError) {
-        console.error(
+// console.error(
           'Error fetching feedback for record:',
           record.id,
           feedbackError
@@ -600,7 +600,7 @@ async function getUserWorkoutData(
             profile_image_url: coachData.profile_image_url
           };
         } else if (coachError) {
-          console.error('Error fetching coach:', coachError);
+// console.error('Error fetching coach:', coachError);
         }
       }
 
@@ -661,7 +661,7 @@ async function getUserWorkoutData(
     const { data: recentWorkouts, error: workoutsError } = await workoutsQuery;
 
     if (workoutsError) {
-      console.error('Error fetching recent workouts:', workoutsError);
+// console.error('Error fetching recent workouts:', workoutsError);
       return NextResponse.json(
         { error: 'Failed to fetch recent workouts' },
         { status: 500 }
@@ -698,7 +698,7 @@ async function getUserWorkoutData(
     };
     return NextResponse.json(final);
   } catch (error) {
-    console.error('Error fetching user workout data:', error);
+// console.error('Error fetching user workout data:', error);
     return NextResponse.json(
       { error: 'Failed to fetch user workout data' },
       { status: 500 }
@@ -727,7 +727,7 @@ async function getBatchUserWorkoutData(
         .single();
 
       if (userError) {
-        console.error(`Error fetching user ${userId}:`, userError);
+// console.error(`Error fetching user ${userId}:`, userError);
         return null;
       }
 
@@ -846,7 +846,7 @@ async function getBatchUserWorkoutData(
 
     return NextResponse.json(validResults);
   } catch (error) {
-    console.error('Error fetching batch user workout data:', error);
+// console.error('Error fetching batch user workout data:', error);
     return NextResponse.json(
       { error: 'Failed to fetch batch user workout data' },
       { status: 500 }

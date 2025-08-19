@@ -27,7 +27,7 @@ export async function GET(request: Request) {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('🔄 Weekly-chart 데이터 조회:', challengeId);
+// console.log('🔄 Weekly-chart 데이터 조회:', challengeId);
       }
 
       // 1. 챌린지 참가자 목록 조회
@@ -37,7 +37,7 @@ export async function GET(request: Request) {
         .eq('challenge_id', challengeId);
 
       if (participantsError) {
-        console.error('❌ Error fetching participants:', participantsError);
+// console.error('❌ Error fetching participants:', participantsError);
         return NextResponse.json(
           { error: 'Failed to fetch participants' },
           { status: 500 }
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
         .single();
 
       if (challengeError) {
-        console.error('❌ Error getting challenge:', challengeError);
+// console.error('❌ Error getting challenge:', challengeError);
         return NextResponse.json(
           { error: 'Failed to fetch challenge' },
           { status: 500 }
@@ -89,7 +89,7 @@ export async function GET(request: Request) {
         .in('id', participantIds);
 
       if (usersError) {
-        console.error('❌ Error fetching users:', usersError);
+// console.error('❌ Error fetching users:', usersError);
         return NextResponse.json(
           { error: 'Failed to fetch users' },
           { status: 500 }
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
         .select('id, name');
 
       if (typesError) {
-        console.error('❌ Error getting workout types:', typesError);
+// console.error('❌ Error getting workout types:', typesError);
         return NextResponse.json(
           { error: 'Failed to fetch workout types' },
           { status: 500 }
@@ -123,7 +123,7 @@ export async function GET(request: Request) {
         .select('id, type_id');
 
       if (categoriesError) {
-        console.error('❌ Error fetching categories:', categoriesError);
+// console.error('❌ Error fetching categories:', categoriesError);
         return NextResponse.json(
           { error: 'Failed to fetch categories' },
           { status: 500 }
@@ -158,7 +158,7 @@ export async function GET(request: Request) {
         .lte('timestamp', sunday.toISOString());
 
       if (workoutsError) {
-        console.error('❌ Error fetching workouts:', workoutsError);
+// console.error('❌ Error fetching workouts:', workoutsError);
         return NextResponse.json(
           { error: 'Failed to fetch workouts' },
           { status: 500 }
@@ -198,7 +198,7 @@ export async function GET(request: Request) {
         ],
       });
     } catch (error) {
-      console.error('Error in weekly-chart:', error);
+// console.error('Error in weekly-chart:', error);
       return NextResponse.json(
         { error: 'Internal server error' },
         { status: 500 }
@@ -231,7 +231,7 @@ export async function GET(request: Request) {
         .eq('challenge_id', challengeId);
 
       if (participantsError) {
-        console.error('❌ Error fetching participants:', participantsError);
+// console.error('❌ Error fetching participants:', participantsError);
         return NextResponse.json(
           { error: 'Failed to fetch participants' },
           { status: 500 }
@@ -261,7 +261,7 @@ export async function GET(request: Request) {
         );
 
       if (workoutsError) {
-        console.error('❌ Error fetching workouts:', workoutsError);
+// console.error('❌ Error fetching workouts:', workoutsError);
         return NextResponse.json(
           { error: 'Failed to fetch workouts' },
           { status: 500 }
@@ -280,7 +280,7 @@ export async function GET(request: Request) {
         total: participantIds.length,
       });
     } catch (error) {
-      console.error('Error in today-count:', error);
+// console.error('Error in today-count:', error);
       return NextResponse.json(
         { error: 'Internal server error' },
         { status: 500 }
@@ -354,7 +354,7 @@ export async function GET(request: Request) {
         .eq('challenge_id', challengeId);
 
       if (participantsError) {
-        console.error('❌ Error fetching participants:', participantsError);
+// console.error('❌ Error fetching participants:', participantsError);
         return NextResponse.json(
           { error: 'Failed to fetch participants' },
           { status: 500 }
@@ -382,7 +382,7 @@ export async function GET(request: Request) {
         .lte('timestamp', sunday.toISOString());
 
       if (workoutsError) {
-        console.error('❌ Error fetching workouts:', workoutsError);
+// console.error('❌ Error fetching workouts:', workoutsError);
         return NextResponse.json(
           { error: 'Failed to fetch workouts' },
           { status: 500 }
@@ -428,7 +428,7 @@ export async function GET(request: Request) {
 
       return NextResponse.json(processedData);
     } catch (error) {
-      console.error('Error in daily-records:', error);
+// console.error('Error in daily-records:', error);
       return NextResponse.json(
         { error: 'Internal server error' },
         { status: 500 }
@@ -443,7 +443,7 @@ export async function GET(request: Request) {
     // console.log('📥 Session:', session?.user?.email || 'No session');
 
     if (!session?.user?.email) {
-      console.log('❌ Not authenticated');
+// console.log('❌ Not authenticated');
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
@@ -462,7 +462,7 @@ export async function GET(request: Request) {
       .single();
 
     if (challengeError) {
-      console.error('❌ Error getting challenge:', challengeError);
+// console.error('❌ Error getting challenge:', challengeError);
       return NextResponse.json(
         { error: 'Failed to fetch challenge' },
         { status: 500 }
@@ -506,7 +506,7 @@ export async function GET(request: Request) {
 
     // challengeId가 없는 경우 코치 확인
     if (!challengeId) {
-      console.log('🔍 No challengeId provided, checking if user is coach...');
+// console.log('🔍 No challengeId provided, checking if user is coach...');
 
       // 먼저 admin_users 테이블에서 코치인지 확인
       const { data: adminUser, error: adminError } = await supabase
@@ -540,7 +540,7 @@ export async function GET(request: Request) {
     // console.log('📥 Challenge ID:', challengeId);
 
     if (!challengeId) {
-      console.log('❌ Challenge ID is missing');
+// console.log('❌ Challenge ID is missing');
       return NextResponse.json(
         { error: 'Challenge ID is required' },
         { status: 400 }
@@ -555,7 +555,7 @@ export async function GET(request: Request) {
       .eq('challenge_id', challengeId);
 
     if (participantsError) {
-      console.error('❌ Error getting participants:', participantsError);
+// console.error('❌ Error getting participants:', participantsError);
       return NextResponse.json(
         { error: 'Failed to fetch participants' },
         { status: 500 }
@@ -566,7 +566,7 @@ export async function GET(request: Request) {
 
     // If no participants, return empty array
     if (!participants || participants.length === 0) {
-      console.log('ℹ️ No participants found');
+// console.log('ℹ️ No participants found');
       return NextResponse.json([]);
     }
 
@@ -581,7 +581,7 @@ export async function GET(request: Request) {
       .single();
 
     if (typesError) {
-      console.error('❌ Error getting workout types:', typesError);
+// console.error('❌ Error getting workout types:', typesError);
       return NextResponse.json(
         { error: 'Failed to fetch workout types' },
         { status: 500 }
@@ -603,7 +603,7 @@ export async function GET(request: Request) {
         .single();
 
       if (cardioTypeError) {
-        console.error('❌ Error getting CARDIO type:', cardioTypeError);
+// console.error('❌ Error getting CARDIO type:', cardioTypeError);
         return NextResponse.json(
           { error: 'Failed to fetch workout types' },
           { status: 500 }
@@ -617,7 +617,7 @@ export async function GET(request: Request) {
         .eq('type_id', cardioType.id);
 
       if (cardioError) {
-        console.error('❌ Error fetching cardio categories:', cardioError);
+// console.error('❌ Error fetching cardio categories:', cardioError);
         return NextResponse.json(
           { error: 'Failed to fetch categories' },
           { status: 500 }
@@ -652,7 +652,7 @@ export async function GET(request: Request) {
         .single();
 
       if (strengthTypeError) {
-        console.error('❌ Error getting STRENGTH type:', strengthTypeError);
+// console.error('❌ Error getting STRENGTH type:', strengthTypeError);
         return NextResponse.json(
           { error: 'Failed to fetch workout types' },
           { status: 500 }
@@ -666,7 +666,7 @@ export async function GET(request: Request) {
           .eq('type_id', strengthType.id);
 
       if (categoriesError) {
-        console.error(
+// console.error(
           '❌ Error fetching strength categories:',
           categoriesError
         );
@@ -688,7 +688,7 @@ export async function GET(request: Request) {
           .lte('timestamp', challenge.end_date);
 
       if (strengthWorkoutsError) {
-        console.error(
+// console.error(
           '❌ Error fetching strength workouts:',
           strengthWorkoutsError
         );
@@ -717,7 +717,7 @@ export async function GET(request: Request) {
       const { data: workoutData, error: workoutError } = await query;
 
       if (workoutError) {
-        console.error('❌ Supabase query error at workoutData:', workoutError);
+// console.error('❌ Supabase query error at workoutData:', workoutError);
         return NextResponse.json(
           { error: 'Failed to fetch workout data' },
           { status: 500 }
@@ -789,7 +789,7 @@ export async function GET(request: Request) {
       //console.log(workoutData);
 
       if (workoutError) {
-        console.error(
+// console.error(
           '❌ Supabase query error at workouts table:',
           workoutError
         );
@@ -832,8 +832,8 @@ export async function GET(request: Request) {
       return NextResponse.json(chartData);
     }
   } catch (error) {
-    console.error('❌ === Workouts API Error ===');
-    console.error('Error details:', {
+// console.error('❌ === Workouts API Error ===');
+// console.error('Error details:', {
       name: error instanceof Error ? error.name : 'Unknown error',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,

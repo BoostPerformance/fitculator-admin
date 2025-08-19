@@ -36,7 +36,7 @@ const DailyDietRecordMobile = ({ activities }: any) => {
     try {
       const start = new Date(startDate);
       if (isNaN(start.getTime())) {
-        console.error("Invalid start date:", startDate);
+// console.error("Invalid start date:", startDate);
         return Array(7).fill("");
       }
 
@@ -51,7 +51,7 @@ const DailyDietRecordMobile = ({ activities }: any) => {
       }
       return dates;
     } catch (error) {
-      console.error("Error in getWeekDates:", error);
+// console.error("Error in getWeekDates:", error);
       return Array(7).fill("");
     }
   };
@@ -141,7 +141,7 @@ const DailyDietRecordMobile = ({ activities }: any) => {
                                     );
                                   }
                                 } catch (error) {
-                                  console.error(
+// console.error(
                                     "Error fetching daily record:",
                                     error
                                   );
