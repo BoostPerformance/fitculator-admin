@@ -15,9 +15,15 @@ export async function GET(
   { params }: { params: { challengeId: string } }
 ) {
   try {
+    console.log('🔍 === Challenge Detail API Start ===');
+    const { challengeId } = params;
+    console.log('📝 Challenge ID:', challengeId);
+
     const session = (await getServerSession(authOptions)) as Session;
+    console.log('👤 Session email:', session?.user?.email);
 
     if (!session?.user?.email) {
+      console.log('❌ Not authenticated');
       return NextResponse.json(
         {
           error: 'Not authenticated',
@@ -28,13 +34,27 @@ export async function GET(
     }
 
     // 관리자 사용자 확인
+    console.log('🔍 Checking admin user...');
     const { data: adminUser, error: adminError } = await supabase
       .from('admin_users')
       .select('*')
       .eq('email', session.user.email)
       .single();
 
-    if (adminError || !adminUser) {
+    if (adminError) {
+      console.error('❌ Admin user query error:', adminError);
+      return NextResponse.json(
+        {
+          error: 'Failed to fetch admin user',
+          details: adminError.message,
+          type: 'AdminUserError',
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!adminUser) {
+      console.log('❌ Admin user not found');
       return NextResponse.json(
         {
           error: 'Admin user not found',
@@ -44,9 +64,11 @@ export async function GET(
       );
     }
 
+    console.log('✅ Admin user found:', adminUser.email);
+
     // 챌린지 ID 확인
-    const { challengeId } = params;
     if (!challengeId) {
+      console.log('❌ Challenge ID is missing');
       return NextResponse.json(
         {
           error: 'Challenge ID is required',
@@ -57,13 +79,14 @@ export async function GET(
     }
 
     // 챌린지 조회
-    const { data: challenge, error: challengeError } = await supabase
+    console.log('🔍 Fetching challenge...');
+    const { data: challengeData, error: challengeError } = await supabase
       .from('challenges')
       .select('*')
-      .eq('id', challengeId)
-      .single();
+      .eq('id', challengeId);
 
     if (challengeError) {
+      console.error('❌ Challenge query error:', challengeError);
       return NextResponse.json(
         {
           error: 'Failed to fetch challenge',
@@ -74,7 +97,8 @@ export async function GET(
       );
     }
 
-    if (!challenge) {
+    if (!challengeData || challengeData.length === 0) {
+      console.log('❌ Challenge not found');
       return NextResponse.json(
         {
           error: 'Challenge not found',
@@ -84,14 +108,17 @@ export async function GET(
       );
     }
 
+    const challenge = challengeData[0];
+
+    console.log('✅ Challenge found:', challenge.title);
     return NextResponse.json(challenge);
   } catch (error) {
-// console.error('❌ === Challenge API Error ===', {
-    //   name: error instanceof Error ? error.name : 'Unknown error',
-    //   message: error instanceof Error ? error.message : String(error),
-    //   stack: error instanceof Error ? error.stack : undefined,
-    //   type: 'GlobalError',
-    // });
+    console.error('❌ === Challenge API Error ===', {
+      name: error instanceof Error ? error.name : 'Unknown error',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: 'GlobalError',
+    });
     return NextResponse.json(
       {
         error: 'Internal server error',
@@ -171,14 +198,13 @@ export async function PUT(
     }
 
     // 챌린지 존재 여부 확인
-    const { data: existingChallenge, error: existingChallengeError } =
+    const { data: existingChallengeData, error: existingChallengeError } =
       await supabase
         .from('challenges')
         .select('id')
-        .eq('id', challengeId)
-        .single();
+        .eq('id', challengeId);
 
-    if (existingChallengeError || !existingChallenge) {
+    if (existingChallengeError || !existingChallengeData || existingChallengeData.length === 0) {
       return NextResponse.json(
         {
           error: 'Challenge not found',

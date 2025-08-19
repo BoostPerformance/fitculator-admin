@@ -11,14 +11,25 @@ interface Organization {
 
 interface Challenge {
   id: string;
-  title: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  banner_image_url: string;
-  cover_image_url: string;
-  challenge_type: string;
-  organization_id: string;
+  challenges?: {
+    id: string;
+    title: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    banner_image_url: string;
+    cover_image_url: string;
+    challenge_type: string;
+    organization_id: string;
+  };
+  title?: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
+  banner_image_url?: string;
+  cover_image_url?: string;
+  challenge_type?: string;
+  organization_id?: string;
 }
 
 export default function ManageChallenges() {
@@ -36,30 +47,7 @@ export default function ManageChallenges() {
         if (response.ok) {
           const data = await response.json();
           // 챌린지 데이터 구조에 따라 적절히 처리
-          const challengeList = Array.isArray(data)
-            ? data.map((item: any) => ({
-                id: item.id || item.challenges?.id,
-                title: item.title || item.challenges?.title,
-                description:
-                  item.description || item.challenges?.description || '',
-                start_date: item.start_date || item.challenges?.start_date,
-                end_date: item.end_date || item.challenges?.end_date,
-                banner_image_url:
-                  item.banner_image_url ||
-                  item.challenges?.banner_image_url ||
-                  '',
-                cover_image_url:
-                  item.cover_image_url ||
-                  item.challenges?.cover_image_url ||
-                  '',
-                challenge_type:
-                  item.challenge_type || item.challenges?.challenge_type || '',
-                organization_id:
-                  item.organization_id ||
-                  item.challenges?.organization_id ||
-                  '',
-              }))
-            : [];
+          const challengeList = Array.isArray(data) ? data : [];
           setChallenges(challengeList);
         }
       } catch (error) {
@@ -130,14 +118,14 @@ export default function ManageChallenges() {
               key={challenge.id}
               className="bg-white dark:bg-blue-4 rounded-lg shadow overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
               onClick={() =>
-                router.push(`/admin/manage-challenges/${challenge.id}`)
+                router.push(`/admin/manage-challenges/${challenge.challenges?.id || challenge.id}`)
               }
             >
               <div className="h-40 bg-gray-200 dark:bg-blue-3 relative">
-                {challenge.cover_image_url ? (
+                {(challenge.challenges?.cover_image_url || challenge.cover_image_url) ? (
                   <Image
-                    src={challenge.cover_image_url}
-                    alt={challenge.title}
+                    src={challenge.challenges?.cover_image_url || challenge.cover_image_url || ''}
+                    alt={challenge.challenges?.title || challenge.title || ''}
                     fill
                     style={{ objectFit: 'cover' }}
                   />
@@ -149,21 +137,21 @@ export default function ManageChallenges() {
               </div>
               <div className="p-4">
                 <h2 className="text-lg font-semibold mb-2 dark:text-white">
-                  {challenge.title}
+                  {challenge.challenges?.title || challenge.title}
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                  {challenge.description
-                    ? challenge.description.length > 100
-                      ? `${challenge.description.substring(0, 100)}...`
-                      : challenge.description
+                  {(challenge.challenges?.description || challenge.description)
+                    ? (challenge.challenges?.description || challenge.description || '').length > 100
+                      ? `${(challenge.challenges?.description || challenge.description || '').substring(0, 100)}...`
+                      : (challenge.challenges?.description || challenge.description)
                     : '설명 없음'}
                 </p>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <p>조직: {getOrganizationName(challenge.organization_id)}</p>
-                  <p>유형: {getChallengeTypeText(challenge.challenge_type)}</p>
+                  <p>조직: {getOrganizationName(challenge.challenges?.organization_id || challenge.organization_id || '')}</p>
+                  <p>유형: {getChallengeTypeText(challenge.challenges?.challenge_type || challenge.challenge_type || '')}</p>
                   <p>
-                    기간: {new Date(challenge.start_date).toLocaleDateString()}{' '}
-                    ~ {new Date(challenge.end_date).toLocaleDateString()}
+                    기간: {new Date(challenge.challenges?.start_date || challenge.start_date || '').toLocaleDateString()}{' '}
+                    ~ {new Date(challenge.challenges?.end_date || challenge.end_date || '').toLocaleDateString()}
                   </p>
                 </div>
               </div>

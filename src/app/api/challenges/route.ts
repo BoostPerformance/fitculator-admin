@@ -211,9 +211,13 @@ export async function GET(
         challenges!inner (
           id,
           title,
+          description,
           start_date,
           end_date,
+          banner_image_url,
+          cover_image_url,
           challenge_type,
+          organization_id,
           enable_benchmark,
           enable_mission,
           challenge_participants!inner (
