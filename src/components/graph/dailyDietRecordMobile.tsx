@@ -142,9 +142,9 @@ const DailyDietRecordMobile = ({ activities }: any) => {
                                   }
                                 } catch (error) {
 // console.error(
-                                    "Error fetching daily record:",
-                                    error
-                                  );
+                                  //   "Error fetching daily record:",
+                                  //   error
+                                  // );
                                 }
                               }}
                             />
