@@ -62,11 +62,11 @@ export async function GET(request: Request) {
     return NextResponse.json(organizations || []);
   } catch (error) {
 // console.error('❌ === Organizations API Error ===', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: 'GlobalError',
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    //   type: 'GlobalError',
+    // });
     return NextResponse.json(
       {
         error: 'Internal server error',
@@ -149,11 +149,11 @@ export async function POST(request: Request) {
     return NextResponse.json(newOrganization);
   } catch (error) {
 // console.error('❌ === Organizations Create API Error ===', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: 'GlobalError',
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    //   type: 'GlobalError',
+    // });
     return NextResponse.json(
       {
         error: '서버 내부 오류',

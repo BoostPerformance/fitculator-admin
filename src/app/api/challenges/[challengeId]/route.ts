@@ -87,11 +87,11 @@ export async function GET(
     return NextResponse.json(challenge);
   } catch (error) {
 // console.error('❌ === Challenge API Error ===', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: 'GlobalError',
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    //   type: 'GlobalError',
+    // });
     return NextResponse.json(
       {
         error: 'Internal server error',
@@ -218,11 +218,11 @@ export async function PUT(
     return NextResponse.json(updatedChallenge);
   } catch (error) {
 // console.error('❌ === Challenge Update API Error ===', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: 'GlobalError',
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    //   type: 'GlobalError',
+    // });
     return NextResponse.json(
       {
         error: 'Internal server error',

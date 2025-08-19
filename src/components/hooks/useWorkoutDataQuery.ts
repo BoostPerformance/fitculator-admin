@@ -32,11 +32,11 @@ const fetchWeeklyChart = async (challengeId: string) => {
     if (!response.ok) {
       const errorText = await response.text();
 // console.error(`❌ Weekly chart API 오류:`, {
-        status: response.status,
-        statusText: response.statusText,
-        url: response.url,
-        error: errorText
-      });
+      //   status: response.status,
+      //   statusText: response.statusText,
+      //   url: response.url,
+      //   error: errorText
+      // });
       throw new Error(`Weekly chart API failed: ${response.status} - ${errorText}`);
     }
     
@@ -45,10 +45,10 @@ const fetchWeeklyChart = async (challengeId: string) => {
     return data;
   } catch (error) {
 // console.error('❌ Weekly chart fetch 실패:', {
-      error: error.message,
-      challengeId,
-      environment: process.env.NODE_ENV
-    });
+    //   error: error.message,
+    //   challengeId,
+    //   environment: process.env.NODE_ENV
+    // });
     throw error;
   }
 };
@@ -71,11 +71,11 @@ const fetchLeaderboard = async (challengeId: string) => {
     if (!response.ok) {
       const errorText = await response.text();
 // console.error(`❌ Leaderboard API 오류:`, {
-        status: response.status,
-        statusText: response.statusText,
-        url: response.url,
-        error: errorText
-      });
+      //   status: response.status,
+      //   statusText: response.statusText,
+      //   url: response.url,
+      //   error: errorText
+      // });
       throw new Error(`Leaderboard API failed: ${response.status} - ${errorText}`);
     }
     
@@ -84,10 +84,10 @@ const fetchLeaderboard = async (challengeId: string) => {
     return data;
   } catch (error) {
 // console.error('❌ Leaderboard fetch 실패:', {
-      error: error.message,
-      challengeId,
-      environment: process.env.NODE_ENV
-    });
+    //   error: error.message,
+    //   challengeId,
+    //   environment: process.env.NODE_ENV
+    // });
     throw error;
   }
 };
@@ -110,11 +110,11 @@ const fetchTodayCount = async (challengeId: string) => {
     if (!response.ok) {
       const errorText = await response.text();
 // console.error(`❌ Today count API 오류:`, {
-        status: response.status,
-        statusText: response.statusText,
-        url: response.url,
-        error: errorText
-      });
+      //   status: response.status,
+      //   statusText: response.statusText,
+      //   url: response.url,
+      //   error: errorText
+      // });
       throw new Error(`Today count API failed: ${response.status} - ${errorText}`);
     }
     
@@ -123,10 +123,10 @@ const fetchTodayCount = async (challengeId: string) => {
     return data;
   } catch (error) {
 // console.error('❌ Today count fetch 실패:', {
-      error: error.message,
-      challengeId,
-      environment: process.env.NODE_ENV
-    });
+    //   error: error.message,
+    //   challengeId,
+    //   environment: process.env.NODE_ENV
+    // });
     throw error;
   }
 };
@@ -225,11 +225,11 @@ export const useWorkoutDataQuery = (challengeId: string) => {
       if (!response.ok) {
         const errorText = await response.text();
 // console.error('❌ Batch user data API 오류:', {
-          status: response.status,
-          statusText: response.statusText,
-          url: response.url,
-          error: errorText
-        });
+        //   status: response.status,
+        //   statusText: response.statusText,
+        //   url: response.url,
+        //   error: errorText
+        // });
         throw new Error(`Failed to fetch batch user data: ${response.status} - ${errorText}`);
       }
       
@@ -269,40 +269,40 @@ export const useWorkoutDataQuery = (challengeId: string) => {
   // 연결 상태 로깅 - Production 환경에서 더 상세히
   if (error) {
 // console.error('⚠️ API 연결 문제 감지:', {
-      error: error.message,
-      challengeId,
-      environment: process.env.NODE_ENV,
-      queries: {
-        weeklyChart: weeklyChartQuery.status,
-        leaderboard: leaderboardQuery.status,
-        todayCount: todayCountQuery.status,
-        batchUserData: batchUserDataQuery.status,
-      }
-    });
+    //   error: error.message,
+    //   challengeId,
+    //   environment: process.env.NODE_ENV,
+    //   queries: {
+    //     weeklyChart: weeklyChartQuery.status,
+    //     leaderboard: leaderboardQuery.status,
+    //     todayCount: todayCountQuery.status,
+    //     batchUserData: batchUserDataQuery.status,
+    //   }
+    // });
   } else if (hasAnyData) {
 // console.log('✅ API 연결 정상, 데이터 로드됨:', {
-      challengeId,
-      environment: process.env.NODE_ENV,
-      data: {
-        weeklyChart: !!weeklyChartQuery.data,
-        leaderboard: !!leaderboardQuery.data,
-        todayCount: !!todayCountQuery.data,
-        batchUserData: batchUserData?.length || 0,
-      }
-    });
+    //   challengeId,
+    //   environment: process.env.NODE_ENV,
+    //   data: {
+    //     weeklyChart: !!weeklyChartQuery.data,
+    //     leaderboard: !!leaderboardQuery.data,
+    //     todayCount: !!todayCountQuery.data,
+    //     batchUserData: batchUserData?.length || 0,
+    //   }
+    // });
   } else if (!isLoading) {
 // console.warn('⚠️ 로딩 완료되었지만 데이터가 없음:', {
-      challengeId,
-      environment: process.env.NODE_ENV,
-      isLoading,
-      hasAnyData,
-      queries: {
-        weeklyChart: weeklyChartQuery.status,
-        leaderboard: leaderboardQuery.status,
-        todayCount: todayCountQuery.status,
-        batchUserData: batchUserDataQuery.status,
-      }
-    });
+    //   challengeId,
+    //   environment: process.env.NODE_ENV,
+    //   isLoading,
+    //   hasAnyData,
+    //   queries: {
+    //     weeklyChart: weeklyChartQuery.status,
+    //     leaderboard: leaderboardQuery.status,
+    //     todayCount: todayCountQuery.status,
+    //     batchUserData: batchUserDataQuery.status,
+    //   }
+    // });
   }
 
   return {

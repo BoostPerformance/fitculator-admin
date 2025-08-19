@@ -32,16 +32,16 @@ export default function WorkoutPage() {
   // 디버깅을 위한 로그
   useEffect(() => {
 // console.log('🔍 Workout 페이지 데이터 상태:', {
-      challengeId: params.challengeId,
-      workoutLoading,
-      hasAnyData,
-      isApiConnected,
-      weeklyChart: !!weeklyChart,
-      leaderboard: !!leaderboard,
-      todayCount: !!todayCount,
-      batchUserData: batchUserData?.length || 0,
-      workoutError: workoutError?.message
-    });
+    //   challengeId: params.challengeId,
+    //   workoutLoading,
+    //   hasAnyData,
+    //   isApiConnected,
+    //   weeklyChart: !!weeklyChart,
+    //   leaderboard: !!leaderboard,
+    //   todayCount: !!todayCount,
+    //   batchUserData: batchUserData?.length || 0,
+    //   workoutError: workoutError?.message
+    // });
   }, [params.challengeId, workoutLoading, hasAnyData, isApiConnected, weeklyChart, leaderboard, todayCount, batchUserData, workoutError]);
   
   const { isMobile } = useResponsive();

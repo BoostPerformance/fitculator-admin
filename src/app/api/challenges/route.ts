@@ -46,11 +46,11 @@ export async function GET(
 
     if (adminError) {
 // console.error('❌ Admin User Error:', {
-        error: adminError,
-        code: adminError.code,
-        details: adminError.details,
-        type: 'AdminUserError',
-      });
+      //   error: adminError,
+      //   code: adminError.code,
+      //   details: adminError.details,
+      //   type: 'AdminUserError',
+      // });
       return NextResponse.json(
         {
           error: 'Failed to fetch admin user',
@@ -102,11 +102,11 @@ export async function GET(
 
       if (error) {
 // console.error('❌ Error fetching challenges:', {
-          error,
-          code: error.code,
-          details: error.details,
-          type: 'ChallengeQueryError',
-        });
+        //   error,
+        //   code: error.code,
+        //   details: error.details,
+        //   type: 'ChallengeQueryError',
+        // });
         return NextResponse.json(
           {
             error: 'Failed to fetch challenges',
@@ -175,12 +175,12 @@ export async function GET(
 
     if (coachError) {
 // console.error('❌ Coach Error:', {
-        error: coachError,
-        code: coachError.code,
-        details: coachError.details,
-        admin_id: adminUser.id,
-        type: 'CoachQueryError',
-      });
+      //   error: coachError,
+      //   code: coachError.code,
+      //   details: coachError.details,
+      //   admin_id: adminUser.id,
+      //   type: 'CoachQueryError',
+      // });
       return NextResponse.json(
         {
           error: 'Failed to fetch coach data',
@@ -227,12 +227,12 @@ export async function GET(
 
     if (challengeError) {
 // console.error('❌ Error fetching coach challenges:', {
-        error: challengeError,
-        code: challengeError.code,
-        details: challengeError.details,
-        coach_id: coach.id,
-        type: 'CoachChallengeQueryError',
-      });
+      //   error: challengeError,
+      //   code: challengeError.code,
+      //   details: challengeError.details,
+      //   coach_id: coach.id,
+      //   type: 'CoachChallengeQueryError',
+      // });
       return NextResponse.json(
         {
           error: 'Failed to fetch coach challenges',
@@ -302,11 +302,11 @@ export async function GET(
     return NextResponse.json(challengeData);
   } catch (error) {
 // console.error('❌ === Challenges API Error ===', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: 'GlobalError',
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    //   type: 'GlobalError',
+    // });
     return NextResponse.json(
       {
         error: 'Internal server error',
@@ -432,11 +432,11 @@ export async function POST(request: Request) {
     return NextResponse.json(challenge);
   } catch (error) {
 // console.error('❌ === Challenge Creation API Error ===', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: 'GlobalError',
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    //   type: 'GlobalError',
+    // });
     return NextResponse.json(
       {
         error: 'Internal server error',

@@ -134,11 +134,11 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   // Process data when React Query data changes
   const processWorkoutData = useCallback(async () => {
 // console.log('🔧 processWorkoutData 시작', { 
-      weeklyChart: !!weeklyChart, 
-      leaderboard: !!leaderboard, 
-      todayCount: !!todayCount,
-      challengeId 
-    });
+    //   weeklyChart: !!weeklyChart, 
+    //   leaderboard: !!leaderboard, 
+    //   todayCount: !!todayCount,
+    //   challengeId 
+    // });
     
     if (!weeklyChart || !leaderboard || !todayCount) {
 // console.log('❌ 필수 데이터 없음, 종료');
@@ -207,12 +207,12 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
         // 디버깅: 첫 번째 사용자만 로그 출력
         if (user.id === users[0]?.id) {
 // console.log('🔍 WorkoutUserList 디버깅:', {
-            userId: user.id,
-            userName: user.name,
-            hasBatchUserData: !!userData,
-            weeklyRecordsCount: userData?.weeklyRecords?.length || 0,
-            firstRecord: userData?.weeklyRecords?.[0]
-          });
+          //   userId: user.id,
+          //   userName: user.name,
+          //   hasBatchUserData: !!userData,
+          //   weeklyRecordsCount: userData?.weeklyRecords?.length || 0,
+          //   firstRecord: userData?.weeklyRecords?.[0]
+          // });
         }
 
         const weeksCount = generatedWeeks.length || 1;
@@ -391,11 +391,11 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
               className="pt-[0rem] pb-[2rem] sm:bg-white rounded-md shadow cursor-pointer"
               onClick={() => {
 // console.log('👤 사용자 카드 클릭됨!', {
-                  user: user.name,
-                  userId: user.userId,
-                  challengeId,
-                  weeklyDataLength: user.weeklyData.length
-                });
+                //   user: user.name,
+                //   userId: user.userId,
+                //   challengeId,
+                //   weeklyDataLength: user.weeklyData.length
+                // });
                 
                 // 첫 번째 주차로 이동
                 const firstWeek = user.weeklyData[0];
@@ -444,12 +444,12 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                               onClick={(e) => {
                                 e.stopPropagation(); // 부모 클릭 이벤트 방지
 // console.log('🎯 주차별 운동량 칸 클릭됨!', {
-                                  user: user.name,
-                                  userId: user.userId,
-                                  weekNumber: week.weekNumber,
-                                  challengeId,
-                                  week
-                                });
+                                //   user: user.name,
+                                //   userId: user.userId,
+                                //   weekNumber: week.weekNumber,
+                                //   challengeId,
+                                //   week
+                                // });
                                 
                                 // startDate와 endDate가 있으면 MM.DD-MM.DD 형식으로, 아니면 기본 라벨 사용
                                 const weekLabel = week.startDate && week.endDate 

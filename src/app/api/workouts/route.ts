@@ -667,9 +667,9 @@ export async function GET(request: Request) {
 
       if (categoriesError) {
 // console.error(
-          '❌ Error fetching strength categories:',
-          categoriesError
-        );
+        //   '❌ Error fetching strength categories:',
+        //   categoriesError
+        // );
         return NextResponse.json(
           { error: 'Failed to fetch categories' },
           { status: 500 }
@@ -689,9 +689,9 @@ export async function GET(request: Request) {
 
       if (strengthWorkoutsError) {
 // console.error(
-          '❌ Error fetching strength workouts:',
-          strengthWorkoutsError
-        );
+        //   '❌ Error fetching strength workouts:',
+        //   strengthWorkoutsError
+        // );
         return NextResponse.json(
           { error: 'Failed to fetch strength workouts' },
           { status: 500 }
@@ -790,9 +790,9 @@ export async function GET(request: Request) {
 
       if (workoutError) {
 // console.error(
-          '❌ Supabase query error at workouts table:',
-          workoutError
-        );
+        //   '❌ Supabase query error at workouts table:',
+        //   workoutError
+        // );
         return NextResponse.json(
           { error: 'Failed to fetch workout data' },
           { status: 500 }
@@ -834,10 +834,10 @@ export async function GET(request: Request) {
   } catch (error) {
 // console.error('❌ === Workouts API Error ===');
 // console.error('Error details:', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    // });
     return NextResponse.json(
       { error: 'Failed to fetch data' },
       { status: 500 }

@@ -78,11 +78,11 @@ export async function GET(
     return NextResponse.json(formattedMembers || []);
   } catch (error) {
 // console.error('❌ === Organization Members API Error ===', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: 'GlobalError',
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    //   type: 'GlobalError',
+    // });
     return NextResponse.json(
       {
         error: '서버 내부 오류',

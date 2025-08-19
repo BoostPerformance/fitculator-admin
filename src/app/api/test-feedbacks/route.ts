@@ -186,17 +186,17 @@ export async function GET(request: Request) {
 // console.error('===== 피드백 테스트 API 에러 =====');
 // console.error('오류 내용:', error);
 // console.error(
-      '오류 타입:',
-      error instanceof Error ? error.constructor.name : typeof error
-    );
+    //   '오류 타입:',
+    //   error instanceof Error ? error.constructor.name : typeof error
+    // );
 // console.error(
-      '오류 메시지:',
-      error instanceof Error ? error.message : String(error)
-    );
+    //   '오류 메시지:',
+    //   error instanceof Error ? error.message : String(error)
+    // );
 // console.error(
-      '오류 스택:',
-      error instanceof Error ? error.stack : '스택 정보 없음'
-    );
+    //   '오류 스택:',
+    //   error instanceof Error ? error.stack : '스택 정보 없음'
+    // );
 // console.error('===== 피드백 테스트 API 에러 종료 =====');
 
     return NextResponse.json(

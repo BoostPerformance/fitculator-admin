@@ -270,17 +270,17 @@ export async function GET(request: Request) {
 // console.error('===== challenge-participants API 에러 =====');
 // console.error('오류 내용:', error);
 // console.error(
-      '오류 타입:',
-      error instanceof Error ? error.constructor.name : typeof error
-    );
+    //   '오류 타입:',
+    //   error instanceof Error ? error.constructor.name : typeof error
+    // );
 // console.error(
-      '오류 메시지:',
-      error instanceof Error ? error.message : String(error)
-    );
+    //   '오류 메시지:',
+    //   error instanceof Error ? error.message : String(error)
+    // );
 // console.error(
-      '오류 스택:',
-      error instanceof Error ? error.stack : '스택 정보 없음'
-    );
+    //   '오류 스택:',
+    //   error instanceof Error ? error.stack : '스택 정보 없음'
+    // );
 // console.error('===== challenge-participants API 에러 종료 =====');
 
     return NextResponse.json(
@@ -392,11 +392,11 @@ export async function PUT(request: Request) {
     return NextResponse.json(updatedParticipant);
   } catch (error) {
 // console.error('❌ === Challenge Participant API Error ===', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: 'GlobalError',
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    //   type: 'GlobalError',
+    // });
     return NextResponse.json(
       {
         error: '서버 오류가 발생했습니다.',
@@ -492,11 +492,11 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
 // console.error('❌ === Challenge Participant API Error ===', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: 'GlobalError',
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    //   type: 'GlobalError',
+    // });
     return NextResponse.json(
       {
         error: '서버 오류가 발생했습니다.',
@@ -658,11 +658,11 @@ export async function POST(request: Request) {
     });
   } catch (error) {
 // console.error('❌ === Challenge Participant API Error ===', {
-      name: error instanceof Error ? error.name : 'Unknown error',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: 'GlobalError',
-    });
+    //   name: error instanceof Error ? error.name : 'Unknown error',
+    //   message: error instanceof Error ? error.message : String(error),
+    //   stack: error instanceof Error ? error.stack : undefined,
+    //   type: 'GlobalError',
+    // });
     return NextResponse.json(
       {
         error: '서버 오류가 발생했습니다.',

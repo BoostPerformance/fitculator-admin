@@ -190,12 +190,12 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
       // 데이터 연결 확인을 위한 로그 (첫 번째 사용자만)
       if (user.id === users[0]?.id) {
 // console.log('첫 번째 사용자 데이터:', {
-          userId: user.id,
-          userName: user.name,
-          weeklyRecordsCount: userStatsData.weeklyRecords?.length || 0,
-          generatedWeeksCount: generatedWeeks.length,
-          weeklyRecords: userStatsData.weeklyRecords,
-        });
+        //   userId: user.id,
+        //   userName: user.name,
+        //   weeklyRecordsCount: userStatsData.weeklyRecords?.length || 0,
+        //   generatedWeeksCount: generatedWeeks.length,
+        //   weeklyRecords: userStatsData.weeklyRecords,
+        // });
       }
 
       const weeksCount = generatedWeeks.length || 1;

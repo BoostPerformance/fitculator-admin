@@ -275,9 +275,9 @@ async function getLeaderboardData(
 
     if (participantsError) {
 // console.error(
-        'Error fetching challenge participants:',
-        participantsError
-      );
+      //   'Error fetching challenge participants:',
+      //   participantsError
+      // );
       return NextResponse.json(
         { error: 'Failed to fetch challenge participants' },
         { status: 500 }
@@ -396,9 +396,9 @@ async function getTodayCountData(
 
     if (participantsError) {
 // console.error(
-        'Error fetching challenge participants:',
-        participantsError
-      );
+      //   'Error fetching challenge participants:',
+      //   participantsError
+      // );
       return NextResponse.json(
         { error: 'Failed to fetch challenge participants' },
         { status: 500 }
@@ -513,13 +513,13 @@ async function getUserWorkoutData(
 
       if (participationError) {
 // console.error(
-          'Error checking challenge participation:',
-          participationError
-        );
+        //   'Error checking challenge participation:',
+        //   participationError
+        // );
       } else if (!participation) {
 // console.warn(
-          `User ${userId} is not an active participant in challenge ${challengeId}`
-        );
+        //   `User ${userId} is not an active participant in challenge ${challengeId}`
+        // );
       }
     }
 
@@ -573,10 +573,10 @@ async function getUserWorkoutData(
 
       if (feedbackError) {
 // console.error(
-          'Error fetching feedback for record:',
-          record.id,
-          feedbackError
-        );
+        //   'Error fetching feedback for record:',
+        //   record.id,
+        //   feedbackError
+        // );
       }
 
       let coach = null;
