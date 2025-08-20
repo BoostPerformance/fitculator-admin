@@ -101,6 +101,11 @@ const isCurrentWeek = (startDate: Date, endDate: Date): boolean => {
 };
 
 // WorkoutTable component
+type SortConfig = {
+  key: string;
+  direction: 'asc' | 'desc';
+};
+
 const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   const [workoutItems, setWorkoutItems] = useState<WorkoutItem[]>([]);
   const [weekInfo, setWeekInfo] = useState<WeekInfo[]>([]);
@@ -109,6 +114,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [totalAchievements, setTotalAchievements] = useState(0);
   const [activeMembersPercent, setActiveMembersPercent] = useState(0);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: 'asc' });
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastRowRef = useRef(null);
   const router = useRouter();
@@ -309,6 +315,78 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
     return Math.round((activeMembers / items.length) * 100);
   };
 
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedWorkoutItems = useMemo(() => {
+    if (!sortConfig.key) return workoutItems;
+
+    const sorted = [...workoutItems].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      if (sortConfig.key === 'id') {
+        aValue = a.userName || '';
+        bValue = b.userName || '';
+      } else if (sortConfig.key === 'name') {
+        aValue = a.name || '';
+        bValue = b.name || '';
+      } else if (sortConfig.key.startsWith('week-')) {
+        const weekIndex = parseInt(sortConfig.key.split('-')[1]);
+        const aWeekData = a.weeklyData[weekIndex];
+        const bWeekData = b.weeklyData[weekIndex];
+        aValue = aWeekData ? aWeekData.aerobicPercentage : 0;
+        bValue = bWeekData ? bWeekData.aerobicPercentage : 0;
+      }
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortConfig.direction === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortConfig.direction === 'asc' 
+          ? aValue - bValue
+          : bValue - aValue;
+      }
+
+      return 0;
+    });
+
+    return sorted;
+  }, [workoutItems, sortConfig]);
+
+  const getSortIcon = (columnKey: string) => {
+    if (sortConfig.key !== columnKey) {
+      return (
+        <Image
+          src="/svg/arrow-down.svg"
+          width={10}
+          height={10}
+          alt="sort"
+          className="opacity-50"
+        />
+      );
+    }
+    return (
+      <Image
+        src="/svg/arrow-down.svg"
+        width={10}
+        height={10}
+        alt="sort"
+        className={`transition-transform ${
+          sortConfig.direction === 'desc' ? 'rotate-180' : ''
+        }`}
+      />
+    );
+  };
+
   // Process data when React Query data is available
   useEffect(() => {
     processWorkoutData();
@@ -365,7 +443,7 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
         observer.unobserve(currentLastRow);
       }
     };
-  }, [handleObserver, workoutItems]);
+  }, [handleObserver, sortedWorkoutItems]);
 
   if (isLoading) {
     return <WorkoutPageSkeleton />;
@@ -394,26 +472,22 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
               <th className="w-[5%] p-3 text-left">
                 <div className="flex items-center justify-start gap-1">
                   <span className="text-sm">ID</span>
-                  <button>
-                    <Image
-                      src="/svg/arrow-down.svg"
-                      width={10}
-                      height={10}
-                      alt="arrow-down"
-                    />
+                  <button 
+                    onClick={() => handleSort('id')}
+                    className="hover:opacity-75 transition-opacity"
+                  >
+                    {getSortIcon('id')}
                   </button>
                 </div>
               </th>
               <th className="w-[10%] p-3 text-left">
                 <div className="flex items-center justify-start gap-1">
                   <span className="text-sm">이름</span>
-                  <button>
-                    <Image
-                      src="/svg/arrow-down.svg"
-                      width={10}
-                      height={10}
-                      alt="arrow-down"
-                    />
+                  <button 
+                    onClick={() => handleSort('name')}
+                    className="hover:opacity-75 transition-opacity"
+                  >
+                    {getSortIcon('name')}
                   </button>
                 </div>
               </th>
@@ -430,12 +504,20 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
                     }`}
                   >
                     <div className="text-sm">
-                      <div
-                        className={`font-semibold ${
-                          isCurrent ? 'text-blue-600' : ''
-                        }`}
-                      >
-                        W{week.weekNumber}
+                      <div className="flex items-center justify-center gap-1">
+                        <div
+                          className={`font-semibold ${
+                            isCurrent ? 'text-blue-600' : ''
+                          }`}
+                        >
+                          W{week.weekNumber}
+                        </div>
+                        <button 
+                          onClick={() => handleSort(`week-${index}`)}
+                          className="hover:opacity-75 transition-opacity"
+                        >
+                          {getSortIcon(`week-${index}`)}
+                        </button>
                       </div>
                       <div
                         className={`text-[10px] font-normal mt-1 ${
@@ -453,12 +535,12 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
             </tr>
           </thead>
           <tbody>
-            {workoutItems.map((item, index) => {
+            {sortedWorkoutItems.map((item, index) => {
               // console.log('item', item);
               return (
                 <tr
                   key={index}
-                  ref={index === workoutItems.length - 1 ? lastRowRef : null}
+                  ref={index === sortedWorkoutItems.length - 1 ? lastRowRef : null}
                   className="border-b border-gray-200 hover:bg-[#F4F6FC]"
                 >
                   <td className="p-3 text-center text-gray-500">{index + 1}</td>
