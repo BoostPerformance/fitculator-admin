@@ -1,6 +1,20 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+
+// 캐싱 방지를 위한 헤더 설정
+if (typeof window !== 'undefined') {
+  // 브라우저 캐시 방지
+  window.addEventListener('beforeunload', () => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(registration => {
+          registration.unregister();
+        });
+      });
+    }
+  });
+}
 import { useParams, useRouter } from 'next/navigation';
 import { useWorkoutData } from '@/components/hooks/useWorkoutData';
 import { useChallengeMembers } from '@/components/hooks/useChallengeMembers';
@@ -134,6 +148,32 @@ export default function MobileWorkoutDetail() {
     setShowMemberDropdown(false);
     setShowWeekDropdown(false);
     setSearchQuery('');
+    
+    // 캐시 방지 헤더 설정
+    if (typeof window !== 'undefined') {
+      // 페이지 캐시 방지
+      const metaNoCache = document.createElement('meta');
+      metaNoCache.httpEquiv = 'cache-control';
+      metaNoCache.content = 'no-cache, no-store, must-revalidate';
+      document.head.appendChild(metaNoCache);
+      
+      const metaPragma = document.createElement('meta');
+      metaPragma.httpEquiv = 'pragma';
+      metaPragma.content = 'no-cache';
+      document.head.appendChild(metaPragma);
+      
+      const metaExpires = document.createElement('meta');
+      metaExpires.httpEquiv = 'expires';
+      metaExpires.content = '0';
+      document.head.appendChild(metaExpires);
+      
+      // cleanup function
+      return () => {
+        document.head.removeChild(metaNoCache);
+        document.head.removeChild(metaPragma);
+        document.head.removeChild(metaExpires);
+      };
+    }
   }, [params, challengeId]);
 
   // 피드백 변경 감지
