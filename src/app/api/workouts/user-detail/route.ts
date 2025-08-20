@@ -18,8 +18,8 @@ export interface WorkoutWeeklyRecord {
   updated_at: string;
 }
 
-// Next.js 캐싱 설정 - 적절한 캐싱 허용
-export const revalidate = 60; // 60초마다 재검증
+// 관리자 시스템은 항상 최신 데이터 제공 (클라이언트에서 캐싱)
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
