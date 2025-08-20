@@ -14,6 +14,7 @@ import {
 } from '@/components/graph/generateCharts';
 import { useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { IoRefresh } from 'react-icons/io5';
 
 const useUserInfo = (userId: string) => {
   const [name, setName] = useState<string>('');
@@ -70,6 +71,7 @@ export default function MobileWorkoutDetail() {
   const [updatedDailyWorkouts, setUpdatedDailyWorkouts] = useState<any[]>([]);
   const [updatedWorkoutTypes, setUpdatedWorkoutTypes] = useState<any>({});
   const [expandedWorkouts, setExpandedWorkouts] = useState<Set<string>>(new Set());
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const memberDropdownRef = useRef<HTMLDivElement>(null);
   const weekDropdownRef = useRef<HTMLDivElement>(null);
@@ -211,42 +213,42 @@ export default function MobileWorkoutDetail() {
   }, [challengeId]);
 
   // 해당 주의 운동 상세 데이터 가져오기 및 요일별 그룹핑
-  useEffect(() => {
-    const fetchWeekWorkouts = async () => {
-      if (!userData || !weekLabelParam) return;
-      
-      try {
-        // 주의 시작/종료 날짜 파싱
-        const [startStr, endStr] = weekLabelParam.split('-');
-        const currentYear = new Date().getFullYear();
-        const [startMonth, startDay] = startStr.split('.');
-        const [endMonth, endDay] = endStr.split('.');
-        
-        const startDate = `${currentYear}-${startMonth}-${startDay}`;
-        const endDate = `${currentYear}-${endMonth}-${endDay}`;
-        
-        // 운동 데이터 가져오기
-        const res = await fetch(
-          `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}`
-        );
-        
-        if (res.ok) {
-          const data = await res.json();
-          const workouts = data.workouts || [];
-          setWeekWorkouts(workouts);
-          
-          // 요일별로 운동 데이터 그룹핑하여 dailyWorkouts 업데이트
-          updateDailyWorkoutsWithRealData(workouts);
-          
-          // 도넛 그래프용 데이터도 업데이트
-          updateWorkoutTypesWithRealData(workouts);
-        }
-      } catch (error) {
-        // console.error('Failed to fetch week workouts:', error);
-        setWeekWorkouts([]);
-      }
-    };
+  const fetchWeekWorkouts = async () => {
+    if (!userData || !weekLabelParam) return;
     
+    try {
+      // 주의 시작/종료 날짜 파싱
+      const [startStr, endStr] = weekLabelParam.split('-');
+      const currentYear = new Date().getFullYear();
+      const [startMonth, startDay] = startStr.split('.');
+      const [endMonth, endDay] = endStr.split('.');
+      
+      const startDate = `${currentYear}-${startMonth}-${startDay}`;
+      const endDate = `${currentYear}-${endMonth}-${endDay}`;
+      
+      // 운동 데이터 가져오기
+      const res = await fetch(
+        `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}`
+      );
+      
+      if (res.ok) {
+        const data = await res.json();
+        const workouts = data.workouts || [];
+        setWeekWorkouts(workouts);
+        
+        // 요일별로 운동 데이터 그룹핑하여 dailyWorkouts 업데이트
+        updateDailyWorkoutsWithRealData(workouts);
+        
+        // 도넛 그래프용 데이터도 업데이트
+        updateWorkoutTypesWithRealData(workouts);
+      }
+    } catch (error) {
+      // console.error('Failed to fetch week workouts:', error);
+      setWeekWorkouts([]);
+    }
+  };
+  
+  useEffect(() => {
     fetchWeekWorkouts();
   }, [userData, weekLabelParam, userId]);
 
@@ -534,6 +536,25 @@ export default function MobileWorkoutDetail() {
             
             {/* 네비게이션 버튼들 */}
             <div className="flex items-center gap-3">
+              {/* 새로고침 버튼 */}
+              <button
+                onClick={async () => {
+                  setIsRefreshing(true);
+                  try {
+                    await fetchWeekWorkouts();
+                  } finally {
+                    setTimeout(() => setIsRefreshing(false), 500);
+                  }
+                }}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="데이터 새로고침"
+              >
+                <IoRefresh 
+                  className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} 
+                />
+                {isRefreshing ? '새로고침 중...' : '새로고침'}
+              </button>
               {/* 멤버 네비게이션 */}
               <button
                 onClick={() => navigateToMember('prev')}
@@ -728,6 +749,27 @@ export default function MobileWorkoutDetail() {
         
         {/* 모바일 네비게이션 */}
         <div className="flex flex-col gap-4 lg:hidden px-8 pt-4 sm:px-4 sm:pt-4">
+          {/* 새로고침 버튼 - 모바일 */}
+          <div className="flex justify-center">
+            <button
+              onClick={async () => {
+                setIsRefreshing(true);
+                try {
+                  await fetchWeekWorkouts();
+                } finally {
+                  setTimeout(() => setIsRefreshing(false), 500);
+                }
+              }}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              aria-label="데이터 새로고침"
+            >
+              <IoRefresh 
+                className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} 
+              />
+              {isRefreshing ? '새로고침 중...' : '새로고침'}
+            </button>
+          </div>
           {/* 멤버 네비게이션 */}
           <div className="flex items-center gap-3 w-full">
             <button

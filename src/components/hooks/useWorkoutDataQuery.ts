@@ -22,7 +22,7 @@ const fetchWeeklyChart = async (challengeId: string) => {
         'Content-Type': 'application/json',
       },
       // Production 환경에서 캐시 이슈 방지
-      cache: 'no-store',
+      // cache: 'no-store', // 캐싱 허용
     });
     
 // console.log('📡 Weekly chart 응답 상태:', response.status, response.statusText);
@@ -63,7 +63,7 @@ const fetchLeaderboard = async (challengeId: string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'no-store',
+      // cache: 'no-store', // 캐싱 허용
     });
     
 // console.log('📡 Leaderboard 응답 상태:', response.status, response.statusText);
@@ -102,7 +102,7 @@ const fetchTodayCount = async (challengeId: string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'no-store',
+      // cache: 'no-store', // 캐싱 허용
     });
     
 // console.log('📡 Today count 응답 상태:', response.status, response.statusText);
@@ -155,14 +155,14 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'weekly-chart', challengeId],
     queryFn: () => fetchWeeklyChart(challengeId),
     enabled: !!challengeId,
-    staleTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000, // Production: 2분, Development: 5분
-    gcTime: process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 10 * 60 * 1000, // Production: 5분, Development: 10분
+    staleTime: 5 * 60 * 1000, // 5분
+    gcTime: 10 * 60 * 1000, // 10분
     retry: (failureCount, error) => {
 // console.log(`🔄 Weekly chart 재시도 ${failureCount}회:`, error);
       return failureCount < 3; // Production 환경에서 더 많은 재시도
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프
-    refetchOnMount: process.env.NODE_ENV === 'production', // Production에서 항상 새로 가져오기
+    refetchOnMount: false, // 마운트 시 재요청 비활성화
     refetchOnWindowFocus: false, // 윈도우 포커스 시 재요청 비활성화
   });
 
@@ -187,8 +187,8 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'today-count', challengeId],
     queryFn: () => fetchTodayCount(challengeId),
     enabled: !!challengeId,
-    staleTime: process.env.NODE_ENV === 'production' ? 30 * 1000 : 1 * 60 * 1000, // Production: 30초, Development: 1분
-    gcTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000, // Production: 2분, Development: 5분
+    staleTime: 1 * 60 * 1000, // 1분  
+    gcTime: 5 * 60 * 1000, // 5분
     retry: (failureCount, error) => {
 // console.log(`🔄 Today count 재시도 ${failureCount}회:`, error);
       return failureCount < 3;
@@ -217,7 +217,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        cache: 'no-store',
+        // cache: 'no-store', // 캐싱 허용
       });
       
 // console.log('📡 Batch user data 응답 상태:', response.status, response.statusText);

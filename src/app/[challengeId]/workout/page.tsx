@@ -6,6 +6,7 @@ import { useWorkoutDataQuery } from '@/components/hooks/useWorkoutDataQuery';
 import { useResponsive } from '@/components/hooks/useResponsive';
 import { useChallenge } from '@/components/hooks/useChallenges';
 import Title from '@/components/layout/title';
+import { IoRefresh } from 'react-icons/io5';
 import WorkoutTable from '@/components/workoutDashboard/workoutTable';
 import { ExcerciseStatistics } from '@/components/statistics/excerciseStatistics';
 import WorkoutUserList from '@/components/workoutDashboard/workoutUserList';
@@ -26,7 +27,8 @@ export default function WorkoutPage() {
     isLoading: workoutLoading,
     error: workoutError,
     hasAnyData,
-    isApiConnected
+    isApiConnected,
+    refetch
   } = useWorkoutDataQuery(params.challengeId as string);
   
   // 디버깅을 위한 로그
@@ -53,6 +55,7 @@ export default function WorkoutPage() {
   } = useChallenge();
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challengeError, setChallengeError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   // API 연결 상태 체크 제거
 
   const handleSelectChallenge = (challengeId: string) => {
@@ -73,6 +76,15 @@ export default function WorkoutPage() {
   }, [fetchChallenges]);
 
   // API 연결 테스트 제거 - 불필요한 경고 메시지 방지
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
 
   useEffect(() => {
     if (urlDate) {
@@ -120,7 +132,20 @@ export default function WorkoutPage() {
         <div className="text-gray-2 text-1.25-700">
           {currentChallenge?.challenges.title || ''}
         </div>
-        <Title title="운동 현황" />
+        <div className="flex items-center justify-between">
+          <Title title="운동 현황" />
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="데이터 새로고침"
+          >
+            <IoRefresh 
+              className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} 
+            />
+            {isRefreshing ? '새로고침 중...' : '새로고침'}
+          </button>
+        </div>
       </div>
       {workoutError && (
         <div className="p-4 text-red-500 bg-red-50 rounded-lg mx-4">
