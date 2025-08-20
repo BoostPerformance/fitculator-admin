@@ -9,10 +9,46 @@ const supabase = createClient(
 
 export const dynamic = 'force-dynamic';
 
+export async function PUT(request: Request) {
+  try {
+    const session = await getServerSession();
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    const { username } = await request.json();
+
+    if (!username || !username.trim()) {
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
+    }
+
+    const { data: updatedUser, error } = await supabase
+      .from('admin_users')
+      .update({ username: username.trim() })
+      .eq('email', session.user.email)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({ 
+      admin_role: updatedUser.admin_role, 
+      username: updatedUser.username 
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to update username' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function GET() {
   try {
     const session = await getServerSession();
-    // console.log(session);
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -23,14 +59,6 @@ export async function GET() {
       .select('*')
       .eq('email', session.user.email)
       .single();
-
-    // 받아온 데이터 구조 변환
-
-    // console.log('adminUser 여ㅕ깃어요', adminUser);
-
-    // console.log(formattedData);
-
-    //console.log('Query result:', { adminUser, error });
 
     if (error) {
       throw error;
@@ -44,6 +72,7 @@ export async function GET() {
         { status: 404 }
       );
     }
+
     const coachInfo = {
       admin_role: adminUser?.admin_role,
       username: adminUser?.username,
@@ -51,7 +80,6 @@ export async function GET() {
 
     return NextResponse.json(coachInfo);
   } catch (error) {
-// console.error('Error fetching Data', error);
     return NextResponse.json(
       {
         error: 'failed to fetch data',

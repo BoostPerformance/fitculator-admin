@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Sidebar from '@/components/fixedBars/sidebar';
 import LogoutButton from '@/components/buttons/logoutButton';
+import EditUsernameModal from '@/components/modals/editUsernameModal';
 import { useAdminData } from '@/components/hooks/useAdminData';
 import { useChallenge } from '@/components/hooks/useChallenges';
 
@@ -23,10 +24,28 @@ export default function ChallengeLayout({
 }) {
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [userDropdown, setUserDropdown] = useState(false);
+  const [editUsernameModal, setEditUsernameModal] = useState(false);
   
   // React Query hooks 사용으로 API 호출 최적화
-  const { adminData } = useAdminData();
+  const { adminData, fetchAdminData } = useAdminData();
   const { challenges } = useChallenge();
+
+  const handleUsernameUpdate = async (newUsername: string) => {
+    const response = await fetch('/api/admin-users', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username: newUsername }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update username');
+    }
+
+    // 데이터 새로고침
+    await fetchAdminData();
+  };
 
   // 챌린지 데이터를 기존 인터페이스에 맞게 변환
   const formattedChallenges: Challenges[] = challenges?.map((challenge) => ({
@@ -71,7 +90,16 @@ export default function ChallengeLayout({
           />
         </button>
         {userDropdown && (
-          <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px]">
+          <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-md py-2 z-50 min-w-[120px]">
+            <button
+              onClick={() => {
+                setEditUsernameModal(true);
+                setUserDropdown(false);
+              }}
+              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm"
+            >
+              이름 수정
+            </button>
             <LogoutButton />
           </div>
         )}
@@ -88,6 +116,13 @@ export default function ChallengeLayout({
           {children}
         </main>
       </div>
+
+      <EditUsernameModal
+        isOpen={editUsernameModal}
+        currentUsername={adminData?.username || ''}
+        onClose={() => setEditUsernameModal(false)}
+        onSave={handleUsernameUpdate}
+      />
     </div>
   );
 }

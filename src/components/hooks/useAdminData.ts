@@ -16,14 +16,10 @@ export const useAdminData = () => {
   const { data: adminData, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-users'],
     queryFn: fetchAdminData,
-    staleTime: 15 * 60 * 1000, // 15분
-    gcTime: 60 * 60 * 1000, // 1시간
+    staleTime: 0,
+    gcTime: 0,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    initialData: {
-      admin_role: '',
-      username: '',
-    },
+    refetchOnMount: true,
   });
 
   const fetchAdminDataRefresh = async () => {
