@@ -13,6 +13,8 @@ export async function GET(request: Request) {
     const challengeId = url.searchParams.get('challengeId');
     const userId = url.searchParams.get('userId'); // 특정 사용자 필터링 (선택적)
     const weekLabel = url.searchParams.get('weekLabel'); // 특정 주 필터링 (선택적)
+    const startDate = url.searchParams.get('startDate'); // 시작 날짜 (선택적)
+    const endDate = url.searchParams.get('endDate'); // 종료 날짜 (선택적)
     //console.log('Received weekLabel:', weekLabel);
 
     if (!challengeId) {
@@ -74,9 +76,16 @@ export async function GET(request: Request) {
     // 특정 주차만 필터링
     let filteredWeeks = weeks;
     if (weekLabel) {
+      // console.log('🔍 Looking for weekLabel:', weekLabel);
+      // console.log('📅 Available weeks:', weeks.map(w => w.label));
       filteredWeeks = weeks.filter((week) => week.label === weekLabel);
       if (filteredWeeks.length === 0) {
-        return NextResponse.json({ error: 'Week not found' }, { status: 400 });
+        // console.log('❌ Week not found:', weekLabel);
+        return NextResponse.json({ 
+          error: 'Week not found',
+          requestedWeek: weekLabel,
+          availableWeeks: weeks.map(w => w.label)
+        }, { status: 400 });
       }
     }
 
@@ -138,7 +147,19 @@ export async function GET(request: Request) {
       );
 
     // 기간 필터링
-    if (filteredWeeks.length === 1) {
+    if (startDate && endDate) {
+      // 날짜 범위로 직접 필터링
+      workoutQuery
+        .gte('timestamp', startDate)
+        .lte('timestamp', endDate);
+      
+      // filteredWeeks를 해당 날짜 범위로 재설정
+      filteredWeeks = [{
+        label: `custom`,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate)
+      }];
+    } else if (filteredWeeks.length === 1) {
       // 특정 주차만 필터링
       workoutQuery
         .gte('timestamp', filteredWeeks[0].startDate.toISOString())

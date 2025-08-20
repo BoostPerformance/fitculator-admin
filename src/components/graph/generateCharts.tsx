@@ -111,13 +111,14 @@ const generateDonutChart = (
 ) => {
   const radius = 35;
   const center = 50;
-  const strokeWidth = 23;
+  const strokeWidth = 30;
+  const textRadius = 30; // 텍스트를 위한 반지름 (더 바깥으로)
   const total = Object.values(workoutTypes).reduce((sum, v) => sum + v, 0);
 
   if ((total === 0 && totalPoints === 0) || showAsEmpty) {
     return (
       <div className="relative w-full flex flex-col items-center justify-center py-4 sm:py-8 text-gray-400 text-xs sm:text-sm">
-        <svg className="w-32 h-32 sm:w-45 sm:h-45" viewBox="0 0 100 100">
+        <svg className="w-48 h-48 sm:w-56 sm:h-56" viewBox="0 0 100 100">
           <circle
             cx={center}
             cy={center}
@@ -152,6 +153,20 @@ const generateDonutChart = (
     크로스핏: '#9C27B0',
     걷기: '#7BA5FF',
     기타: '#607D8F',
+    배드민턴: '#E91E63',
+    복싱: '#FF5722',
+    요가: '#9C27B0',
+    필라테스: '#673AB7',
+    골프: '#8BC34A',
+    클라이밍: '#795548',
+    스키: '#2196F3',
+    스노보드: '#00BCD4',
+    농구: '#FF9800',
+    축구: '#4CAF50',
+    야구: '#F44336',
+    배구: '#3F51B5',
+    탁구: '#FFEB3B',
+    볼링: '#9E9E9E',
   };
 
   const toRadians = (degree: number) => (degree * Math.PI) / 180;
@@ -180,10 +195,41 @@ const generateDonutChart = (
     processedWorkoutTypes = { '운동': totalPoints };
   }
 
+  // 운동별 포인트 합산 (같은 운동이 여러 개 있으면 합치기)
+  const consolidatedWorkoutTypes: WorkoutTypes = {};
+  Object.entries(processedWorkoutTypes).forEach(([type, points]) => {
+    if (consolidatedWorkoutTypes[type]) {
+      consolidatedWorkoutTypes[type] += points;
+    } else {
+      consolidatedWorkoutTypes[type] = points;
+    }
+  });
+
+  // 100% 이상일 때 정규화
+  const actualTotal = Object.values(consolidatedWorkoutTypes).reduce((sum, v) => sum + v, 0);
+  let normalizedWorkoutTypes: WorkoutTypes = {};
+  
+  if (actualTotal > 100) {
+    // 100% 이상이면 각 운동의 비율을 100% 기준으로 정규화
+    Object.entries(consolidatedWorkoutTypes).forEach(([type, points]) => {
+      normalizedWorkoutTypes[type] = (points / actualTotal) * 100;
+    });
+  } else {
+    normalizedWorkoutTypes = { ...consolidatedWorkoutTypes };
+  }
+
+  // 포인트가 높은 순으로 정렬
+  const sortedWorkoutTypes = Object.entries(normalizedWorkoutTypes)
+    .filter(([, points]) => points > 0)
+    .sort(([,a], [,b]) => b - a);
+
+  // 정규화된 총합 (100 또는 실제 총합 중 작은 값)
+  const displayTotal = Math.min(actualTotal, 100);
+
   let currentAngle = -90;
-  const segmentInfo = Object.entries(processedWorkoutTypes).map(([type, value], i) => {
-    // 100% 이상일 때는 전체 원을 채우도록 설정
-    const sweepAngle = Math.min((totalPoints / 100) * 360, 360);
+  const segmentInfo = sortedWorkoutTypes.map(([type, points], i) => {
+    // 정규화된 포인트 기준으로 각도 계산
+    const sweepAngle = (points / 100) * 360;
     
     let path;
     if (sweepAngle >= 360) {
@@ -193,12 +239,23 @@ const generateDonutChart = (
       path = describeArc(currentAngle, currentAngle + sweepAngle);
     }
     
-    const color = colors[type] || '#26CBFF'; // 기본 색상
+    // 텍스트 위치 계산 (호의 중앙)
+    const textAngle = currentAngle + (sweepAngle / 2);
+    const textX = center + textRadius * Math.cos((textAngle * Math.PI) / 180);
+    const textY = center + textRadius * Math.sin((textAngle * Math.PI) / 180);
+    
+    const color = colors[type] || `hsl(${(i * 137.508) % 360}, 70%, 60%)`; // 동적 색상 생성
     const segment = {
       type,
-      percentage: value, // 이미 퍼센테이지 값
+      points: consolidatedWorkoutTypes[type], // 실제 포인트 값 사용
+      normalizedPoints: points, // 정규화된 포인트
+      percentage: points,
       path,
       color,
+      textX,
+      textY,
+      textAngle,
+      sweepAngle
     };
     currentAngle += sweepAngle;
     return segment;
@@ -207,7 +264,7 @@ const generateDonutChart = (
   return (
     <div className="relative w-full">
       <div className="flex items-center justify-center">
-        <svg className="w-32 h-32 sm:w-45 sm:h-45" viewBox="0 0 100 100">
+        <svg className="w-48 h-48 sm:w-56 sm:h-56" viewBox="0 0 100 100">
           {/* 배경 원 */}
           <circle
             cx={center}
@@ -220,45 +277,72 @@ const generateDonutChart = (
 
           {/* 세그먼트 arc */}
           {segmentInfo.map((segment, index) => (
-            <path
-              key={index}
-              d={segment.path}
-              fill="transparent"
-              stroke={segment.color}
-              strokeWidth={strokeWidth}
-              strokeLinecap="butt"
-            />
+            <g key={index}>
+              <path
+                d={segment.path}
+                fill="transparent"
+                stroke={segment.color}
+                strokeWidth={strokeWidth}
+                strokeLinecap="butt"
+              />
+              {/* 각 세그먼트에 텍스트 추가 (충분히 큰 영역에만) */}
+              {segment.sweepAngle > 25 && (
+                <g>
+                  <text
+                    x={segment.textX}
+                    y={segment.textY - 2.5}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize="6"
+                    fontWeight="bold"
+                    fill="black"
+                    stroke="white"
+                    strokeWidth="0.05"
+                  >
+                    {segment.type}
+                  </text>
+                  <text
+                    x={segment.textX}
+                    y={segment.textY + 3.5}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize="5"
+                    fontWeight="bold"
+                    fill="black"
+                    stroke="white"
+                    strokeWidth="0.05"
+                  >
+                    {segment.points.toFixed(1)}p
+                  </text>
+                </g>
+              )}
+            </g>
           ))}
 
           {/* 중앙 텍스트 */}
           <text
             x="50"
-            y="52"
+            y="44"
             textAnchor="middle"
             dominantBaseline="middle"
-            fontSize="14"
-            fontWeight="bold"
+            fontSize="6"
+            fill="#6B7280"
           >
-            {totalPoints.toFixed(1)}%
+            유산소
+          </text>
+          <text
+            x="50"
+            y="54"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize="10"
+            fontWeight="bold"
+            fill="#374151"
+          >
+            {actualTotal.toFixed(1)}
+            <tspan fontSize="7">%</tspan>
           </text>
         </svg>
-      </div>
-
-      {/* 범례 */}
-      <div className="flex flex-wrap justify-around text-[10px] sm:text-xs mt-2">
-        {segmentInfo.map((segment, index) => (
-          <div key={index} className="flex items-center my-1">
-            <div
-              className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-1"
-              style={{ backgroundColor: segment.color }}
-            ></div>
-            <div>
-              {segment.type}
-              <br />
-              {segment.percentage.toFixed(1)}%
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );

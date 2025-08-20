@@ -1,0 +1,82 @@
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: Request) {
+  try {
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('userId');
+    const startDate = url.searchParams.get('startDate');
+    const endDate = url.searchParams.get('endDate');
+
+    if (!userId || !startDate || !endDate) {
+      return NextResponse.json(
+        { error: 'Missing required parameters' },
+        { status: 400 }
+      );
+    }
+
+    // 해당 기간의 모든 운동 데이터 가져오기
+    const { data: workouts, error } = await supabase
+      .from('workouts')
+      .select(`
+        id,
+        user_id,
+        category_id,
+        timestamp,
+        start_time,
+        end_time,
+        points,
+        duration_minutes,
+        title,
+        workout_categories (
+          name_ko,
+          name_en,
+          workout_types (
+            name
+          )
+        )
+      `)
+      .eq('user_id', userId)
+      .gte('timestamp', startDate)
+      .lte('timestamp', endDate)
+      .order('timestamp', { ascending: true });
+
+    if (error) {
+      // console.error('Error fetching workouts:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch workouts' },
+        { status: 500 }
+      );
+    }
+
+    // 데이터 포맷팅
+    const formattedWorkouts = workouts?.map(workout => ({
+      id: workout.id,
+      startTime: workout.start_time,
+      endTime: workout.end_time,
+      timestamp: workout.timestamp,
+      title: workout.title || '운동',
+      category: workout.workout_categories?.name_ko || '기타',
+      type: workout.workout_categories?.workout_types?.name || 'UNKNOWN',
+      points: workout.points || 0,
+      duration: workout.duration_minutes || 0,
+    })) || [];
+
+    return NextResponse.json({
+      workouts: formattedWorkouts,
+      total: formattedWorkouts.length
+    });
+  } catch (error) {
+    // console.error('Error in week-detail API:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

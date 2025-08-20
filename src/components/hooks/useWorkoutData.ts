@@ -94,9 +94,9 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     };
 
     const toDateKey = (dateString: string): string => {
-      // timestamp에 +9시간 적용 (한국 시간대)
+      // start_time에 +18시간 적용 (한국 시간대 + 추가 보정)
       const date = new Date(dateString);
-      const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+      const kstDate = new Date(date.getTime() + (18 * 60 * 60 * 1000));
       return kstDate.toISOString().split('T')[0];
     };
 
@@ -118,24 +118,33 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
 
       let workoutTypes: WorkoutTypes = {};
       try {
+        // weekLabel 대신 날짜 범위로 전달
+        const startDateStr = recordStartDate.toISOString().split('T')[0];
+        const endDateStr = recordEndDate.toISOString().split('T')[0];
+        
         const response = await fetch(
-          `/api/workouts/weekly-categories?challengeId=${challengeId}&userId=${user.id}&weekLabel=${label}`
+          `/api/workouts/weekly-categories?challengeId=${challengeId}&userId=${user.id}&startDate=${startDateStr}&endDate=${endDateStr}`
         );
         if (response.ok) {
           const categoryData = await response.json();
-          const weekData = categoryData.data?.find(
-            (week: any) => week.weekLabel === label
-          );
+          // console.log('📊 Weekly categories API response:', categoryData);
+          
+          // 첫 번째 주차 데이터 사용 (날짜 범위로 필터링했으므로)
+          const weekData = categoryData.data?.[0];
+          // console.log('📊 Week data for', label, ':', weekData);
+          
           if (weekData?.categories) {
             weekData.categories
-              .filter((cat: any) => cat.percentage > 0)
+              .filter((cat: any) => cat.points > 0) // percentage 대신 points로 필터링
               .forEach((cat: any) => {
-                workoutTypes[cat.name_ko] = cat.percentage;
+                // console.log('📊 Adding category:', cat.name_ko, 'points:', cat.points);
+                workoutTypes[cat.name_ko] = cat.points; // percentage 대신 points 사용
               });
           }
+          // console.log('📊 Final workoutTypes:', workoutTypes);
         }
       } catch (error) {
-// console.error('운동 카테고리 데이터 가져오기 실패:', error);
+        // console.error('운동 카테고리 데이터 가져오기 실패:', error);
       }
 
       // 해당 주차의 운동 데이터만 가져오기

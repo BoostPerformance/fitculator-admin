@@ -71,11 +71,11 @@ export default function ChallengeDetail({
       try {
         setIsLoading(true);
         const response = await fetch(`/api/challenges/${challengeId}`);
-        console.log('챌린지 API 응답 상태:', response.status);
+        // console.log('챌린지 API 응답 상태:', response.status);
         
         if (response.ok) {
           const data = await response.json();
-          console.log('챌린지 데이터:', data);
+          // console.log('챌린지 데이터:', data);
           setChallenge(data);
           setTitle(data.title);
           setDescription(data.description || '');
@@ -87,14 +87,14 @@ export default function ChallengeDetail({
           setChallengeType(data.challenge_type || 'diet_and_exercise');
         } else {
           const errorText = await response.text();
-          console.error('챌린지 정보 가져오기 실패:', {
-            status: response.status,
-            statusText: response.statusText,
-            error: errorText
-          });
+          // console.error('챌린지 정보 가져오기 실패:', {
+          //   status: response.status,
+          //   statusText: response.statusText,
+          //   error: errorText
+          // });
         }
       } catch (error) {
-        console.error('챌린지 정보 가져오기 오류:', error);
+        // console.error('챌린지 정보 가져오기 오류:', error);
       } finally {
         setIsLoading(false);
       }
