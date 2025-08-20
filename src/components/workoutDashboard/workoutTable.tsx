@@ -384,10 +384,10 @@ const WorkoutTable: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   return (
     <div className="mt-6 px-8 overflow-x-auto w-full">
       {/* Main workout table */}
-      <div className="w-full overflow-x-auto">
-        <table className="w-full bg-white rounded-lg border border-gray-200 min-w-[1000px]">
+      <div className="w-full overflow-x-auto bg-white shadow rounded-lg border border-gray-200">
+        <table className="w-full min-w-[1000px]">
           <thead>
-            <tr className="bg-white text-[#A1A1A1]">
+            <tr className="bg-white text-gray-500">
               <th className="w-[3%] p-3 text-center">
                 <span className="text-sm">#</span>
               </th>

@@ -15,7 +15,6 @@ import DateInput from '@/components/input/dateInput';
 import { useFeedback } from '@/components/hooks/useFeedback';
 import { useChallenge } from '@/components/hooks/useChallenges';
 import logger from '@/lib/logger';
-import Footer from '@/components/layout/footer';
 import { CustomAlert } from '@/components/layout/customAlert';
 
 type PageParams = {
@@ -672,7 +671,6 @@ export default function SelectedDate() {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

@@ -417,7 +417,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
               }}
             >
               <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]">
-                {user.name} 회원
+                {user.name}
               </div>
               <table className="w-full">
                 <tbody>

@@ -92,8 +92,10 @@ export default function Sidebar({
         setIsSidebarOpen(false);
         setIsOpenDropdown(true);
       } else {
-        // 데스크톱일 때는 사이드바 열려있게
-        setIsSidebarOpen(true);
+        // 데스크톱일 때는 기본적으로 사이드바 열려있게 (하지만 토글 가능하도록)
+        if (!isSidebarOpen && isSidebarOpen !== false) {
+          setIsSidebarOpen(true);
+        }
       }
     };
 
@@ -194,7 +196,7 @@ export default function Sidebar({
   };
 
   return (
-    <div className="lg:w-[16rem] min-w-[14rem] sm:min-w-[12rem] md:min-w-[14rem] min-h-fit md:min-h-fit lg:min-h-screen lg:px-[1rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100">
+    <div className={`${!isMobile && !isSidebarOpen ? 'lg:w-[4rem] min-w-[4rem]' : 'lg:w-[16rem] min-w-[14rem]'} sm:min-w-[12rem] md:min-w-[14rem] min-h-fit md:min-h-fit lg:min-h-screen lg:px-[1rem] bg-white dark:bg-blue-4 drop-shadow-sm z-100 transition-all duration-300`}>
       {/* <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]"> */}
       <div className="flex justify-start gap-[0.5rem] pt-[2.25rem] sm:pt-[0rem] md:hidden">
         {/* <Image src="/svg/logo_light.svg" width={30} height={30} alt="logo" /> */}
@@ -203,13 +205,13 @@ export default function Sidebar({
           width={120}
           height={30}
           alt="logo_text"
-          className={`${isMobile ? 'hidden' : ''}`}
+          className={`${isMobile || (!isMobile && !isSidebarOpen) ? 'hidden' : ''}`}
         />
       </div>
       <div className="flex justify-between items-center py-[1.25rem] sm:px-4 md:px-4 lg:px-0 lg:gap-[1rem]">
         <button
           onClick={handleSidebarOpen}
-          className={`${isMobile ? '' : 'hidden'} `}
+          className="flex"
         >
           <Image
             src={isSidebarOpen ? '/svg/close.svg' : '/svg/hamburger.svg'}
@@ -242,7 +244,7 @@ export default function Sidebar({
           )}
         </div>
       </div>
-      {(isSidebarOpen || !isMobile) && (
+      {isSidebarOpen && (
         <div
           className={`sm:w-full sm:flex sm:items-center sm:justify-center z-50 md:w-full md:items-center md:flex md:border md:justify-start lg:w-full`}
         >
@@ -251,11 +253,11 @@ export default function Sidebar({
               <li className="w-full items-center justify-between text-1.5-700 mb-4">
                 <div
                   role="group"
-                  aria-label="챌린지 메뉴"
+                  aria-label="프로그램 메뉴"
                   className="flex flex-row justify-between align-middle items-center cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-2"
                   onClick={handleDropdown}
                 >
-                  챌린지
+                  프로그램
                   <button className="w-4 h-4 ">
                     <Image
                       src={

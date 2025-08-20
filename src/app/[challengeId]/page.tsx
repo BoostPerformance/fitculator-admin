@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Footer from '@/components/layout/footer';
 import TrafficSourceChart from '@/components/graph/trafficSourceChart';
 import DailyDietRecord from '@/components/graph/dailyDietRecord';
 import WorkoutLeaderboard from '@/components/graph/workoutLeaderboard';
@@ -506,7 +505,6 @@ export default function User() {
             </div>
           </div>
         </div>
-      <Footer />
     </div>
   );
 }
