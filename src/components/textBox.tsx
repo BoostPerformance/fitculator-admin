@@ -19,6 +19,8 @@ interface TextBoxProps {
   readOnly?: boolean;
   copyIcon?: boolean;
   isFeedbackMode?: boolean;
+  className?: string;
+  disabled?: boolean;
 }
 
 const TextBox = ({
@@ -38,6 +40,8 @@ const TextBox = ({
   copyIcon,
   onSave,
   isFeedbackMode,
+  className,
+  disabled = false,
 }: TextBoxProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [copyMessage, setCopyMessage] = useState<boolean>(false);
@@ -76,21 +80,23 @@ const TextBox = ({
   };
 
   return (
-    <div className="mt-[2rem] p-[1rem] relative lg:px-0 lg:w-full lg:h-[28rem] sm:min-w-[18rem] sm:dark:text-white sm:px-0">
-      <h4 className="text-1.375-700 font-semibold mb-2 flex items-center ">
-        {title}
-        {copyIcon && (
-          <button className="ml-2 text-[1rem]" onClick={handleCopy}>
-            <Image
-              src="/svg/copyIcon-gray.svg"
-              alt="copy icon"
-              width={17}
-              height={17}
-              className="w-4 h-4"
-            />
-          </button>
-        )}
-      </h4>
+    <div className={`relative lg:px-0 lg:w-full sm:min-w-[18rem] sm:dark:text-white sm:px-0 ${className || 'mt-[2rem] p-[1rem] lg:h-[28rem]'} ${className === 'h-full' ? 'h-full flex flex-col min-h-0' : ''}`}>
+      {title && (
+        <h4 className="text-1.375-700 font-semibold mb-2 flex items-center ">
+          {title}
+          {copyIcon && (
+            <button className="ml-2 text-[1rem]" onClick={handleCopy}>
+              <Image
+                src="/svg/copyIcon-gray.svg"
+                alt="copy icon"
+                width={17}
+                height={17}
+                className="w-4 h-4"
+              />
+            </button>
+          )}
+        </h4>
+      )}
 
       {copyMessage && copyIcon && (
         <div
@@ -101,22 +107,23 @@ const TextBox = ({
         </div>
       )}
 
-      <div className="flex flex-col items-end">
+      <div className={`flex flex-col items-end ${className === 'h-full' ? 'flex-1 min-h-0' : ''}`}>
         <textarea
           ref={textareaRef}
           placeholder={placeholder}
           value={isFeedbackMode ? localValue : value}
-          className={`border p-2 w-full rounded-md text-0.875-400 h-[20rem] dark:bg-white dark:text-black ${
+          className={`border p-2 w-full rounded-md text-0.875-400 dark:bg-white dark:text-black ${
             readOnly ? 'bg-gray-100 cursor-not-allowed' : ''
-          }`}
+          } ${className === 'h-full' ? 'flex-1 resize-none min-h-[400px] lg:min-h-[300px]' : 'h-[25rem] lg:h-[15rem]'}`}
           readOnly={readOnly}
           onChange={handleChange}
         />
 
         <div className="flex gap-[0.625rem] mt-[0.75rem] sm:w-full">
           <button
-            className={`${Btn1className} flex flex-row gap-1 justify-center items-center rounded-md text-0.875-400 w-[9.3125rem] p-[0.375rem] sm:w-full`}
+            className={`${disabled ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : Btn1className} flex flex-row gap-1 justify-center items-center rounded-md text-0.875-400 w-[9.3125rem] p-[0.375rem] sm:w-full`}
             onClick={handleButtonClick}
+            disabled={disabled}
           >
             {svg1 && (
               <Image

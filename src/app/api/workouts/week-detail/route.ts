@@ -33,7 +33,12 @@ export async function GET(request: Request) {
         end_time,
         points,
         duration_minutes,
+        duration_seconds,
         title,
+        intensity,
+        note,
+        avg_heart_rate,
+        max_heart_rate,
         workout_categories (
           name_ko,
           name_en,
@@ -66,6 +71,11 @@ export async function GET(request: Request) {
       type: workout.workout_categories?.workout_types?.name || 'UNKNOWN',
       points: workout.points || 0,
       duration: workout.duration_minutes || 0,
+      duration_seconds: workout.duration_seconds || 0,
+      intensity: workout.intensity,
+      note: workout.note,
+      avg_heart_rate: workout.avg_heart_rate,
+      max_heart_rate: workout.max_heart_rate,
     })) || [];
 
     return NextResponse.json({

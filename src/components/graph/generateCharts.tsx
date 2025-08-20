@@ -9,7 +9,7 @@ const generateBarChart = (
 ): JSX.Element => {
   if (dailyWorkouts.length === 0 || showAsEmpty) {
     return (
-      <div className="h-48 sm:h-64 w-full flex items-center justify-center text-gray-400 text-sm">
+      <div className="h-48 sm:h-64 w-full flex items-center justify-center text-gray-400 text-sm lg:h-64">
         운동 기록이 등록되면 여기에 표시됩니다.
       </div>
     );
@@ -27,7 +27,7 @@ const generateBarChart = (
   });
 
   return (
-    <div className="relative h-48 sm:h-64 w-full">
+    <div className="relative h-48 sm:h-64 w-full lg:h-64">
       {/* Y축 눈금 */}
       <div className="absolute left-0 h-[90%] flex flex-col justify-between text-gray-500 text-[10px] sm:text-xs">
         <div>100</div>
@@ -111,8 +111,8 @@ const generateDonutChart = (
 ) => {
   const radius = 35;
   const center = 50;
-  const strokeWidth = 30;
-  const textRadius = 30; // 텍스트를 위한 반지름 (더 바깥으로)
+  const strokeWidth = 28; // 도넛 두께 적절한 크기로 조정
+  const textRadius = 35; // 텍스트를 위한 반지름 (더 바깥으로 이동)
   const total = Object.values(workoutTypes).reduce((sum, v) => sum + v, 0);
 
   if ((total === 0 && totalPoints === 0) || showAsEmpty) {
@@ -142,6 +142,17 @@ const generateDonutChart = (
       </div>
     );
   }
+
+  // 지정된 색상 순서
+  const COLORS = [
+    '#26CBFF', // Color(0xFF26CBFF)
+    '#3E82F1', // Color(0xFF3E82F1)  
+    '#219DF6', // Color(0xFF219DF6)
+    '#D253FF', // Color(0xFFD253FF)
+    '#7400CF', // Color(0xFF7400CF)
+    '#0640FF', // Color(0xFF0640FF)
+    '#494CFF'  // Color(0xFF494CFF)
+  ];
 
   const colors: Record<string, string> = {
     달리기: '#80FBD0',
@@ -244,7 +255,8 @@ const generateDonutChart = (
     const textX = center + textRadius * Math.cos((textAngle * Math.PI) / 180);
     const textY = center + textRadius * Math.sin((textAngle * Math.PI) / 180);
     
-    const color = colors[type] || `hsl(${(i * 137.508) % 360}, 70%, 60%)`; // 동적 색상 생성
+    // 운동 나열 순서에 따라 지정된 색상을 차례로 적용 (7개 초과시 순환)
+    const color = COLORS[i % COLORS.length];
     const segment = {
       type,
       points: consolidatedWorkoutTypes[type], // 실제 포인트 값 사용
@@ -312,7 +324,7 @@ const generateDonutChart = (
                     stroke="white"
                     strokeWidth="0.05"
                   >
-                    {segment.points.toFixed(1)}p
+                    {segment.points.toFixed(1)}pt
                   </text>
                 </g>
               )}

@@ -54,8 +54,10 @@ export default function MobileWorkoutDetail() {
 
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
   const [coachFeedback, setCoachFeedback] = useState('');
+  const [originalFeedback, setOriginalFeedback] = useState('');
   const [feedbackId, setFeedbackId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [copyMessage, setCopyMessage] = useState(false);
   const [isDisable, setIsDisable] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -67,6 +69,7 @@ export default function MobileWorkoutDetail() {
   const [weekWorkouts, setWeekWorkouts] = useState<any[]>([]);
   const [updatedDailyWorkouts, setUpdatedDailyWorkouts] = useState<any[]>([]);
   const [updatedWorkoutTypes, setUpdatedWorkoutTypes] = useState<any>({});
+  const [expandedWorkouts, setExpandedWorkouts] = useState<Set<string>>(new Set());
   
   const memberDropdownRef = useRef<HTMLDivElement>(null);
   const weekDropdownRef = useRef<HTMLDivElement>(null);
@@ -107,11 +110,16 @@ export default function MobileWorkoutDetail() {
       );
       const data = await res.json();
       if (res.ok && data.data) {
-        setCoachFeedback(data.data.coach_feedback || '');
+        const feedback = data.data.coach_feedback || '';
+        setCoachFeedback(feedback);
+        setOriginalFeedback(feedback);
         setFeedbackId(data.data.id);
+        setHasUnsavedChanges(false);
       } else {
         setCoachFeedback('');
+        setOriginalFeedback('');
         setFeedbackId(null);
+        setHasUnsavedChanges(false);
       }
     };
 
@@ -125,6 +133,27 @@ export default function MobileWorkoutDetail() {
     setShowWeekDropdown(false);
     setSearchQuery('');
   }, [params, challengeId]);
+
+  // 피드백 변경 감지
+  useEffect(() => {
+    setHasUnsavedChanges(coachFeedback !== originalFeedback);
+  }, [coachFeedback, originalFeedback]);
+
+  // 페이지 이탈 시 확인
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '저장되지 않은 변경사항이 있습니다. 페이지를 떠나시겠습니까?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
 
   // 외부 클릭 및 ESC 키 핸들러 (임시 비활성화)
   // useEffect(() => {
@@ -374,6 +403,39 @@ export default function MobileWorkoutDetail() {
     setShowWeekDropdown(false);
   };
 
+  // 운동 상세 정보 토글 함수
+  const toggleWorkoutDetails = (workoutId: string) => {
+    const newExpanded = new Set(expandedWorkouts);
+    if (newExpanded.has(workoutId)) {
+      newExpanded.delete(workoutId);
+    } else {
+      newExpanded.add(workoutId);
+    }
+    setExpandedWorkouts(newExpanded);
+  };
+
+  // 운동 시간을 분으로 변환하는 함수
+  const formatDuration = (seconds: number, category?: string) => {
+    if (!seconds) return '-';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    
+    // 수영은 소수점 두자리까지, 나머지는 정수로
+    const formattedSeconds = category === '수영' 
+      ? remainingSeconds.toFixed(2) 
+      : Math.round(remainingSeconds).toString();
+    
+    if (minutes === 0) return `${formattedSeconds}초`;
+    if (remainingSeconds === 0) return `${minutes}분`;
+    return `${minutes}분 ${formattedSeconds}초`;
+  };
+
+  // 강도 존을 표시하는 함수
+  const getIntensityLabel = (intensity: number) => {
+    if (!intensity) return null;
+    return `Zone ${intensity}`;
+  };
+
   const handleFeedbackSave = async (feedback: string) => {
     if (!weeklyRecordId) return alert('주간 운동 데이터 ID가 없습니다.');
 
@@ -397,7 +459,10 @@ export default function MobileWorkoutDetail() {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || '저장 실패');
 
-      setCoachFeedback(result.data.coach_feedback || '');
+      const savedFeedback = result.data.coach_feedback || '';
+      setCoachFeedback(savedFeedback);
+      setOriginalFeedback(savedFeedback);
+      setHasUnsavedChanges(false);
 
       setTimeout(() => {
         setShowAlert(false);
@@ -414,8 +479,29 @@ export default function MobileWorkoutDetail() {
   };
 
   return (
-    <div className="flex w-full p-4 sm:p-0">
-      <div className="w-full md:w-4/6 mr-2 flex flex-col gap-5">
+    <>
+      <style jsx>{`
+        .workout-card-hover:hover .hover-tooltip {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        .workout-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+        .workout-scroll::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 3px;
+        }
+        .workout-scroll::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 3px;
+        }
+        .workout-scroll::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+      `}</style>
+      <div className="flex w-full">
+      <div className="w-full flex flex-col gap-5 mx-2">
         
         {/* PC 버전 헤더 - 타이틀과 네비게이션 */}
         <div className="hidden lg:flex flex-col px-8 pt-4 sm:px-4 sm:pt-4">
@@ -817,74 +903,232 @@ export default function MobileWorkoutDetail() {
 
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="font-bold mb-4">
-              W{weekNumberParam} 운동 그래프 ({currentWeekData.label})
+              W{weekNumberParam} <span className="text-gray-500 font-normal">{currentWeekData.label}</span>
             </div>
-            <div className="flex gap-6 mb-6 sm:flex-col sm:gap-6">
-              <div className="flex flex-col items-center w-1/3 sm:w-full">
-                <div className="relative w-full">
-                  {generateDonutChart(
-                    Object.keys(updatedWorkoutTypes).length > 0 ? updatedWorkoutTypes : currentWeekData.workoutTypes,
-                    false,
-                    Object.keys(updatedWorkoutTypes).length > 0 
-                      ? Object.values(updatedWorkoutTypes).reduce((sum: number, val: any) => sum + val, 0)
-                      : currentWeekData.totalAchievement
-                  )}
-                </div>
-                <div className="flex justify-between text-sm mt-4 w-full bg-gray-8 px-[1.875rem] py-[1.25rem] md:px-[0.7rem] ">
-                  <div className="text-gray-500 ">근력 운동</div>
-                  <div className="text-blue-500 text-2.5-900 pt-5 md:text-1.5-900">
-                    {currentWeekData.totalSessions || 0}
-                    <span className="text-1.75-900 md:text-1.25-900">/2회</span>
+            {/* PC 버전과 모바일 버전 분리 - 3컬럼 레이아웃 */}
+            <div className="sm:flex sm:flex-col sm:gap-6 lg:grid lg:grid-cols-3 lg:gap-6">
+              
+              {/* 1컬럼: 도넛 그래프 + 근력운동 + 요일별 그래프 */}
+              <div className="sm:w-full lg:col-span-1 flex flex-col lg:px-4">
+                {/* 도넛 그래프 */}
+                <div className="mb-4">
+                  <div className="relative w-full flex justify-center">
+                    {generateDonutChart(
+                      Object.keys(updatedWorkoutTypes).length > 0 ? updatedWorkoutTypes : currentWeekData.workoutTypes,
+                      false,
+                      Object.keys(updatedWorkoutTypes).length > 0 
+                        ? Object.values(updatedWorkoutTypes).reduce((sum: number, val: any) => sum + val, 0)
+                        : currentWeekData.totalAchievement
+                    )}
                   </div>
                 </div>
-                
-                {/* 운동 상세 목록 */}
-                <div className="w-full mt-4 max-h-64 overflow-y-auto">
+
+                {/* 근력 운동 */}
+                <div className="mb-4 bg-gray-50 px-6 py-6 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm text-gray-500">근력 운동</div>
+                    <div className="text-blue-500 flex items-baseline gap-1">
+                      <span className="text-6xl font-bold leading-none">{currentWeekData.totalSessions || 0}</span>
+                      <span className="text-base font-bold">/2회</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 요일별 그래프 */}
+                <div className="flex-1 flex items-end">
+                  {generateBarChart(
+                    updatedDailyWorkouts.length > 0 ? updatedDailyWorkouts : currentWeekData.dailyWorkouts,
+                    currentWeekData.totalSessions
+                  )}
+                </div>
+              </div>
+
+              {/* 2컬럼: 운동 기록 */}
+              <div className="sm:w-full lg:col-span-1 flex flex-col">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2 flex justify-between items-center">
+                  <span>운동 기록</span>
+                  {weekWorkouts.length > 0 && (
+                    <span className="text-gray-400 text-[10px]">총 {weekWorkouts.length}개</span>
+                  )}
+                </div>
+                <div className="flex-1 overflow-y-auto max-h-[450px] workout-scroll">
                   {weekWorkouts.length > 0 ? (
-                    <div className="space-y-2">
-                      <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                        이번 주 운동 기록
-                      </div>
-                      {weekWorkouts.map((workout, index) => (
-                        <div
-                          key={workout.id || index}
-                          className="border-l-4 border-blue-400 pl-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-r"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <div className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-                                {workout.title}
-                              </div>
-                              <div className="text-[10px] text-gray-600 dark:text-gray-400 mt-1">
-                                {(() => {
-                                  const adjustedTime = new Date(new Date(workout.startTime).getTime() - (9 * 60 * 60 * 1000));
-                                  return `${adjustedTime.toLocaleDateString('ko-KR', {
-                                    month: 'numeric',
-                                    day: 'numeric',
-                                    weekday: 'short'
-                                  })} ${adjustedTime.toLocaleTimeString('ko-KR', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}`;
-                                })()}
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                                {workout.points.toFixed(1)}p
-                              </div>
-                              <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                                {workout.category}
-                              </div>
-                              {workout.type === 'STRENGTH' && (
-                                <div className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">
-                                  근력
+                    <div className="space-y-2 pr-2">
+                      {weekWorkouts.map((workout, index) => {
+                        const workoutId = workout.id || `workout-${index}`;
+                        const isExpanded = expandedWorkouts.has(workoutId);
+                        const intensityLabel = getIntensityLabel(workout.intensity);
+
+                        // 운동 타입에 따른 색상 결정
+                        const isStrength = workout.type === 'STRENGTH';
+                        const borderColor = isStrength ? 'border-orange-400' : 'border-[#26CBFF]';
+                        const bgColor = isStrength ? 'bg-orange-50' : 'bg-blue-50';
+                        const hoverBgColor = isStrength ? 'hover:bg-orange-100' : 'hover:bg-blue-100';
+
+                        return (
+                          <div
+                            key={workoutId}
+                            className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                          >
+                            {/* 메인 운동 정보 */}
+                            <div
+                              className={`border-l-4 ${borderColor} pl-3 py-2 ${bgColor} dark:bg-gray-800 cursor-pointer ${hoverBgColor} dark:hover:bg-gray-700 transition-colors relative workout-card-hover`}
+                              onClick={() => toggleWorkoutDetails(workoutId)}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                    {workout.title}
+                                  </div>
+                                  <div className="text-[10px] text-gray-600 dark:text-gray-400 mt-1">
+                                    {(() => {
+                                      const adjustedTime = new Date(new Date(workout.startTime).getTime() - (9 * 60 * 60 * 1000));
+                                      const timeString = `${adjustedTime.toLocaleDateString('ko-KR', {
+                                        month: 'numeric',
+                                        day: 'numeric',
+                                        weekday: 'short'
+                                      })} ${adjustedTime.toLocaleTimeString('ko-KR', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}`;
+                                      const duration = formatDuration(workout.duration_seconds, workout.category);
+                                      return `${timeString} • ${duration}`;
+                                    })()}
+                                  </div>
                                 </div>
-                              )}
+                                <div className="text-right flex items-center gap-2">
+                                  <div>
+                                    {!isStrength && (
+                                      <div className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                                        {workout.points.toFixed(1)}pt
+                                      </div>
+                                    )}
+                                    <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                                      {workout.category}
+                                    </div>
+                                    {workout.type === 'STRENGTH' && (
+                                      <div className="text-[10px] text-orange-600 dark:text-orange-400 font-semibold">
+                                        근력
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="text-gray-400">
+                                    <svg
+                                      className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Hover 툴팁 */}
+                              <div className="absolute left-full top-0 ml-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg p-3 opacity-0 invisible hover-tooltip transition-all duration-200 z-50">
+                                <div className="space-y-2 text-[10px]">
+                                  {/* 운동 시간 */}
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">운동시간:</span>
+                                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                                      {formatDuration(workout.duration_seconds, workout.category)}
+                                    </span>
+                                  </div>
+
+                                  {/* 강도 존 */}
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">강도:</span>
+                                    <span className="font-medium text-orange-600 dark:text-orange-400">
+                                      {workout.intensity ? `Zone ${workout.intensity}` : '-'}
+                                    </span>
+                                  </div>
+
+                                  {/* 평균 심박수 */}
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">평균심박수:</span>
+                                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                                      {workout.avg_heart_rate ? `${workout.avg_heart_rate} bpm` : '-'}
+                                    </span>
+                                  </div>
+
+                                  {/* 최대 심박수 */}
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">최대심박수:</span>
+                                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                                      {workout.max_heart_rate ? `${workout.max_heart_rate} bpm` : '-'}
+                                    </span>
+                                  </div>
+
+                                  {/* 운동 노트 */}
+                                  {workout.note && (
+                                    <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
+                                      <div className="text-gray-500 font-medium mb-1">노트:</div>
+                                      <div className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap max-h-16 overflow-y-auto">
+                                        {workout.note}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* 툴팁 화살표 */}
+                                <div className="absolute left-0 top-4 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-white dark:border-r-gray-800 -translate-x-full"></div>
+                              </div>
                             </div>
+
+                            {/* 확장된 상세 정보 */}
+                            {isExpanded && (
+                              <div className="px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+                                <div className="grid grid-cols-1 gap-2 text-[11px]">
+                                  {/* 운동 시간 */}
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">운동시간:</span>
+                                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                                      {formatDuration(workout.duration_seconds, workout.category)}
+                                    </span>
+                                  </div>
+
+                                  {/* 강도 존 */}
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">강도:</span>
+                                    <span className="font-medium text-orange-600 dark:text-orange-400">
+                                      {workout.intensity ? `Zone ${workout.intensity}` : '-'}
+                                    </span>
+                                  </div>
+
+                                  {/* 평균 심박수 */}
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">평균심박수:</span>
+                                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                                      {workout.avg_heart_rate ? `${workout.avg_heart_rate} bpm` : '-'}
+                                    </span>
+                                  </div>
+
+                                  {/* 최대 심박수 */}
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">최대심박수:</span>
+                                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                                      {workout.max_heart_rate ? `${workout.max_heart_rate} bpm` : '-'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* 운동 노트 */}
+                                {workout.note && (
+                                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="text-[11px]">
+                                      <span className="text-gray-500 font-medium">노트:</span>
+                                      <p className="mt-1 text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                        {workout.note}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="text-xs text-gray-400 text-center py-4">
@@ -892,24 +1136,16 @@ export default function MobileWorkoutDetail() {
                     </div>
                   )}
                 </div>
-                
-                <button
-                  className="pt-[6rem] text-gray-400 font-bold hover:font-extrabold cursor-pointer sm:px-[2rem] sm:hidden lg:block md:block"
-                  onClick={handleBack}
-                >
-                  ← 목록으로
-                </button>
               </div>
-              <div className="flex flex-col w-2/3 sm:w-full sm:items-start ">
-                <div className="flex items-end mb-4">
-                  {generateBarChart(
-                    updatedDailyWorkouts.length > 0 ? updatedDailyWorkouts : currentWeekData.dailyWorkouts,
-                    currentWeekData.totalSessions
-                  )}
+
+              {/* 3컬럼: 코치 피드백 */}
+              <div className="sm:w-full lg:col-span-1 flex flex-col sm:min-h-[600px] lg:min-h-0">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                  코치 피드백
                 </div>
-                <div>
+                <div className="flex-1">
                   <TextBox
-                    title="코치 피드백"
+                    title=""
                     value={coachFeedback}
                     placeholder="피드백을 작성하세요."
                     button1="남기기"
@@ -921,6 +1157,8 @@ export default function MobileWorkoutDetail() {
                     }}
                     isFeedbackMode={true}
                     copyIcon
+                    className="h-full"
+                    disabled={!hasUnsavedChanges || saving}
                   />
                 </div>
                 <button
@@ -932,6 +1170,16 @@ export default function MobileWorkoutDetail() {
               </div>
             </div>
           </div>
+        </div>
+        
+        {/* 목록으로 버튼 - 컨테이너 바깥 */}
+        <div className="flex justify-start px-4 pt-4">
+          <button
+            className="text-gray-400 font-bold hover:font-extrabold cursor-pointer sm:hidden lg:block md:block"
+            onClick={handleBack}
+          >
+            ← 목록으로
+          </button>
         </div>
       </div>
       <CustomAlert
@@ -950,5 +1198,6 @@ export default function MobileWorkoutDetail() {
         }}
       />
     </div>
+    </>
   );
 }
