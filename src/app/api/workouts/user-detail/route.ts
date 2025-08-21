@@ -542,10 +542,10 @@ async function getUserWorkoutData(
       }
     }
 
-    // 챌린지 기간으로 필터링된 weeklyRecords 가져오기
+    // 챌린지 기간으로 필터링된 weeklyRecords 가져오기 - ID와 날짜만
     let query = supabase
       .from('workout_weekly_records')
-      .select('*')
+      .select('id, start_date, end_date')
       .eq('user_id', userId);
 
     if (challengeStartDate && challengeEndDate) {
@@ -635,6 +635,7 @@ async function getUserWorkoutData(
         weekNumber = Math.floor(diffDays / 7) + 1;
       }
 
+      // 이 주의 실제 운동 데이터는 나중에 계산
       weeklyRecordsWithFeedback.push({
         ...record,
         weekNumber,
@@ -645,30 +646,23 @@ async function getUserWorkoutData(
             }
           : null,
         coach: coach || null,
+        // 실제 값은 workouts 테이블에서 계산할 예정
+        cardio_points_total: 0,
+        strength_sessions_count: 0,
       });
     }
 
-    // 챌린지 기간 내의 모든 운동 데이터 가져오기
+    // 주차별 포인트와 근력 횟수만 계산하기 위한 최소한의 데이터만 가져오기
     let workoutsQuery = supabase
       .from('workouts')
       .select(
         `
-        id,
-        user_id,
-        category_id,
-        title,
-        timestamp,
-        duration_minutes,
-        avg_heart_rate,
-        max_heart_rate,
+        start_time,
         points,
-        calories,
-        progress,
-        workout_categories(id, name_ko, name_en, type_id, workout_types(id, name))
+        workout_categories(workout_types(name))
       `
       )
-      .eq('user_id', userId)
-      .order('timestamp', { ascending: false });
+      .eq('user_id', userId);
 
     // 챌린지 기간이 있으면 해당 기간으로 필터링
     if (challengeStartDate && challengeEndDate) {
@@ -677,20 +671,55 @@ async function getUserWorkoutData(
         .lte('timestamp', challengeEndDate);
     }
 
-    const { data: recentWorkouts, error: workoutsError } = await workoutsQuery;
+    const { data: workoutsData, error: workoutsError } = await workoutsQuery;
+    
+    // DB의 start_time을 startTime으로 변환
+    const workoutsForCalculation = workoutsData?.map(workout => ({
+      ...workout,
+      startTime: workout.start_time
+    })) || [];
 
     if (workoutsError) {
-// console.error('Error fetching recent workouts:', workoutsError);
+// console.error('Error fetching workouts for calculation:', workoutsError);
       return NextResponse.json(
-        { error: 'Failed to fetch recent workouts' },
+        { error: 'Failed to fetch workouts for calculation' },
         { status: 500 }
       );
     }
 
-    const recentWorkoutsWithKST = recentWorkouts.map((w) => ({
-      ...w,
-      timestamp_kst: convertToKoreanTime(w.timestamp),
-    }));
+    // 각 주차별로 실제 운동 데이터에서 포인트와 근력 횟수 계산
+    weeklyRecordsWithFeedback.forEach(record => {
+      // UTC 날짜 문자열을 그대로 비교 (시간대 변환 없이)
+      const startDateStr = record.start_date; // YYYY-MM-DD
+      const endDateStr = record.end_date; // YYYY-MM-DD
+      
+      let cardioPoints = 0;
+      let strengthSessions = 0;
+      const uniqueStrengthDates = new Set<string>(); // 같은 날 중복 방지
+      
+      workoutsForCalculation.forEach(workout => {
+        // startTime에서 9시간을 빼서 날짜 문자열로 변환 (YYYY-MM-DD)
+        const originalTime = new Date(workout.startTime);
+        const adjustedTime = new Date(originalTime.getTime() - (9 * 60 * 60 * 1000));
+        const workoutDateStr = adjustedTime.toISOString().split('T')[0];
+        
+        // 문자열 비교로 날짜 범위 확인
+        if (workoutDateStr >= startDateStr && workoutDateStr <= endDateStr) {
+          const workoutType = workout.workout_categories?.workout_types?.name;
+          
+          if (workoutType === 'CARDIO') {
+            cardioPoints += workout.points || 0;
+          } else if (workoutType === 'STRENGTH') {
+            // 같은 날 여러 근력 운동은 1회로 계산
+            uniqueStrengthDates.add(workoutDateStr);
+          }
+        }
+      });
+      
+      // 계산된 실제 값으로 업데이트 (소수점 둘째자리에서 반올림)
+      record.cardio_points_total = Math.round(cardioPoints * 100) / 100;
+      record.strength_sessions_count = uniqueStrengthDates.size;
+    });
 
     const totalCardioPoints = weeklyRecordsWithFeedback.reduce(
       (sum, record) => sum + (record.cardio_points_total || 0),
@@ -708,12 +737,17 @@ async function getUserWorkoutData(
         displayName: user.username,
       },
       weeklyRecords: weeklyRecordsWithFeedback,
-      recentWorkouts: recentWorkoutsWithKST,
+      // recentWorkouts 제거 - week-detail API에서만 가져옴
       stats: {
         totalWeeks: weeklyRecordsWithFeedback.length,
         totalCardioPoints,
         totalStrengthSessions,
       },
+      // challengePeriod 추가 (클라이언트에서 필요할 수 있음)
+      challengePeriod: challengeStartDate && challengeEndDate ? {
+        startDate: challengeStartDate,
+        endDate: challengeEndDate,
+      } : null,
     };
     return NextResponse.json(final, {
       headers: {
@@ -743,41 +777,41 @@ async function getBatchUserWorkoutData(
   challengeId?: string | null
 ): Promise<NextResponse> {
   try {
-    // 모든 사용자의 데이터를 병렬로 가져오기
-    const promises = userIds.map(async (userId) => {
-      const { data: user, error: userError } = await supabase
-        .from('users')
-        .select('id, name, username')
-        .eq('id', userId)
+    // 챌린지 정보를 먼저 한 번만 가져오기
+    let challengeStartDate: string | null = null;
+    let challengeEndDate: string | null = null;
+
+    if (challengeId) {
+      const { data: challenge } = await supabase
+        .from('challenges')
+        .select('start_date, end_date')
+        .eq('id', challengeId)
         .single();
 
-      if (userError) {
-// console.error(`Error fetching user ${userId}:`, userError);
-        return null;
+      if (challenge) {
+        challengeStartDate = challenge.start_date;
+        challengeEndDate = challenge.end_date;
       }
+    }
 
-      // 챌린지 정보 가져오기
-      let challengeStartDate: string | null = null;
-      let challengeEndDate: string | null = null;
+    // 모든 사용자 정보를 배치로 가져오기
+    const { data: users } = await supabase
+      .from('users')
+      .select('id, name, username')
+      .in('id', userIds);
 
-      if (challengeId) {
-        const { data: challenge } = await supabase
-          .from('challenges')
-          .select('start_date, end_date')
-          .eq('id', challengeId)
-          .single();
+    if (!users || users.length === 0) {
+      return NextResponse.json([]);
+    }
 
-        if (challenge) {
-          challengeStartDate = challenge.start_date;
-          challengeEndDate = challenge.end_date;
-        }
-      }
+    // 모든 사용자의 데이터를 병렬로 처리
+    const promises = users.map(async (user) => {
 
       // 주간 기록 가져오기 (피드백 포함)
       let query = supabase
         .from('workout_weekly_records')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', user.id);
 
       if (challengeStartDate && challengeEndDate) {
         // W0를 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
@@ -851,7 +885,7 @@ async function getBatchUserWorkoutData(
       ) || 0;
 
       return {
-        userId,
+        userId: user.id,
         user: {
           id: user.id,
           name: user.name,

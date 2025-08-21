@@ -238,9 +238,9 @@ export const useWorkoutDataQuery = (challengeId: string) => {
 // console.log('✅ Batch user data 수신:', Array.isArray(data) ? data.length : 'Invalid data', '개 사용자');
       return data;
     },
-    enabled: !!challengeId && userIds.length > 0 && userIds.length <= 50, // 50명 이하일 때만
-    staleTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000,
-    gcTime: process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 10 * 60 * 1000,
+    enabled: !!challengeId && userIds.length > 0 && userIds.length <= 200, // 200명까지 허용
+    staleTime: process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 5 * 60 * 1000, // 5분
+    gcTime: process.env.NODE_ENV === 'production' ? 15 * 60 * 1000 : 10 * 60 * 1000, // 15분
     refetchOnMount: process.env.NODE_ENV === 'production',
     refetchOnWindowFocus: false,
     retry: 3,

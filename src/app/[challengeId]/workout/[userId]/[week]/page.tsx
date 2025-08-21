@@ -29,6 +29,7 @@ import {
 import { useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { IoRefresh } from 'react-icons/io5';
+import { DonutChartSkeleton, BarChartSkeleton, WorkoutListSkeleton } from '@/components/workoutpage/WorkoutDetailSkeleton';
 
 const useUserInfo = (userId: string) => {
   const [name, setName] = useState<string>('');
@@ -86,6 +87,8 @@ export default function MobileWorkoutDetail() {
   const [updatedWorkoutTypes, setUpdatedWorkoutTypes] = useState<any>({});
   const [expandedWorkouts, setExpandedWorkouts] = useState<Set<string>>(new Set());
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingWeekData, setIsLoadingWeekData] = useState(false);
+  const [weekDataCache, setWeekDataCache] = useState<Record<string, {workouts: any[], dailyWorkouts: any[], workoutTypes: any}>>({});
   
   const memberDropdownRef = useRef<HTMLDivElement>(null);
   const weekDropdownRef = useRef<HTMLDivElement>(null);
@@ -254,9 +257,22 @@ export default function MobileWorkoutDetail() {
     }
   }, [challengeId]);
 
-  // 해당 주의 운동 상세 데이터 가져오기 및 요일별 그룹핑
-  const fetchWeekWorkouts = async () => {
+  // 해당 주의 운동 상세 데이터 가져오기 및 요일별 그룹핑 (캐싱 포함)
+  const fetchWeekWorkouts = async (forceRefresh = false) => {
     if (!userData || !weekLabelParam) return;
+    
+    const cacheKey = `${userId}-${weekLabelParam}`;
+    
+    // 캐시된 데이터가 있고 강제 새로고침이 아닌 경우 캐시 사용
+    if (!forceRefresh && weekDataCache[cacheKey]) {
+      const cached = weekDataCache[cacheKey];
+      setWeekWorkouts(cached.workouts);
+      setUpdatedDailyWorkouts(cached.dailyWorkouts);
+      setUpdatedWorkoutTypes(cached.workoutTypes);
+      return;
+    }
+    
+    setIsLoadingWeekData(true);
     
     try {
       // 주의 시작/종료 날짜 파싱
@@ -265,17 +281,20 @@ export default function MobileWorkoutDetail() {
       const [startMonth, startDay] = startStr.split('.');
       const [endMonth, endDay] = endStr.split('.');
       
-      const startDate = `${currentYear}-${startMonth}-${startDay}`;
-      const endDate = `${currentYear}-${endMonth}-${endDay}`;
+      // 월과 일에 0을 채워서 올바른 날짜 포맷 생성
+      const startDate = `${currentYear}-${startMonth.padStart(2, '0')}-${startDay.padStart(2, '0')}T00:00:00`;
+      const endDate = `${currentYear}-${endMonth.padStart(2, '0')}-${endDay.padStart(2, '0')}T23:59:59`;
       
-      // 운동 데이터 가져오기
+      // 운동 데이터 가져오기 - 특정 주만 필터링
       const res = await fetch(
         `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}&t=${Date.now()}`,
         { 
-          cache: 'no-store',
-          headers: {
+          cache: forceRefresh ? 'no-store' : 'force-cache',
+          headers: forceRefresh ? {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache'
+          } : {
+            'Cache-Control': 'public, max-age=300', // 5분 캐시
           }
         }
       );
@@ -286,14 +305,30 @@ export default function MobileWorkoutDetail() {
         setWeekWorkouts(workouts);
         
         // 요일별로 운동 데이터 그룹핑하여 dailyWorkouts 업데이트
-        updateDailyWorkoutsWithRealData(workouts);
+        const processedDailyWorkouts = processWorkoutsToDaily(workouts);
+        setUpdatedDailyWorkouts(processedDailyWorkouts);
         
         // 도넛 그래프용 데이터도 업데이트
-        updateWorkoutTypesWithRealData(workouts);
+        const processedWorkoutTypes = processWorkoutsToTypes(workouts);
+        setUpdatedWorkoutTypes(processedWorkoutTypes);
+        
+        // 캐시에 저장
+        setWeekDataCache(prev => ({
+          ...prev,
+          [cacheKey]: {
+            workouts,
+            dailyWorkouts: processedDailyWorkouts,
+            workoutTypes: processedWorkoutTypes
+          }
+        }));
       }
     } catch (error) {
       // console.error('Failed to fetch week workouts:', error);
       setWeekWorkouts([]);
+      setUpdatedDailyWorkouts([]);
+      setUpdatedWorkoutTypes({});
+    } finally {
+      setIsLoadingWeekData(false);
     }
   };
   
@@ -302,57 +337,9 @@ export default function MobileWorkoutDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData, weekLabelParam, userId]);
 
-  // 실제 운동 데이터로 dailyWorkouts 업데이트
-  const updateDailyWorkoutsWithRealData = (workouts: any[]) => {
-    if (!userData || !weekLabelParam) return;
 
-    // 요일별 운동 데이터 집계
-    const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-    const workoutsByDay: Record<string, { cardio: number; strength: number; workouts: any[] }> = {};
-    
-    // 초기화
-    weekdays.forEach(day => {
-      workoutsByDay[day] = { cardio: 0, strength: 0, workouts: [] };
-    });
-
-    // 운동 데이터를 요일별로 그룹핑
-    workouts.forEach(workout => {
-      const workoutDate = new Date(new Date(workout.startTime).getTime() - (9 * 60 * 60 * 1000)); // 9시간 차감
-      const dayOfWeek = weekdays[workoutDate.getDay() === 0 ? 6 : workoutDate.getDay() - 1]; // 일요일=0을 토요일=6으로 조정
-      
-      if (workoutsByDay[dayOfWeek]) {
-        workoutsByDay[dayOfWeek].workouts.push(workout);
-        
-        if (workout.type === 'CARDIO') {
-          workoutsByDay[dayOfWeek].cardio += workout.points || 0;
-        } else if (workout.type === 'STRENGTH') {
-          workoutsByDay[dayOfWeek].strength += 1;
-        }
-      }
-    });
-
-    // currentWeekData의 dailyWorkouts 업데이트
-    const updatedDailyWorkouts = currentWeekData.dailyWorkouts.map(day => {
-      const dayData = workoutsByDay[day.day];
-      return {
-        ...day,
-        value: dayData ? dayData.cardio : day.value,
-        hasStrength: dayData ? dayData.strength > 0 : day.hasStrength,
-        strengthCount: dayData ? dayData.strength : day.strengthCount,
-        status: (day.day === '토' || day.day === '일') 
-          ? 'rest' as const
-          : (dayData && dayData.cardio > 0) 
-          ? 'complete' as const 
-          : 'incomplete' as const
-      };
-    });
-
-    // 업데이트된 dailyWorkouts 저장
-    setUpdatedDailyWorkouts(updatedDailyWorkouts);
-  };
-
-  // 실제 운동 데이터로 workoutTypes 업데이트 (도넛 그래프용)
-  const updateWorkoutTypesWithRealData = (workouts: any[]) => {
+  // 데이터 처리 함수들
+  const processWorkoutsToTypes = (workouts: any[]) => {
     const workoutTypesByCategory: Record<string, number> = {};
     
     // CARDIO 운동만 집계
@@ -363,7 +350,93 @@ export default function MobileWorkoutDetail() {
       }
     });
 
-    setUpdatedWorkoutTypes(workoutTypesByCategory);
+    return workoutTypesByCategory;
+  };
+
+  const processWorkoutsToDaily = (workouts: any[]) => {
+    // 주차 라벨에서 시작일과 종료일 파싱
+    if (!weekLabelParam) return [];
+    
+    const [startStr, endStr] = weekLabelParam.split('-');
+    const currentYear = new Date().getFullYear();
+    const [startMonth, startDay] = startStr.split('.');
+    const [endMonth, endDay] = endStr.split('.');
+    
+    // 기준 날짜를 UTC 기준으로 생성 (운동 데이터와 동일한 기준)
+    const startDate = new Date(Date.UTC(currentYear, parseInt(startMonth) - 1, parseInt(startDay)));
+    const endDate = new Date(Date.UTC(currentYear, parseInt(endMonth) - 1, parseInt(endDay)));
+
+    // 운동 데이터를 날짜별로 그룹핑 (표시 시간에서 9시간 빼기)
+    const workoutsByDate = workouts.reduce((acc: Record<string, any[]>, workout: any) => {
+      // startTime에서 9시간을 빼서 날짜 추출
+      const originalTime = new Date(workout.startTime);
+      const adjustedTime = new Date(originalTime.getTime() - (9 * 60 * 60 * 1000));
+      const dateStr = adjustedTime.toISOString().split('T')[0];
+      
+      // 디버깅: 시간 확인 (첫 번째 운동만)
+      if (Object.keys(acc).length === 0 && workouts.length > 0) {
+        console.log('🕐 시간에서 9시간 빼기 (startTime):', {
+          original_startTime: workout.startTime,
+          original_time: originalTime.toISOString(),
+          adjusted_time: adjustedTime.toISOString(),
+          final_date_str: dateStr
+        });
+      }
+      
+      if (!acc[dateStr]) acc[dateStr] = [];
+      acc[dateStr].push(workout);
+      return acc;
+    }, {});
+
+    // 7일 구조 생성 (월요일부터 일요일까지)
+    const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    const dailyWorkouts = [];
+    
+    console.log('📊 바 그래프 데이터 생성 시작');
+    console.log('🗓️ 기준 startDate:', startDate.toISOString());
+    console.log('🏋️ workoutsByDate keys:', Object.keys(workoutsByDate));
+    
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const dayWorkouts = workoutsByDate[dateStr] || [];
+      
+      const cardio = dayWorkouts
+        .filter(w => w.type === 'CARDIO')
+        .reduce((sum, w) => sum + (w.points || 0), 0);
+      
+      const strength = dayWorkouts.filter(w => w.type === 'STRENGTH').length;
+      
+      console.log(`📅 ${weekdays[i]}(${dateStr}):`, {
+        dayWorkouts: dayWorkouts.length,
+        cardio,
+        strength,
+        workoutTitles: dayWorkouts.map(w => w.title)
+      });
+      
+      dailyWorkouts.push({
+        day: weekdays[i],
+        date: dateStr,
+        value: Math.round(cardio * 100) / 100,
+        hasStrength: strength > 0,
+        strengthCount: strength,
+        status: (weekdays[i] === '토' || weekdays[i] === '일') 
+          ? 'rest' as const
+          : (cardio > 0) 
+          ? 'complete' as const 
+          : 'incomplete' as const
+      });
+    }
+
+    return dailyWorkouts;
+  };
+
+  // 실제 운동 데이터로 workoutTypes 업데이트 (도넛 그래프용) - 호환성을 위해 유지
+  const updateWorkoutTypesWithRealData = (workouts: any[]) => {
+    const result = processWorkoutsToTypes(workouts);
+    setUpdatedWorkoutTypes(result);
   };
 
   const handleBack = () =>
@@ -390,8 +463,15 @@ export default function MobileWorkoutDetail() {
   ) || {
     recordId: '',
     label: weekLabelParam || '데이터 없음',
-    workoutTypes: {},
-    dailyWorkouts: [],
+    dailyWorkouts: [
+      { day: '월', value: 0, status: 'incomplete', hasStrength: false, strengthCount: 0 },
+      { day: '화', value: 0, status: 'incomplete', hasStrength: false, strengthCount: 0 },
+      { day: '수', value: 0, status: 'incomplete', hasStrength: false, strengthCount: 0 },
+      { day: '목', value: 0, status: 'incomplete', hasStrength: false, strengthCount: 0 },
+      { day: '금', value: 0, status: 'incomplete', hasStrength: false, strengthCount: 0 },
+      { day: '토', value: 0, status: 'rest', hasStrength: false, strengthCount: 0 },
+      { day: '일', value: 0, status: 'rest', hasStrength: false, strengthCount: 0 }
+    ],
     feedback: {
       text: '피드백이 아직 없습니다.',
       author: 'AI 코치',
@@ -594,7 +674,7 @@ export default function MobileWorkoutDetail() {
                     // workout_weekly_records와 workouts 테이블 모두 새로고침
                     await Promise.all([
                       refetchWorkoutData(),
-                      fetchWeekWorkouts()
+                      fetchWeekWorkouts(true) // 강제 새로고침
                     ]);
                   } finally {
                     setTimeout(() => setIsRefreshing(false), 500);
@@ -812,7 +892,7 @@ export default function MobileWorkoutDetail() {
                   // workout_weekly_records와 workouts 테이블 모두 새로고침
                   await Promise.all([
                     refetchWorkoutData(),
-                    fetchWeekWorkouts()
+                    fetchWeekWorkouts(true) // 강제 새로고침
                   ]);
                 } finally {
                   setTimeout(() => setIsRefreshing(false), 500);
@@ -1013,12 +1093,14 @@ export default function MobileWorkoutDetail() {
                 {/* 도넛 그래프 */}
                 <div className="mb-4">
                   <div className="relative w-full flex justify-center">
-                    {generateDonutChart(
-                      Object.keys(updatedWorkoutTypes).length > 0 ? updatedWorkoutTypes : currentWeekData.workoutTypes,
-                      false,
-                      Object.keys(updatedWorkoutTypes).length > 0 
-                        ? Object.values(updatedWorkoutTypes).reduce((sum: number, val: any) => sum + val, 0)
-                        : currentWeekData.totalAchievement
+                    {isLoadingWeekData ? (
+                      <DonutChartSkeleton />
+                    ) : (
+                      generateDonutChart(
+                        updatedWorkoutTypes,
+                        false,
+                        Math.round(Object.values(updatedWorkoutTypes).reduce((sum: number, val: any) => sum + val, 0) * 100) / 100
+                      )
                     )}
                   </div>
                 </div>
@@ -1036,9 +1118,13 @@ export default function MobileWorkoutDetail() {
 
                 {/* 요일별 그래프 */}
                 <div className="flex-1 flex items-end">
-                  {generateBarChart(
-                    updatedDailyWorkouts.length > 0 ? updatedDailyWorkouts : currentWeekData.dailyWorkouts,
-                    currentWeekData.totalSessions
+                  {isLoadingWeekData ? (
+                    <BarChartSkeleton />
+                  ) : (
+                    generateBarChart(
+                      updatedDailyWorkouts.length > 0 ? updatedDailyWorkouts : currentWeekData.dailyWorkouts,
+                      currentWeekData.totalSessions
+                    )
                   )}
                 </div>
               </div>
@@ -1052,7 +1138,9 @@ export default function MobileWorkoutDetail() {
                   )}
                 </div>
                 <div className="flex-1 overflow-y-auto max-h-[450px] workout-scroll">
-                  {weekWorkouts.length > 0 ? (
+                  {isLoadingWeekData ? (
+                    <WorkoutListSkeleton />
+                  ) : weekWorkouts.length > 0 ? (
                     <div className="space-y-2 pr-2">
                       {weekWorkouts.map((workout, index) => {
                         const workoutId = workout.id || `workout-${index}`;

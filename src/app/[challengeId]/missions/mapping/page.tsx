@@ -74,12 +74,12 @@ export default function MissionMappingPage() {
       const mission = missions.find(m => m.id === selectedMission);
       if (!mission) return;
 
-      // 선택된 미션의 기간 내 운동 가져오기
+      // 선택된 미션의 기간 내 운동 가져오기 - week-detail API 사용
       const response = await fetch(
-        `/api/workouts/user-detail?userId=${selectedUser}&startDate=${mission.start_date}&endDate=${mission.end_date}`
+        `/api/workouts/week-detail?userId=${selectedUser}&startDate=${mission.start_date}&endDate=${mission.end_date}`
       );
       const data = await response.json();
-      setWorkouts(data);
+      setWorkouts(data.workouts || []);
       setShowWorkouts(true);
     } catch (error) {
 // console.error('Error fetching workouts:', error);

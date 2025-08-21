@@ -1,5 +1,6 @@
 import { WeeklyWorkout } from '@/components/hooks/useWorkoutData';
 import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 interface WeeklyWorkoutChartProps {
   userName: string;
@@ -8,6 +9,7 @@ interface WeeklyWorkoutChartProps {
   weekNumberParam?: number;
   fetchedUserName?: string; // 사용자명
   username?: string | null; // 사용자 username
+  // currentWeekRealPoints 제거 - 모든 주차에서 cardioPointsTotal 사용
 }
 
 export default function WeeklyWorkoutChart({
@@ -21,12 +23,27 @@ export default function WeeklyWorkoutChart({
   const router = useRouter();
   const params = useParams();
   const challengeId = params.challengeId as string;
+  
+  // 더 이상 week-detail API 호출하지 않음 - user-detail에서 실제 계산된 데이터 사용
+
+  // 포인트 표시 함수 - 모든 주차에서 user-detail API의 실제 계산된 데이터 사용
+  const getDisplayPoints = (week: WeeklyWorkout) => {
+    // user-detail API에서 실제 계산된 데이터 우선 사용 (모든 주차 통일)
+    if (week.cardioPointsTotal !== undefined) {
+      return week.cardioPointsTotal.toFixed(1);
+    }
+    
+    // fallback으로 totalAchievement 사용
+    const fallbackValue = (typeof week.totalAchievement === 'number' ? week.totalAchievement : parseFloat(week.totalAchievement) || 0);
+    return fallbackValue.toFixed(1);
+  };
 
   // 주차 클릭 핸들러
   const handleWeekClick = (weekNumber: number, label: string) => {
     const targetUrl = `/${challengeId}/workout/${userId}/${weekNumber}?label=${label}`;
     router.push(targetUrl);
   };
+  
   if (!weeklyWorkouts || weeklyWorkouts.length === 0) {
     return (
       <div className="bg-white rounded-lg p-6 mb-4 shadow-sm border border-gray-200">
@@ -87,7 +104,7 @@ export default function WeeklyWorkoutChart({
                       onClick={() => handleWeekClick(week.weekNumber, week.label)}
                     >
                       <div className={`text-blue-500 ${isCurrentWeek ? 'font-semibold' : ''}`}>
-                        {`${week.totalAchievement}%`}
+                        {`${getDisplayPoints(week)}%`}
                       </div>
                       <div className="text-gray-500 text-sm">
                         {week.totalSessions}
@@ -136,7 +153,7 @@ export default function WeeklyWorkoutChart({
                   </div>
                   <div className="text-right">
                     <div className={`text-blue-500 ${isCurrentWeek ? 'font-semibold' : ''}`}>
-                      {`${week.totalAchievement}%`}
+                      {`${getDisplayPoints(week)}%`}
                     </div>
                     <div className="text-gray-500 text-sm">
                       {week.totalSessions}

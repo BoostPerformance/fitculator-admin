@@ -124,66 +124,14 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         recordEndDate
       )}`;
 
-      let workoutTypes: WorkoutTypes = {};
-      try {
-        // weekLabel 대신 날짜 범위로 전달
-        const startDateStr = recordStartDate.toISOString().split('T')[0];
-        const endDateStr = recordEndDate.toISOString().split('T')[0];
-        
-        const response = await fetch(
-          `/api/workouts/weekly-categories?challengeId=${challengeId}&userId=${user.id}&startDate=${startDateStr}&endDate=${endDateStr}&t=${Date.now()}`,
-          { 
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache'
-            }
-          }
-        );
-        if (response.ok) {
-          const categoryData = await response.json();
-          // console.log('📊 Weekly categories API response:', categoryData);
-          
-          // 첫 번째 주차 데이터 사용 (날짜 범위로 필터링했으므로)
-          const weekData = categoryData.data?.[0];
-          // console.log('📊 Week data for', label, ':', weekData);
-          
-          if (weekData?.categories) {
-            weekData.categories
-              .filter((cat: any) => cat.points > 0) // percentage 대신 points로 필터링
-              .forEach((cat: any) => {
-                // console.log('📊 Adding category:', cat.name_ko, 'points:', cat.points);
-                workoutTypes[cat.name_ko] = cat.points; // percentage 대신 points 사용
-              });
-          }
-          // console.log('📊 Final workoutTypes:', workoutTypes);
-        }
-      } catch (error) {
-        // console.error('운동 카테고리 데이터 가져오기 실패:', error);
-      }
+      // workoutTypes는 더 이상 weekly-categories API에서 가져오지 않음
+      // 실제 운동 데이터에서 계산하도록 변경됨
+      const workoutTypes: WorkoutTypes = {};
 
-      // 해당 주차의 운동 데이터만 가져오기
-      const weeklyWorkouts = apiData.recentWorkouts || [];
+      // recentWorkouts가 제거되었으므로 빈 맵으로 초기화
+      // 실제 데이터는 week-detail API에서 가져옴
       const strengthWorkoutsByDate: Record<string, number> = {};
       const cardioWorkoutsByDate: Record<string, number> = {};
-
-      weeklyWorkouts.forEach((workout) => {
-        const workoutDate = new Date(workout.timestamp);
-        const dateKey = toDateKey(workout.timestamp);
-        const type = workout.workout_categories?.workout_types?.name;
-        
-        // 해당 주차 범위 내의 운동만 처리
-        if (workoutDate >= recordStartDate && workoutDate <= recordEndDate) {
-          if (type === 'STRENGTH') {
-            strengthWorkoutsByDate[dateKey] =
-              (strengthWorkoutsByDate[dateKey] || 0) + 1;
-          }
-          if (type === 'CARDIO') {
-            cardioWorkoutsByDate[dateKey] =
-              (cardioWorkoutsByDate[dateKey] || 0) + (workout.points || 0);
-          }
-        }
-      });
 
       const dateRange: Date[] = [];
       let currentDate = new Date(recordStartDate);
@@ -259,6 +207,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         totalSessions: record.strength_sessions_count || 0,
         requiredSessions: 3,
         feedback: feedbackData,
+        cardioPointsTotal: record.cardio_points_total || 0, // user-detail API에서 실제 계산된 값
       });
     }
     // console.log('processedWeeklyWorkouts', processedWeeklyWorkouts);

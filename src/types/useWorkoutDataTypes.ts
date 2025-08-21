@@ -30,6 +30,7 @@ export interface WeeklyWorkout {
   cardio?: number;
   strengthSessions?: number;
   actualCardio?: number;
+  cardioPointsTotal?: number; // user-detail API에서 실제 계산된 유산소 포인트
 }
 
 export interface UserData {
@@ -86,7 +87,7 @@ export interface ApiResponse {
   user: UserInfo;
   weeklyRecords: WeeklyRecord[];
   stats: ApiStats;
-  recentWorkouts?: any[];
+  // recentWorkouts 제거 - week-detail API에서만 가져옴
   challengePeriod: ChallengePeriod;
 }
 

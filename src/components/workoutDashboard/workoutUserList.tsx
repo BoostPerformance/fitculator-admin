@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { WorkoutPageSkeleton } from '../layout/skeleton';
@@ -131,39 +131,127 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   // React Query 훅 사용으로 API 호출 최적화
   const { weeklyChart, leaderboard, todayCount, batchUserData, isLoading, error } = useWorkoutDataQuery(challengeId);
 
+  // 주차 정보를 useMemo로 메모화하여 무한 렌더링 방지
+  const generatedWeeks = useMemo(() => {
+    if (!weeklyChart) return [];
+    
+    if (
+      weeklyChart.challengePeriod &&
+      weeklyChart.challengePeriod.startDate &&
+      weeklyChart.challengePeriod.endDate
+    ) {
+      return generateWeekLabels(
+        weeklyChart.challengePeriod.startDate,
+        weeklyChart.challengePeriod.endDate
+      );
+    } else if (weeklyChart.weeks && weeklyChart.weeks.length > 0) {
+      return weeklyChart.weeks;
+    }
+    
+    return [];
+  }, [
+    weeklyChart?.challengePeriod?.startDate, 
+    weeklyChart?.challengePeriod?.endDate,
+    weeklyChart?.weeks
+  ]);
+
+  // weekInfo 업데이트는 별도 useEffect로 분리
+  useEffect(() => {
+    if (generatedWeeks.length > 0) {
+      setWeekInfo(generatedWeeks);
+    }
+  }, [generatedWeeks]);
+
+  // Process API data to workout items 함수를 메모화
+  const processApiDataToWorkoutItems = useCallback(async (
+    weeklyChartData: WeeklyChartData,
+    leaderboardData: LeaderboardEntry[],
+    todayCountData: TodayCountData,
+    generatedWeeks: WeekInfo[],
+    batchUserData?: any
+  ): Promise<WorkoutItem[]> => {
+    const users = weeklyChartData.users || [];
+    const cardioData = weeklyChartData.cardio || [];
+    const strengthData = weeklyChartData.strength || [];
+
+    const userPointsMap: Record<string, number> = {};
+    leaderboardData?.forEach((item) => {
+      userPointsMap[item.user_id] = item.points;
+    });
+
+    // 대용량 데이터 처리를 위한 배치 처리
+    const BATCH_SIZE = 20; // 한 번에 20명씩 처리
+    const results: WorkoutItem[] = [];
+    
+    for (let i = 0; i < users.length; i += BATCH_SIZE) {
+      const userBatch = users.slice(i, i + BATCH_SIZE);
+      
+      const batchResults = await Promise.all(userBatch.map(async (user) => {
+        // 기존 로직을 여기에 구현
+        const userData = batchUserData?.find((data: any) => data.userId === user.id);
+        const totalCardioPoints = userData?.stats?.totalCardioPoints || 0;
+        
+        // 주차별 데이터 처리
+        const weeklyData = generatedWeeks.map((week, idx) => {
+          const cardioPoints = cardioData
+            .filter((c) => c.userId === user.id && c.x === week.label)
+            .reduce((sum, c) => sum + c.y, 0);
+
+          const strengthSessions = strengthData.filter(
+            (s) => s.userId === user.id && s.x === week.label
+          ).length;
+
+          const weekRecord = userData?.weeklyRecords?.find((record: any) => {
+            const recordStartDate = new Date(record.start_date);
+            const recordEndDate = new Date(record.end_date);
+            return (
+              recordStartDate.getTime() === week.startDate.getTime() &&
+              recordEndDate.getTime() === week.endDate.getTime()
+            );
+          });
+
+          return {
+            weekNumber: idx + 1,
+            startDate: week.label.split('-')[0],
+            endDate: week.label.split('-')[1],
+            aerobicPercentage: cardioPoints,
+            actualPercentage: cardioPoints,
+            strengthSessions,
+            cardio_points_total: weekRecord?.cardio_points_total || 0,
+          };
+        });
+
+        return {
+          id: user.id,
+          challenge_id: challengeId,
+          userId: user.id,
+          userName: user.name?.split(' ')[0] || '유저',
+          name: user.name || '유저',
+          weeklyData,
+          hasUploaded: (userPointsMap[user.id] || 0) > 0,
+          totalAchievements: totalCardioPoints,
+          activeThisWeek: true,
+        };
+      }));
+      
+      results.push(...batchResults);
+      
+      // 브라우저가 다른 작업을 처리할 수 있도록 잠깐 대기
+      if (i + BATCH_SIZE < users.length) {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+    }
+
+    return results;
+  }, [challengeId]);
+
   // Process data when React Query data changes
   const processWorkoutData = useCallback(async () => {
-// console.log('🔧 processWorkoutData 시작', { 
-    //   weeklyChart: !!weeklyChart, 
-    //   leaderboard: !!leaderboard, 
-    //   todayCount: !!todayCount,
-    //   challengeId 
-    // });
-    
-    if (!weeklyChart || !leaderboard || !todayCount) {
-// console.log('❌ 필수 데이터 없음, 종료');
+    if (!weeklyChart || !leaderboard || !todayCount || generatedWeeks.length === 0) {
       return;
     }
 
     try {
-      // Generate proper week info based on challenge period
-      let generatedWeeks = [];
-      if (
-        weeklyChart.challengePeriod &&
-        weeklyChart.challengePeriod.startDate &&
-        weeklyChart.challengePeriod.endDate
-      ) {
-        generatedWeeks = generateWeekLabels(
-          weeklyChart.challengePeriod.startDate,
-          weeklyChart.challengePeriod.endDate
-        );
-        setWeekInfo(generatedWeeks);
-      } else if (weeklyChart.weeks && weeklyChart.weeks.length > 0) {
-        // Fallback to existing weeks if challenge period is not available
-        setWeekInfo(weeklyChart.weeks);
-        generatedWeeks = weeklyChart.weeks;
-      }
-
       // Process API data to workout items using the generated weeks
       const workoutData = await processApiDataToWorkoutItems(
         weeklyChart,
@@ -180,121 +268,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
     } catch (error) {
 // console.error('운동 데이터 처리 실패:', error);
     }
-  }, [weeklyChart, leaderboard, todayCount, batchUserData]);
-
-  // Process API data to workout items
-  const processApiDataToWorkoutItems = async (
-    weeklyChartData: WeeklyChartData,
-    leaderboardData: LeaderboardEntry[],
-    todayCountData: TodayCountData,
-    generatedWeeks: WeekInfo[],
-    batchUserData?: any
-  ): Promise<WorkoutItem[]> => {
-    const users = weeklyChartData.users || [];
-    const cardioData = weeklyChartData.cardio || [];
-    const strengthData = weeklyChartData.strength || [];
-
-    const userPointsMap: Record<string, number> = {};
-    leaderboardData?.forEach((item) => {
-      userPointsMap[item.user_id] = item.points;
-    });
-
-    const items = users.map((user) => {
-        // batchUserData에서 해당 사용자 데이터 찾기
-        const userData = batchUserData?.find((data: any) => data.userId === user.id);
-        const totalCardioPoints = userData?.stats?.totalCardioPoints || 0;
-        
-        // 디버깅: 첫 번째 사용자만 로그 출력
-        if (user.id === users[0]?.id) {
-// console.log('🔍 WorkoutUserList 디버깅:', {
-          //   userId: user.id,
-          //   userName: user.name,
-          //   hasBatchUserData: !!userData,
-          //   weeklyRecordsCount: userData?.weeklyRecords?.length || 0,
-          //   firstRecord: userData?.weeklyRecords?.[0]
-          // });
-        }
-
-        const weeksCount = generatedWeeks.length || 1;
-
-        const userWeeklyData = generatedWeeks.map((week, index) => {
-          const startDate = formatDateToMMDD(week.startDate);
-          const endDate = formatDateToMMDD(week.endDate);
-
-          // batchUserData에서 해당 주차의 weeklyRecord 찾기
-          const weekRecord = userData?.weeklyRecords?.find(
-            (record: any) => {
-              const recordStartDate = new Date(record.start_date);
-              const recordEndDate = new Date(record.end_date);
-              
-              // W0의 경우 특별 처리
-              if (week.weekNumber === 0) {
-                const isW0Record = (
-                  recordStartDate <= week.endDate && 
-                  recordEndDate >= week.startDate
-                );
-                return isW0Record;
-              }
-              
-              // W1 이후는 기존 로직
-              const isOverlapping = (
-                recordStartDate <= week.endDate && 
-                recordEndDate >= week.startDate
-              );
-              return isOverlapping;
-            }
-          );
-
-          const cardioPoints = weekRecord?.cardio_points_total || 0;
-          const strengthSessions = weekRecord?.strength_sessions_count || 0;
-          const actualPercentage = Math.round(totalCardioPoints * 10) / 10;
-
-          return {
-            weekNumber: week.weekNumber !== undefined ? week.weekNumber : index,
-            startDate,
-            endDate,
-            aerobicPercentage: cardioPoints,
-            actualPercentage,
-            strengthSessions,
-          };
-        });
-
-        const lastWeek = userWeeklyData.at(-1);
-        const isActiveThisWeek =
-          userWeeklyData.length > 0 &&
-          ((lastWeek?.aerobicPercentage ?? 0) > 0 ||
-            (lastWeek?.strengthSessions ?? 0) > 0);
-
-        const totalAchievement = userWeeklyData.reduce(
-          (sum, week) => sum + week.aerobicPercentage,
-          0
-        );
-
-        return {
-          id: user.id,
-          challenge_id: challengeId || 'default-challenge',
-          userId: user.id,
-          userName: user.name.split(' ')[0] || 'User',
-          name: user.name || '유저',
-          weeklyData: userWeeklyData,
-          hasUploaded: userPointsMap[user.id] > 0,
-          activeThisWeek: isActiveThisWeek,
-          totalAchievements: totalAchievement,
-        };
-      });
-
-    return items.sort((a, b) => {
-      const aTotal = a.weeklyData.reduce(
-        (sum, week) => sum + week.aerobicPercentage,
-        0
-      );
-      const bTotal = b.weeklyData.reduce(
-        (sum, week) => sum + week.aerobicPercentage,
-        0
-      );
-      return bTotal - aTotal;
-    });
-  };
+  }, [weeklyChart, leaderboard, todayCount, batchUserData, generatedWeeks, processApiDataToWorkoutItems]);
 
   // Calculate total achievements
   const calculateTotalAchievements = (items: WorkoutItem[]): number => {
