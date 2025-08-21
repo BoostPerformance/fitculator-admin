@@ -89,7 +89,7 @@ export default function TrafficSourceChart({
           setChartData([{ category: '데이터 없음', percentage: 100 }]);
         }
       } catch (error) {
-        console.error('Error fetching workout data:', error);
+        // console.error('Error fetching workout data:', error);
         setChartData([{ category: '데이터 없음', percentage: 100 }]);
       } finally {
         setInternalLoading(false);

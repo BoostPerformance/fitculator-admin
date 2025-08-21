@@ -54,27 +54,27 @@ const DailyWorkoutRecord = ({
         logger.data('DailyWorkoutRecord 데이터 수신:', Array.isArray(data) ? `${data.length}개 기록` : 'Invalid data');
         
         // 디버깅: 받은 데이터 구조 확인
-        console.log('일별 운동 기록 API 응답 데이터:', data);
-        if (data && data.length > 0) {
-          console.log('첫 번째 사용자 데이터 예시:', {
-            사용자: data[0].user,
-            챌린지_기간: data[0].challenge,
-            주간_날짜: data[0].weekDates,
-            총_운동일수: data[0].totalWorkouts,
-            날짜_기준: '서버에서 결정됨'
-          });
+        // console.log('일별 운동 기록 API 응답 데이터:', data);
+        // if (data && data.length > 0) {
+        //   console.log('첫 번째 사용자 데이터 예시:', {
+        //     사용자: data[0].user,
+        //     챌린지_기간: data[0].challenge,
+        //     주간_날짜: data[0].weekDates,
+        //     총_운동일수: data[0].totalWorkouts,
+        //     날짜_기준: '서버에서 결정됨'
+        //   });
           
-          // 각 사용자의 운동 일수 계산 확인
-          data.forEach((record: WorkoutRecord, idx: number) => {
-            const workoutDays = record.weekDates.filter(d => d.hasWorkout).length;
-            console.log(`[사용자 ${idx + 1}] ${record.user.name}:`, {
-              weekDates_배열_길이: record.weekDates.length,
-              hasWorkout_true_개수: workoutDays,
-              totalWorkouts_서버값: record.totalWorkouts,
-              일치여부: workoutDays === record.totalWorkouts ? '✅ 일치' : `❌ 불일치 (${workoutDays} vs ${record.totalWorkouts})`
-            });
-          });
-        }
+        //   // 각 사용자의 운동 일수 계산 확인
+        //   data.forEach((record: WorkoutRecord, idx: number) => {
+        //     const workoutDays = record.weekDates.filter(d => d.hasWorkout).length;
+        //     console.log(`[사용자 ${idx + 1}] ${record.user.name}:`, {
+        //       weekDates_배열_길이: record.weekDates.length,
+        //       hasWorkout_true_개수: workoutDays,
+        //       totalWorkouts_서버값: record.totalWorkouts,
+        //       일치여부: workoutDays === record.totalWorkouts ? '✅ 일치' : `❌ 불일치 (${workoutDays} vs ${record.totalWorkouts})`
+        //     });
+        //   });
+        // }
         
         setWorkoutRecords(data || []);
       } catch (error) {

@@ -41,7 +41,7 @@ export default function WorkoutLeaderboard({
       try {
         // challengeId가 유효한지 확인
         if (!challengeId) {
-          console.error('유효하지 않은 challengeId:', challengeId);
+          // console.error('유효하지 않은 challengeId:', challengeId);
           setLeaderboardData([]);
           return;
         }
@@ -49,13 +49,13 @@ export default function WorkoutLeaderboard({
         const now = new Date();
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-        console.log(
-          `리더보드 조회기간: ${
-            period === "weekly"
-              ? `${weekAgo.toISOString()} ~ ${now.toISOString()}`
-              : `전체 기간 (~ ${now.toISOString()})`
-          }`
-        );
+        // console.log(
+        //   `리더보드 조회기간: ${
+        //     period === "weekly"
+        //       ? `${weekAgo.toISOString()} ~ ${now.toISOString()}`
+        //       : `전체 기간 (~ ${now.toISOString()})`
+        //   }`
+        // );
 
         const response = await fetch(
           `/api/workouts?challengeId=${challengeId}&period=${period}`
@@ -91,7 +91,7 @@ export default function WorkoutLeaderboard({
           {}
         );
 
-        console.log('userPoints', userPoints);
+        // console.log('userPoints', userPoints);
         // 리더보드 데이터 형식으로 변환 및 정렬
         const formattedData = Object.entries(userPoints)
           .map(([userId, data]) => ({
@@ -113,7 +113,7 @@ export default function WorkoutLeaderboard({
         );
         setMaxPoints(maxPoints || 1);
       } catch (error) {
-        console.error('리더보드 데이터 가져오기 실패:', error);
+        // console.error('리더보드 데이터 가져오기 실패:', error);
       }
     }
 

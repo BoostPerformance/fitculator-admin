@@ -378,12 +378,12 @@ export async function GET(request: Request) {
       sunday.setDate(monday.getDate() + 6);
       sunday.setHours(23, 59, 59, 999);
       
-      console.log('일별 운동 기록 API 날짜 범위:', {
-        이번주_시작: monday.toISOString().split('T')[0],
-        이번주_종료: sunday.toISOString().split('T')[0],
-        챌린지_시작: challengeData.start_date,
-        챌린지_종료: challengeData.end_date,
-      });
+      // console.log('일별 운동 기록 API 날짜 범위:', {
+      //   이번주_시작: monday.toISOString().split('T')[0],
+      //   이번주_종료: sunday.toISOString().split('T')[0],
+      //   챌린지_시작: challengeData.start_date,
+      //   챌린지_종료: challengeData.end_date,
+      // });
 
       // 4. 각 참가자의 전체 챌린지 기간 운동 데이터 조회 (start_time 사용)
       const participantIds = participants.map((p) => p.service_user_id);
@@ -440,11 +440,11 @@ export async function GET(request: Request) {
           });
         }
         
-        console.log(`[사용자: ${participant.users.name}]`, {
-          전체_운동일수: allWorkoutDates.size,
-          이번주_운동일수: thisWeekDates.size,
-          전체_운동날짜: Array.from(allWorkoutDates).sort(),
-        });
+        // console.log(`[사용자: ${participant.users.name}]`, {
+        //   전체_운동일수: allWorkoutDates.size,
+        //   이번주_운동일수: thisWeekDates.size,
+        //   전체_운동날짜: Array.from(allWorkoutDates).sort(),
+        // });
 
         return {
           user: {

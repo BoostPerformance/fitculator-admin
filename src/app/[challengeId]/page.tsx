@@ -372,11 +372,11 @@ export default function User() {
   }, [todayCount]);
 
   // 리더보드 데이터 디버깅
-  useEffect(() => {
-    if (leaderboard) {
-      console.log('현재 리더보드 데이터:', leaderboard);
-    }
-  }, [leaderboard]);
+  // useEffect(() => {
+  //   if (leaderboard) {
+  //     console.log('현재 리더보드 데이터:', leaderboard);
+  //   }
+  // }, [leaderboard]);
 
   const handleChallengeSelect = (challengeId: string) => {
     const selectedChallenge = formattedChallenges.find(
