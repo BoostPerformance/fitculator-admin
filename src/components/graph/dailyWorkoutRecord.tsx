@@ -52,6 +52,30 @@ const DailyWorkoutRecord = ({
         const data = await response.json();
         logger.perf('DailyWorkoutRecord API 응답', startTime);
         logger.data('DailyWorkoutRecord 데이터 수신:', Array.isArray(data) ? `${data.length}개 기록` : 'Invalid data');
+        
+        // 디버깅: 받은 데이터 구조 확인
+        console.log('일별 운동 기록 API 응답 데이터:', data);
+        if (data && data.length > 0) {
+          console.log('첫 번째 사용자 데이터 예시:', {
+            사용자: data[0].user,
+            챌린지_기간: data[0].challenge,
+            주간_날짜: data[0].weekDates,
+            총_운동일수: data[0].totalWorkouts,
+            날짜_기준: '서버에서 결정됨'
+          });
+          
+          // 각 사용자의 운동 일수 계산 확인
+          data.forEach((record: WorkoutRecord, idx: number) => {
+            const workoutDays = record.weekDates.filter(d => d.hasWorkout).length;
+            console.log(`[사용자 ${idx + 1}] ${record.user.name}:`, {
+              weekDates_배열_길이: record.weekDates.length,
+              hasWorkout_true_개수: workoutDays,
+              totalWorkouts_서버값: record.totalWorkouts,
+              일치여부: workoutDays === record.totalWorkouts ? '✅ 일치' : `❌ 불일치 (${workoutDays} vs ${record.totalWorkouts})`
+            });
+          });
+        }
+        
         setWorkoutRecords(data || []);
       } catch (error) {
         handleApiError(error, 'DailyWorkoutRecord');
@@ -89,18 +113,18 @@ const DailyWorkoutRecord = ({
   }
 
   return (
-    <div className="bg-white rounded-lg p-3 col-span-2 overflow-y-auto h-[36rem] [&::-webkit-scrollbar]:!hidden [scrollbar-width:none] shadow-[0_0_12px_0_rgba(121,120,132,0.15)] ">
+    <div className="bg-white rounded-lg p-4 col-span-2 overflow-y-auto h-[36rem] [&::-webkit-scrollbar]:!hidden [scrollbar-width:none] shadow-[0_0_12px_0_rgba(121,120,132,0.15)] ">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold dark:text-gray-5 text-[#6F6F6F] pt-4 pl-1">
+        <h2 className="text-lg font-semibold dark:text-gray-5 text-[#6F6F6F] pt-3">
           일별 운동 기록 현황
         </h2>
       </div>
       {/* 헤더 부분 */}
-      <div className="grid grid-cols-6 mb-4">
+      <div className="grid grid-cols-12 mb-4">
         {/* 이름 열 공간 */}
-        <div className="col-span-1"></div>
+        <div className="col-span-3"></div>
         {/* 요일 표시 영역 */}
-        <div className="col-span-3">
+        <div className="col-span-7">
           <div className="grid grid-cols-7 gap-2 pt-[1rem]">
             {days.map((day, idx) => (
               <div
@@ -112,10 +136,9 @@ const DailyWorkoutRecord = ({
             ))}
           </div>
         </div>
-        {/* 총 업로드 현황 헤더 */}
-        <div className="col-span-2 flex justify-center text-gray-500 lg:text-0.75-500 md:text-0.875-500 sm:text-0.875-500 text-center pt-[1rem]">
-          총 업로드
-          <br className="md:inline lg:hidden" />
+        {/* 전체 현황 헤더 */}
+        <div className="col-span-2 flex justify-end pr-2 text-gray-500 lg:text-0.75-500 md:text-0.875-500 sm:text-0.875-500 pt-[1rem]">
+          전체
         </div>
       </div>
 
@@ -124,16 +147,16 @@ const DailyWorkoutRecord = ({
         {workoutRecords
           .sort((a, b) => b.totalWorkouts - a.totalWorkouts)
           .map((record, index) => (
-            <div key={index} className="grid grid-cols-6 items-center">
+            <div key={index} className="grid grid-cols-12 items-center">
               {/* 사용자 이름 */}
-              <div className="col-span-1">
-                <span className="text-gray-700 text-0.625-500">
+              <div className="col-span-3 px-1">
+                <span className="text-gray-700 text-[12px]">
                   {record.user.name.split(' ')[0]}
                 </span>
               </div>
 
               {/* 기록 네모칸들 */}
-              <div className="col-span-3">
+              <div className="col-span-7">
                 <div className="grid grid-cols-7 gap-1">
                   {record.weekDates.map((weekDate, idx) => (
                     <div key={idx} className="flex justify-center">
@@ -148,9 +171,9 @@ const DailyWorkoutRecord = ({
               </div>
 
               {/* 총 업로드 현황 카운트 */}
-              <div className="col-span-2 flex justify-center">
+              <div className="col-span-2 flex justify-end pr-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                  {/* <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
                     <svg
                       viewBox="0 0 24 24"
                       className="w-3 h-3 text-white"
@@ -164,7 +187,7 @@ const DailyWorkoutRecord = ({
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                  </div>
+                  </div> */}
                   <span className="text-gray-600 text-0.875-500">
                     {`${record.totalWorkouts}일`}
                   </span>

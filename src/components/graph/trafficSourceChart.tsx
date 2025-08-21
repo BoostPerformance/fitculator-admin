@@ -7,7 +7,10 @@ interface ChartDataPoint {
 }
 
 interface TrafficSourceChartProps {
-  challengeId: string;
+  challengeId?: string; // 후방 호환성을 위해 유지
+  data?: ChartDataPoint[]; // 외부에서 데이터를 받을 수 있도록
+  isLoading?: boolean;
+  error?: any;
 }
 
 const COLORS = ['#3FE2FF', '#3E82F1', '#ADB9FF', '#7CF5DD', '#3FE2FF'];
@@ -51,19 +54,30 @@ const renderActiveShape = (props: any) => {
 
 export default function TrafficSourceChart({
   challengeId,
+  data: externalData,
+  isLoading = false,
+  error,
 }: TrafficSourceChartProps) {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [internalLoading, setInternalLoading] = useState(false);
 
   useEffect(() => {
+    // 외부에서 데이터를 받으면 그것을 사용
+    if (externalData && Array.isArray(externalData)) {
+      setChartData(externalData);
+      return;
+    }
+
+    // 외부 데이터가 없으면 직접 API 호출 (후방 호환성)
+    if (!challengeId) {
+      setChartData([{ category: '데이터 없음', percentage: 100 }]);
+      return;
+    }
+
     const fetchData = async () => {
       try {
-        if (!challengeId) {
-// console.error('유효하지 않은 challengeId:', challengeId);
-          setChartData([{ category: '데이터 없음', percentage: 100 }]);
-          return;
-        }
-
+        setInternalLoading(true);
         const response = await fetch(
           `/api/workouts?challengeId=${challengeId}&type=chart`
         );
@@ -72,17 +86,18 @@ export default function TrafficSourceChart({
         if (Array.isArray(data)) {
           setChartData(data);
         } else {
-// console.error('Invalid data format:', data);
           setChartData([{ category: '데이터 없음', percentage: 100 }]);
         }
       } catch (error) {
-// console.error('Error fetching workout data:', error);
+        console.error('Error fetching workout data:', error);
         setChartData([{ category: '데이터 없음', percentage: 100 }]);
+      } finally {
+        setInternalLoading(false);
       }
     };
 
     fetchData();
-  }, [challengeId]);
+  }, [challengeId, externalData]);
 
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
@@ -99,8 +114,17 @@ export default function TrafficSourceChart({
       <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
         인기운동
       </h2>
-      <div>
-        <div className="w-full h-[13rem] sm:py-[0.5rem] pb-[1rem] flex items-center justify-center relative">
+      {(isLoading || internalLoading) ? (
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-500">데이터를 불러오는 중...</p>
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center h-64">
+          <p className="text-red-500">데이터를 불러오는 중 오류가 발생했습니다</p>
+        </div>
+      ) : (
+        <div>
+        <div className="w-full h-[16rem] sm:py-[0.5rem] pb-[1rem] flex items-center justify-center relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -109,8 +133,8 @@ export default function TrafficSourceChart({
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={40}
-                outerRadius={80}
+                innerRadius={35}
+                outerRadius={105}
                 dataKey="percentage"
                 onMouseEnter={onPieEnter}
               >
@@ -153,7 +177,8 @@ export default function TrafficSourceChart({
             </ul>
           </div>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

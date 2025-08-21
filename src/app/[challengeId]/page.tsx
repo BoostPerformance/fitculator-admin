@@ -126,7 +126,13 @@ export default function User() {
   // React Query hooks 사용으로 API 호출 최적화
   const { adminData } = useAdminData();
   const { challenges } = useChallenge();
-  const { todayCount } = useWorkoutDataQuery(selectedChallengeId);
+  const { 
+    weeklyChart, 
+    leaderboard, 
+    todayCount, 
+    isLoading: workoutDataLoading, 
+    error: workoutDataError 
+  } = useWorkoutDataQuery(selectedChallengeId);
   
   // 챌린지 데이터 변환
   const formattedChallenges: Challenges[] = challenges?.map((challenge) => ({
@@ -334,13 +340,22 @@ export default function User() {
 
   // 챌린지 ID가 변경될 때마다 데이터 업데이트
   useEffect(() => {
-    if (selectedChallengeId) {
+    if (selectedChallengeId && formattedChallenges.length > 0) {
       // 챌린지가 변경되면 캐시 초기화
       dailyRecordsCache.current.clear();
       
+      // 현재 선택된 챌린지 정보 가져오기
+      const currentChallenge = formattedChallenges.find(
+        (challenge) => challenge.challenges.id === selectedChallengeId
+      );
+      
       // 데이터 불러오기
-      fetchTodayDietUploads(selectedChallengeId);
-      fetchFeedbackData(selectedChallengeId);
+      // 식단이 포함된 챌린지만 식단 관련 API 호출
+      if (currentChallenge?.challenges.challenge_type !== 'exercise') {
+        fetchTodayDietUploads(selectedChallengeId);
+        fetchFeedbackData(selectedChallengeId);
+      }
+      
       // 모든 멤버를 가져오기 위해 loadAll을 true로 설정
       fetchDailyRecords(1, true);
 
@@ -355,6 +370,13 @@ export default function User() {
       setTotalParticipants(todayCount.total || 0);
     }
   }, [todayCount]);
+
+  // 리더보드 데이터 디버깅
+  useEffect(() => {
+    if (leaderboard) {
+      console.log('현재 리더보드 데이터:', leaderboard);
+    }
+  }, [leaderboard]);
 
   const handleChallengeSelect = (challengeId: string) => {
     const selectedChallenge = formattedChallenges.find(
@@ -474,7 +496,11 @@ export default function User() {
                   <DailyDietRecord activities={filteredDailyRecordsbyId} />
                   <DailyWorkoutRecord activities={filteredDailyRecordsbyId} />
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
-                  <WeeklyWorkoutChart challengeId={selectedChallengeId} />
+                  <WeeklyWorkoutChart 
+                    data={weeklyChart} 
+                    isLoading={workoutDataLoading} 
+                    error={workoutDataError} 
+                  />
                 </>
               )}
               {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
@@ -484,13 +510,17 @@ export default function User() {
               {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type === 'exercise' && (
                 <>
-                  <TrafficSourceChart challengeId={selectedChallengeId} />{' '}
+                  <TrafficSourceChart challengeId={selectedChallengeId} />
                   <DailyWorkoutRecord activities={filteredDailyRecordsbyId} />
                   {/* <DailyWorkoutRecordMobile
                     activities={filteredDailyRecordsbyId}
                   /> */}
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
-                  <WeeklyWorkoutChart challengeId={selectedChallengeId} />
+                  <WeeklyWorkoutChart 
+                    data={weeklyChart} 
+                    isLoading={workoutDataLoading} 
+                    error={workoutDataError} 
+                  />
                 </>
               )}
             </div>

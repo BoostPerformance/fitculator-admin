@@ -14,7 +14,9 @@ import { logger, handleApiError } from '@/utils/logger';
 
 // 타입 정의
 interface WeeklyWorkoutChartProps {
-  challengeId: string;
+  data?: any; // useWorkoutDataQuery에서 받은 weeklyChart 데이터
+  isLoading?: boolean;
+  error?: any;
 }
 
 interface User {
@@ -37,15 +39,16 @@ const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
 // 주간 운동 차트 컴포넌트
 const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
-  challengeId,
+  data,
+  isLoading = false,
+  error,
 }) => {
   const [cardioData, setCardioData] = useState<ChartDataPoint[]>([]);
   const [strengthData, setStrengthData] = useState<ChartDataPoint[]>([]);
   const [weeklyCardioData, setWeeklyCardioData] = useState<ChartDataPoint[]>([]);
   const [weeklyStrengthData, setWeeklyStrengthData] = useState<ChartDataPoint[]>([]);
   const [userColors, setUserColors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // 로딩과 에러 상태는 props로 받음
   const [weekLabels, setWeekLabels] = useState<string[]>([]);
 
   // 색상 팔레트 정의
@@ -151,103 +154,74 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
     return null;
   };
 
-  // 데이터 로드
+  // 데이터 처리
   useEffect(() => {
-    const loadData = async () => {
-      if (!challengeId) {
-        logger.warn('WeeklyWorkoutChart: challengeId가 비어있습니다');
-        setError('유효한 챌린지 ID가 필요합니다.');
-        setLoading(false);
+    if (!data) {
+      return;
+    }
+
+    try {
+      if (!data.weeks || !data.cardioData || !data.strengthData) {
+        logger.warn('WeeklyWorkoutChart: 데이터 형식이 올바르지 않습니다');
         return;
       }
 
-      setLoading(true);
-      setError(null);
+      // 주차 레이블 설정
+      const weekLabels = data.weeks.map((week: any) => week.weekLabel);
+      setWeekLabels(weekLabels);
 
-      try {
-        const apiUrl = `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}`;
-        logger.api('WeeklyWorkoutChart API 호출:', apiUrl);
-
-        const startTime = Date.now();
-        const response = await fetch(apiUrl);
-
-        if (!response.ok) {
-          throw new Error(`API 호출 실패 (${response.status})`);
-        }
-
-        const data = await response.json();
-        logger.perf('WeeklyWorkoutChart API 응답', startTime);
-
-        if (!data.weeks || !data.cardioData || !data.strengthData) {
-          throw new Error('API 응답 데이터 형식이 올바르지 않습니다');
-        }
-
-        // 주차 레이블 설정
-        const weekLabels = data.weeks.map((week: any) => week.weekLabel);
-        setWeekLabels(weekLabels);
-
-        // 사용자별 색상 매핑
-        const colorMapping: Record<string, string> = {};
-        if (data.users && Array.isArray(data.users)) {
-          data.users.forEach((user: User, index: number) => {
-            if (user && user.name) {
-              colorMapping[user.name] = getUserColor(user.name, index);
-            }
-          });
-          setUserColors(colorMapping);
-        }
-
-        // 유산소 운동 데이터 변환
-        const cardioPoints = data.cardioData.map((item: any) => ({
-          x: item.weekLabel,
-          y: item.points || 0,
-          user: item.user,
-          userId: item.userId,
-          weekNumber: item.weekNumber,
-        }));
-
-        // 근력 운동 데이터 변환 (세션 수만큼 개별 포인트 생성)
-        const strengthPoints: ChartDataPoint[] = [];
-        data.strengthData.forEach((item: any) => {
-          const sessions = item.sessions || 0;
-          for (let i = 0; i < sessions; i++) {
-            strengthPoints.push({
-              x: item.weekLabel,
-              y: 1,
-              user: item.user,
-              userId: item.userId,
-              weekNumber: item.weekNumber,
-            });
+      // 사용자별 색상 매핑
+      const colorMapping: Record<string, string> = {};
+      if (data.users && Array.isArray(data.users)) {
+        data.users.forEach((user: User, index: number) => {
+          if (user && user.name) {
+            colorMapping[user.name] = getUserColor(user.name, index);
           }
         });
-
-        setCardioData(cardioPoints);
-        setStrengthData(strengthPoints);
-
-        // 주간 누적 데이터 계산
-        setWeeklyCardioData(aggregateWeeklyData(cardioPoints));
-        setWeeklyStrengthData(aggregateWeeklyData(strengthPoints));
-
-        logger.data('WeeklyWorkoutChart 데이터 처리 완료:', {
-          weeks: weekLabels.length,
-          cardio: cardioPoints.length,
-          strength: strengthPoints.length
-        });
-
-      } catch (err) {
-        handleApiError(err, 'WeeklyWorkoutChart');
-        setError(
-          err instanceof Error
-            ? err.message
-            : '데이터를 불러오는 중 오류가 발생했습니다.'
-        );
-      } finally {
-        setLoading(false);
+        setUserColors(colorMapping);
       }
-    };
 
-    loadData();
-  }, [challengeId]);
+      // 유산소 운동 데이터 변환
+      const cardioPoints = data.cardioData.map((item: any) => ({
+        x: item.weekLabel,
+        y: item.points || 0,
+        user: item.user,
+        userId: item.userId,
+        weekNumber: item.weekNumber,
+      }));
+
+      // 근력 운동 데이터 변환 (세션 수만큼 개별 포인트 생성)
+      const strengthPoints: ChartDataPoint[] = [];
+      data.strengthData.forEach((item: any) => {
+        const sessions = item.sessions || 0;
+        for (let i = 0; i < sessions; i++) {
+          strengthPoints.push({
+            x: item.weekLabel,
+            y: 1,
+            user: item.user,
+            userId: item.userId,
+            weekNumber: item.weekNumber,
+          });
+        }
+      });
+
+      setCardioData(cardioPoints);
+      setStrengthData(strengthPoints);
+
+      // 주간 누적 데이터 계산
+      setWeeklyCardioData(aggregateWeeklyData(cardioPoints));
+      setWeeklyStrengthData(aggregateWeeklyData(strengthPoints));
+
+      logger.data('WeeklyWorkoutChart 데이터 처리 완료:', {
+        weeks: weekLabels.length,
+        cardio: cardioPoints.length,
+        strength: strengthPoints.length
+      });
+
+    } catch (err) {
+      logger.error('WeeklyWorkoutChart 데이터 처리 오류:', err);
+    }
+  }, [data]);
 
   // 차트에 표시될 사용자별 산점도 생성
   const renderScatters = (data: ChartDataPoint[]) => {
@@ -284,7 +258,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   };
 
   // 로딩 중 표시
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 bg-white p-4 md:p-6 shadow rounded-lg flex items-center justify-center h-40 md:h-64">
         <p className="text-gray-500 text-sm md:text-base">
@@ -303,9 +277,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
         </p>
         <button
           onClick={() => {
-            setLoading(true);
-            setError(null);
-            setTimeout(() => window.location.reload(), 100);
+            window.location.reload();
           }}
           className="px-3 py-1 md:px-4 md:py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
         >
@@ -335,8 +307,8 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   return (
     <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 space-y-4 md:space-y-6 ">
       {/* 유산소 운동 차트 */}
-      <div className="bg-white p-3 md:p-4 shadow rounded-lg dark:bg-gray-8 overflow-hidden">
-        <h2 className="text-base md:text-lg font-semibold mb-2 md:mb-4 dark:text-gray-5 text-[#6F6F6F] pt-2 md:pt-3">
+      <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 overflow-hidden">
+        <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
           주별 유산소 운동량
         </h2>
         <div className="overflow-x-auto pb-4">
@@ -418,8 +390,8 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
       </div>
 
       {/* 근력 운동 차트 */}
-      <div className="bg-white p-3 md:p-4 shadow rounded-lg dark:bg-gray-8  overflow-hidden">
-        <h2 className="text-base md:text-lg font-semibold mb-2 md:mb-4 dark:text-gray-5 text-[#6F6F6F] pt-2 md:pt-3">
+      <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 overflow-hidden">
+        <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
           주별 근력 운동량
         </h2>
         <div className="overflow-x-auto pb-4">

@@ -361,7 +361,13 @@ export async function GET(request: Request) {
         );
       }
 
-      // 2. 이번 주의 시작일(월요일)과 종료일(일요일) 계산
+      // 2. 챌린지 기간 가져오기
+      const challengeData = participants[0]?.challenges;
+      if (!challengeData) {
+        return NextResponse.json({ error: 'Challenge data not found' }, { status: 404 });
+      }
+
+      // 3. 이번 주의 시작일(월요일)과 종료일(일요일) 계산 - 표시용
       const today = new Date();
       const day = today.getDay();
       const diff = today.getDate() - (day === 0 ? 6 : day - 1);
@@ -371,15 +377,22 @@ export async function GET(request: Request) {
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
       sunday.setHours(23, 59, 59, 999);
+      
+      console.log('일별 운동 기록 API 날짜 범위:', {
+        이번주_시작: monday.toISOString().split('T')[0],
+        이번주_종료: sunday.toISOString().split('T')[0],
+        챌린지_시작: challengeData.start_date,
+        챌린지_종료: challengeData.end_date,
+      });
 
-      // 3. 각 참가자의 이번 주 운동 데이터 조회
+      // 4. 각 참가자의 전체 챌린지 기간 운동 데이터 조회 (start_time 사용)
       const participantIds = participants.map((p) => p.service_user_id);
       const { data: workouts, error: workoutsError } = await supabase
         .from('workouts')
-        .select('user_id, timestamp')
+        .select('user_id, start_time, end_time')
         .in('user_id', participantIds)
-        .gte('timestamp', monday.toISOString())
-        .lte('timestamp', sunday.toISOString());
+        .gte('start_time', challengeData.start_date)
+        .lte('start_time', challengeData.end_date);
 
       if (workoutsError) {
 // console.error('❌ Error fetching workouts:', workoutsError);
@@ -389,18 +402,33 @@ export async function GET(request: Request) {
         );
       }
 
-      // 4. 각 참가자별로 이번 주 운동 기록 처리
+      // 5. 각 참가자별로 운동 기록 처리
       const processedData = participants.map((participant) => {
         const userWorkouts = workouts.filter(
           (w) => w.user_id === participant.service_user_id
         );
-        const workoutDates = new Set(
+        
+        // 전체 챌린지 기간 동안의 운동 날짜들 (start_time 기준)
+        const allWorkoutDates = new Set(
           userWorkouts.map(
-            (w) => new Date(w.timestamp).toISOString().split('T')[0]
+            (w) => new Date(w.start_time).toISOString().split('T')[0]
+          )
+        );
+        
+        // 이번 주의 운동 날짜들만 필터링 (표시용)
+        const thisWeekWorkouts = userWorkouts.filter(
+          (w) => {
+            const workoutDate = new Date(w.start_time);
+            return workoutDate >= monday && workoutDate <= sunday;
+          }
+        );
+        const thisWeekDates = new Set(
+          thisWeekWorkouts.map(
+            (w) => new Date(w.start_time).toISOString().split('T')[0]
           )
         );
 
-        // 이번 주의 각 날짜에 대한 운동 기록 여부 확인
+        // 이번 주의 각 날짜에 대한 운동 기록 여부 확인 (표시용)
         const weekDates = [];
         for (let i = 0; i < 7; i++) {
           const date = new Date(monday);
@@ -408,9 +436,15 @@ export async function GET(request: Request) {
           const dateStr = date.toISOString().split('T')[0];
           weekDates.push({
             date: dateStr,
-            hasWorkout: workoutDates.has(dateStr),
+            hasWorkout: thisWeekDates.has(dateStr), // 이번 주 데이터만
           });
         }
+        
+        console.log(`[사용자: ${participant.users.name}]`, {
+          전체_운동일수: allWorkoutDates.size,
+          이번주_운동일수: thisWeekDates.size,
+          전체_운동날짜: Array.from(allWorkoutDates).sort(),
+        });
 
         return {
           user: {
@@ -421,8 +455,8 @@ export async function GET(request: Request) {
             start_date: participant.challenges.start_date,
             end_date: participant.challenges.end_date,
           },
-          weekDates,
-          totalWorkouts: workoutDates.size,
+          weekDates, // 이번 주 7일 표시
+          totalWorkouts: allWorkoutDates.size, // 전체 챌린지 기간의 총 운동일수
         };
       });
 
