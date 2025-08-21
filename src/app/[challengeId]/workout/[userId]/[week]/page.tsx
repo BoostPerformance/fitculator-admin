@@ -141,6 +141,7 @@ export default function MobileWorkoutDetail() {
     };
 
     fetchCoachFeedback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData, currentWeekIndex]);
 
   useEffect(() => {
@@ -269,7 +270,14 @@ export default function MobileWorkoutDetail() {
       
       // 운동 데이터 가져오기
       const res = await fetch(
-        `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}`
+        `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}&t=${Date.now()}`,
+        { 
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        }
       );
       
       if (res.ok) {
@@ -291,6 +299,7 @@ export default function MobileWorkoutDetail() {
   
   useEffect(() => {
     fetchWeekWorkouts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData, weekLabelParam, userId]);
 
   // 실제 운동 데이터로 dailyWorkouts 업데이트

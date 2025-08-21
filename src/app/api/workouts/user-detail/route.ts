@@ -250,6 +250,12 @@ async function getWeeklyChartData(
         startDate: challenge.start_date,
         endDate: challenge.end_date,
       },
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     });
   } catch (error) {
 // console.error('Error in weekly chart data:', error);
@@ -371,7 +377,13 @@ async function getLeaderboardData(
     // 포인트 내림차순 정렬
     leaderboardData.sort((a, b) => b.points - a.points);
 
-    return NextResponse.json(leaderboardData);
+    return NextResponse.json(leaderboardData, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
 // console.error('Error in leaderboard data:', error);
     return NextResponse.json(
@@ -445,6 +457,12 @@ async function getTodayCountData(
     return NextResponse.json({
       count: todayActiveUsers,
       total: participantIds.length,
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     });
   } catch (error) {
 // console.error('Error in today count data:', error);
@@ -697,7 +715,13 @@ async function getUserWorkoutData(
         totalStrengthSessions,
       },
     };
-    return NextResponse.json(final);
+    return NextResponse.json(final, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
 // console.error('Error fetching user workout data:', error);
     return NextResponse.json(
@@ -845,7 +869,13 @@ async function getBatchUserWorkoutData(
     const results = await Promise.all(promises);
     const validResults = results.filter((result) => result !== null);
 
-    return NextResponse.json(validResults);
+    return NextResponse.json(validResults, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
   } catch (error) {
 // console.error('Error fetching batch user workout data:', error);
     return NextResponse.json(

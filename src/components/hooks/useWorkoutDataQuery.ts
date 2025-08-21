@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useQueries } from '@tanstack/react-query';
+import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
 
 // 타입 정의
 export interface WorkoutDataResponse {
@@ -150,6 +150,7 @@ const fetchBatchUserData = async (userIds: string[], challengeId: string, page: 
 
 // 메인 훅: 모든 운동 데이터를 한번에 가져옴
 export const useWorkoutDataQuery = (challengeId: string) => {
+  const queryClient = useQueryClient();
   // 1. Weekly Chart 데이터
   const weeklyChartQuery = useQuery({
     queryKey: ['workout', 'weekly-chart', challengeId],
@@ -315,7 +316,10 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     isApiConnected,
     hasAnyData,
     refetch: async () => {
-      // 캐시를 무효화하고 강제로 새 데이터 가져오기
+      // 캐시를 완전히 무효화하고 강제로 새 데이터 가져오기
+      await queryClient.invalidateQueries({ queryKey: ['workout'] });
+      
+      // 그 다음 refetch
       await Promise.all([
         weeklyChartQuery.refetch(),
         leaderboardQuery.refetch(),

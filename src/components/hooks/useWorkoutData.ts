@@ -22,7 +22,14 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         if (!userId) throw new Error('사용자 ID가 필요합니다.');
 
         const response = await fetch(
-          `/api/workouts/user-detail?userId=${userId}&challengeId=${challengeId}`
+          `/api/workouts/user-detail?userId=${userId}&challengeId=${challengeId}&t=${Date.now()}`,
+          { 
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache'
+            }
+          }
         );
 
         if (!response.ok) throw new Error(`API 오류: ${response.status}`);
@@ -54,6 +61,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
       setTotalPoints(0);
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, challengeId]);
 
   const transformApiData = async (apiData: ApiResponse): Promise<UserData> => {
@@ -123,7 +131,14 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
         const endDateStr = recordEndDate.toISOString().split('T')[0];
         
         const response = await fetch(
-          `/api/workouts/weekly-categories?challengeId=${challengeId}&userId=${user.id}&startDate=${startDateStr}&endDate=${endDateStr}`
+          `/api/workouts/weekly-categories?challengeId=${challengeId}&userId=${user.id}&startDate=${startDateStr}&endDate=${endDateStr}&t=${Date.now()}`,
+          { 
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache'
+            }
+          }
         );
         if (response.ok) {
           const categoryData = await response.json();
