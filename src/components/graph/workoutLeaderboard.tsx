@@ -131,7 +131,7 @@ export default function WorkoutLeaderboard({
         <div className="flex gap-2">
           <button
             onClick={() => setPeriod('weekly')}
-            className={`px-3 py-1 rounded-full text-sm ${
+            className={`px-3 py-1 rounded-full text-xs ${
               period === 'weekly'
                 ? 'bg-blue-5 text-white'
                 : 'bg-gray-100 text-gray-600'
@@ -141,7 +141,7 @@ export default function WorkoutLeaderboard({
           </button>
           <button
             onClick={() => setPeriod('all')}
-            className={`px-3 py-1 rounded-full text-sm ${
+            className={`px-3 py-1 rounded-full text-xs ${
               period === 'all'
                 ? 'bg-blue-5 text-white'
                 : 'bg-gray-100 text-gray-600'
@@ -158,43 +158,39 @@ export default function WorkoutLeaderboard({
         {leaderboardData.map((entry) => {
           //  console.log('leaderboardData', leaderboardData);
           return (
-            <div key={entry.user_id} className="flex items-center gap-4">
-              <span className="w-6 text-center font-bold text-[#6F6F6F] text-[14px]">
+            <div key={entry.user_id} className="grid grid-cols-12 gap-2 items-center">
+              <div className="col-span-1 text-center font-bold text-[#6F6F6F] text-[14px]">
                 {entry.rank}
-              </span>
-              <div className="flex-1 flex items-center gap-2">
-                <span className="font-medium text-[#6F6F6F] w-[70px] text-[14px]">
-                  {entry.user_name.split(' ')[0]}
-                </span>
-                <div className="w-[100px] sm:w-[60px] bg-gray-200 rounded-full h-2 relative">
-                  <div
-                    className="h-2 rounded-full transition-all duration-300"
-                    style={{
-                      width: `${Math.min(
-                        (entry.total_points / 100) * 100,
-                        100
-                      )}%`,
-                      background:
-                        'linear-gradient(90deg, #FF007A 0%, #FF70AC 100%)',
-                    }}
-                  />
-                  {entry.total_points >= 100 && (
-                    <div className="absolute -right-2 -top-2">
-                      <Image
-                        src="/svg/fire.svg"
-                        alt="fire"
-                        width={15}
-                        height={20}
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 w-[80px] justify-end">
-                  <span className="text-[14px] sm:text-[12px] text-[#6F6F6F]">
-                    {entry.total_points.toFixed(2)}pt/
-                    {entry.strengthWorkoutCount}회
-                  </span>
-                </div>
+              </div>
+              <div className="col-span-3 font-medium text-[#6F6F6F] text-[12px]">
+                {entry.user_name.split(' ')[0]}
+              </div>
+              <div className="col-span-4 bg-gray-200 rounded-full h-2 relative">
+                <div
+                  className="h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${Math.min(
+                      (entry.total_points / 100) * 100,
+                      100
+                    )}%`,
+                    background:
+                      'linear-gradient(90deg, #FF007A 0%, #FF70AC 100%)',
+                  }}
+                />
+                {entry.total_points >= 100 && (
+                  <div className="absolute -right-2 -top-2">
+                    <Image
+                      src="/svg/fire.svg"
+                      alt="fire"
+                      width={15}
+                      height={20}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="col-span-4 text-right text-[12px] text-[#6F6F6F]">
+                {entry.total_points.toFixed(1)}pt/
+                {entry.strengthWorkoutCount}회
               </div>
             </div>
           );

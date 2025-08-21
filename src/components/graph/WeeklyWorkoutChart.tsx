@@ -311,9 +311,9 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
         <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
           주별 유산소 운동량
         </h2>
-        <div className="overflow-x-auto pb-4">
+        <div className="overflow-x-auto pb-2">
           <div
-            className="h-[200px] sm:h-[250px] md:h-[300px]"
+            className="h-[250px] sm:h-[300px] md:h-[350px]"
             style={{
               width: `${Math.max(100, weekLabels.length * 150)}px`,
               minWidth: '100%',
@@ -365,12 +365,12 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                   tick={{ fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12 }}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend
+                {/* <Legend
                   wrapperStyle={{
                     fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12,
                     marginTop: typeof window !== 'undefined' && window.innerWidth < 640 ? 0 : 10,
                   }}
-                />
+                /> */}
 
                 {/* 주간 구분선 (각 주의 시작) */}
                 {weekLabels.map((_, i) => (
@@ -394,9 +394,9 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
         <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
           주별 근력 운동량
         </h2>
-        <div className="overflow-x-auto pb-4">
+        <div className="overflow-x-auto pb-2">
           <div
-            className="h-[200px] sm:h-[250px] md:h-[300px]"
+            className="h-[250px] sm:h-[300px] md:h-[350px]"
             style={{
               width: `${Math.max(100, weekLabels.length * 150)}px`,
               minWidth: '100%',
@@ -448,12 +448,12 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
                   tick={{ fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12 }}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend
+                {/* <Legend
                   wrapperStyle={{
                     fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12,
                     marginTop: typeof window !== 'undefined' && window.innerWidth < 640 ? 0 : 10,
                   }}
-                />
+                /> */}
 
                 {/* 주간 구분선 (각 주의 시작) */}
                 {weekLabels.map((_, i) => (
