@@ -495,14 +495,14 @@ export default function User() {
               )}
             </div>
 
-            <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem] bg-white-1 px-4 sm:px-4">
+            {/* <div className="dark:bg-blue-4 bg-gray-100 lg:pt-[1rem] bg-white-1 px-4 sm:px-4">
               <DietTable
                 dailyRecordsData={filteredDailyRecordsbyId}
                 challengeId={selectedChallengeId}
                 loading={isLoadingFeedbacks || loading}
                 feedbackData={feedbackData}
               />
-            </div>
+            </div> */}
           </div>
         </div>
     </div>

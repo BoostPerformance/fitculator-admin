@@ -144,7 +144,6 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
 
       return (
         <div className="bg-white p-2 border border-gray-200 shadow-md rounded text-xs">
-          <p className="font-bold">{data.weekNumber} ({data.x})</p>
           <p className="text-gray-700">{`${data.user}: ${data.y.toFixed(1)}`}</p>
         </div>
       );
