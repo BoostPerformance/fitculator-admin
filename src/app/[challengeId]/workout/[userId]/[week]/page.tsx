@@ -95,6 +95,7 @@ export default function MobileWorkoutDetail() {
     loading,
     error: apiError,
     totalPoints,
+    refetch: refetchWorkoutData,
   } = useWorkoutData(userId, challengeId);
   const { name: fetchedUserName } = useUserInfo(userId);
 
@@ -581,7 +582,11 @@ export default function MobileWorkoutDetail() {
                 onClick={async () => {
                   setIsRefreshing(true);
                   try {
-                    await fetchWeekWorkouts();
+                    // workout_weekly_records와 workouts 테이블 모두 새로고침
+                    await Promise.all([
+                      refetchWorkoutData(),
+                      fetchWeekWorkouts()
+                    ]);
                   } finally {
                     setTimeout(() => setIsRefreshing(false), 500);
                   }
@@ -795,7 +800,11 @@ export default function MobileWorkoutDetail() {
               onClick={async () => {
                 setIsRefreshing(true);
                 try {
-                  await fetchWeekWorkouts();
+                  // workout_weekly_records와 workouts 테이블 모두 새로고침
+                  await Promise.all([
+                    refetchWorkoutData(),
+                    fetchWeekWorkouts()
+                  ]);
                 } finally {
                   setTimeout(() => setIsRefreshing(false), 500);
                 }

@@ -15,8 +15,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
   const [error, setError] = useState<string | null>(null);
   const [totalPoints, setTotalPoints] = useState<number>(0);
 
-  useEffect(() => {
-    const fetchUserWorkoutData = async () => {
+  const fetchUserWorkoutData = async () => {
       try {
         setLoading(true);
         setError(null);
@@ -47,6 +46,7 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
       }
     };
 
+  useEffect(() => {
     if (userId) {
       fetchUserWorkoutData();
     } else {
@@ -262,5 +262,6 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     loading,
     error,
     totalPoints,
+    refetch: fetchUserWorkoutData,
   };
 };

@@ -314,11 +314,14 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     error,
     isApiConnected,
     hasAnyData,
-    refetch: () => {
-      weeklyChartQuery.refetch();
-      leaderboardQuery.refetch();
-      todayCountQuery.refetch();
-      batchUserDataQuery.refetch();
+    refetch: async () => {
+      // 캐시를 무효화하고 강제로 새 데이터 가져오기
+      await Promise.all([
+        weeklyChartQuery.refetch(),
+        leaderboardQuery.refetch(),
+        todayCountQuery.refetch(),
+        batchUserDataQuery.refetch()
+      ]);
     }
   };
 };
