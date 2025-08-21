@@ -19,6 +19,18 @@ export default function Login() {
   }, [setTheme]);
 
   useEffect(() => {
+    // KakaoTalk 브라우저 감지 및 Chrome 리다이렉트
+    if (typeof window !== 'undefined') {
+      const userAgent = navigator.userAgent;
+      if (userAgent.includes('KAKAOTALK')) {
+        const currentUrl = window.location.href;
+        const chromeUrl = `intent://${currentUrl.replace(/https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+        window.location.href = chromeUrl;
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     // console.log('🔄 Login Page useEffect - Session');
     // console.log('📊 Session status:', status);
     // console.log('📊 Session data:', session);
