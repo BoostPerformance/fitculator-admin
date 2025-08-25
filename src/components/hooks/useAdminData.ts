@@ -12,7 +12,7 @@ const fetchAdminData = async (): Promise<AdminData> => {
   return response.json();
 };
 
-export const useAdminData = () => {
+export function useAdminData() {
   const { data: adminData, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-users'],
     queryFn: fetchAdminData,
@@ -33,4 +33,4 @@ export const useAdminData = () => {
     isLoading,
     error,
   };
-};
+}

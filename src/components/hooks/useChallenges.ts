@@ -48,7 +48,7 @@ const fetchChallengesApi = async (): Promise<Challenges[]> => {
   return response.json();
 };
 
-export const useChallenge = () => {
+export function useChallenge() {
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challengeTitle, setChallengeTitle] = useState('');
 
@@ -87,4 +87,4 @@ export const useChallenge = () => {
     loading,
     error,
   };
-};
+}
