@@ -40,7 +40,13 @@ const useUserInfo = (userId: string) => {
     const fetchUserInfo = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/user?userId=${userId}`);
+        const res = await fetch(`/api/user?userId=${userId}&t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        });
         if (!res.ok) throw new Error('유저 정보 로딩 실패');
         const data = await res.json();
         setName(data.name || '알 수 없음');
@@ -126,7 +132,14 @@ export default function MobileWorkoutDetail() {
 
     const fetchCoachFeedback = async () => {
       const res = await fetch(
-        `/api/workout-feedback?workout_weekly_records_id=${weeklyRecordId}&challenge_id=${challengeId}`
+        `/api/workout-feedback?workout_weekly_records_id=${weeklyRecordId}&challenge_id=${challengeId}&t=${Date.now()}`,
+        {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        }
       );
       const data = await res.json();
       if (res.ok && data.data) {
@@ -238,7 +251,13 @@ export default function MobileWorkoutDetail() {
   useEffect(() => {
     const fetchChallengeInfo = async () => {
       try {
-        const res = await fetch(`/api/challenges`);
+        const res = await fetch(`/api/challenges?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        });
         const data = await res.json();
         if (data && data.length > 0) {
           const challenge = data.find((c: any) => c.challenges.id === challengeId);
@@ -289,12 +308,10 @@ export default function MobileWorkoutDetail() {
       const res = await fetch(
         `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}&t=${Date.now()}`,
         { 
-          cache: forceRefresh ? 'no-store' : 'force-cache',
-          headers: forceRefresh ? {
+          cache: 'no-store',
+          headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache'
-          } : {
-            'Cache-Control': 'public, max-age=300', // 5분 캐시
           }
         }
       );
