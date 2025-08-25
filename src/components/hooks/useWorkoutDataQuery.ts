@@ -156,15 +156,15 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'weekly-chart', challengeId],
     queryFn: () => fetchWeeklyChart(challengeId),
     enabled: !!challengeId,
-    staleTime: 5 * 60 * 1000, // 5분
+    staleTime: 0, // 항상 fresh data
     gcTime: 10 * 60 * 1000, // 10분
     retry: (failureCount, error) => {
 // console.log(`🔄 Weekly chart 재시도 ${failureCount}회:`, error);
       return failureCount < 3; // Production 환경에서 더 많은 재시도
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프
-    refetchOnMount: false, // 마운트 시 재요청 비활성화
-    refetchOnWindowFocus: false, // 윈도우 포커스 시 재요청 비활성화
+    refetchOnMount: true, // 마운트 시 항상 재요청
+    refetchOnWindowFocus: true, // 윈도우 포커스 시 재요청
   });
 
   // 2. Leaderboard 데이터
@@ -172,15 +172,15 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'leaderboard', challengeId],
     queryFn: () => fetchLeaderboard(challengeId),
     enabled: !!challengeId,
-    staleTime: process.env.NODE_ENV === 'production' ? 2 * 60 * 1000 : 5 * 60 * 1000,
-    gcTime: process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 10 * 60 * 1000,
+    staleTime: 0, // 항상 fresh data
+    gcTime: 10 * 60 * 1000, // 10분
     retry: (failureCount, error) => {
 // console.log(`🔄 Leaderboard 재시도 ${failureCount}회:`, error);
       return failureCount < 3;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    refetchOnMount: process.env.NODE_ENV === 'production',
-    refetchOnWindowFocus: false,
+    refetchOnMount: true, // 항상 재요청
+    refetchOnWindowFocus: true, // 윈도우 포커스 시 재요청
   });
 
   // 3. Today Count 데이터
@@ -188,15 +188,15 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'today-count', challengeId],
     queryFn: () => fetchTodayCount(challengeId),
     enabled: !!challengeId,
-    staleTime: 1 * 60 * 1000, // 1분  
+    staleTime: 0, // 항상 fresh data
     gcTime: 5 * 60 * 1000, // 5분
     retry: (failureCount, error) => {
 // console.log(`🔄 Today count 재시도 ${failureCount}회:`, error);
       return failureCount < 3;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    refetchOnMount: process.env.NODE_ENV === 'production',
-    refetchOnWindowFocus: false,
+    refetchOnMount: true, // 항상 재요청
+    refetchOnWindowFocus: true, // 윈도우 포커스 시 재요청
   });
 
   // 4. Batch User Data - 임시로 단일 요청으로 변경 (성능 문제 해결)
@@ -239,10 +239,10 @@ export const useWorkoutDataQuery = (challengeId: string) => {
       return data;
     },
     enabled: !!challengeId && userIds.length > 0 && userIds.length <= 200, // 200명까지 허용
-    staleTime: process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 5 * 60 * 1000, // 5분
-    gcTime: process.env.NODE_ENV === 'production' ? 15 * 60 * 1000 : 10 * 60 * 1000, // 15분
-    refetchOnMount: process.env.NODE_ENV === 'production',
-    refetchOnWindowFocus: false,
+    staleTime: 0, // 항상 fresh data
+    gcTime: 10 * 60 * 1000, // 10분
+    refetchOnMount: true, // 항상 재요청
+    refetchOnWindowFocus: true, // 윈도우 포커스 시 재요청
     retry: 3,
   });
   
