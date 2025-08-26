@@ -13,13 +13,15 @@ export interface WorkoutDataResponse {
 // API 호출 함수들
 const fetchWeeklyChart = async (challengeId: string) => {
   try {
-    const url = `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}`;
+    const url = `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
 // console.log('🔗 Weekly chart API 호출:', url);
     
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
       },
       cache: 'no-store', // 캐싱 비활성화
     });
@@ -54,13 +56,15 @@ const fetchWeeklyChart = async (challengeId: string) => {
 
 const fetchLeaderboard = async (challengeId: string) => {
   try {
-    const url = `/api/workouts/user-detail?type=leaderboard&challengeId=${challengeId}`;
+    const url = `/api/workouts/user-detail?type=leaderboard&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
 // console.log('🔗 Leaderboard API 호출:', url);
     
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
       },
       cache: 'no-store', // 캐싱 비활성화
     });
@@ -93,13 +97,15 @@ const fetchLeaderboard = async (challengeId: string) => {
 
 const fetchTodayCount = async (challengeId: string) => {
   try {
-    const url = `/api/workouts/user-detail?type=today-count&challengeId=${challengeId}`;
+    const url = `/api/workouts/user-detail?type=today-count&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
 // console.log('🔗 Today count API 호출:', url);
     
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
       },
       cache: 'no-store', // 캐싱 비활성화
     });
@@ -152,70 +158,75 @@ export const useWorkoutDataQuery = (challengeId: string) => {
   const queryClient = useQueryClient();
   // 1. Weekly Chart 데이터
   const weeklyChartQuery = useQuery({
-    queryKey: ['workout', 'weekly-chart', challengeId],
+    queryKey: ['workout', 'weekly-chart', challengeId, Date.now()],
     queryFn: () => fetchWeeklyChart(challengeId),
     enabled: !!challengeId,
     staleTime: 0, // 항상 fresh data
-    gcTime: 10 * 60 * 1000, // 10분
+    gcTime: 0, // 즉시 가비지 컬렉션
     retry: (failureCount, error) => {
 // console.log(`🔄 Weekly chart 재시도 ${failureCount}회:`, error);
       return failureCount < 3; // Production 환경에서 더 많은 재시도
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프
-    refetchOnMount: true, // 마운트 시 항상 재요청
-    refetchOnWindowFocus: true, // 윈도우 포커스 시 재요청
+    refetchOnMount: 'always', // 마운트 시 항상 재요청
+    refetchOnWindowFocus: 'always', // 윈도우 포커스 시 재요청
+    refetchInterval: false, // 주기적 refetch 비활성화
   });
 
   // 2. Leaderboard 데이터
   const leaderboardQuery = useQuery({
-    queryKey: ['workout', 'leaderboard', challengeId],
+    queryKey: ['workout', 'leaderboard', challengeId, Date.now()],
     queryFn: () => fetchLeaderboard(challengeId),
     enabled: !!challengeId,
     staleTime: 0, // 항상 fresh data
-    gcTime: 10 * 60 * 1000, // 10분
+    gcTime: 0, // 즉시 가비지 컬렉션
     retry: (failureCount, error) => {
 // console.log(`🔄 Leaderboard 재시도 ${failureCount}회:`, error);
       return failureCount < 3;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    refetchOnMount: true, // 항상 재요청
-    refetchOnWindowFocus: true, // 윈도우 포커스 시 재요청
+    refetchOnMount: 'always', // 항상 재요청
+    refetchOnWindowFocus: 'always', // 윈도우 포커스 시 재요청
+    refetchInterval: false,
   });
 
   // 3. Today Count 데이터
   const todayCountQuery = useQuery({
-    queryKey: ['workout', 'today-count', challengeId],
+    queryKey: ['workout', 'today-count', challengeId, Date.now()],
     queryFn: () => fetchTodayCount(challengeId),
     enabled: !!challengeId,
     staleTime: 0, // 항상 fresh data
-    gcTime: 5 * 60 * 1000, // 5분
+    gcTime: 0, // 즉시 가비지 컬렉션
     retry: (failureCount, error) => {
 // console.log(`🔄 Today count 재시도 ${failureCount}회:`, error);
       return failureCount < 3;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    refetchOnMount: true, // 항상 재요청
-    refetchOnWindowFocus: true, // 윈도우 포커스 시 재요청
+    refetchOnMount: 'always', // 항상 재요청
+    refetchOnWindowFocus: 'always', // 윈도우 포커스 시 재요청
+    refetchInterval: false,
   });
 
   // 4. Batch User Data - 임시로 단일 요청으로 변경 (성능 문제 해결)
   const userIds = weeklyChartQuery.data?.users?.map((user: any) => user.id) || [];
   
   const batchUserDataQuery = useQuery({
-    queryKey: ['workout', 'batch-user-data-single', challengeId, userIds.sort().join(',')],
+    queryKey: ['workout', 'batch-user-data-single', challengeId, userIds.sort().join(','), Date.now()],
     queryFn: async () => {
       if (!userIds.length) {
 // console.log('🚫 Batch user data: userIds가 비어있음');
         return [];
       }
       
-      const url = `/api/workouts/user-detail?type=batch-user-data&userIds=${userIds.join(',')}&challengeId=${challengeId}`;
+      const url = `/api/workouts/user-detail?type=batch-user-data&userIds=${userIds.join(',')}&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
 // console.log('🔗 Batch user data API 호출:', url, `(${userIds.length}명)`);
       
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
         },
         cache: 'no-store', // 캐싱 비활성화
       });
@@ -239,9 +250,10 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     },
     enabled: !!challengeId && userIds.length > 0 && userIds.length <= 200, // 200명까지 허용
     staleTime: 0, // 항상 fresh data
-    gcTime: 10 * 60 * 1000, // 10분
-    refetchOnMount: true, // 항상 재요청
-    refetchOnWindowFocus: true, // 윈도우 포커스 시 재요청
+    gcTime: 0, // 즉시 가비지 컬렉션
+    refetchOnMount: 'always', // 항상 재요청
+    refetchOnWindowFocus: 'always', // 윈도우 포커스 시 재요청
+    refetchInterval: false,
     retry: 3,
   });
   
