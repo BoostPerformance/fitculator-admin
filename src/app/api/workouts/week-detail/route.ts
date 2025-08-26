@@ -6,6 +6,8 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   try {
@@ -85,9 +87,12 @@ export async function GET(request: Request) {
       },
       {
         headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Cache-Control': 'private, no-cache, no-store, max-age=0, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0',
+          'Surrogate-Control': 'no-store',
+          'X-Accel-Expires': '0',
+          'Vary': '*'
         }
       }
     );

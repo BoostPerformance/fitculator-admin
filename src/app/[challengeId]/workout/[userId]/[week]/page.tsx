@@ -56,6 +56,14 @@ export default function MobileWorkoutDetail() {
   const weekNumberParam = parseInt(params.week as string);
   const searchParams = useSearchParams();
   const weekLabelParam = searchParams.get('label');
+  
+  // Force re-render key based on all params
+  const [componentKey, setComponentKey] = useState(0);
+  
+  useEffect(() => {
+    // Force component re-render when params change
+    setComponentKey(prev => prev + 1);
+  }, [userId, challengeId, weekNumberParam, weekLabelParam]);
 
   const router = useRouter();
   const { members, loading: membersLoading } = useChallengeMembers(challengeId);
@@ -240,6 +248,10 @@ export default function MobileWorkoutDetail() {
   const fetchWeekWorkouts = async () => {
     if (!userData || !weekLabelParam) return;
     
+    // 데이터 초기화
+    setWeekWorkouts([]);
+    setUpdatedDailyWorkouts([]);
+    setUpdatedWorkoutTypes({});
     setIsLoadingWeekData(true);
     
     try {
@@ -255,14 +267,15 @@ export default function MobileWorkoutDetail() {
       
       // 운동 데이터 가져오기 - 특정 주만 필터링
       const res = await fetch(
-        `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}&t=${Date.now()}&r=${Math.random()}`,
+        `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}&_t=${Date.now()}&_r=${Math.random()}&_key=${componentKey}`,
         { 
           cache: 'no-store',
           method: 'GET',
           headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Cache-Control': 'no-cache, no-store, must-revalidate, private',
             'Pragma': 'no-cache',
-            'Expires': '0'
+            'Expires': '0',
+            'X-Request-ID': `${Date.now()}-${Math.random()}`
           }
         }
       );
@@ -292,13 +305,9 @@ export default function MobileWorkoutDetail() {
   
   useEffect(() => {
     // 페이지 이동이나 파라미터 변경시마다 새로운 데이터 가져오기
-    // 데이터 초기화 후 새로 가져오기
-    setWeekWorkouts([]);
-    setUpdatedDailyWorkouts([]);
-    setUpdatedWorkoutTypes({});
     fetchWeekWorkouts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userData, weekLabelParam, userId, challengeId, weekNumberParam]);
+  }, [userData, weekLabelParam, userId, challengeId, weekNumberParam, componentKey]);
 
 
   // 데이터 처리 함수들
@@ -574,7 +583,7 @@ export default function MobileWorkoutDetail() {
   };
 
   return (
-    <>
+    <div key={`${userId}-${challengeId}-${weekNumberParam}-${weekLabelParam}-${componentKey}`}>
       <style jsx>{`
         .workout-card-hover:hover .hover-tooltip {
           opacity: 1 !important;
@@ -1357,6 +1366,6 @@ export default function MobileWorkoutDetail() {
         }}
       />
     </div>
-    </>
+    </div>
   );
 }
