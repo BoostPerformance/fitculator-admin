@@ -60,6 +60,18 @@ const nextConfig = {
       };
     }
 
+    // punycode deprecation warning 억제
+    const originalEmitWarning = process.emitWarning;
+    process.emitWarning = (warning, ...args) => {
+      if (
+        typeof warning === 'string' &&
+        warning.includes('punycode')
+      ) {
+        return;
+      }
+      return originalEmitWarning.call(process, warning, ...args);
+    };
+
     return config;
   },
   swcMinify: true,

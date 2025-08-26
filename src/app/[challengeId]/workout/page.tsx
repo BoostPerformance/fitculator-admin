@@ -4,7 +4,7 @@ import { WorkoutPageSkeleton } from '@/components/layout/skeleton';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useWorkoutDataQuery } from '@/components/hooks/useWorkoutDataQuery';
 import { useResponsive } from '@/components/hooks/useResponsive';
-import { useChallenge } from '@/components/hooks/useChallenges';
+import { useChallengeContext } from '@/contexts/ChallengeContext';
 import Title from '@/components/layout/title';
 import { IoRefresh } from 'react-icons/io5';
 import WorkoutTable from '@/components/workoutDashboard/workoutTable';
@@ -53,7 +53,7 @@ export default function WorkoutPage() {
     selectedChallengeId: currentChallengeId,
     fetchChallenges,
     loading: challengesLoading,
-  } = useChallenge();
+  } = useChallengeContext();
   const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
   const [challengeError, setChallengeError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -76,17 +76,8 @@ export default function WorkoutPage() {
       }
     }
     
-    const loadChallenges = async () => {
-      try {
-        await fetchChallenges();
-        setChallengeError(null);
-      } catch (err) {
-        setChallengeError('챌린지 정보를 불러오는데 실패했습니다.');
-// console.error('Failed to fetch challenges:', err);
-      }
-    };
-    loadChallenges();
-  }, [fetchChallenges, queryClient]);
+    // Challenge 데이터는 Context에서 자동으로 로드됨
+  }, [queryClient]);
 
   // API 연결 테스트 제거 - 불필요한 경고 메시지 방지
 
@@ -180,13 +171,32 @@ export default function WorkoutPage() {
           processedMeals={[]}
           selectedChallengeId={params.challengeId as string}
           selectedDate={selectedDate}
+          weeklyChart={weeklyChart}
+          todayCount={todayCount}
+          isLoading={workoutLoading}
         />
       </div>
 
       {/* API 연결 경고 메시지 제거 */}
-      <WorkoutUserList challengeId={params.challengeId as string} />
+      <WorkoutUserList 
+        challengeId={params.challengeId as string}
+        weeklyChart={weeklyChart}
+        leaderboard={leaderboard}
+        todayCount={todayCount}
+        batchUserData={batchUserData}
+        isLoading={workoutLoading}
+        error={workoutError}
+      />
       <div className="sm:hidden">
-        <WorkoutTable challengeId={params.challengeId as string} />
+        <WorkoutTable 
+          challengeId={params.challengeId as string}
+          weeklyChart={weeklyChart}
+          leaderboard={leaderboard}
+          todayCount={todayCount}
+          batchUserData={batchUserData}
+          isLoading={workoutLoading}
+          error={workoutError}
+        />
       </div>
     </div>
   );

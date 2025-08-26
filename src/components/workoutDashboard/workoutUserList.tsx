@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { WorkoutPageSkeleton } from '../layout/skeleton';
-import { useWorkoutDataQuery } from '../hooks/useWorkoutDataQuery';
 import {
   WeeklyChartData,
   LeaderboardEntry,
@@ -116,7 +115,14 @@ const isWorkoutUploaded = (workoutName: number) => {
 };
 
 // WorkoutTable component
-const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
+const WorkoutUserList: React.FC<WorkoutTableProps & {
+  weeklyChart?: any;
+  leaderboard?: any; 
+  todayCount?: any;
+  batchUserData?: any;
+  isLoading?: boolean;
+  error?: any;
+}> = ({ challengeId, weeklyChart, leaderboard, todayCount, batchUserData, isLoading = false, error }) => {
   const [workoutItems, setWorkoutItems] = useState<WorkoutItem[]>([]);
   const [weekInfo, setWeekInfo] = useState<WeekInfo[]>([]);
   const [hasMore, setHasMore] = useState(false);
@@ -128,8 +134,7 @@ const WorkoutUserList: React.FC<WorkoutTableProps> = ({ challengeId }) => {
   const lastRowRef = useRef(null);
   const router = useRouter();
   
-  // React Query 훅 사용으로 API 호출 최적화
-  const { weeklyChart, leaderboard, todayCount, batchUserData, isLoading, error } = useWorkoutDataQuery(challengeId);
+  // Props로 데이터 받음 (중복 API 호출 방지)
 
   // 주차 정보를 useMemo로 메모화하여 무한 렌더링 방지
   const generatedWeeks = useMemo(() => {

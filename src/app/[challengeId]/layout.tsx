@@ -5,7 +5,7 @@ import Sidebar from '@/components/fixedBars/sidebar';
 import LogoutButton from '@/components/buttons/logoutButton';
 import EditUsernameModal from '@/components/modals/editUsernameModal';
 import { useAdminData } from '@/components/hooks/useAdminData';
-import { useChallenge } from '@/components/hooks/useChallenges';
+import { ChallengeProvider, useChallengeContext } from '@/contexts/ChallengeContext';
 
 interface Challenges {
   challenges: {
@@ -17,7 +17,7 @@ interface Challenges {
   };
 }
 
-export default function ChallengeLayout({
+function ChallengeLayoutContent({
   children,
 }: {
   children: React.ReactNode;
@@ -28,7 +28,7 @@ export default function ChallengeLayout({
   
   // React Query hooks 사용으로 API 호출 최적화
   const { adminData, fetchAdminData } = useAdminData();
-  const { challenges } = useChallenge();
+  const { challenges } = useChallengeContext();
 
   const handleUsernameUpdate = async (newUsername: string) => {
     const response = await fetch('/api/admin-users', {
@@ -124,5 +124,17 @@ export default function ChallengeLayout({
         onSave={handleUsernameUpdate}
       />
     </div>
+  );
+}
+
+export default function ChallengeLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ChallengeProvider>
+      <ChallengeLayoutContent>{children}</ChallengeLayoutContent>
+    </ChallengeProvider>
   );
 }

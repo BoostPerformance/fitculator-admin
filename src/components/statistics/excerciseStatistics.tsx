@@ -3,13 +3,15 @@ import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import { ChallengeParticipant } from '@/types/userPageTypes';
 import { useEffect, useState, memo, useMemo } from 'react';
-import { useWorkoutDataQuery } from '../hooks/useWorkoutDataQuery';
 
 interface ExcerciseStatsProps {
   processedMeals: ProcessedMeal[];
   selectedChallengeId?: string;
   dailyRecords?: ChallengeParticipant[];
   selectedDate: string;
+  weeklyChart?: any;
+  todayCount?: any;
+  isLoading?: boolean;
 }
 
 const ExcerciseStatistics = memo(function ExcerciseStatistics({
@@ -17,9 +19,10 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
   selectedChallengeId,
   dailyRecords,
   selectedDate,
+  weeklyChart,
+  todayCount,
+  isLoading = false,
 }: ExcerciseStatsProps) {
-  // React Query 훅 사용
-  const { weeklyChart, todayCount, isLoading } = useWorkoutDataQuery(selectedChallengeId || '');
 
   // 계산 결과를 useMemo로 캐싱하여 불필요한 재계산 방지
   const { totalWorkouts, weeklyAverage } = useMemo(() => {
