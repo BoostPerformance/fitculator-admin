@@ -132,7 +132,7 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await supabase
       .from('workout_feedbacks')
-      .select()
+      .select('id, coach_feedback, ai_feedback, created_at, updated_at, coach_id, workout_weekly_records_id, challenge_id')
       .eq('workout_weekly_records_id', workoutWeeklyId)
       .eq('challenge_id', challengeId)
       .single();

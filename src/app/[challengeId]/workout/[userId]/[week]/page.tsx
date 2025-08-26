@@ -72,6 +72,7 @@ export default function MobileWorkoutDetail() {
   const [coachFeedback, setCoachFeedback] = useState('');
   const [originalFeedback, setOriginalFeedback] = useState('');
   const [feedbackId, setFeedbackId] = useState<string | null>(null);
+  const [feedbackDate, setFeedbackDate] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [copyMessage, setCopyMessage] = useState(false);
@@ -146,11 +147,13 @@ export default function MobileWorkoutDetail() {
         setCoachFeedback(feedback);
         setOriginalFeedback(feedback);
         setFeedbackId(data.data.id);
+        setFeedbackDate(data.data.updated_at || data.data.created_at);
         setHasUnsavedChanges(false);
       } else {
         setCoachFeedback('');
         setOriginalFeedback('');
         setFeedbackId(null);
+        setFeedbackDate(null);
         setHasUnsavedChanges(false);
       }
     };
@@ -546,6 +549,31 @@ export default function MobileWorkoutDetail() {
     return `Zone ${intensity}`;
   };
 
+  // 날짜 포맷팅 함수
+  const formatFeedbackDate = (dateString: string | null) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) {
+      return `오늘 ${date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}`;
+    } else if (diffInDays === 1) {
+      return `어제 ${date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays}일 전`;
+    } else {
+      return date.toLocaleDateString('ko-KR', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+  };
+
   const handleFeedbackSave = async (feedback: string) => {
     if (!weeklyRecordId) return alert('주간 운동 데이터 ID가 없습니다.');
 
@@ -572,6 +600,7 @@ export default function MobileWorkoutDetail() {
       const savedFeedback = result.data.coach_feedback || '';
       setCoachFeedback(savedFeedback);
       setOriginalFeedback(savedFeedback);
+      setFeedbackDate(result.data.updated_at || result.data.created_at);
       setHasUnsavedChanges(false);
 
       setTimeout(() => {
@@ -653,6 +682,7 @@ export default function MobileWorkoutDetail() {
                   setUpdatedDailyWorkouts([]);
                   setUpdatedWorkoutTypes({});
                   setCoachFeedback('');
+                  setFeedbackDate(null);
                   try {
                     // 모든 데이터 새로고침
                     await refetchWorkoutData();
@@ -879,6 +909,7 @@ export default function MobileWorkoutDetail() {
                 setUpdatedDailyWorkouts([]);
                 setUpdatedWorkoutTypes({});
                 setCoachFeedback('');
+                setFeedbackDate(null);
                 try {
                   // 모든 데이터 새로고침
                   await refetchWorkoutData();
@@ -1322,8 +1353,15 @@ export default function MobileWorkoutDetail() {
 
               {/* 3컬럼: 코치 피드백 */}
               <div className="sm:w-full lg:col-span-1 flex flex-col sm:min-h-[600px] lg:min-h-0">
-                <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                  코치 피드백
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+                    코치 피드백
+                  </div>
+                  {feedbackDate && (
+                    <div className="text-[10px] text-gray-400">
+                      {formatFeedbackDate(feedbackDate)}
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1">
                   <TextBox
