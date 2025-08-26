@@ -26,6 +26,7 @@ export default function WorkoutPage() {
     todayCount,
     batchUserData,
     isLoading: workoutLoading,
+    isFetching: workoutFetching,
     error: workoutError,
     hasAnyData,
     isApiConnected,
@@ -140,14 +141,14 @@ export default function WorkoutPage() {
           <Title title="운동 현황" />
           <button
             onClick={handleRefresh}
-            disabled={isRefreshing}
+            disabled={isRefreshing || workoutFetching}
             className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="데이터 새로고침"
           >
             <IoRefresh 
-              className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} 
+              className={`h-4 w-4 ${(isRefreshing || workoutFetching) ? 'animate-spin' : ''}`} 
             />
-            {isRefreshing ? '새로고침 중...' : '새로고침'}
+            {(isRefreshing || workoutFetching) ? '업데이트 중...' : '새로고침'}
           </button>
         </div>
       </div>
@@ -173,7 +174,7 @@ export default function WorkoutPage() {
           selectedDate={selectedDate}
           weeklyChart={weeklyChart}
           todayCount={todayCount}
-          isLoading={workoutLoading}
+          isLoading={workoutFetching} // 백그라운드 업데이트 상태 사용
         />
       </div>
 

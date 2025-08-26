@@ -135,8 +135,13 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
 
   return (
     <>
-      <div className="grid grid-cols-3 sm:grid-cols-1 gap-4 px-8 pb-[3rem] sm:px-3">
-        <div>
+      <div 
+        className="grid grid-cols-3 sm:grid-cols-1 gap-4 px-8 pb-[3rem] sm:px-3 transition-opacity duration-300 ease-in-out"
+        style={{ 
+          opacity: isLoading ? 0.7 : 1,
+        }}
+      >
+        <div className="transition-all duration-300 ease-in-out">
           <TotalFeedbackCounts
             counts={`${totalWorkouts}개`}
             title="전체 운동 업로드 수"
@@ -145,7 +150,7 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
             loading={isLoading}
           />
         </div>
-        <div>
+        <div className="transition-all duration-300 ease-in-out">
           <TotalFeedbackCounts
             counts={`${todayStats.count}`}
             total={`${todayStats.total} 명`}
@@ -155,7 +160,7 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
             loading={isLoading}
           />
         </div>
-        <div>
+        <div className="transition-all duration-300 ease-in-out">
           <TotalFeedbackCounts
             counts={`${weeklyAverage}`}
             title="주간 평균 운동점수"

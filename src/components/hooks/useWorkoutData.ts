@@ -102,10 +102,10 @@ export const useWorkoutData = (userId: string, challengeId: string) => {
     };
 
     const toDateKey = (dateString: string): string => {
-      // start_time에 +18시간 적용 (한국 시간대 + 추가 보정)
+      // 한국 시간 표시를 위해 +9시간 적용
       const date = new Date(dateString);
-      const kstDate = new Date(date.getTime() + (18 * 60 * 60 * 1000));
-      return kstDate.toISOString().split('T')[0];
+      const kstTime = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+      return kstTime.toISOString().split('T')[0];
     };
 
     for (const record of weeklyRecords) {

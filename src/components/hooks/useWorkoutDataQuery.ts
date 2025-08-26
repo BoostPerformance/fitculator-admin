@@ -161,16 +161,17 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'weekly-chart', challengeId],
     queryFn: () => fetchWeeklyChart(challengeId),
     enabled: !!challengeId,
-    staleTime: 0, // 항상 fresh data
-    gcTime: 0, // 즉시 가비지 컬렉션
+    staleTime: 30 * 1000, // 30초간 fresh 상태 유지
+    gcTime: 10 * 60 * 1000, // 10분간 캐시 보관
     retry: (failureCount, error) => {
 // console.log(`🔄 Weekly chart 재시도 ${failureCount}회:`, error);
-      return failureCount < 3; // Production 환경에서 더 많은 재시도
+      return failureCount < 3;
     },
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프
-    refetchOnMount: 'always', // 마운트 시 항상 재요청
-    refetchOnWindowFocus: 'always', // 윈도우 포커스 시 재요청
-    refetchInterval: false, // 주기적 refetch 비활성화
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchOnMount: 'always', // 마운트시 백그라운드에서 새 데이터 가져오기
+    refetchOnWindowFocus: false, 
+    refetchInterval: false,
+    placeholderData: (previousData) => previousData, // 이전 데이터 유지하며 부드러운 업데이트
   });
 
   // 2. Leaderboard 데이터
@@ -178,16 +179,17 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'leaderboard', challengeId],
     queryFn: () => fetchLeaderboard(challengeId),
     enabled: !!challengeId,
-    staleTime: 0, // 항상 fresh data
-    gcTime: 0, // 즉시 가비지 컬렉션
+    staleTime: 30 * 1000, // 30초간 fresh 상태 유지
+    gcTime: 10 * 60 * 1000, // 10분간 캐시 보관
     retry: (failureCount, error) => {
 // console.log(`🔄 Leaderboard 재시도 ${failureCount}회:`, error);
       return failureCount < 3;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    refetchOnMount: 'always', // 항상 재요청
-    refetchOnWindowFocus: 'always', // 윈도우 포커스 시 재요청
+    refetchOnMount: 'always', // 마운트시 백그라운드에서 새 데이터 가져오기
+    refetchOnWindowFocus: false,
     refetchInterval: false,
+    placeholderData: (previousData) => previousData, // 이전 데이터 유지
   });
 
   // 3. Today Count 데이터
@@ -195,16 +197,17 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     queryKey: ['workout', 'today-count', challengeId],
     queryFn: () => fetchTodayCount(challengeId),
     enabled: !!challengeId,
-    staleTime: 0, // 항상 fresh data
-    gcTime: 0, // 즉시 가비지 컬렉션
+    staleTime: 15 * 1000, // 15초간 fresh (오늘 운동 수는 자주 바뀜)
+    gcTime: 10 * 60 * 1000, // 10분간 캐시 보관
     retry: (failureCount, error) => {
 // console.log(`🔄 Today count 재시도 ${failureCount}회:`, error);
       return failureCount < 3;
     },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    refetchOnMount: 'always', // 항상 재요청
-    refetchOnWindowFocus: 'always', // 윈도우 포커스 시 재요청
+    refetchOnMount: 'always', // 마운트시 백그라운드에서 새 데이터 가져오기
+    refetchOnWindowFocus: false,
     refetchInterval: false,
+    placeholderData: (previousData) => previousData, // 이전 데이터 유지
   });
 
   // 4. Batch User Data - 임시로 단일 요청으로 변경 (성능 문제 해결)
@@ -249,11 +252,12 @@ export const useWorkoutDataQuery = (challengeId: string) => {
       return data;
     },
     enabled: !!challengeId && userIds.length > 0 && userIds.length <= 200, // 200명까지 허용
-    staleTime: 0, // 항상 fresh data
-    gcTime: 0, // 즉시 가비지 컬렉션
-    refetchOnMount: 'always', // 항상 재요청
-    refetchOnWindowFocus: 'always', // 윈도우 포커스 시 재요청
+    staleTime: 60 * 1000, // 1분간 fresh (사용자 데이터는 덜 자주 바뀜)
+    gcTime: 10 * 60 * 1000, // 10분간 캐시 보관
+    refetchOnMount: 'always', // 마운트시 백그라운드에서 새 데이터 가져오기
+    refetchOnWindowFocus: false,
     refetchInterval: false,
+    placeholderData: (previousData) => previousData, // 이전 데이터 유지
     retry: 3,
   });
   
@@ -267,6 +271,12 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     leaderboardQuery.isLoading || 
     todayCountQuery.isLoading ||
     (userIds.length > 0 && isBatchUserDataLoading);
+
+  const isFetching = 
+    weeklyChartQuery.isFetching || 
+    leaderboardQuery.isFetching || 
+    todayCountQuery.isFetching ||
+    (userIds.length > 0 && batchUserDataQuery.isFetching);
 
   const error = 
     weeklyChartQuery.error || 
@@ -323,6 +333,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     todayCount: todayCountQuery.data,
     batchUserData,
     isLoading,
+    isFetching,
     error,
     isApiConnected,
     hasAnyData,

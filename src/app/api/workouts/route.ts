@@ -14,6 +14,104 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const type = url.searchParams.get('type') || 'leaderboard';
   const isDaily = url.searchParams.get('daily') === 'true';
+  const userId = url.searchParams.get('userId');
+  const startDate = url.searchParams.get('startDate');
+  const endDate = url.searchParams.get('endDate');
+
+  // 개별 사용자 운동 데이터 조회 (상세 페이지용)
+  if (userId && startDate && endDate) {
+    try {
+      const { data: workouts, error } = await supabase
+        .from('workouts')
+        .select(`
+          id,
+          title,
+          start_time,
+          end_time,
+          points,
+          timestamp,
+          duration_minutes,
+          duration_seconds,
+          distance,
+          calories,
+          note,
+          intensity,
+          avg_heart_rate,
+          max_heart_rate,
+          workout_categories!inner(
+            id,
+            name_ko,
+            workout_types!inner(
+              id,
+              name
+            )
+          )
+        `)
+        .eq('user_id', userId)
+        .gte('timestamp', startDate)
+        .lte('timestamp', endDate)
+        .order('start_time', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching user workouts:', error);
+        return NextResponse.json(
+          { error: 'Failed to fetch workouts' },
+          { status: 500 }
+        );
+      }
+
+      // 데이터 변환
+      const transformedWorkouts = workouts?.map(workout => {
+        let durationMinutes = workout.duration_minutes;
+        let durationSeconds = workout.duration_seconds;
+        
+        // duration 필드들이 둘 다 없으면 end_time - start_time으로 계산
+        if ((!durationMinutes || durationMinutes === 0) && 
+            (!durationSeconds || durationSeconds === 0) && 
+            workout.start_time && workout.end_time) {
+          const startTime = new Date(workout.start_time);
+          const endTime = new Date(workout.end_time);
+          const diffMs = endTime.getTime() - startTime.getTime();
+          
+          if (diffMs > 0) {
+            durationSeconds = Math.floor(diffMs / 1000);
+            durationMinutes = Math.floor(durationSeconds / 60);
+          }
+        }
+        
+        return {
+          id: workout.id,
+          title: workout.title,
+          startTime: workout.start_time,
+          endTime: workout.end_time,
+          points: workout.points,
+          durationMinutes,
+          durationSeconds,
+          distance: workout.distance,
+          calories: workout.calories,
+          note: workout.note,
+          intensity: workout.intensity,
+          avgHeartRate: workout.avg_heart_rate,
+          maxHeartRate: workout.max_heart_rate,
+          timestamp: workout.timestamp,
+          type: workout.workout_categories?.workout_types?.name,
+          category: workout.workout_categories?.name_ko || workout.title,
+          categoryId: workout.workout_categories?.id
+        };
+      }) || [];
+
+      return NextResponse.json({
+        workouts: transformedWorkouts
+      });
+
+    } catch (error) {
+      console.error('Error in user workouts API:', error);
+      return NextResponse.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      );
+    }
+  }
 
   // 주별 유산소/근력 운동 데이터를 가져오는 타입 추가
   if (type === 'weekly-chart') {
