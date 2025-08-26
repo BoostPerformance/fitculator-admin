@@ -1,20 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-
-// 캐싱 방지를 위한 헤더 설정
-if (typeof window !== 'undefined') {
-  // 브라우저 캐시 방지
-  window.addEventListener('beforeunload', () => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        registrations.forEach(registration => {
-          registration.unregister();
-        });
-      });
-    }
-  });
-}
 import { useParams, useRouter } from 'next/navigation';
 import { useWorkoutData } from '@/components/hooks/useWorkoutData';
 import { useChallengeMembers } from '@/components/hooks/useChallengeMembers';
@@ -94,7 +80,7 @@ export default function MobileWorkoutDetail() {
   const [expandedWorkouts, setExpandedWorkouts] = useState<Set<string>>(new Set());
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingWeekData, setIsLoadingWeekData] = useState(false);
-  const [weekDataCache, setWeekDataCache] = useState<Record<string, {workouts: any[], dailyWorkouts: any[], workoutTypes: any}>>({});
+  // 캐시 제거 - 항상 최신 데이터를 가져오도록 변경
   
   const memberDropdownRef = useRef<HTMLDivElement>(null);
   const weekDropdownRef = useRef<HTMLDivElement>(null);
@@ -166,32 +152,6 @@ export default function MobileWorkoutDetail() {
     setShowMemberDropdown(false);
     setShowWeekDropdown(false);
     setSearchQuery('');
-    
-    // 캐시 방지 헤더 설정
-    if (typeof window !== 'undefined') {
-      // 페이지 캐시 방지
-      const metaNoCache = document.createElement('meta');
-      metaNoCache.httpEquiv = 'cache-control';
-      metaNoCache.content = 'no-cache, no-store, must-revalidate';
-      document.head.appendChild(metaNoCache);
-      
-      const metaPragma = document.createElement('meta');
-      metaPragma.httpEquiv = 'pragma';
-      metaPragma.content = 'no-cache';
-      document.head.appendChild(metaPragma);
-      
-      const metaExpires = document.createElement('meta');
-      metaExpires.httpEquiv = 'expires';
-      metaExpires.content = '0';
-      document.head.appendChild(metaExpires);
-      
-      // cleanup function
-      return () => {
-        document.head.removeChild(metaNoCache);
-        document.head.removeChild(metaPragma);
-        document.head.removeChild(metaExpires);
-      };
-    }
   }, [params, challengeId]);
 
   // 피드백 변경 감지
@@ -276,20 +236,9 @@ export default function MobileWorkoutDetail() {
     }
   }, [challengeId]);
 
-  // 해당 주의 운동 상세 데이터 가져오기 및 요일별 그룹핑 (캐싱 포함)
-  const fetchWeekWorkouts = async (forceRefresh = false) => {
+  // 해당 주의 운동 상세 데이터 가져오기 및 요일별 그룹핑 (캐싱 제거)
+  const fetchWeekWorkouts = async () => {
     if (!userData || !weekLabelParam) return;
-    
-    const cacheKey = `${userId}-${weekLabelParam}`;
-    
-    // 캐시된 데이터가 있고 강제 새로고침이 아닌 경우 캐시 사용
-    if (!forceRefresh && weekDataCache[cacheKey]) {
-      const cached = weekDataCache[cacheKey];
-      setWeekWorkouts(cached.workouts);
-      setUpdatedDailyWorkouts(cached.dailyWorkouts);
-      setUpdatedWorkoutTypes(cached.workoutTypes);
-      return;
-    }
     
     setIsLoadingWeekData(true);
     
@@ -328,16 +277,6 @@ export default function MobileWorkoutDetail() {
         // 도넛 그래프용 데이터도 업데이트
         const processedWorkoutTypes = processWorkoutsToTypes(workouts);
         setUpdatedWorkoutTypes(processedWorkoutTypes);
-        
-        // 캐시에 저장
-        setWeekDataCache(prev => ({
-          ...prev,
-          [cacheKey]: {
-            workouts,
-            dailyWorkouts: processedDailyWorkouts,
-            workoutTypes: processedWorkoutTypes
-          }
-        }));
       }
     } catch (error) {
       // console.error('Failed to fetch week workouts:', error);
@@ -350,9 +289,10 @@ export default function MobileWorkoutDetail() {
   };
   
   useEffect(() => {
+    // 페이지 이동이나 파라미터 변경시마다 새로운 데이터 가져오기
     fetchWeekWorkouts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userData, weekLabelParam, userId]);
+  }, [userData, weekLabelParam, userId, challengeId, weekNumberParam]);
 
 
   // 데이터 처리 함수들
@@ -691,7 +631,7 @@ export default function MobileWorkoutDetail() {
                     // workout_weekly_records와 workouts 테이블 모두 새로고침
                     await Promise.all([
                       refetchWorkoutData(),
-                      fetchWeekWorkouts(true) // 강제 새로고침
+                      fetchWeekWorkouts() // 항상 새로운 데이터 가져오기
                     ]);
                   } finally {
                     setTimeout(() => setIsRefreshing(false), 500);
@@ -909,7 +849,7 @@ export default function MobileWorkoutDetail() {
                   // workout_weekly_records와 workouts 테이블 모두 새로고침
                   await Promise.all([
                     refetchWorkoutData(),
-                    fetchWeekWorkouts(true) // 강제 새로고침
+                    fetchWeekWorkouts() // 항상 새로운 데이터 가져오기
                   ]);
                 } finally {
                   setTimeout(() => setIsRefreshing(false), 500);
