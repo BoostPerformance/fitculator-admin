@@ -21,8 +21,7 @@ const fetchWeeklyChart = async (challengeId: string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      // Production 환경에서 캐시 이슈 방지
-      // cache: 'no-store', // 캐싱 허용
+      cache: 'no-store', // 캐싱 비활성화
     });
     
 // console.log('📡 Weekly chart 응답 상태:', response.status, response.statusText);
@@ -63,7 +62,7 @@ const fetchLeaderboard = async (challengeId: string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      // cache: 'no-store', // 캐싱 허용
+      cache: 'no-store', // 캐싱 비활성화
     });
     
 // console.log('📡 Leaderboard 응답 상태:', response.status, response.statusText);
@@ -102,7 +101,7 @@ const fetchTodayCount = async (challengeId: string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      // cache: 'no-store', // 캐싱 허용
+      cache: 'no-store', // 캐싱 비활성화
     });
     
 // console.log('📡 Today count 응답 상태:', response.status, response.statusText);
@@ -218,7 +217,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        // cache: 'no-store', // 캐싱 허용
+        cache: 'no-store', // 캐싱 비활성화
       });
       
 // console.log('📡 Batch user data 응답 상태:', response.status, response.statusText);
