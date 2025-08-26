@@ -275,7 +275,7 @@ export default function MobileWorkoutDetail() {
       
       // 운동 데이터 가져오기 - 특정 주만 필터링
       const res = await fetch(
-        `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}&_t=${Date.now()}&_r=${Math.random()}&_key=${componentKey}`,
+        `/api/workouts?userId=${userId}&startDate=${startDate}&endDate=${endDate}&_t=${Date.now()}&_r=${Math.random()}&_key=${componentKey}`,
         { 
           cache: 'no-store',
           method: 'GET',
@@ -346,19 +346,19 @@ export default function MobileWorkoutDetail() {
     const startDate = new Date(Date.UTC(currentYear, parseInt(startMonth) - 1, parseInt(startDay)));
     const endDate = new Date(Date.UTC(currentYear, parseInt(endMonth) - 1, parseInt(endDay)));
 
-    // 운동 데이터를 날짜별로 그룹핑 (표시 시간에서 9시간 빼기)
+    // 운동 데이터를 날짜별로 그룹핑 (DB는 UTC+9로 저장되어 있으므로 -9시간 조정)
     const workoutsByDate = workouts.reduce((acc: Record<string, any[]>, workout: any) => {
-      // startTime에서 9시간을 빼서 날짜 추출
+      // startTime에서 9시간을 빼서 실제 운동한 시간 기준 날짜 추출
       const originalTime = new Date(workout.startTime);
-      const adjustedTime = new Date(originalTime.getTime() - (9 * 60 * 60 * 1000));
-      const dateStr = adjustedTime.toISOString().split('T')[0];
+      const actualTime = new Date(originalTime.getTime() - (9 * 60 * 60 * 1000));
+      const dateStr = actualTime.toISOString().split('T')[0];
       
       // 디버깅: 시간 확인 (첫 번째 운동만)
       if (Object.keys(acc).length === 0 && workouts.length > 0) {
-        console.log('🕐 시간에서 9시간 빼기 (startTime):', {
+        console.log('🕐 실제 운동 시간으로 -9시간 (startTime):', {
           original_startTime: workout.startTime,
           original_time: originalTime.toISOString(),
-          adjusted_time: adjustedTime.toISOString(),
+          actual_time: actualTime.toISOString(),
           final_date_str: dateStr
         });
       }
@@ -527,20 +527,31 @@ export default function MobileWorkoutDetail() {
     setExpandedWorkouts(newExpanded);
   };
 
-  // 운동 시간을 분으로 변환하는 함수
-  const formatDuration = (seconds: number, category?: string) => {
-    if (!seconds) return '-';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
+  // 운동 시간 포맷 함수 (duration_seconds 우선, duration_minutes 폴백)
+  const formatDuration = (workout: any, category?: string) => {
+    // duration_seconds가 있으면 사용, 없으면 duration_minutes 사용
+    const durationSeconds = workout.durationSeconds;
+    const durationMinutes = workout.durationMinutes;
     
-    // 수영은 소수점 두자리까지, 나머지는 정수로
-    const formattedSeconds = category === '수영' 
-      ? remainingSeconds.toFixed(2) 
-      : Math.round(remainingSeconds).toString();
+    if (durationSeconds && durationSeconds > 0) {
+      // duration_seconds로 표시
+      const minutes = Math.floor(durationSeconds / 60);
+      const remainingSeconds = durationSeconds % 60;
+      
+      // 수영은 소수점 두자리까지, 나머지는 정수로
+      const formattedSeconds = category === '수영' 
+        ? remainingSeconds.toFixed(2) 
+        : Math.round(remainingSeconds).toString();
+      
+      if (minutes === 0) return `${formattedSeconds}초`;
+      if (remainingSeconds === 0) return `${minutes}분`;
+      return `${minutes}분 ${formattedSeconds}초`;
+    } else if (durationMinutes && durationMinutes > 0) {
+      // duration_minutes로 표시
+      return `${durationMinutes}분`;
+    }
     
-    if (minutes === 0) return `${formattedSeconds}초`;
-    if (remainingSeconds === 0) return `${minutes}분`;
-    return `${minutes}분 ${formattedSeconds}초`;
+    return '-';
   };
 
   // 강도 존을 표시하는 함수
@@ -1185,26 +1196,33 @@ export default function MobileWorkoutDetail() {
                           >
                             {/* 메인 운동 정보 */}
                             <div
-                              className={`border-l-4 ${borderColor} pl-3 py-2 ${bgColor} dark:bg-gray-800 cursor-pointer ${hoverBgColor} dark:hover:bg-gray-700 transition-colors relative workout-card-hover`}
+                              className={`border-l-4 ${borderColor} pl-3 pr-3 py-2 ${bgColor} dark:bg-gray-800 cursor-pointer ${hoverBgColor} dark:hover:bg-gray-700 transition-colors relative workout-card-hover`}
                               onClick={() => toggleWorkoutDetails(workoutId)}
                             >
                               <div className="flex justify-between items-start">
                                 <div className="flex-1">
-                                  <div className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                  {/* Title을 크게 표시 */}
+                                  <div className="text-sm font-bold text-gray-900 dark:text-white">
                                     {workout.title}
+                                  </div>
+                                  {/* Category를 작게 표시 */}
+                                  <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                    {workout.category}
                                   </div>
                                   <div className="text-[10px] text-gray-600 dark:text-gray-400 mt-1">
                                     {(() => {
-                                      const adjustedTime = new Date(new Date(workout.startTime).getTime() - (9 * 60 * 60 * 1000));
-                                      const timeString = `${adjustedTime.toLocaleDateString('ko-KR', {
+                                      // DB는 UTC+9로 저장되어 있으므로 -9시간 조정하여 실제 운동 시간 표시
+                                      const originalTime = new Date(workout.startTime);
+                                      const actualTime = new Date(originalTime.getTime() - (9 * 60 * 60 * 1000));
+                                      const timeString = `${actualTime.toLocaleDateString('ko-KR', {
                                         month: 'numeric',
                                         day: 'numeric',
                                         weekday: 'short'
-                                      })} ${adjustedTime.toLocaleTimeString('ko-KR', {
+                                      })} ${actualTime.toLocaleTimeString('ko-KR', {
                                         hour: '2-digit',
                                         minute: '2-digit'
                                       })}`;
-                                      const duration = formatDuration(workout.duration_seconds, workout.category);
+                                      const duration = formatDuration(workout, workout.category);
                                       return `${timeString} • ${duration}`;
                                     })()}
                                   </div>
@@ -1216,11 +1234,8 @@ export default function MobileWorkoutDetail() {
                                         {workout.points.toFixed(1)}pt
                                       </div>
                                     )}
-                                    <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                                      {workout.category}
-                                    </div>
                                     {workout.type === 'STRENGTH' && (
-                                      <div className="text-[10px] text-orange-600 dark:text-orange-400 font-semibold">
+                                      <div className="text-xs text-orange-600 dark:text-orange-400 font-semibold">
                                         근력
                                       </div>
                                     )}
@@ -1238,6 +1253,15 @@ export default function MobileWorkoutDetail() {
                                 </div>
                               </div>
                               
+                              {/* 노트 태그 - 우측 하단 */}
+                              {workout.note && (
+                                <div className="absolute bottom-2 right-8">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                                    노트
+                                  </span>
+                                </div>
+                              )}
+                              
                               {/* Hover 툴팁 */}
                               <div className="absolute left-full top-0 ml-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg p-3 opacity-0 invisible hover-tooltip transition-all duration-200 z-50">
                                 <div className="space-y-2 text-[10px]">
@@ -1245,7 +1269,7 @@ export default function MobileWorkoutDetail() {
                                   <div className="flex justify-between">
                                     <span className="text-gray-500">운동시간:</span>
                                     <span className="font-medium text-gray-800 dark:text-gray-200">
-                                      {formatDuration(workout.duration_seconds, workout.category)}
+                                      {formatDuration(workout, workout.category)}
                                     </span>
                                   </div>
 
@@ -1261,7 +1285,7 @@ export default function MobileWorkoutDetail() {
                                   <div className="flex justify-between">
                                     <span className="text-gray-500">평균심박수:</span>
                                     <span className="font-medium text-gray-800 dark:text-gray-200">
-                                      {workout.avg_heart_rate ? `${workout.avg_heart_rate} bpm` : '-'}
+                                      {workout.avgHeartRate ? `${workout.avgHeartRate} bpm` : '-'}
                                     </span>
                                   </div>
 
@@ -1269,7 +1293,7 @@ export default function MobileWorkoutDetail() {
                                   <div className="flex justify-between">
                                     <span className="text-gray-500">최대심박수:</span>
                                     <span className="font-medium text-gray-800 dark:text-gray-200">
-                                      {workout.max_heart_rate ? `${workout.max_heart_rate} bpm` : '-'}
+                                      {workout.maxHeartRate ? `${workout.maxHeartRate} bpm` : '-'}
                                     </span>
                                   </div>
 
@@ -1297,7 +1321,7 @@ export default function MobileWorkoutDetail() {
                                   <div className="flex justify-between">
                                     <span className="text-gray-500">운동시간:</span>
                                     <span className="font-medium text-gray-800 dark:text-gray-200">
-                                      {formatDuration(workout.duration_seconds, workout.category)}
+                                      {formatDuration(workout, workout.category)}
                                     </span>
                                   </div>
 
@@ -1313,7 +1337,7 @@ export default function MobileWorkoutDetail() {
                                   <div className="flex justify-between">
                                     <span className="text-gray-500">평균심박수:</span>
                                     <span className="font-medium text-gray-800 dark:text-gray-200">
-                                      {workout.avg_heart_rate ? `${workout.avg_heart_rate} bpm` : '-'}
+                                      {workout.avgHeartRate ? `${workout.avgHeartRate} bpm` : '-'}
                                     </span>
                                   </div>
 
@@ -1321,7 +1345,7 @@ export default function MobileWorkoutDetail() {
                                   <div className="flex justify-between">
                                     <span className="text-gray-500">최대심박수:</span>
                                     <span className="font-medium text-gray-800 dark:text-gray-200">
-                                      {workout.max_heart_rate ? `${workout.max_heart_rate} bpm` : '-'}
+                                      {workout.maxHeartRate ? `${workout.maxHeartRate} bpm` : '-'}
                                     </span>
                                   </div>
                                 </div>
