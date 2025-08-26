@@ -3,6 +3,7 @@ import { ProcessedMeal } from '@/types/dietDetaileTableTypes';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import { ChallengeParticipant } from '@/types/userPageTypes';
 import { useEffect, useState, memo, useMemo } from 'react';
+import { ExcerciseStatisticsSkeleton } from './excerciseStatisticsSkeleton';
 
 interface ExcerciseStatsProps {
   processedMeals: ProcessedMeal[];
@@ -133,21 +134,21 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
     [todayCount]
   );
 
+  // 로딩 중이고 데이터가 없을 때만 스켈레톤 표시
+  if (isLoading && !weeklyChart && !todayCount) {
+    return <ExcerciseStatisticsSkeleton />;
+  }
+
   return (
     <>
-      <div 
-        className="grid grid-cols-3 sm:grid-cols-1 gap-4 px-8 pb-[3rem] sm:px-3 transition-opacity duration-300 ease-in-out"
-        style={{ 
-          opacity: isLoading ? 0.7 : 1,
-        }}
-      >
+      <div className="grid grid-cols-3 sm:grid-cols-1 gap-4 px-8 pb-[3rem] sm:px-3">
         <div className="transition-all duration-300 ease-in-out">
           <TotalFeedbackCounts
             counts={`${totalWorkouts}개`}
             title="전체 운동 업로드 수"
             borderColor="border-blue-5"
             textColor="text-blue-5"
-            loading={isLoading}
+            loading={false}
           />
         </div>
         <div className="transition-all duration-300 ease-in-out">
@@ -157,7 +158,7 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
             title="오늘 운동 업로드 멤버"
             borderColor="border-blue-5"
             textColor="text-blue-5"
-            loading={isLoading}
+            loading={false}
           />
         </div>
         <div className="transition-all duration-300 ease-in-out">
@@ -166,7 +167,7 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
             title="주간 평균 운동점수"
             borderColor="border-blue-5"
             textColor="text-blue-5"
-            loading={isLoading}
+            loading={false}
           />
         </div>
       </div>
