@@ -32,7 +32,7 @@ export default function WorkoutPage() {
     hasAnyData,
     isApiConnected,
     refetch
-  } = useWorkoutDataQuery(params.challengeId as string);
+  } = useWorkoutDataQuery(params.challengeId as string, refreshParam);
   
   // 디버깅을 위한 로그
   useEffect(() => {
@@ -66,17 +66,8 @@ export default function WorkoutPage() {
   };
 
   useEffect(() => {
-    // refresh 파라미터가 있거나 페이지 마운트 시 workout 관련 캐시 무효화
-    if (refreshParam) {
-      // 사이드바에서 운동 메뉴 클릭 시 캐시 완전 제거
-      queryClient.removeQueries({ queryKey: ['workout'] });
-      queryClient.invalidateQueries({ queryKey: ['workout'] });
-    } else {
-      // 일반적인 페이지 마운트 시에는 캐시 무효화만
-      queryClient.invalidateQueries({ queryKey: ['workout'] });
-    }
-    
-    // 페이지 새로고침 감지를 위한 performance entry 확인
+    // refreshParam이 query key에 포함되므로 별도의 캐시 제거 불필요
+    // 페이지 새로고림 시에만 전체 캐시 제거
     if (typeof window !== 'undefined') {
       const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
       if (navigation.type === 'reload') {
@@ -86,7 +77,7 @@ export default function WorkoutPage() {
     }
     
     // Challenge 데이터는 Context에서 자동으로 로드됨
-  }, [queryClient, refreshParam]);
+  }, [queryClient]);
 
   // API 연결 테스트 제거 - 불필요한 경고 메시지 방지
 

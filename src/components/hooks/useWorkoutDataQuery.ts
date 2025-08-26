@@ -154,11 +154,11 @@ const fetchBatchUserData = async (userIds: string[], challengeId: string, page: 
 };
 
 // 메인 훅: 모든 운동 데이터를 한번에 가져옴
-export const useWorkoutDataQuery = (challengeId: string) => {
+export const useWorkoutDataQuery = (challengeId: string, refreshParam?: string | null) => {
   const queryClient = useQueryClient();
   // 1. Weekly Chart 데이터
   const weeklyChartQuery = useQuery({
-    queryKey: ['workout', 'weekly-chart', challengeId],
+    queryKey: ['workout', 'weekly-chart', challengeId, refreshParam],
     queryFn: () => fetchWeeklyChart(challengeId),
     enabled: !!challengeId,
     staleTime: 30 * 1000, // 30초간 fresh 상태 유지
@@ -171,12 +171,12 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     refetchOnMount: 'always', // 마운트시 백그라운드에서 새 데이터 가져오기
     refetchOnWindowFocus: false, 
     refetchInterval: false,
-    placeholderData: (previousData) => previousData, // 이전 데이터 유지하며 부드러운 업데이트
+    placeholderData: refreshParam ? undefined : (previousData) => previousData, // refresh시에는 placeholder 없음
   });
 
   // 2. Leaderboard 데이터
   const leaderboardQuery = useQuery({
-    queryKey: ['workout', 'leaderboard', challengeId],
+    queryKey: ['workout', 'leaderboard', challengeId, refreshParam],
     queryFn: () => fetchLeaderboard(challengeId),
     enabled: !!challengeId,
     staleTime: 30 * 1000, // 30초간 fresh 상태 유지
@@ -189,12 +189,12 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     refetchOnMount: 'always', // 마운트시 백그라운드에서 새 데이터 가져오기
     refetchOnWindowFocus: false,
     refetchInterval: false,
-    placeholderData: (previousData) => previousData, // 이전 데이터 유지
+    placeholderData: refreshParam ? undefined : (previousData) => previousData, // refresh시에는 placeholder 없음
   });
 
   // 3. Today Count 데이터
   const todayCountQuery = useQuery({
-    queryKey: ['workout', 'today-count', challengeId],
+    queryKey: ['workout', 'today-count', challengeId, refreshParam],
     queryFn: () => fetchTodayCount(challengeId),
     enabled: !!challengeId,
     staleTime: 15 * 1000, // 15초간 fresh (오늘 운동 수는 자주 바뀜)
@@ -207,14 +207,14 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     refetchOnMount: 'always', // 마운트시 백그라운드에서 새 데이터 가져오기
     refetchOnWindowFocus: false,
     refetchInterval: false,
-    placeholderData: (previousData) => previousData, // 이전 데이터 유지
+    placeholderData: refreshParam ? undefined : (previousData) => previousData, // refresh시에는 placeholder 없음
   });
 
   // 4. Batch User Data - 임시로 단일 요청으로 변경 (성능 문제 해결)
   const userIds = weeklyChartQuery.data?.users?.map((user: any) => user.id) || [];
   
   const batchUserDataQuery = useQuery({
-    queryKey: ['workout', 'batch-user-data-single', challengeId, userIds.sort().join(',')],
+    queryKey: ['workout', 'batch-user-data-single', challengeId, userIds.sort().join(','), refreshParam],
     queryFn: async () => {
       if (!userIds.length) {
 // console.log('🚫 Batch user data: userIds가 비어있음');
@@ -257,7 +257,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
     refetchOnMount: 'always', // 마운트시 백그라운드에서 새 데이터 가져오기
     refetchOnWindowFocus: false,
     refetchInterval: false,
-    placeholderData: (previousData) => previousData, // 이전 데이터 유지
+    placeholderData: refreshParam ? undefined : (previousData) => previousData, // refresh시에는 placeholder 없음
     retry: 3,
   });
   
