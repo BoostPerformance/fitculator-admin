@@ -120,18 +120,23 @@ export default function MobileWorkoutDetail() {
   }, [userData, weekNumberParam]);
 
   useEffect(() => {
-    const weeklyRecordId =
-      userData?.weeklyWorkouts?.[currentWeekIndex]?.recordId;
+    // weekLabelParam을 사용하여 정확한 주차 데이터 찾기
+    const currentWeek = userData?.weeklyWorkouts?.find(
+      week => week.label === weekLabelParam
+    );
+    
+    const weeklyRecordId = currentWeek?.recordId;
     if (!weeklyRecordId) return;
 
     const fetchCoachFeedback = async () => {
       const res = await fetch(
-        `/api/workout-feedback?workout_weekly_records_id=${weeklyRecordId}&challenge_id=${challengeId}&t=${Date.now()}`,
+        `/api/workout-feedback?workout_weekly_records_id=${weeklyRecordId}&challenge_id=${challengeId}&t=${Date.now()}&r=${Math.random()}`,
         {
           cache: 'no-store',
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache'
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         }
       );
@@ -152,7 +157,7 @@ export default function MobileWorkoutDetail() {
 
     fetchCoachFeedback();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userData, currentWeekIndex]);
+  }, [userData, weekLabelParam, challengeId]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -454,6 +459,7 @@ export default function MobileWorkoutDetail() {
     totalAchievement: 0,
   };
 
+  // weeklyRecordId는 currentWeekData에서 가져오기
   const weeklyRecordId = currentWeekData.recordId;
 
   // 검색된 멤버 필터링
@@ -646,14 +652,18 @@ export default function MobileWorkoutDetail() {
                   setWeekWorkouts([]);
                   setUpdatedDailyWorkouts([]);
                   setUpdatedWorkoutTypes({});
+                  setCoachFeedback('');
                   try {
-                    // workout_weekly_records와 workouts 테이블 모두 새로고침
-                    await Promise.all([
-                      refetchWorkoutData(),
-                      fetchWeekWorkouts() // 항상 새로운 데이터 가져오기
-                    ]);
+                    // 모든 데이터 새로고침
+                    await refetchWorkoutData();
+                    
+                    // userData가 업데이트된 후 실행되도록 약간의 딜레이
+                    setTimeout(async () => {
+                      await fetchWeekWorkouts();
+                      // 피드백 데이터도 새로 가져오기는 useEffect에서 자동으로 처리됨
+                    }, 100);
                   } finally {
-                    setTimeout(() => setIsRefreshing(false), 500);
+                    setTimeout(() => setIsRefreshing(false), 600);
                   }
                 }}
                 disabled={isRefreshing}
@@ -868,14 +878,18 @@ export default function MobileWorkoutDetail() {
                 setWeekWorkouts([]);
                 setUpdatedDailyWorkouts([]);
                 setUpdatedWorkoutTypes({});
+                setCoachFeedback('');
                 try {
-                  // workout_weekly_records와 workouts 테이블 모두 새로고침
-                  await Promise.all([
-                    refetchWorkoutData(),
-                    fetchWeekWorkouts() // 항상 새로운 데이터 가져오기
-                  ]);
+                  // 모든 데이터 새로고침
+                  await refetchWorkoutData();
+                  
+                  // userData가 업데이트된 후 실행되도록 약간의 딜레이
+                  setTimeout(async () => {
+                    await fetchWeekWorkouts();
+                    // 피드백 데이터도 새로 가져오기는 useEffect에서 자동으로 처리됨
+                  }, 100);
                 } finally {
-                  setTimeout(() => setIsRefreshing(false), 500);
+                  setTimeout(() => setIsRefreshing(false), 600);
                 }
               }}
               disabled={isRefreshing}

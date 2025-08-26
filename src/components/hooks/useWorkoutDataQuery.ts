@@ -158,7 +158,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
   const queryClient = useQueryClient();
   // 1. Weekly Chart 데이터
   const weeklyChartQuery = useQuery({
-    queryKey: ['workout', 'weekly-chart', challengeId, Date.now()],
+    queryKey: ['workout', 'weekly-chart', challengeId],
     queryFn: () => fetchWeeklyChart(challengeId),
     enabled: !!challengeId,
     staleTime: 0, // 항상 fresh data
@@ -175,7 +175,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
 
   // 2. Leaderboard 데이터
   const leaderboardQuery = useQuery({
-    queryKey: ['workout', 'leaderboard', challengeId, Date.now()],
+    queryKey: ['workout', 'leaderboard', challengeId],
     queryFn: () => fetchLeaderboard(challengeId),
     enabled: !!challengeId,
     staleTime: 0, // 항상 fresh data
@@ -192,7 +192,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
 
   // 3. Today Count 데이터
   const todayCountQuery = useQuery({
-    queryKey: ['workout', 'today-count', challengeId, Date.now()],
+    queryKey: ['workout', 'today-count', challengeId],
     queryFn: () => fetchTodayCount(challengeId),
     enabled: !!challengeId,
     staleTime: 0, // 항상 fresh data
@@ -211,7 +211,7 @@ export const useWorkoutDataQuery = (challengeId: string) => {
   const userIds = weeklyChartQuery.data?.users?.map((user: any) => user.id) || [];
   
   const batchUserDataQuery = useQuery({
-    queryKey: ['workout', 'batch-user-data-single', challengeId, userIds.sort().join(','), Date.now()],
+    queryKey: ['workout', 'batch-user-data-single', challengeId, userIds.sort().join(',')],
     queryFn: async () => {
       if (!userIds.length) {
 // console.log('🚫 Batch user data: userIds가 비어있음');
