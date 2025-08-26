@@ -78,10 +78,19 @@ export async function GET(request: Request) {
       max_heart_rate: workout.max_heart_rate,
     })) || [];
 
-    return NextResponse.json({
-      workouts: formattedWorkouts,
-      total: formattedWorkouts.length
-    });
+    return NextResponse.json(
+      {
+        workouts: formattedWorkouts,
+        total: formattedWorkouts.length
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        }
+      }
+    );
   } catch (error) {
     // console.error('Error in week-detail API:', error);
     return NextResponse.json(

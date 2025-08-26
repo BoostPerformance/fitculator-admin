@@ -1,5 +1,9 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useWorkoutData } from '@/components/hooks/useWorkoutData';
@@ -255,12 +259,14 @@ export default function MobileWorkoutDetail() {
       
       // 운동 데이터 가져오기 - 특정 주만 필터링
       const res = await fetch(
-        `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}&t=${Date.now()}`,
+        `/api/workouts/week-detail?userId=${userId}&startDate=${startDate}&endDate=${endDate}&t=${Date.now()}&r=${Math.random()}`,
         { 
           cache: 'no-store',
+          method: 'GET',
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache'
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         }
       );
@@ -290,6 +296,10 @@ export default function MobileWorkoutDetail() {
   
   useEffect(() => {
     // 페이지 이동이나 파라미터 변경시마다 새로운 데이터 가져오기
+    // 데이터 초기화 후 새로 가져오기
+    setWeekWorkouts([]);
+    setUpdatedDailyWorkouts([]);
+    setUpdatedWorkoutTypes({});
     fetchWeekWorkouts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData, weekLabelParam, userId, challengeId, weekNumberParam]);
@@ -627,6 +637,10 @@ export default function MobileWorkoutDetail() {
               <button
                 onClick={async () => {
                   setIsRefreshing(true);
+                  // 데이터 초기화
+                  setWeekWorkouts([]);
+                  setUpdatedDailyWorkouts([]);
+                  setUpdatedWorkoutTypes({});
                   try {
                     // workout_weekly_records와 workouts 테이블 모두 새로고침
                     await Promise.all([
@@ -845,6 +859,10 @@ export default function MobileWorkoutDetail() {
             <button
               onClick={async () => {
                 setIsRefreshing(true);
+                // 데이터 초기화
+                setWeekWorkouts([]);
+                setUpdatedDailyWorkouts([]);
+                setUpdatedWorkoutTypes({});
                 try {
                   // workout_weekly_records와 workouts 테이블 모두 새로고침
                   await Promise.all([
