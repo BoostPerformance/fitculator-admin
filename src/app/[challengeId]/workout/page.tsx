@@ -10,13 +10,14 @@ import { IoRefresh } from 'react-icons/io5';
 import WorkoutTable from '@/components/workoutDashboard/workoutTable';
 import { ExcerciseStatistics } from '@/components/statistics/excerciseStatistics';
 import WorkoutUserList from '@/components/workoutDashboard/workoutUserList';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function WorkoutPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const urlDate = searchParams.get('date');
   const today = new Date().toISOString().split('T')[0];
+  const queryClient = useQueryClient();
 
   const [selectedDate, setSelectedDate] = useState<string>(urlDate || today);
   const {
@@ -63,6 +64,18 @@ export default function WorkoutPage() {
   };
 
   useEffect(() => {
+    // 페이지 마운트 시 workout 관련 캐시 무효화 (브라우저 새로고침 대응)
+    queryClient.invalidateQueries({ queryKey: ['workout'] });
+    
+    // 페이지 새로고침 감지를 위한 performance entry 확인
+    if (typeof window !== 'undefined') {
+      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      if (navigation.type === 'reload') {
+        // 새로고침으로 접근한 경우 모든 workout 관련 캐시 제거
+        queryClient.removeQueries({ queryKey: ['workout'] });
+      }
+    }
+    
     const loadChallenges = async () => {
       try {
         await fetchChallenges();
@@ -73,7 +86,7 @@ export default function WorkoutPage() {
       }
     };
     loadChallenges();
-  }, [fetchChallenges]);
+  }, [fetchChallenges, queryClient]);
 
   // API 연결 테스트 제거 - 불필요한 경고 메시지 방지
 

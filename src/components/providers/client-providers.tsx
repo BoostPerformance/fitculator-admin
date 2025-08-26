@@ -17,12 +17,12 @@ export default function ClientProviders({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5 * 60 * 1000, // 5분 - 더 길게 캐싱
+            staleTime: 1 * 60 * 1000, // 1분 - 더 짧은 캐싱으로 최신 데이터 보장
             retry: 1,
             refetchOnWindowFocus: false,
-            refetchOnMount: false, // 마운트 시 재요청 방지
+            refetchOnMount: true, // 마운트 시 항상 재요청
             refetchOnReconnect: false,
-            gcTime: 30 * 60 * 1000, // 30분 - 메모리에 더 오래 유지
+            gcTime: 5 * 60 * 1000, // 5분 - 메모리 캐시 시간 단축
             notifyOnChangeProps: ['data', 'error'], // 필요한 props만 구독
           },
           mutations: {

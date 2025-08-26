@@ -4,8 +4,8 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // 운동 상세 페이지 경로 패턴 체크 (예: /challengeId/workout/userId/week)
-  const workoutPagePattern = /^\/[^\/]+\/workout\/[^\/]+\/\d+$/;
+  // 운동 관련 모든 페이지 경로 패턴 체크
+  const workoutPagePattern = /^\/[^\/]+\/workout(?:\/.*)?$/;
   
   if (workoutPagePattern.test(pathname)) {
     // 캐시 방지 헤더 추가
