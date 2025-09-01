@@ -200,6 +200,7 @@ export default function UserWorkoutDetailPage() {
         body: JSON.stringify({
           workout_weekly_records_id: weeklyRecordId,
           coach_feedback: feedback,
+          challenge_id: challengeId,
         }),
         headers: {
           'Content-Type': 'application/json',

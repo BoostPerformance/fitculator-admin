@@ -481,6 +481,63 @@ const convertToKoreanTime = (utcString: string): string => {
   return koreanDate.toISOString();
 };
 
+// 누락된 주간 레코드 자동 생성 함수
+async function ensureWeeklyRecords(
+  userId: string,
+  challengeId: string,
+  startDate: Date,
+  endDate: Date,
+  existingRecords: any[]
+): Promise<void> {
+  const missingWeeks: Array<{ start_date: string; end_date: string }> = [];
+  
+  // 챌린지 기간 내 모든 주차 생성
+  let currentWeekStart = new Date(startDate);
+  
+  while (currentWeekStart <= endDate) {
+    const weekEnd = new Date(currentWeekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    
+    const startDateStr = currentWeekStart.toISOString().split('T')[0];
+    const endDateStr = weekEnd.toISOString().split('T')[0];
+    
+    // 기존 레코드에 이 주차가 있는지 확인
+    const exists = existingRecords.some(record => 
+      record.start_date === startDateStr && record.end_date === endDateStr
+    );
+    
+    if (!exists) {
+      missingWeeks.push({ start_date: startDateStr, end_date: endDateStr });
+    }
+    
+    // 다음 주로 이동
+    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+  }
+  
+  // 누락된 주차 레코드들을 일괄 생성
+  if (missingWeeks.length > 0) {
+    const recordsToInsert = missingWeeks.map(week => ({
+      user_id: userId,
+      start_date: week.start_date,
+      end_date: week.end_date,
+      cardio_points_total: 0,
+      strength_sessions_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }));
+    
+    const { error } = await supabase
+      .from('workout_weekly_records')
+      .insert(recordsToInsert);
+      
+    if (error) {
+      console.error('Error creating missing weekly records:', error);
+    } else {
+      console.log(`Created ${missingWeeks.length} missing weekly records for user ${userId}`);
+    }
+  }
+}
+
 async function getUserWorkoutData(
   userId: string,
   challengeId?: string | null
@@ -548,17 +605,22 @@ async function getUserWorkoutData(
       .select('id, start_date, end_date, cardio_points_total, strength_sessions_count')
       .eq('user_id', userId);
 
+    let w0StartDate: Date | null = null;
+    let challengeEnd: Date | null = null;
+
     if (challengeStartDate && challengeEndDate) {
       // W0를 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
       const challengeStart = new Date(challengeStartDate);
       const startDay = challengeStart.getDay();
       
       // 챌린지 시작일이 포함된 주의 월요일 계산
-      let w0StartDate = new Date(challengeStart);
+      w0StartDate = new Date(challengeStart);
       if (startDay !== 1) {
         const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
         w0StartDate.setDate(w0StartDate.getDate() - daysSinceMonday);
       }
+      
+      challengeEnd = new Date(challengeEndDate);
       
       query = query
         .gte('start_date', w0StartDate.toISOString().split('T')[0])
@@ -576,6 +638,18 @@ async function getUserWorkoutData(
         { error: 'Failed to fetch weekly workout records' },
         { status: 500 }
       );
+    }
+
+    // 🆕 누락된 주간 레코드 자동 생성 로직
+    if (challengeId && w0StartDate && challengeEnd) {
+      await ensureWeeklyRecords(userId, challengeId, w0StartDate, challengeEnd, weeklyRecords || []);
+      
+      // 레코드 재조회 (새로 생성된 레코드 포함)
+      const { data: updatedRecords, error: updateError } = await query.order('start_date', { ascending: true });
+      if (!updateError && updatedRecords && weeklyRecords) {
+        // 기존 weeklyRecords를 완전히 교체
+        weeklyRecords.splice(0, weeklyRecords.length, ...updatedRecords);
+      }
     }
 
     const weeklyRecordsWithFeedback = [];

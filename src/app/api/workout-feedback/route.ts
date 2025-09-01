@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
         .from('workout_feedbacks')
         .update({
           coach_feedback: body.coach_feedback,
+          coach_id: coach.id,
           challenge_id: body.challenge_id,
           updated_at: new Date().toISOString(),
         })
