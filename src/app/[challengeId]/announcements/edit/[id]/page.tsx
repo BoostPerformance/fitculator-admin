@@ -34,7 +34,7 @@ interface Announcement {
   title: string;
   type: 'general' | 'workout_schedule';
   content: any;
-  status: 'draft' | 'published' | 'archived';
+  status: 'published';
   priority: number;
   start_date?: string;
   end_date?: string;
@@ -102,7 +102,7 @@ export default function EditAnnouncementPage() {
     title: '',
     type: 'general' as 'general' | 'workout_schedule',
     content: '',
-    status: 'draft' as 'draft' | 'published' | 'archived',
+    status: 'published' as 'published',
     priority: 0,
     start_date: '',
     end_date: '',
@@ -525,9 +525,7 @@ export default function EditAnnouncementPage() {
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="draft">초안</option>
                 <option value="published">발행</option>
-                <option value="archived">보관</option>
               </select>
             </div>
 
