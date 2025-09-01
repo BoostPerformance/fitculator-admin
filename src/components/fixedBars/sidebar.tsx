@@ -666,6 +666,7 @@ export default function Sidebar({
                           조직 관리
                         </div>
                       </li>
+                      {/* TODO: 개발 완료 후 주석 해제
                       <li>
                         <div
                           className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
@@ -706,6 +707,7 @@ export default function Sidebar({
                           데이터 추출
                         </div>
                       </li>
+                      */}
                     </ul>
                   )}
                 </li>
