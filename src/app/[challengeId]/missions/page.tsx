@@ -502,7 +502,7 @@ export default function MissionsPage() {
   }
 
   return (
-    <div className="flex-1 p-4">
+    <div className="flex-1 p-4 overflow-x-hidden">
       <div className="px-8 pt-4 sm:px-4 sm:pt-4">
         {currentChallenge && (
           <div className="text-0.875-400 text-gray-6 mb-2">
@@ -523,7 +523,7 @@ export default function MissionsPage() {
         <Title title="미션" />
       </div>
 
-      <div className="mt-6 px-8 sm:px-4 space-y-8">
+      <div className="mt-6 px-8 sm:px-4 space-y-8 w-full max-w-full overflow-x-hidden">
         {/* 미션 관리 섹션 */}
         <div>
           <div className="flex justify-between items-center mb-6">
@@ -547,28 +547,29 @@ export default function MissionsPage() {
         </div>
 
         {/* 미션 테이블 */}
-        <div className="bg-white rounded-lg shadow overflow-x-auto mb-8">
-          {missions.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg mb-4">등록된 미션이 없습니다.</p>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                첫 미션 추가하기
-              </button>
-            </div>
-          ) : (
-            <table className="w-full table-fixed">
+        <div className="bg-white rounded-lg shadow overflow-hidden mb-8" style={{ width: '100%', maxWidth: '90vw' }}>
+          <div className="overflow-x-auto" style={{ width: '100%', maxWidth: '90vw' }}>
+            {missions.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg mb-4">등록된 미션이 없습니다.</p>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  첫 미션 추가하기
+                </button>
+              </div>
+            ) : (
+              <table className="w-full" style={{ tableLayout: 'fixed', width: '100%' }}>
               <thead className="bg-gray-50">
                 <tr>
                   <th className="w-10 px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     #
                   </th>
-                  <th className="w-2/5 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '40%' }}>
                     제목
                   </th>
-                  <th className="w-1/4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '35%' }}>
                     <button
                       onClick={handleSortToggle}
                       className="flex items-center gap-1 hover:text-gray-700"
@@ -579,7 +580,7 @@ export default function MissionsPage() {
                       </svg>
                     </button>
                   </th>
-                  <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ width: '15%' }}>
                     상태
                   </th>
                 </tr>
@@ -612,14 +613,15 @@ export default function MissionsPage() {
                   </td>
                 </tr>
                 ))}
-              </tbody>
-            </table>
-          )}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
 
       {/* 달성 현황 섹션 */}
-      <div className="mt-2">
+      <div className="mt-2 w-full overflow-x-hidden">
         <div className="mb-4">
           <h2 className="text-2xl lg:text-3xl font-bold mb-4">미션 달성 현황</h2>
           
@@ -710,111 +712,132 @@ export default function MissionsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
-          <table className="min-w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="w-16 px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  #
-                </th>
-                <th className="sticky left-16 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <button
-                    onClick={() => handleMemberSortToggle('name')}
-                    className="flex items-center gap-1 hover:text-gray-700"
-                  >
-                    멤버
-                    <svg className={`w-4 h-4 transition-transform ${
-                      memberSortField === 'name' ? (memberSortOrder === 'desc' ? 'rotate-180' : '') : 'opacity-50'
-                    }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                  </button>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
-                  <button
-                    onClick={() => handleMemberSortToggle('completion_rate')}
-                    className="flex items-center gap-1 hover:text-gray-700"
-                  >
-                    달성률
-                    <svg className={`w-4 h-4 transition-transform ${
-                      memberSortField === 'completion_rate' ? (memberSortOrder === 'desc' ? 'rotate-180' : '') : 'opacity-50'
-                    }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                  </button>
-                </th>
-                {filteredMissions.map((mission) => (
-                  <th
-                    key={mission.id}
-                    className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]"
-                  >
-                    <div className="text-xs">
-                      {mission.title}
-                    </div>
+        <div className="bg-white rounded-lg shadow overflow-hidden flex" style={{ width: '100%', maxWidth: '90vw' }}>
+          {/* 고정된 왼쪽 컬럼들 */}
+          <div className="flex-shrink-0 border border-gray-200" style={{ width: '370px' }}>
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="w-16 px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    #
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {sortedUsers.map((user, index) => {
-                const completionRate = calculateCompletionRate(user);
-                
-                return (
-                  <tr key={user.id}>
-                    <td className="w-16 px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm font-medium text-gray-900">{index + 1}</span>
-                    </td>
-                    <td className="sticky left-16 bg-white px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                        <div className="text-xs text-gray-400">@{user.username}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-1 mr-2">
-                          <div className="bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-blue-600 h-2 rounded-full"
-                              style={{ width: `${completionRate}%` }}
-                            />
-                          </div>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <button
+                      onClick={() => handleMemberSortToggle('name')}
+                      className="flex items-center gap-1 hover:text-gray-700"
+                    >
+                      멤버
+                      <svg className={`w-4 h-4 transition-transform ${
+                        memberSortField === 'name' ? (memberSortOrder === 'desc' ? 'rotate-180' : '') : 'opacity-50'
+                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </button>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <button
+                      onClick={() => handleMemberSortToggle('completion_rate')}
+                      className="flex items-center gap-1 hover:text-gray-700"
+                    >
+                      달성률
+                      <svg className={`w-4 h-4 transition-transform ${
+                        memberSortField === 'completion_rate' ? (memberSortOrder === 'desc' ? 'rotate-180' : '') : 'opacity-50'
+                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {sortedUsers.map((user, index) => {
+                  const completionRate = calculateCompletionRate(user);
+                  
+                  return (
+                    <tr key={user.id}>
+                      <td className="w-16 px-6 py-4 whitespace-nowrap text-center">
+                        <span className="text-sm font-medium text-gray-900">{index + 1}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                          <div className="text-[12px] text-gray-400">@{user.username}</div>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{completionRate}%</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-1 mr-2">
+                            <div className="bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-blue-600 h-2 rounded-full"
+                                style={{ width: `${completionRate}%` }}
+                              />
+                            </div>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">{completionRate}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 스크롤 가능한 미션 컬럼들 */}
+          <div className="flex-1 overflow-x-auto border-t border-r border-b border-gray-200">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  {filteredMissions.map((mission) => (
+                    <th
+                      key={mission.id}
+                      className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px] whitespace-nowrap"
+                    >
+                      <div className="text-xs">
+                        {mission.title}
                       </div>
-                    </td>
-                    {filteredMissions.map((mission) => {
-                      const completion = user.completions[mission.id];
-                      const isCompleted = completion && 
-                        (completion.verification_status === 'approved' || 
-                         completion.verification_status === 'auto_approved');
-                      
-                      return (
-                        <td key={mission.id} className="px-6 py-4 whitespace-nowrap text-center">
-                          {isCompleted ? (
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-// console.log('Button clicked for user:', user.id, 'mission:', mission.id);
-                                fetchCompletedWorkouts(user.id, mission.id);
-                              }}
-                              className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-colors cursor-pointer border-none"
-                              title="클릭하여 등록된 운동 보기"
-                            >
-                              완료
-                            </button>
-                          ) : (
-                            getStatusBadge(completion)
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {sortedUsers.map((user) => {
+                  return (
+                    <tr key={user.id} style={{ height: '75px' }}>
+                      {filteredMissions.map((mission) => {
+                        const completion = user.completions[mission.id];
+                        const isCompleted = completion && 
+                          (completion.verification_status === 'approved' || 
+                           completion.verification_status === 'auto_approved');
+                        
+                        return (
+                          <td key={mission.id} className="px-6 py-4 whitespace-nowrap text-center align-middle">
+                            {isCompleted ? (
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+  // console.log('Button clicked for user:', user.id, 'mission:', mission.id);
+                                  fetchCompletedWorkouts(user.id, mission.id);
+                                }}
+                                className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-colors cursor-pointer border-none"
+                                title="클릭하여 등록된 운동 보기"
+                              >
+                                완료
+                              </button>
+                            ) : (
+                              getStatusBadge(completion)
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
           {users.length === 0 && (
             <div className="text-center py-12 text-gray-500">
