@@ -27,7 +27,7 @@ function ChallengeLayoutContent({
   const [editUsernameModal, setEditUsernameModal] = useState(false);
   
   // React Query hooks 사용으로 API 호출 최적화
-  const { adminData, fetchAdminData } = useAdminData();
+  const { adminData, fetchAdminData, displayUsername, isLoading, hasData } = useAdminData();
   const { challenges } = useChallengeContext();
 
   const handleUsernameUpdate = async (newUsername: string) => {
@@ -74,8 +74,8 @@ function ChallengeLayoutContent({
   return (
     <div className="relative">
       <div className="absolute right-8 top-4 z-50 hidden lg:flex md:hidden items-center gap-2">
-        <div className="text-gray-500 text-sm whitespace-nowrap">
-          안녕하세요, {adminData?.username} !
+        <div className={`text-gray-500 text-sm whitespace-nowrap ${isLoading ? 'animate-pulse' : ''}`}>
+          안녕하세요, {displayUsername} !
         </div>
         <button
           onClick={() => setUserDropdown(!userDropdown)}
@@ -96,7 +96,8 @@ function ChallengeLayoutContent({
                 setEditUsernameModal(true);
                 setUserDropdown(false);
               }}
-              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm"
+              disabled={isLoading || !hasData}
+              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               이름 수정
             </button>
@@ -108,9 +109,9 @@ function ChallengeLayoutContent({
         <Sidebar
           data={formattedChallenges}
           onSelectChallenge={handleChallengeSelect}
-          coach={adminData?.username}
+          coach={displayUsername}
           selectedChallengeId={selectedChallengeId}
-          username={adminData?.username}
+          username={displayUsername}
         />
         <main className="flex-1 px-[1rem] py-[1.25rem] sm:px-0 sm:py-0 bg-white-1 dark:bg-blue-4">
           {children}

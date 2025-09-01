@@ -16,10 +16,11 @@ export function useAdminData() {
   const { data: adminData, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-users'],
     queryFn: fetchAdminData,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
+    gcTime: 1000 * 60 * 10, // 10분간 가비지 컬렉션 방지
     refetchOnWindowFocus: false,
     refetchOnMount: true,
+    retry: 2,
   });
 
   const fetchAdminDataRefresh = async () => {
@@ -32,5 +33,8 @@ export function useAdminData() {
     fetchAdminData: fetchAdminDataRefresh,
     isLoading,
     error,
+    // 로딩 중이거나 username이 없을 때 처리
+    displayUsername: isLoading ? '로딩 중...' : (adminData?.username || '사용자'),
+    hasData: !!adminData && !!adminData.username,
   };
 }

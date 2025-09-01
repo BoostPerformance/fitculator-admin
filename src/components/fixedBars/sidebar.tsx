@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { DiVim } from 'react-icons/di';
 import NoticeModal from '../input/noticeModal';
 import { useAdminData } from '../hooks/useAdminData';
+import { useSession } from 'next-auth/react';
 
 interface Challenges {
   challenges: {
@@ -60,9 +61,30 @@ export default function Sidebar({
     { id: '3', title: '세 번째 공지사항', content: '' },
   ]);
   const router = useRouter();
+  const { data: session } = useSession();
   
   // React Query hook 사용으로 API 호출 최적화
-  const { adminData } = useAdminData();
+  const { adminData, displayUsername: hookDisplayUsername, isLoading: adminDataLoading } = useAdminData();
+  
+  // 운영 관리 권한 체크 함수 (특정 이메일로 제어)
+  const hasOperationalAccess = () => {
+    // 운영 관리 접근 가능한 이메일 리스트
+    const operationalEmails = [
+      'ryoohyun@fitculator.io',
+      'cuteprobe@gmail.com'
+    ];
+    
+    // 세션 이메일로 체크
+    const userEmail = session?.user?.email;
+    if (userEmail && operationalEmails.includes(userEmail)) {
+      return true;
+    }
+    
+    // 또는 admin_role로 체크 (기존 방식 유지)
+    return adminData?.admin_role && ['internal_operator', 'system_admin', 'developer'].includes(adminData.admin_role);
+  };
+  
+  // 기존 호환성을 위한 변수 유지
   const isInternalOperator = adminData?.admin_role === 'internal_operator';
 
   const dummyNotices = [
@@ -223,10 +245,10 @@ export default function Sidebar({
         </button>
         <div className="flex items-center gap-2 sm:flex md:flex lg:hidden">
           <div
-            className="text-gray-500 text-sm whitespace-nowrap sm:dark:text-gray-8"
+            className={`text-gray-500 text-sm whitespace-nowrap sm:dark:text-gray-8 ${adminDataLoading ? 'animate-pulse' : ''}`}
             onClick={handleUserDropdown}
           >
-            안녕하세요, {username} !
+            안녕하세요, {username || hookDisplayUsername} !
           </div>
           <button onClick={handleUserDropdown} className="flex items-center">
             <Image
@@ -401,6 +423,18 @@ export default function Sidebar({
                                       </div>
                                     </li>
                                   )}
+                                  <li>
+                                    <div
+                                      className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                                      onClick={() => {
+                                        router.push(
+                                          `/${challenge.challenges.id}/announcements`
+                                        );
+                                      }}
+                                    >
+                                      공지사항
+                                    </div>
+                                  </li>
                                 </ul>
                               )}
                             </li>
@@ -552,6 +586,18 @@ export default function Sidebar({
                                         </div>
                                       </li>
                                     )}
+                                    <li>
+                                      <div
+                                        className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded"
+                                        onClick={() => {
+                                          router.push(
+                                            `/${challenge.challenges.id}/announcements`
+                                          );
+                                        }}
+                                      >
+                                        공지사항
+                                      </div>
+                                    </li>
                                   </ul>
                                 )}
                               </li>
@@ -563,16 +609,17 @@ export default function Sidebar({
                   </ul>
                 )}
               </li>
-              {isInternalOperator && (
-                <li className="w-full items-center justify-between text-1.5-700">
+              {/* 운영 관리 메뉴 - internal_operator, system_admin, developer만 접근 가능 */}
+              {hasOperationalAccess() && (
+                <li className="w-full items-center justify-between text-1.5-700 mb-4">
                   <div
                     role="group"
-                    aria-label="관리자 메뉴"
-                    className="flex flex-row justify-between align-middle cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-2"
+                    aria-label="운영 관리 메뉴"
+                    className="flex flex-row justify-between align-middle items-center cursor-pointer border-b-[0.1rem] border-gray-13 py-[0.8rem] px-2"
                     onClick={handleAdminDropdown}
                   >
-                    관리자 메뉴
-                    <button className="w-[1rem] lg:w-[0.8rem]">
+                    운영 관리
+                    <button className="w-4 h-4">
                       <Image
                         src={
                           !isAdminDropdownOpen
@@ -582,6 +629,7 @@ export default function Sidebar({
                         width={30}
                         height={30}
                         alt="드롭다운 아이콘"
+                        className="min-w-[1rem] min-h-[1rem]"
                       />
                     </button>
                   </div>
@@ -590,7 +638,7 @@ export default function Sidebar({
                     <ul className="font-medium text-1.25-700 text-gray-1 mt-4 flex flex-col gap-2">
                       <li>
                         <div
-                          className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                          className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
                           onClick={() => {
                             router.push('/admin/create-challenge');
                           }}
@@ -600,7 +648,7 @@ export default function Sidebar({
                       </li>
                       <li>
                         <div
-                          className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                          className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
                           onClick={() => {
                             router.push('/admin/manage-challenges');
                           }}
@@ -610,12 +658,52 @@ export default function Sidebar({
                       </li>
                       <li>
                         <div
-                          className="cursor-pointer font-medium text-1-400 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                          className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
                           onClick={() => {
                             router.push('/admin/manage-organizations');
                           }}
                         >
                           조직 관리
+                        </div>
+                      </li>
+                      <li>
+                        <div
+                          className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                          onClick={() => {
+                            router.push('/admin/user-management');
+                          }}
+                        >
+                          사용자 관리
+                        </div>
+                      </li>
+                      <li>
+                        <div
+                          className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                          onClick={() => {
+                            router.push('/admin/system-logs');
+                          }}
+                        >
+                          시스템 로그
+                        </div>
+                      </li>
+                      <li>
+                        <div
+                          className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                          onClick={() => {
+                            router.push('/admin/settings');
+                          }}
+                        >
+                          시스템 설정
+                        </div>
+                      </li>
+                      <li>
+                        <div
+                          className="cursor-pointer font-medium text-1-500 hover:text-gray-1 py-2 px-8 rounded dark:text-white"
+                          onClick={() => {
+                            router.push('/admin/data-export');
+                          }}
+                        >
+                          데이터 추출
                         </div>
                       </li>
                     </ul>

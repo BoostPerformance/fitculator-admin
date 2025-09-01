@@ -4,9 +4,11 @@ import SearchBar from './searchBar';
 import AccountInfo from '../accountInfo';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useAdminData } from '../hooks/useAdminData';
 
 const DashboardHeader = ({ isOpen }: { isOpen: boolean }) => {
   const router = useRouter();
+  const { displayUsername } = useAdminData();
 
   return (
     <header
@@ -24,7 +26,7 @@ const DashboardHeader = ({ isOpen }: { isOpen: boolean }) => {
         />
       </button>
       <SearchBar />
-      <AccountInfo username="User" avatarUrl="/image/logo-icon.png" />
+      <AccountInfo username={displayUsername} avatarUrl="/image/logo-icon.png" />
     </header>
   );
 };
