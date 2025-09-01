@@ -349,6 +349,28 @@ export default function EditAnnouncementPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 필수 필드 검증
+    if (!formData.title.trim()) {
+      alert('제목을 입력해주세요.');
+      return;
+    }
+    
+    if (!formData.start_date) {
+      alert('시작일을 선택해주세요.');
+      return;
+    }
+    
+    if (!formData.end_date) {
+      alert('종료일을 선택해주세요.');
+      return;
+    }
+    
+    if (formData.type === 'general' && !formData.content.trim()) {
+      alert('공지사항 내용을 입력해주세요.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -533,9 +555,6 @@ export default function EditAnnouncementPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">전체</option>
-                <option value="beginner">초급</option>
-                <option value="intermediate">중급</option>
-                <option value="advanced">고급</option>
               </select>
             </div>
           </div>
@@ -543,15 +562,16 @@ export default function EditAnnouncementPage() {
 
         {/* Date Range */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">게시 기간</h2>
+          <h2 className="text-lg font-semibold mb-4">게시 기간 *</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                시작일
+                시작일 *
               </label>
               <input
                 type="date"
+                required
                 value={formData.start_date}
                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -560,10 +580,11 @@ export default function EditAnnouncementPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                종료일
+                종료일 *
               </label>
               <input
                 type="date"
+                required
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
