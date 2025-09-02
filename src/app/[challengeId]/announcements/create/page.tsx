@@ -527,7 +527,7 @@ export default function CreateAnnouncementPage() {
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="공지사항 내용을 입력하세요. 줄바꿈은 자동으로 처리됩니다."
+                placeholder="공지사항 내용을 입력하세요."
               />
             </div>
           )}
