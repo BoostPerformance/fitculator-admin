@@ -20,53 +20,31 @@ const formatDateToMMDD = (dateString: string | Date) => {
   return `${month}.${day}`;
 };
 
-// Helper function to generate week labels based on challenge period
+// Helper function to generate week labels based on challenge period (서버 로직과 일치)
 const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
-  const startDate = new Date(startDateStr);
-  const endDate = new Date(endDateStr);
+  const [year, month, day] = startDateStr.split('-').map(Number);
+  const challengeStartDate = new Date(year, month - 1, day);
+  
+  const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+  const challengeEndDate = new Date(endYear, endMonth - 1, endDay);
 
   const weeks: WeekInfo[] = [];
+
+  // 챌린지 시작일이 포함된 주의 월요일 찾기 (이 주가 W1이 됨)
+  let currentStart = new Date(challengeStartDate);
+  const startDay = challengeStartDate.getDay();
+  const daysFromMonday = startDay === 0 ? 6 : startDay - 1;
+  currentStart.setDate(challengeStartDate.getDate() - daysFromMonday);
+
   let weekNumber = 1;
 
-  // Get the day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-  const startDay = startDate.getDay();
-
-  // Calculate the Monday of the week containing the start date
-  let currentStart = new Date(startDate);
-  if (startDay !== 1) {
-    // If not Monday, go back to the previous Monday
-    const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
-    currentStart.setDate(currentStart.getDate() - daysSinceMonday);
-  }
-
-  // If start date is not Monday, create W0 from that week's Monday
-  if (startDay !== 1) {
+  // 챌린지 종료일까지 주차별로 생성
+  while (currentStart <= challengeEndDate) {
     const currentEnd = new Date(currentStart);
-    currentEnd.setDate(currentEnd.getDate() + 6); // Sunday
+    currentEnd.setDate(currentStart.getDate() + 6); // 일요일
 
-    const formattedStart = formatDateToMMDD(currentStart);
-    const formattedEnd = formatDateToMMDD(currentEnd);
-
-    weeks.push({
-      label: `${formattedStart}-${formattedEnd}`,
-      startDate: new Date(currentStart),
-      endDate: new Date(currentEnd),
-      weekNumber: weekNumber,
-    });
-    weekNumber++;
-
-    // Move to next Monday for W1
-    currentStart = new Date(currentEnd);
-    currentStart.setDate(currentStart.getDate() + 1);
-  }
-
-  // Generate full weeks starting from Monday
-  while (currentStart < endDate) {
-    const currentEnd = new Date(currentStart);
-    currentEnd.setDate(currentEnd.getDate() + 6); // Sunday (7-day week)
-
-    // Don't exceed the end date
-    const actualEnd = currentEnd > endDate ? endDate : currentEnd;
+    // 챌린지 종료일을 넘지 않도록 조정
+    const actualEnd = currentEnd > challengeEndDate ? challengeEndDate : currentEnd;
 
     const formattedStart = formatDateToMMDD(currentStart);
     const formattedEnd = formatDateToMMDD(actualEnd);
@@ -78,9 +56,9 @@ const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
       weekNumber: weekNumber,
     });
 
-    // Move to next Monday
+    // 다음 주 월요일로 이동
     currentStart = new Date(currentEnd);
-    currentStart.setDate(currentStart.getDate() + 1);
+    currentStart.setDate(currentEnd.getDate() + 1);
     weekNumber++;
   }
 
@@ -207,12 +185,18 @@ const WorkoutTable: React.FC<
 
       // 데이터 연결 확인을 위한 로그 (첫 번째 사용자만)
       if (user.id === users[0]?.id) {
-        // console.log('첫 번째 사용자 데이터:', {
+        // console.log('🔍 첫 번째 사용자 데이터:', {
         //   userId: user.id,
         //   userName: user.name,
         //   weeklyRecordsCount: userStatsData.weeklyRecords?.length || 0,
         //   generatedWeeksCount: generatedWeeks.length,
         //   weeklyRecords: userStatsData.weeklyRecords,
+        //   generatedWeeks: generatedWeeks.map(w => ({
+        //     weekNumber: w.weekNumber,
+        //     label: w.label,
+        //     startDate: w.startDate.toISOString().split('T')[0],
+        //     endDate: w.endDate.toISOString().split('T')[0]
+        //   }))
         // });
       }
 
@@ -240,31 +224,56 @@ const WorkoutTable: React.FC<
         const startDate = formatDateToMMDD(week.startDate);
         const endDate = formatDateToMMDD(week.endDate);
 
-        // 해당 주차의 weeklyRecord 찾기 (W0 포함 개선된 매핑)
+        // 해당 주차의 weeklyRecord 찾기 - 서버와 동일한 로직 적용
         const weekRecord = userStatsData.weeklyRecords?.find((record: any) => {
-          const recordStartDate = new Date(record.start_date);
-          const recordEndDate = new Date(record.end_date);
+          // 서버와 동일하게 로컬 타임으로 파싱
+          const [recordStartYear, recordStartMonth, recordStartDay] = record.start_date.split('-').map(Number);
+          const recordStartDate = new Date(recordStartYear, recordStartMonth - 1, recordStartDay);
+          
+          const [recordEndYear, recordEndMonth, recordEndDay] = record.end_date.split('-').map(Number);
+          const recordEndDate = new Date(recordEndYear, recordEndMonth - 1, recordEndDay);
 
-          // W0의 경우 특별 처리: W0 기간과 실제로 겹치는 기록 찾기
-          if (week.weekNumber === 1) {
-            // W0 기간(월요일~일요일)과 record 기간이 겹치는지 확인
-            const isW0Record =
-              recordStartDate <= week.endDate &&
-              recordEndDate >= week.startDate;
+          // 모든 주차에 대해 일관된 매핑 로직 사용
+          // record의 end_date가 해당 주차의 start_date와 같거나 이후인 record를 찾음
+          const isMatching =
+            recordEndDate >= week.startDate && recordStartDate <= week.endDate;
 
-            return isW0Record;
-          }
+          // 첫 번째 사용자의 첫 두 주차만 상세 매핑 로그
+          // if (user.id === users[0]?.id && index < 2) {
+          //   console.log(`📅 W${week.weekNumber} 레코드 ${record.start_date}~${record.end_date} 체크:`, {
+          //     recordStart: recordStartDate.toISOString().split('T')[0],
+          //     recordEnd: recordEndDate.toISOString().split('T')[0],
+          //     weekStart: week.startDate.toISOString().split('T')[0],
+          //     weekEnd: week.endDate.toISOString().split('T')[0],
+          //     condition1: `recordEndDate >= week.startDate: ${recordEndDate >= week.startDate}`,
+          //     condition2: `recordStartDate <= week.endDate: ${recordStartDate <= week.endDate}`,
+          //     isMatching,
+          //     cardioPoints: record.cardio_points_total
+          //   });
+          // }
 
-          // W1 이후는 기존 로직 사용
-          const isOverlapping =
-            recordStartDate <= week.endDate && recordEndDate >= week.startDate;
-
-          return isOverlapping;
+          return isMatching;
         });
 
         const totalCardioPoints = weekRecord?.cardio_points_total || 0;
         const strengthSessions = weekRecord?.strength_sessions_count || 0;
         const actualPercentage = Math.round(totalCardioPoints * 10) / 10;
+
+        // 첫 번째 사용자의 첫 두 주차만 매핑 상황 로그
+        // if (user.id === users[0]?.id && index < 2) {
+        //   console.log(`🔗 W${week.weekNumber} 매핑 결과:`, {
+        //     weekLabel: week.label,
+        //     weekStartEnd: `${week.startDate.toISOString().split('T')[0]} ~ ${week.endDate.toISOString().split('T')[0]}`,
+        //     foundRecord: !!weekRecord,
+        //     recordInfo: weekRecord ? {
+        //       start_date: weekRecord.start_date,
+        //       end_date: weekRecord.end_date,
+        //       cardio_points_total: weekRecord.cardio_points_total
+        //     } : null,
+        //     totalCardioPoints,
+        //     strengthSessions
+        //   });
+        // }
 
         return {
           weekNumber: week.weekNumber,

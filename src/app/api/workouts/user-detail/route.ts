@@ -111,8 +111,11 @@ async function getWeeklyChartData(
       );
     }
 
-    const challengeStart = new Date(challenge.start_date);
-    const challengeEnd = new Date(challenge.end_date);
+    // 로컬 시간으로 파싱 (타임존 영향 제거)
+    const [startYear, startMonth, startDayNum] = challenge.start_date.split('-').map(Number);
+    const [endYear, endMonth, endDayNum] = challenge.end_date.split('-').map(Number);
+    const challengeStart = new Date(startYear, startMonth - 1, startDayNum);
+    const challengeEnd = new Date(endYear, endMonth - 1, endDayNum);
 
     // 2. 챌린지 참가자 목록 조회
     const { data: participants } = await supabase
@@ -147,11 +150,12 @@ async function getWeeklyChartData(
     }
 
     // 4. 주간 운동 기록 조회 (W1부터 챌린지 종료일까지)
+    // 7.28-8.3 레코드를 포함하도록 end_date 기준으로 쿼리
     const { data: weeklyRecords } = await supabase
       .from('workout_weekly_records')
       .select('*')
       .in('user_id', participantIds)
-      .gte('start_date', w1StartDate.toISOString().split('T')[0])
+      .gte('end_date', w1StartDate.toISOString().split('T')[0])
       .lte('end_date', challenge.end_date)
       .order('start_date', { ascending: true });
 
@@ -165,6 +169,7 @@ async function getWeeklyChartData(
     const allWeeks: any[] = [];
     let currentWeekStart = new Date(w1StartDate);
     let weekNumber = 1;
+
 
     while (currentWeekStart <= challengeEnd) {
       const currentWeekEnd = new Date(currentWeekStart);
@@ -180,6 +185,7 @@ async function getWeeklyChartData(
       const [startYear, startMonth, startDayStr] = startDateStr.split('-');
       const [endYear, endMonth, endDayStr] = endDateStr.split('-');
       const weekLabel = `${parseInt(startMonth)}.${parseInt(startDayStr)}-${parseInt(endMonth)}.${parseInt(endDayStr)}`;
+      
       
       allWeeks.push({
         weekNumber: `W${weekNumber}`,
@@ -203,14 +209,20 @@ async function getWeeklyChartData(
     const strengthData: any = [];
 
     weeklyRecords?.forEach((record) => {
-      const recordStartDate = new Date(record.start_date + 'T00:00:00Z');
+      // 로컬 시간으로 파싱
+      const [recYear, recMonth, recDay] = record.start_date.split('-').map(Number);
+      const recordStartDate = new Date(recYear, recMonth - 1, recDay);
       
       // 레코드가 속한 주차 찾기
       const matchedWeek = allWeeks.find(week => {
-        const weekStart = new Date(week.startDate + 'T00:00:00Z');
-        const weekEnd = new Date(week.endDate + 'T23:59:59Z');
+        const [weekStartYear, weekStartMonth, weekStartDay] = week.startDate.split('-').map(Number);
+        const [weekEndYear, weekEndMonth, weekEndDay] = week.endDate.split('-').map(Number);
+        const weekStart = new Date(weekStartYear, weekStartMonth - 1, weekStartDay);
+        const weekEnd = new Date(weekEndYear, weekEndMonth - 1, weekEndDay);
+        weekEnd.setHours(23, 59, 59); // 일요일 끝까지
         return recordStartDate >= weekStart && recordStartDate <= weekEnd;
       });
+
 
       if (!matchedWeek) return; // 매칭되는 주차가 없으면 스킵
 
@@ -630,17 +642,20 @@ async function getUserWorkoutData(
 
     if (challengeStartDate && challengeEndDate) {
       // W1을 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
-      const challengeStart = new Date(challengeStartDate);
-      const startDay = challengeStart.getDay();
+      // 로컬 시간으로 파싱 (타임존 영향 제거)
+      const [startYear, startMonth, startDay] = challengeStartDate.split('-').map(Number);
+      const challengeStart = new Date(startYear, startMonth - 1, startDay);
+      const dayOfWeek = challengeStart.getDay();
       
       // 챌린지 시작일이 포함된 주의 월요일 계산
       w1StartDate = new Date(challengeStart);
-      if (startDay !== 1) {
-        const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
+      if (dayOfWeek !== 1) {
+        const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         w1StartDate.setDate(w1StartDate.getDate() - daysSinceMonday);
       }
       
-      challengeEnd = new Date(challengeEndDate);
+      const [endYear, endMonth, endDay] = challengeEndDate.split('-').map(Number);
+      challengeEnd = new Date(endYear, endMonth - 1, endDay);
       
       // 7.28-8.3 레코드를 포함하도록 쿼리 수정
       // start_date가 W1 월요일 이후이거나, end_date가 W1 월요일 이후인 모든 레코드
@@ -746,8 +761,12 @@ async function getUserWorkoutData(
       // Calculate weekNumber based on challenge start date
       let weekNumber = 1;
       if (challengeStartDate) {
-        const recordStart = new Date(record.start_date + 'T00:00:00Z');
-        const challengeStart = new Date(challengeStartDate + 'T00:00:00Z');
+        // 로컬 시간으로 파싱 (타임존 영향 제거)
+        const [recYear, recMonth, recDay] = record.start_date.split('-').map(Number);
+        const recordStart = new Date(recYear, recMonth - 1, recDay);
+        
+        const [chalYear, chalMonth, chalDay] = challengeStartDate.split('-').map(Number);
+        const challengeStart = new Date(chalYear, chalMonth - 1, chalDay);
         
         // 챌린지 시작일이 속한 주의 월요일 계산
         const startDay = challengeStart.getDay();
@@ -757,13 +776,8 @@ async function getUserWorkoutData(
           firstWeekMonday.setDate(firstWeekMonday.getDate() - daysSinceMonday);
         }
         
-        // 현재 레코드가 속한 주의 월요일 계산
-        const recordDay = recordStart.getDay();
+        // 현재 레코드 시작일 (이미 월요일)
         let recordWeekMonday = new Date(recordStart);
-        if (recordDay !== 1) {
-          const daysSinceMonday = recordDay === 0 ? 6 : recordDay - 1;
-          recordWeekMonday.setDate(recordWeekMonday.getDate() - daysSinceMonday);
-        }
         
         const timeDiff = recordWeekMonday.getTime() - firstWeekMonday.getTime();
         const weeksDiff = Math.floor(timeDiff / (7 * 24 * 60 * 60 * 1000));
@@ -884,7 +898,8 @@ async function getBatchUserWorkoutData(
 
       if (challengeStartDate && challengeEndDate) {
         // W1을 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
-        const challengeStart = new Date(challengeStartDate);
+        const [year, month, day] = challengeStartDate.split('-').map(Number);
+        const challengeStart = new Date(year, month - 1, day);
         const startDay = challengeStart.getDay();
         
         // 챌린지 시작일이 포함된 주의 월요일 계산
@@ -909,7 +924,9 @@ async function getBatchUserWorkoutData(
       
       if (weeklyRecords) {
         for (const record of weeklyRecords) {
-          const recordStart = new Date(record.start_date + 'T00:00:00Z');
+          // 로컬 타임으로 파싱
+          const [recordYear, recordMonth, recordDayNum] = record.start_date.split('-').map(Number);
+          const recordStart = new Date(recordYear, recordMonth - 1, recordDayNum);
           const recordDay = recordStart.getDay();
           let weekMonday = new Date(recordStart);
           if (recordDay !== 1) {
