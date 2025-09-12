@@ -27,6 +27,7 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
 
   // 계산 결과를 useMemo로 캐싱하여 불필요한 재계산 방지
   const { totalWorkouts, weeklyAverage } = useMemo(() => {
+    console.log('🔍 ExcerciseStatistics - weeklyChart 데이터:', weeklyChart);
     if (!weeklyChart) return { totalWorkouts: 0, weeklyAverage: 0 };
 
     // 새로운 API 응답 형식 처리
@@ -73,6 +74,13 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
 
       // 주간 평균 운동점수 = 이번주 참여한 사용자들의 평균 유산소 포인트
       participantCount = thisWeekUserPoints.size;
+      console.log('🔍 이번주 데이터:', {
+        현재날짜: new Date().toISOString().split('T')[0],
+        이번주운동한사용자수: participantCount,
+        이번주사용자포인트맵: Array.from(thisWeekUserPoints.entries()),
+        전체cardioData길이: weeklyChart.cardioData.length
+      });
+      
       if (participantCount > 0) {
         thisWeekUserPoints.forEach(points => {
           totalCardioPoints += points;
@@ -80,6 +88,11 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
       }
       
       const avgPercentage = participantCount > 0 ? Math.round(totalCardioPoints / participantCount * 10) / 10 : 0;
+      console.log('📊 주간 평균 계산 결과:', {
+        총참여자수: participantCount,
+        총포인트: totalCardioPoints,
+        평균점수: avgPercentage
+      });
       
       return { 
         totalWorkouts: totalCount, 

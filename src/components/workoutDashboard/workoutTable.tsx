@@ -26,7 +26,7 @@ const generateWeekLabels = (startDateStr: string, endDateStr: string) => {
   const endDate = new Date(endDateStr);
 
   const weeks: WeekInfo[] = [];
-  let weekNumber = 0;
+  let weekNumber = 1;
 
   // Get the day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
   const startDay = startDate.getDay();
@@ -105,14 +105,24 @@ type SortConfig = {
   direction: 'asc' | 'desc';
 };
 
-const WorkoutTable: React.FC<WorkoutTableProps & {
-  weeklyChart?: any;
-  leaderboard?: any; 
-  todayCount?: any;
-  batchUserData?: any;
-  isLoading?: boolean;
-  error?: any;
-}> = ({ challengeId, weeklyChart, leaderboard, todayCount, batchUserData, isLoading = false, error }) => {
+const WorkoutTable: React.FC<
+  WorkoutTableProps & {
+    weeklyChart?: any;
+    leaderboard?: any;
+    todayCount?: any;
+    batchUserData?: any;
+    isLoading?: boolean;
+    error?: any;
+  }
+> = ({
+  challengeId,
+  weeklyChart,
+  leaderboard,
+  todayCount,
+  batchUserData,
+  isLoading = false,
+  error,
+}) => {
   const [workoutItems, setWorkoutItems] = useState<WorkoutItem[]>([]);
   const [weekInfo, setWeekInfo] = useState<WeekInfo[]>([]);
   const [hasMore, setHasMore] = useState(false);
@@ -120,7 +130,10 @@ const WorkoutTable: React.FC<WorkoutTableProps & {
   const [isMobile, setIsMobile] = useState(false);
   const [totalAchievements, setTotalAchievements] = useState(0);
   const [activeMembersPercent, setActiveMembersPercent] = useState(0);
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
+    key: '',
+    direction: 'asc',
+  });
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastRowRef = useRef(null);
   const router = useRouter();
@@ -165,7 +178,7 @@ const WorkoutTable: React.FC<WorkoutTableProps & {
       setActiveMembersPercent(calculateActiveMembersPercent(workoutData));
       setHasMore(false);
     } catch (error) {
-// console.error('운동 데이터 처리 실패:', error);
+      // console.error('운동 데이터 처리 실패:', error);
     }
   }, [weeklyChart, leaderboard, todayCount, batchUserData]);
 
@@ -194,7 +207,7 @@ const WorkoutTable: React.FC<WorkoutTableProps & {
 
       // 데이터 연결 확인을 위한 로그 (첫 번째 사용자만)
       if (user.id === users[0]?.id) {
-// console.log('첫 번째 사용자 데이터:', {
+        // console.log('첫 번째 사용자 데이터:', {
         //   userId: user.id,
         //   userName: user.name,
         //   weeklyRecordsCount: userStatsData.weeklyRecords?.length || 0,
@@ -233,7 +246,7 @@ const WorkoutTable: React.FC<WorkoutTableProps & {
           const recordEndDate = new Date(record.end_date);
 
           // W0의 경우 특별 처리: W0 기간과 실제로 겹치는 기록 찾기
-          if (week.weekNumber === 0) {
+          if (week.weekNumber === 1) {
             // W0 기간(월요일~일요일)과 record 기간이 겹치는지 확인
             const isW0Record =
               recordStartDate <= week.endDate &&
@@ -344,13 +357,13 @@ const WorkoutTable: React.FC<WorkoutTableProps & {
       }
 
       if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortConfig.direction === 'asc' 
+        return sortConfig.direction === 'asc'
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       }
 
       if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortConfig.direction === 'asc' 
+        return sortConfig.direction === 'asc'
           ? aValue - bValue
           : bValue - aValue;
       }
@@ -471,7 +484,7 @@ const WorkoutTable: React.FC<WorkoutTableProps & {
               <th className="w-[5%] p-3 text-left">
                 <div className="flex items-center justify-start gap-1">
                   <span className="text-sm">ID</span>
-                  <button 
+                  <button
                     onClick={() => handleSort('id')}
                     className="hover:opacity-75 transition-opacity"
                   >
@@ -482,7 +495,7 @@ const WorkoutTable: React.FC<WorkoutTableProps & {
               <th className="w-[10%] p-3 text-left">
                 <div className="flex items-center justify-start gap-1">
                   <span className="text-sm">이름</span>
-                  <button 
+                  <button
                     onClick={() => handleSort('name')}
                     className="hover:opacity-75 transition-opacity"
                   >
@@ -511,7 +524,7 @@ const WorkoutTable: React.FC<WorkoutTableProps & {
                         >
                           W{week.weekNumber}
                         </div>
-                        <button 
+                        <button
                           onClick={() => handleSort(`week-${index}`)}
                           className="hover:opacity-75 transition-opacity"
                         >
@@ -539,7 +552,9 @@ const WorkoutTable: React.FC<WorkoutTableProps & {
               return (
                 <tr
                   key={index}
-                  ref={index === sortedWorkoutItems.length - 1 ? lastRowRef : null}
+                  ref={
+                    index === sortedWorkoutItems.length - 1 ? lastRowRef : null
+                  }
                   className="border-b border-gray-200 hover:bg-[#F4F6FC]"
                 >
                   <td className="p-3 text-center text-gray-500">{index + 1}</td>

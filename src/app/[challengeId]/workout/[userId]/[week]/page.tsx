@@ -678,7 +678,7 @@ export default function MobileWorkoutDetail() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-2">
               <h1 className="sm:text-1.5-700 lg:text-1.75-700 font-bold text-gray-900 dark:text-white">
-                {fetchedUserName || userData.name}님의 W{weekNumberParam} 운동 현황
+                {fetchedUserName || userData.name}님의 W{currentWeekData.weekNumber || weekNumberParam} 운동 현황
               </h1>
             </div>
             
@@ -829,7 +829,7 @@ export default function MobileWorkoutDetail() {
                   }}
                   className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-blue-50 rounded-lg transition-all duration-200 shadow-sm hover:shadow border border-gray-200 hover:border-blue-200"
                 >
-                  <span className="font-medium text-gray-800">W{weekNumberParam}</span>
+                  <span className="font-medium text-gray-800">W{currentWeekData.weekNumber || weekNumberParam}</span>
                   <span className="text-xs text-gray-400">{currentWeekData.label}</span>
                   <svg
                     className={`w-4 h-4 transition-transform ${
@@ -903,7 +903,7 @@ export default function MobileWorkoutDetail() {
           {/* 타이틀 */}
           <div className="flex flex-col gap-2">
             <h1 className="sm:text-1.5-700 lg:text-1.75-700 font-bold text-gray-900 dark:text-white">
-              {fetchedUserName || userData.name}님의 W{weekNumberParam} 운동 현황
+              {fetchedUserName || userData.name}님의 W{currentWeekData.weekNumber || weekNumberParam} 운동 현황
             </h1>
           </div>
         </div>
@@ -1059,7 +1059,7 @@ export default function MobileWorkoutDetail() {
             >
               <div className="flex-1 text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <span className="font-semibold text-gray-800">W{weekNumberParam}</span>
+                  <span className="font-semibold text-gray-800">W{currentWeekData.weekNumber || weekNumberParam}</span>
                   <span className="text-xs text-gray-400">{currentWeekData.label}</span>
                 </div>
               </div>
@@ -1119,7 +1119,7 @@ export default function MobileWorkoutDetail() {
 
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="font-bold mb-4">
-              W{weekNumberParam} <span className="text-gray-500 font-normal">{currentWeekData.label}</span>
+              W{currentWeekData.weekNumber || weekNumberParam} <span className="text-gray-500 font-normal">{currentWeekData.label}</span>
             </div>
             {/* PC 버전과 모바일 버전 분리 - 3컬럼 레이아웃 */}
             <div className="sm:flex sm:flex-col sm:gap-6 lg:grid lg:grid-cols-3 lg:gap-6">

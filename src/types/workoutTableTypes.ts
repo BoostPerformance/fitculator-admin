@@ -75,6 +75,7 @@ export interface WeeklyChartData {
   users: {
     id: string;
     name: string;
+    username: string;
     strengthWorkoutCount: number;
   }[];
   weeks: {

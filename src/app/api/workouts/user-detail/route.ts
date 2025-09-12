@@ -136,22 +136,22 @@ async function getWeeklyChartData(
       });
     }
 
-    // 3. W0 주차 계산 - 챌린지 시작일이 포함된 주의 월요일부터
+    // 3. W1 주차 계산 - 챌린지 시작일이 포함된 주의 월요일부터
     const startDay = challengeStart.getDay(); // 0: 일요일, 1: 월요일, ..., 6: 토요일
-    let w0StartDate = new Date(challengeStart);
+    let w1StartDate = new Date(challengeStart);
     
     // 챌린지 시작일이 월요일(1)이 아니면 해당 주의 월요일로 이동
     if (startDay !== 1) {
       const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
-      w0StartDate.setDate(w0StartDate.getDate() - daysSinceMonday);
+      w1StartDate.setDate(w1StartDate.getDate() - daysSinceMonday);
     }
 
-    // 4. 주간 운동 기록 조회 (W0부터 챌린지 종료일까지)
+    // 4. 주간 운동 기록 조회 (W1부터 챌린지 종료일까지)
     const { data: weeklyRecords } = await supabase
       .from('workout_weekly_records')
       .select('*')
       .in('user_id', participantIds)
-      .gte('start_date', w0StartDate.toISOString().split('T')[0])
+      .gte('start_date', w1StartDate.toISOString().split('T')[0])
       .lte('end_date', challenge.end_date)
       .order('start_date', { ascending: true });
 
@@ -161,67 +161,87 @@ async function getWeeklyChartData(
       .select('id, name, username')
       .in('id', participantIds);
 
-    // 6. 주차별 데이터 구성
+    // 6. 먼저 전체 주차 구조를 생성 (W1부터 시작)
+    const allWeeks: any[] = [];
+    let currentWeekStart = new Date(w1StartDate);
+    let weekNumber = 1;
+
+    while (currentWeekStart <= challengeEnd) {
+      const currentWeekEnd = new Date(currentWeekStart);
+      currentWeekEnd.setDate(currentWeekEnd.getDate() + 6); // 일요일까지
+      
+      // 챌린지 종료일을 넘지 않도록 조정
+      const actualEnd = currentWeekEnd > challengeEnd ? challengeEnd : currentWeekEnd;
+      
+      const startDateStr = currentWeekStart.toISOString().split('T')[0];
+      const endDateStr = actualEnd.toISOString().split('T')[0];
+      
+      // 레이블 생성
+      const [startYear, startMonth, startDayStr] = startDateStr.split('-');
+      const [endYear, endMonth, endDayStr] = endDateStr.split('-');
+      const weekLabel = `${parseInt(startMonth)}.${parseInt(startDayStr)}-${parseInt(endMonth)}.${parseInt(endDayStr)}`;
+      
+      allWeeks.push({
+        weekNumber: `W${weekNumber}`,
+        weekLabel,
+        startDate: startDateStr,
+        endDate: endDateStr
+      });
+      
+      weekNumber++;
+      // 다음 주 월요일로 이동
+      currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    }
+
+    // 7. 주차별 데이터 구성
     const weekMap = new Map();
+    allWeeks.forEach(week => {
+      weekMap.set(week.weekNumber, week);
+    });
+
     const cardioData: any = [];
     const strengthData: any = [];
 
     weeklyRecords?.forEach((record) => {
-      const startDate = new Date(record.start_date);
-      const endDate = new Date(record.end_date);
+      const recordStartDate = new Date(record.start_date + 'T00:00:00Z');
       
-      // 주차 번호 계산 (W0부터 시작)
-      const weeksDiff = Math.floor((startDate.getTime() - w0StartDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
-      const weekNumber = `W${weeksDiff}`;
-      
-      // 주차 레이블 생성 (MM.DD-MM.DD 형식)
-      const startMonth = (startDate.getMonth() + 1).toString().padStart(2, '0');
-      const startDay = startDate.getDate().toString().padStart(2, '0');
-      const endMonth = (endDate.getMonth() + 1).toString().padStart(2, '0');
-      const endDay = endDate.getDate().toString().padStart(2, '0');
-      const weekLabel = `${startMonth}.${startDay}-${endMonth}.${endDay}`;
+      // 레코드가 속한 주차 찾기
+      const matchedWeek = allWeeks.find(week => {
+        const weekStart = new Date(week.startDate + 'T00:00:00Z');
+        const weekEnd = new Date(week.endDate + 'T23:59:59Z');
+        return recordStartDate >= weekStart && recordStartDate <= weekEnd;
+      });
 
-      if (!weekMap.has(weekNumber)) {
-        weekMap.set(weekNumber, {
-          weekNumber,
-          weekLabel,
-          startDate: record.start_date,
-          endDate: record.end_date
-        });
-      }
+      if (!matchedWeek) return; // 매칭되는 주차가 없으면 스킵
 
       const user = users?.find((u) => u.id === record.user_id);
       if (!user) return;
 
       // 유산소 운동 데이터
       cardioData.push({
-        weekNumber,
-        weekLabel,
+        weekNumber: matchedWeek.weekNumber,
+        weekLabel: matchedWeek.weekLabel,
         userId: user.id,
         user: user.name || user.username,
         points: Math.round(record.cardio_points_total || 0),
-        startDate: record.start_date,
-        endDate: record.end_date
+        startDate: matchedWeek.startDate,
+        endDate: matchedWeek.endDate
       });
 
       // 근력 운동 데이터
       strengthData.push({
-        weekNumber,
-        weekLabel,
+        weekNumber: matchedWeek.weekNumber,
+        weekLabel: matchedWeek.weekLabel,
         userId: user.id,
         user: user.name || user.username,
         sessions: record.strength_sessions_count || 0,
-        startDate: record.start_date,
-        endDate: record.end_date
+        startDate: matchedWeek.startDate,
+        endDate: matchedWeek.endDate
       });
     });
 
-    // 주차 순서대로 정렬
-    const sortedWeeks = Array.from(weekMap.values()).sort((a, b) => {
-      const weekA = parseInt(a.weekNumber.replace('W', ''));
-      const weekB = parseInt(b.weekNumber.replace('W', ''));
-      return weekA - weekB;
-    });
+    // 주차 순서대로 정렬 (이미 순서대로 생성되었지만 명시적으로)
+    const sortedWeeks = allWeeks;
 
     const usersWithCounts = users?.map((user) => {
       const totalStrengthSessions = weeklyRecords
@@ -605,25 +625,27 @@ async function getUserWorkoutData(
       .select('id, start_date, end_date, cardio_points_total, strength_sessions_count')
       .eq('user_id', userId);
 
-    let w0StartDate: Date | null = null;
+    let w1StartDate: Date | null = null;
     let challengeEnd: Date | null = null;
 
     if (challengeStartDate && challengeEndDate) {
-      // W0를 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
+      // W1을 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
       const challengeStart = new Date(challengeStartDate);
       const startDay = challengeStart.getDay();
       
       // 챌린지 시작일이 포함된 주의 월요일 계산
-      w0StartDate = new Date(challengeStart);
+      w1StartDate = new Date(challengeStart);
       if (startDay !== 1) {
         const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
-        w0StartDate.setDate(w0StartDate.getDate() - daysSinceMonday);
+        w1StartDate.setDate(w1StartDate.getDate() - daysSinceMonday);
       }
       
       challengeEnd = new Date(challengeEndDate);
       
+      // 7.28-8.3 레코드를 포함하도록 쿼리 수정
+      // start_date가 W1 월요일 이후이거나, end_date가 W1 월요일 이후인 모든 레코드
       query = query
-        .gte('start_date', w0StartDate.toISOString().split('T')[0])
+        .gte('end_date', w1StartDate.toISOString().split('T')[0])
         .lte('end_date', challengeEndDate);
     }
 
@@ -631,6 +653,7 @@ async function getUserWorkoutData(
       'start_date',
       { ascending: true }
     );
+
 
     if (weeklyError) {
 // console.error('Error fetching weekly records:', weeklyError);
@@ -640,21 +663,44 @@ async function getUserWorkoutData(
       );
     }
 
-    // 🆕 누락된 주간 레코드 자동 생성 로직
-    if (challengeId && w0StartDate && challengeEnd) {
-      await ensureWeeklyRecords(userId, challengeId, w0StartDate, challengeEnd, weeklyRecords || []);
+    // 🆕 누락된 주간 레코드 자동 생성 로직 (일시적으로 비활성화 - 중복 문제 해결)
+    // if (challengeId && w1StartDate && challengeEnd) {
+    //   await ensureWeeklyRecords(userId, challengeId, w1StartDate, challengeEnd, weeklyRecords || []);
       
-      // 레코드 재조회 (새로 생성된 레코드 포함)
-      const { data: updatedRecords, error: updateError } = await query.order('start_date', { ascending: true });
-      if (!updateError && updatedRecords && weeklyRecords) {
-        // 기존 weeklyRecords를 완전히 교체
-        weeklyRecords.splice(0, weeklyRecords.length, ...updatedRecords);
+    //   // 레코드 재조회 (새로 생성된 레코드 포함)
+    //   const { data: updatedRecords, error: updateError } = await query.order('start_date', { ascending: true });
+    //   if (!updateError && updatedRecords && weeklyRecords) {
+    //     // 기존 weeklyRecords를 완전히 교체
+    //     weeklyRecords.splice(0, weeklyRecords.length, ...updatedRecords);
+    //   }
+    // }
+
+    // 중복 레코드 제거 - 같은 사용자의 같은 주차에 대해 첫 번째 레코드만 사용
+    const uniqueWeeklyRecords = [];
+    const seenWeeks = new Map<string, boolean>(); // userId-weekStartDate로 체크
+    
+    if (weeklyRecords) {
+      for (const record of weeklyRecords) {
+        // 주의 시작일(월요일)을 기준으로 중복 체크
+        const recordStart = new Date(record.start_date + 'T00:00:00Z');
+        const recordDay = recordStart.getDay();
+        let weekMonday = new Date(recordStart);
+        if (recordDay !== 1) {
+          const daysSinceMonday = recordDay === 0 ? 6 : recordDay - 1;
+          weekMonday.setDate(weekMonday.getDate() - daysSinceMonday);
+        }
+        const weekKey = `${userId}-${weekMonday.toISOString().split('T')[0]}`;
+        
+        if (!seenWeeks.has(weekKey)) {
+          seenWeeks.set(weekKey, true);
+          uniqueWeeklyRecords.push(record);
+        }
       }
     }
 
     const weeklyRecordsWithFeedback = [];
 
-    for (const record of weeklyRecords) {
+    for (const record of uniqueWeeklyRecords) {
       const { data: feedback, error: feedbackError } = await supabase
         .from('workout_feedbacks')
         .select(
@@ -700,13 +746,28 @@ async function getUserWorkoutData(
       // Calculate weekNumber based on challenge start date
       let weekNumber = 1;
       if (challengeStartDate) {
-        const recordStart = new Date(record.start_date);
-        const challengeStart = new Date(challengeStartDate);
-        const diffTime = Math.abs(
-          recordStart.getTime() - challengeStart.getTime()
-        );
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        weekNumber = Math.floor(diffDays / 7) + 1;
+        const recordStart = new Date(record.start_date + 'T00:00:00Z');
+        const challengeStart = new Date(challengeStartDate + 'T00:00:00Z');
+        
+        // 챌린지 시작일이 속한 주의 월요일 계산
+        const startDay = challengeStart.getDay();
+        let firstWeekMonday = new Date(challengeStart);
+        if (startDay !== 1) {
+          const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
+          firstWeekMonday.setDate(firstWeekMonday.getDate() - daysSinceMonday);
+        }
+        
+        // 현재 레코드가 속한 주의 월요일 계산
+        const recordDay = recordStart.getDay();
+        let recordWeekMonday = new Date(recordStart);
+        if (recordDay !== 1) {
+          const daysSinceMonday = recordDay === 0 ? 6 : recordDay - 1;
+          recordWeekMonday.setDate(recordWeekMonday.getDate() - daysSinceMonday);
+        }
+        
+        const timeDiff = recordWeekMonday.getTime() - firstWeekMonday.getTime();
+        const weeksDiff = Math.floor(timeDiff / (7 * 24 * 60 * 60 * 1000));
+        weekNumber = weeksDiff + 1; // W1부터 시작
       }
 
       // workout_weekly_records 테이블의 실제 계산된 값 사용
@@ -822,19 +883,19 @@ async function getBatchUserWorkoutData(
         .eq('user_id', user.id);
 
       if (challengeStartDate && challengeEndDate) {
-        // W0를 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
+        // W1을 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
         const challengeStart = new Date(challengeStartDate);
         const startDay = challengeStart.getDay();
         
         // 챌린지 시작일이 포함된 주의 월요일 계산
-        let w0StartDate = new Date(challengeStart);
+        let w1StartDate = new Date(challengeStart);
         if (startDay !== 1) {
           const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
-          w0StartDate.setDate(w0StartDate.getDate() - daysSinceMonday);
+          w1StartDate.setDate(w1StartDate.getDate() - daysSinceMonday);
         }
         
         query = query
-          .gte('start_date', w0StartDate.toISOString().split('T')[0])
+          .gte('start_date', w1StartDate.toISOString().split('T')[0])
           .lte('end_date', challengeEndDate);
       }
 
@@ -842,9 +903,31 @@ async function getBatchUserWorkoutData(
         ascending: true,
       });
 
+      // 중복 레코드 제거
+      const uniqueWeeklyRecords = [];
+      const seenWeeks = new Map<string, boolean>();
+      
+      if (weeklyRecords) {
+        for (const record of weeklyRecords) {
+          const recordStart = new Date(record.start_date + 'T00:00:00Z');
+          const recordDay = recordStart.getDay();
+          let weekMonday = new Date(recordStart);
+          if (recordDay !== 1) {
+            const daysSinceMonday = recordDay === 0 ? 6 : recordDay - 1;
+            weekMonday.setDate(weekMonday.getDate() - daysSinceMonday);
+          }
+          const weekKey = `${user.id}-${weekMonday.toISOString().split('T')[0]}`;
+          
+          if (!seenWeeks.has(weekKey)) {
+            seenWeeks.set(weekKey, true);
+            uniqueWeeklyRecords.push(record);
+          }
+        }
+      }
+
       // 각 주간 기록에 피드백 정보 추가
       const weeklyRecordsWithFeedback = [];
-      for (const record of weeklyRecords || []) {
+      for (const record of uniqueWeeklyRecords) {
         const { data: feedback } = await supabase
           .from('workout_feedbacks')
           .select('id, ai_feedback, coach_feedback, coach_memo, coach_id, created_at')
@@ -882,12 +965,12 @@ async function getBatchUserWorkoutData(
         });
       }
 
-      const totalCardioPoints = weeklyRecords?.reduce(
+      const totalCardioPoints = uniqueWeeklyRecords.reduce(
         (sum, record) => sum + (record.cardio_points_total || 0),
         0
-      ) || 0;
+      );
 
-      const totalStrengthSessions = weeklyRecords?.reduce(
+      const totalStrengthSessions = uniqueWeeklyRecords.reduce(
         (sum, record) => sum + (record.strength_sessions_count || 0),
         0
       ) || 0;
@@ -901,7 +984,7 @@ async function getBatchUserWorkoutData(
         },
         weeklyRecords: weeklyRecordsWithFeedback,
         stats: {
-          totalWeeks: weeklyRecords?.length || 0,
+          totalWeeks: uniqueWeeklyRecords.length,
           totalCardioPoints,
           totalStrengthSessions,
         },
