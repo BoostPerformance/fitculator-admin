@@ -121,9 +121,9 @@ export default function MobileWorkoutDetail() {
   }, [userData, weekNumberParam]);
 
   useEffect(() => {
-    // weekLabelParam을 사용하여 정확한 주차 데이터 찾기
+    // weekNumber로 정확한 주차 데이터 찾기
     const currentWeek = userData?.weeklyWorkouts?.find(
-      week => week.label === weekLabelParam
+      week => week.weekNumber === weekNumberParam
     );
     
     const weeklyRecordId = currentWeek?.recordId;
@@ -438,11 +438,13 @@ export default function MobileWorkoutDetail() {
   if (!userData)
     return <div>사용자 데이터를 불러오는 중 오류가 발생했습니다.</div>;
 
+  // weekNumber로 찾기 (URL의 week 파라미터 사용)
   const currentWeekData = userData.weeklyWorkouts.find(
-    (week) => week.label === weekLabelParam
+    (week) => week.weekNumber === weekNumberParam
   ) || {
     recordId: '',
     label: weekLabelParam || '데이터 없음',
+    weekNumber: weekNumberParam,
     dailyWorkouts: [
       { day: '월', value: 0, status: 'incomplete', hasStrength: false, strengthCount: 0 },
       { day: '화', value: 0, status: 'incomplete', hasStrength: false, strengthCount: 0 },
