@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import Image from 'next/image';
 import Title from '@/components/layout/title';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 // Supabase 클라이언트 초기화
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -63,6 +64,8 @@ export default function ChallengeDetail({
   const [isAddingParticipant, setIsAddingParticipant] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isDeletingParticipant, setIsDeletingParticipant] = useState(false);
+  const [sortBy, setSortBy] = useState<'email' | 'name' | 'username' | 'created_at'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const router = useRouter();
 
   // 챌린지 정보 가져오기
@@ -125,7 +128,7 @@ export default function ChallengeDetail({
     const fetchParticipants = async () => {
       try {
         const response = await fetch(
-          `/api/challenge-participants?challenge_id=${challengeId}`
+          `/api/challenge-participants?challenge_id=${challengeId}&limit=1000`
         );
         if (response.ok) {
           const data = await response.json();
@@ -444,6 +447,50 @@ export default function ChallengeDetail({
         return '알 수 없음';
     }
   };
+
+  // 정렬 핸들러
+  const handleSort = (field: 'email' | 'name' | 'username' | 'created_at') => {
+    if (sortBy === field) {
+      // 같은 필드를 클릭하면 정렬 순서 변경
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // 다른 필드를 클릭하면 해당 필드로 오름차순 정렬
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  // 정렬 아이콘 렌더링
+  const renderSortIcon = (field: 'email' | 'name' | 'username' | 'created_at') => {
+    if (sortBy !== field) {
+      return <ArrowUpDown className="ml-2 h-4 w-4" />;
+    }
+    return sortOrder === 'asc' ? (
+      <ArrowUp className="ml-2 h-4 w-4" />
+    ) : (
+      <ArrowDown className="ml-2 h-4 w-4" />
+    );
+  };
+
+  // 정렬된 참가자 목록
+  const sortedParticipants = [...participants].sort((a, b) => {
+    let aValue = a[sortBy] || '';
+    let bValue = b[sortBy] || '';
+
+    // 날짜 비교
+    if (sortBy === 'created_at') {
+      aValue = new Date(aValue).getTime();
+      bValue = new Date(bValue).getTime();
+    } else {
+      // 문자열 비교 (대소문자 구분 없이)
+      aValue = String(aValue).toLowerCase();
+      bValue = String(bValue).toLowerCase();
+    }
+
+    if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   if (isLoading) {
     return (
@@ -787,25 +834,54 @@ export default function ChallengeDetail({
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                       >
-                        이메일
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                       >
-                        이름
+                        <button
+                          onClick={() => handleSort('email')}
+                          className="flex items-center hover:text-gray-900 dark:hover:text-white transition-colors"
+                        >
+                          이메일
+                          {renderSortIcon('email')}
+                        </button>
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                       >
-                        닉네임
+                        <button
+                          onClick={() => handleSort('name')}
+                          className="flex items-center hover:text-gray-900 dark:hover:text-white transition-colors"
+                        >
+                          이름
+                          {renderSortIcon('name')}
+                        </button>
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                       >
-                        등록일
+                        <button
+                          onClick={() => handleSort('username')}
+                          className="flex items-center hover:text-gray-900 dark:hover:text-white transition-colors"
+                        >
+                          닉네임
+                          {renderSortIcon('username')}
+                        </button>
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                      >
+                        <button
+                          onClick={() => handleSort('created_at')}
+                          className="flex items-center hover:text-gray-900 dark:hover:text-white transition-colors"
+                        >
+                          등록일
+                          {renderSortIcon('created_at')}
+                        </button>
                       </th>
                       <th
                         scope="col"
@@ -816,8 +892,11 @@ export default function ChallengeDetail({
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-blue-4 divide-y divide-gray-200 dark:divide-blue-2">
-                    {participants.map((participant) => (
+                    {sortedParticipants.map((participant, index) => (
                       <tr key={participant.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                          {index + 1}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                           {participant.email}
                         </td>
