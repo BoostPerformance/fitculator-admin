@@ -74,30 +74,39 @@ function ChallengeLayoutContent({
   return (
     <div className="relative">
       <div className="absolute right-8 top-4 z-50 hidden lg:flex md:hidden items-center gap-2">
-        <div className={`text-gray-500 text-sm whitespace-nowrap ${isLoading ? 'animate-pulse' : ''}`}>
+        <div className={`text-gray-800 dark:text-white text-sm whitespace-nowrap ${isLoading ? 'animate-pulse' : ''}`}>
           안녕하세요, {displayUsername} !
         </div>
         <button
           onClick={() => setUserDropdown(!userDropdown)}
           className="flex items-center"
         >
-          <Image
-            src="/svg/arrow-down.svg"
-            width={20}
-            height={20}
-            alt="arrow-down"
-            className="w-[0.8rem]"
-          />
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            className="text-gray-800 dark:text-white transition-transform duration-300 ease-in-out"
+            style={{ transform: userDropdown ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          >
+            <path
+              d="M2 4L6 8L10 4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
         {userDropdown && (
-          <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-md py-2 z-50 min-w-[120px]">
+          <div className="absolute right-0 top-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg overflow-hidden z-50 min-w-[120px] animate-in fade-in-0 zoom-in-95">
             <button
               onClick={() => {
                 setEditUsernameModal(true);
                 setUserDropdown(false);
               }}
               disabled={isLoading || !hasData}
-              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative flex w-full cursor-pointer select-none items-center px-3 py-2 text-sm outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent dark:disabled:hover:bg-transparent"
             >
               이름 수정
             </button>
@@ -113,7 +122,7 @@ function ChallengeLayoutContent({
           selectedChallengeId={selectedChallengeId}
           username={displayUsername}
         />
-        <main className="flex-1 px-[1rem] py-[1.25rem] sm:px-0 sm:py-0 bg-white-1 dark:bg-blue-4">
+        <main id="main-content" className="flex-1 px-[1rem] py-[1.25rem] sm:px-0 sm:py-0 bg-white-1 dark:bg-blue-4" tabIndex={-1}>
           {children}
         </main>
       </div>
