@@ -22,7 +22,10 @@ export async function GET(
 
     const { data: announcement, error } = await supabase
       .from('challenge_announcement')
-      .select('*')
+      .select(`
+        *,
+        challenge_announcement_target_groups(group_id)
+      `)
       .eq('id', params.id)
       .single();
 
@@ -78,7 +81,8 @@ export async function PUT(
       priority,
       start_date,
       end_date,
-      target_audience
+      target_audience,
+      target_group_ids
     } = body;
 
     // 타입 검증
@@ -124,6 +128,30 @@ export async function PUT(
 
     if (error) {
       throw error;
+    }
+
+    // 타겟 그룹 업데이트 (기존 삭제 후 새로 추가)
+    // 먼저 기존 타겟 그룹 삭제
+    await supabase
+      .from('challenge_announcement_target_groups')
+      .delete()
+      .eq('announcement_id', params.id);
+
+    // 새로운 타겟 그룹 추가 (target_group_ids가 있는 경우에만)
+    if (target_group_ids && Array.isArray(target_group_ids) && target_group_ids.length > 0) {
+      const targetGroupInserts = target_group_ids.map((groupId: string) => ({
+        announcement_id: params.id,
+        group_id: groupId
+      }));
+
+      const { error: targetGroupError } = await supabase
+        .from('challenge_announcement_target_groups')
+        .insert(targetGroupInserts);
+
+      if (targetGroupError) {
+        console.error('Error updating target groups:', targetGroupError);
+        // 공지사항은 이미 수정되었으므로 경고만 로깅
+      }
     }
 
     return NextResponse.json(announcement);

@@ -82,7 +82,8 @@ export async function POST(request: Request) {
       start_date,
       end_date,
       target_audience = 'all',
-      challenge_id
+      challenge_id,
+      target_group_ids
     } = body;
 
     // 타입 검증
@@ -134,13 +135,30 @@ export async function POST(request: Request) {
         code: error.code
       });
       return NextResponse.json(
-        { 
-          error: 'Failed to create announcement', 
+        {
+          error: 'Failed to create announcement',
           details: error.message,
-          code: error.code 
-        }, 
+          code: error.code
+        },
         { status: 500 }
       );
+    }
+
+    // 타겟 그룹 저장 (target_group_ids가 있는 경우에만)
+    if (target_group_ids && Array.isArray(target_group_ids) && target_group_ids.length > 0) {
+      const targetGroupInserts = target_group_ids.map((groupId: string) => ({
+        announcement_id: announcement.id,
+        group_id: groupId
+      }));
+
+      const { error: targetGroupError } = await supabase
+        .from('challenge_announcement_target_groups')
+        .insert(targetGroupInserts);
+
+      if (targetGroupError) {
+        console.error('Error inserting target groups:', targetGroupError);
+        // 공지사항은 이미 생성되었으므로 경고만 로깅
+      }
     }
 
     return NextResponse.json(announcement);

@@ -39,6 +39,15 @@ interface Announcement {
   start_date?: string;
   end_date?: string;
   target_audience: 'all' | 'beginner' | 'intermediate' | 'advanced';
+  challenge_announcement_target_groups?: { group_id: string }[];
+}
+
+interface ChallengeGroup {
+  id: string;
+  name: string;
+  description?: string;
+  color_code?: string;
+  sort_order: number;
 }
 
 // 약어 입력 컴포넌트
@@ -98,6 +107,8 @@ export default function EditAnnouncementPage() {
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [challengeGroups, setChallengeGroups] = useState<ChallengeGroup[]>([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]); // 빈 배열 = 전체 공지
   const [formData, setFormData] = useState({
     title: '',
     type: 'general' as 'general' | 'workout_schedule',
@@ -111,6 +122,42 @@ export default function EditAnnouncementPage() {
   const [workoutSchedule, setWorkoutSchedule] = useState<WorkoutScheduleData | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [originalData, setOriginalData] = useState<any>(null);
+
+  // 챌린지 그룹 목록 가져오기
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const response = await fetch(`/api/challenge-groups?challenge_id=${challengeId}`);
+        if (response.ok) {
+          const result = await response.json();
+          // API가 { data: [...] } 형태로 반환
+          const groups = result.data || result;
+          if (Array.isArray(groups)) {
+            setChallengeGroups(groups.sort((a: ChallengeGroup, b: ChallengeGroup) => a.sort_order - b.sort_order));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch challenge groups:', error);
+      }
+    };
+    fetchGroups();
+  }, [challengeId]);
+
+  // 그룹 선택/해제 토글
+  const toggleGroupSelection = (groupId: string) => {
+    setSelectedGroupIds(prev => {
+      if (prev.includes(groupId)) {
+        return prev.filter(id => id !== groupId);
+      } else {
+        return [...prev, groupId];
+      }
+    });
+  };
+
+  // 전체 선택 (모든 그룹 선택 해제 = 전체 공지)
+  const selectAllGroups = () => {
+    setSelectedGroupIds([]);
+  };
 
   useEffect(() => {
     fetchAnnouncement();
@@ -327,11 +374,19 @@ export default function EditAnnouncementPage() {
       };
 
       setFormData(formDataObj);
-      
+
+      // 타겟 그룹 데이터 설정
+      if (data.challenge_announcement_target_groups && data.challenge_announcement_target_groups.length > 0) {
+        setSelectedGroupIds(data.challenge_announcement_target_groups.map(tg => tg.group_id));
+      } else {
+        setSelectedGroupIds([]);
+      }
+
       // 원본 데이터 저장 (변경사항 감지용)
       setOriginalData({
         ...formDataObj,
-        workoutSchedule: workoutSchedule ? JSON.parse(JSON.stringify(workoutSchedule)) : null
+        workoutSchedule: workoutSchedule ? JSON.parse(JSON.stringify(workoutSchedule)) : null,
+        selectedGroupIds: data.challenge_announcement_target_groups?.map((tg: any) => tg.group_id) || []
       });
     } catch (error) {
       console.error('Error fetching announcement:', error);
@@ -438,7 +493,8 @@ export default function EditAnnouncementPage() {
         },
         body: JSON.stringify({
           ...formData,
-          content: processedContent
+          content: processedContent,
+          target_group_ids: selectedGroupIds.length > 0 ? selectedGroupIds : null
         }),
       });
 
@@ -547,13 +603,62 @@ export default function EditAnnouncementPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 대상 그룹
               </label>
-              <select
-                value={formData.target_audience}
-                onChange={(e) => setFormData({ ...formData, target_audience: e.target.value as any })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">전체</option>
-              </select>
+              {challengeGroups.length === 0 ? (
+                <p className="text-sm text-gray-500">그룹이 없습니다. 전체 공지로 발송됩니다.</p>
+              ) : (
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="targetGroup"
+                      checked={selectedGroupIds.length === 0}
+                      onChange={selectAllGroups}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">전체 (모든 그룹)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="targetGroup"
+                      checked={selectedGroupIds.length > 0}
+                      onChange={() => {
+                        if (selectedGroupIds.length === 0 && challengeGroups.length > 0) {
+                          setSelectedGroupIds([challengeGroups[0].id]);
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">특정 그룹 선택</span>
+                  </label>
+                  {selectedGroupIds.length > 0 && (
+                    <div className="ml-6 space-y-2 border-l-2 border-gray-200 pl-4">
+                      {challengeGroups.map((group) => (
+                        <label key={group.id} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedGroupIds.includes(group.id)}
+                            onChange={() => toggleGroupSelection(group.id)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span
+                            className="text-sm text-gray-700"
+                            style={{
+                              borderLeft: group.color_code ? `3px solid ${group.color_code}` : undefined,
+                              paddingLeft: group.color_code ? '8px' : undefined
+                            }}
+                          >
+                            {group.name}
+                          </span>
+                        </label>
+                      ))}
+                      <p className="text-xs text-blue-600 mt-1">
+                        선택된 {selectedGroupIds.length}개 그룹에만 공지가 표시됩니다.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -726,12 +831,12 @@ export default function EditAnnouncementPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       안전 주의사항
                     </label>
-                    <input
-                      type="text"
+                    <textarea
                       value={workoutSchedule.notes?.safety || ''}
                       onChange={(e) => updateNotes('safety', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="⚠️ 운동 전 충분한 워밍업 필수. 무리하지 마세요."
+                      rows={3}
                     />
                   </div>
 
@@ -739,12 +844,12 @@ export default function EditAnnouncementPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       일반 안내사항
                     </label>
-                    <input
-                      type="text"
+                    <textarea
                       value={workoutSchedule.notes?.general || ''}
                       onChange={(e) => updateNotes('general', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="💡 운동 후 쿨다운과 수분 섭취를 잊지 마세요."
+                      rows={3}
                     />
                   </div>
 
