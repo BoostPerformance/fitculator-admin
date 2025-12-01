@@ -92,6 +92,8 @@ export default function ManageChallenges() {
         return '운동';
       case 'diet_and_exercise':
         return '식단 및 운동';
+      case 'running':
+        return '러닝';
       default:
         return '알 수 없음';
     }

@@ -208,6 +208,7 @@ export default function CreateChallenge() {
             <option value="diet">식단</option>
             <option value="exercise">운동</option>
             <option value="diet_and_exercise">식단 및 운동</option>
+            <option value="running">러닝</option>
           </select>
         </div>
 

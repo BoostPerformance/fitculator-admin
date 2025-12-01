@@ -443,6 +443,8 @@ export default function ChallengeDetail({
         return '운동';
       case 'diet_and_exercise':
         return '식단 및 운동';
+      case 'running':
+        return '러닝';
       default:
         return '알 수 없음';
     }
@@ -623,6 +625,7 @@ export default function ChallengeDetail({
                 <option value="diet">식단</option>
                 <option value="exercise">운동</option>
                 <option value="diet_and_exercise">식단 및 운동</option>
+                <option value="running">러닝</option>
               </select>
             </div>
 
