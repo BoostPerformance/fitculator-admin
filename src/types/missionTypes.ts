@@ -11,6 +11,15 @@ export interface ChallengeMission {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  challenge_mission_target_groups?: { group_id: string }[];
+}
+
+export interface ChallengeGroup {
+  id: string;
+  name: string;
+  description?: string;
+  color_code?: string;
+  sort_order: number;
 }
 
 export interface MissionCompletion {
