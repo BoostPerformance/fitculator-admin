@@ -95,6 +95,11 @@ export default function MissionsPage() {
   const [viewingCompletionUser, setViewingCompletionUser] = useState<string>('');
   const [viewingCompletionMission, setViewingCompletionMission] = useState<string>('');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -228,7 +233,7 @@ export default function MissionsPage() {
       // 미션 가져오기
       const missionsResponse = await fetch(`/api/missions?challengeId=${challengeId}`);
       const missionsData = await missionsResponse.json();
-      setMissions(missionsData || []);
+      setMissions(Array.isArray(missionsData) ? missionsData : []);
 
       // 챌린지 참가자 가져오기 (페이지네이션 없이 전체 가져오기)
       const participantsResponse = await fetch(`/api/challenge-participants?challenge_id=${challengeId}&limit=1000`);
@@ -541,7 +546,7 @@ export default function MissionsPage() {
   return (
     <div className="flex-1 p-4 overflow-x-hidden">
       <div className="px-8 pt-4 sm:px-4 sm:pt-4">
-        {currentChallenge && (
+        {currentChallenge && isMounted && (
           <div className="text-0.875-400 text-gray-6 mb-2">
             {new Date(currentChallenge.challenges.start_date).toLocaleDateString('ko-KR', {
               year: 'numeric',
@@ -638,7 +643,7 @@ export default function MissionsPage() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 sm:px-3 sm:py-2 sm:text-[10px]">
                     <div className="text-xs sm:text-[9px]">
-                      {new Date(mission.start_date).toLocaleDateString()} ~ {new Date(mission.end_date).toLocaleDateString()}
+                      {isMounted && `${new Date(mission.start_date).toLocaleDateString()} ~ ${new Date(mission.end_date).toLocaleDateString()}`}
                     </div>
                   </td>
                   <td className="px-6 py-4 sm:px-3 sm:py-2">
@@ -922,11 +927,11 @@ export default function MissionsPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">시작일</label>
-                      <p className="text-sm">{new Date(viewingMission.start_date).toLocaleDateString('ko-KR')}</p>
+                      <p className="text-sm">{isMounted && new Date(viewingMission.start_date).toLocaleDateString('ko-KR')}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">종료일</label>
-                      <p className="text-sm">{new Date(viewingMission.end_date).toLocaleDateString('ko-KR')}</p>
+                      <p className="text-sm">{isMounted && new Date(viewingMission.end_date).toLocaleDateString('ko-KR')}</p>
                     </div>
                   </div>
 
@@ -1264,11 +1269,11 @@ export default function MissionsPage() {
                               </td>
                               <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                                 <div>
-                                  <div>{new Date(workout.start_time).toLocaleDateString('ko-KR')}</div>
+                                  <div>{isMounted && new Date(workout.start_time).toLocaleDateString('ko-KR')}</div>
                                   <div className="text-xs text-gray-400">
-                                    {new Date(workout.start_time).toLocaleTimeString('ko-KR', { 
-                                      hour: '2-digit', 
-                                      minute: '2-digit' 
+                                    {isMounted && new Date(workout.start_time).toLocaleTimeString('ko-KR', {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
                                     })}
                                   </div>
                                 </div>
@@ -1402,7 +1407,7 @@ export default function MissionsPage() {
                         })
                         .map(mission => (
                           <option key={mission.id} value={mission.id}>
-                            {mission.title} ({new Date(mission.start_date).toLocaleDateString()} ~ {new Date(mission.end_date).toLocaleDateString()})
+                            {mission.title} ({isMounted ? `${new Date(mission.start_date).toLocaleDateString()} ~ ${new Date(mission.end_date).toLocaleDateString()}` : ''})
                           </option>
                         ))}
                     </select>
@@ -1498,9 +1503,8 @@ export default function MissionsPage() {
                     </h3>
                     <div className="mb-2 text-sm text-gray-600">
                       선택된 미션 기간: {
-                        missions.find(m => m.id === selectedMission) &&
-                        `${new Date(missions.find(m => m.id === selectedMission)!.start_date).toLocaleDateString('ko-KR')} ~ 
-                         ${new Date(missions.find(m => m.id === selectedMission)!.end_date).toLocaleDateString('ko-KR')}`
+                        isMounted && missions.find(m => m.id === selectedMission) &&
+                        `${new Date(missions.find(m => m.id === selectedMission)!.start_date).toLocaleDateString('ko-KR')} ~ ${new Date(missions.find(m => m.id === selectedMission)!.end_date).toLocaleDateString('ko-KR')}`
                       }
                     </div>
                     <div className="border rounded-lg max-h-96 overflow-y-auto">
@@ -1551,7 +1555,7 @@ export default function MissionsPage() {
                                 )}
                               </div>
                               <div className="text-sm text-gray-500 mt-1">
-                                {new Date(workout.start_time).toLocaleString('ko-KR')}
+                                {isMounted && new Date(workout.start_time).toLocaleString('ko-KR')}
                                 {workout.duration_minutes && ` • ${workout.duration_minutes}분`}
                                 {workout.points && ` • ${workout.points}점`}
                               </div>
