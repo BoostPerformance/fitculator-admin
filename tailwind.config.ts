@@ -48,7 +48,7 @@ const config: Config = {
   				'1': '#625C5C',
   				'2': '#8D8D8D',
   				'3': '#D9D9D9',
-  				'4': '#A3AAAD;',
+  				'4': '#A3AAAD',
   				'5': '#5E5A5A',
   				'6': '#686868',
   				'7': '#9E9E9E',
@@ -64,7 +64,7 @@ const config: Config = {
   				DEFAULT: '#DD204E'
   			},
   			white: {
-  				'1': '#F9FAFF;',
+  				'1': '#F9FAFF',
   				DEFAULT: '#FFFFFF'
   			}
   		},
