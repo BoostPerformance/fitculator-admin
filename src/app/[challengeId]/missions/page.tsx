@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { ChallengeMission, MissionCompletion } from '@/types/missionTypes';
+import { ChallengeMission, MissionCompletion, ChallengeGroup } from '@/types/missionTypes';
 import { useChallenge } from '@/components/hooks/useChallenges';
 import Title from '@/components/layout/title';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -69,6 +69,8 @@ export default function MissionsPage() {
     requires_verification: false,
     sort_order: 0
   });
+  const [challengeGroups, setChallengeGroups] = useState<ChallengeGroup[]>([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
 
   // 달성 현황 상태
   const [users, setUsers] = useState<UserWithCompletions[]>([]);
@@ -96,7 +98,34 @@ export default function MissionsPage() {
 
   useEffect(() => {
     fetchData();
+    fetchChallengeGroups();
   }, [challengeId]);
+
+  const fetchChallengeGroups = async () => {
+    try {
+      const response = await fetch(`/api/challenge-groups?challenge_id=${challengeId}`);
+      const result = await response.json();
+      const groups = result.data || result;
+      if (Array.isArray(groups)) {
+        setChallengeGroups(groups.sort((a: ChallengeGroup, b: ChallengeGroup) => a.sort_order - b.sort_order));
+      }
+    } catch (error) {
+      console.error('Error fetching challenge groups:', error);
+    }
+  };
+
+  const toggleGroupSelection = (groupId: string) => {
+    setSelectedGroupIds(prev => {
+      if (prev.includes(groupId)) {
+        if (prev.length === 1) {
+          return prev;
+        }
+        return prev.filter(id => id !== groupId);
+      } else {
+        return [...prev, groupId];
+      }
+    });
+  };
 
   // 활성 미션만 기본 선택
   useEffect(() => {
@@ -411,13 +440,13 @@ export default function MissionsPage() {
   // 미션 관리 함수들
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const url = '/api/missions';
       const method = editingMission ? 'PUT' : 'POST';
-      const body = editingMission 
-        ? { id: editingMission.id, ...formData }
-        : { challenge_id: challengeId, ...formData };
+      const body = editingMission
+        ? { id: editingMission.id, ...formData, target_group_ids: selectedGroupIds.length > 0 ? selectedGroupIds : null }
+        : { challenge_id: challengeId, ...formData, target_group_ids: selectedGroupIds.length > 0 ? selectedGroupIds : null };
 
       const response = await fetch(url, {
         method,
@@ -461,6 +490,12 @@ export default function MissionsPage() {
       requires_verification: mission.requires_verification,
       sort_order: mission.sort_order
     });
+    // 기존 타겟 그룹 설정
+    if (mission.challenge_mission_target_groups && mission.challenge_mission_target_groups.length > 0) {
+      setSelectedGroupIds(mission.challenge_mission_target_groups.map(tg => tg.group_id));
+    } else {
+      setSelectedGroupIds([]);
+    }
     setShowAddModal(true);
   };
 
@@ -475,6 +510,7 @@ export default function MissionsPage() {
       sort_order: 0
     });
     setEditingMission(null);
+    setSelectedGroupIds([]);
     setShowAddModal(false);
   };
 
@@ -1060,6 +1096,67 @@ export default function MissionsPage() {
                     검증 필요
                   </label>
                 </div>
+
+                {/* 타겟 그룹 선택 */}
+                {challengeGroups.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      대상 그룹
+                    </label>
+                    <div className="space-y-2">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          checked={selectedGroupIds.length === 0}
+                          onChange={() => setSelectedGroupIds([])}
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-700">전체 (모든 그룹)</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          checked={selectedGroupIds.length > 0}
+                          onChange={() => {
+                            if (selectedGroupIds.length === 0 && challengeGroups.length > 0) {
+                              setSelectedGroupIds([challengeGroups[0].id]);
+                            }
+                          }}
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-700">특정 그룹 선택</span>
+                      </label>
+                      {selectedGroupIds.length > 0 && (
+                        <div className="ml-6 mt-2 space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md p-2">
+                          {challengeGroups.map((group) => (
+                            <label key={group.id} className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={selectedGroupIds.includes(group.id)}
+                                onChange={() => toggleGroupSelection(group.id)}
+                                className="mr-2"
+                              />
+                              <span
+                                className="text-sm"
+                                style={{
+                                  borderLeft: group.color_code ? `3px solid ${group.color_code}` : undefined,
+                                  paddingLeft: group.color_code ? '8px' : undefined
+                                }}
+                              >
+                                {group.name}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                      {selectedGroupIds.length > 0 && (
+                        <p className="text-xs text-blue-600 ml-6">
+                          {selectedGroupIds.length}개 그룹에만 미션이 적용됩니다
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-2 pt-4">
                   <button
