@@ -29,7 +29,7 @@ export const useChallengeMembers = (challengeId: string) => {
       
       try {
         const res = await fetch(
-          `/api/challenge-participants?challenge_id=${challengeId}&limit=100`
+          `/api/challenge-participants?challenge_id=${challengeId}&limit=1000`
         );
         
         if (!res.ok) {

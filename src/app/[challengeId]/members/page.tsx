@@ -48,7 +48,7 @@ export default function MembersPage() {
   // 참가자 목록 가져오기
   const fetchParticipants = async () => {
     try {
-      const res = await fetch(`/api/challenge-participants?challenge_id=${challengeId}&limit=100`);
+      const res = await fetch(`/api/challenge-participants?challenge_id=${challengeId}&limit=1000`);
       const data = await res.json();
       
       if (data.data && data.data.length > 0) {
