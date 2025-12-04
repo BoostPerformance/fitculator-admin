@@ -608,10 +608,13 @@ export default function MissionsPage() {
                   <th className="w-10 px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sm:w-8 sm:px-1.5 sm:py-2 sm:text-[10px]">
                     #
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '40%' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '30%' }}>
                     제목
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '35%' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '20%' }}>
+                    그룹
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '30%' }}>
                     <button
                       onClick={handleSortToggle}
                       className="flex items-center gap-1 hover:text-gray-700"
@@ -622,7 +625,7 @@ export default function MissionsPage() {
                       </svg>
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '15%' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '10%' }}>
                     상태
                   </th>
                 </tr>
@@ -639,6 +642,30 @@ export default function MissionsPage() {
                   <td className="px-6 py-4 sm:px-3 sm:py-2">
                     <div className="text-sm font-medium text-gray-900 sm:text-[10px]">
                       {mission.title}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 sm:px-3 sm:py-2">
+                    <div className="flex flex-wrap gap-1">
+                      {mission.challenge_mission_target_groups && mission.challenge_mission_target_groups.length > 0 ? (
+                        mission.challenge_mission_target_groups.map((tg) => {
+                          const group = challengeGroups.find(g => g.id === tg.group_id);
+                          return group ? (
+                            <span
+                              key={tg.group_id}
+                              className="px-2 py-0.5 text-xs rounded-full sm:px-1.5 sm:text-[9px]"
+                              style={{
+                                backgroundColor: group.color_code ? `${group.color_code}20` : '#e5e7eb',
+                                color: group.color_code || '#374151',
+                                border: group.color_code ? `1px solid ${group.color_code}` : '1px solid #d1d5db'
+                              }}
+                            >
+                              {group.name}
+                            </span>
+                          ) : null;
+                        })
+                      ) : (
+                        <span className="text-xs text-gray-400 sm:text-[9px]">전체</span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 sm:px-3 sm:py-2 sm:text-[10px]">
