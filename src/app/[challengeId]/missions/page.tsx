@@ -991,8 +991,8 @@ export default function MissionsPage() {
         {/* 미션 추가/수정 모달 */}
         {showAddModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
-              <div className="flex justify-between items-start mb-4">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+              <div className="flex justify-between items-start mb-4 flex-shrink-0">
                 <h2 className="text-xl font-bold">
                   {editingMission ? '미션 수정' : '미션 추가'}
                 </h2>
@@ -1006,7 +1006,7 @@ export default function MissionsPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-1">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     제목 *
@@ -1163,22 +1163,25 @@ export default function MissionsPage() {
                   </div>
                 )}
 
-                <div className="flex justify-end gap-2 pt-4">
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                  >
-                    취소
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
-                    {editingMission ? '수정' : '추가'}
-                  </button>
-                </div>
               </form>
+
+              <div className="flex justify-end gap-2 pt-4 border-t mt-4 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  form="mission-form"
+                  onClick={handleSubmit as any}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  {editingMission ? '수정' : '추가'}
+                </button>
+              </div>
             </div>
           </div>
         )}
