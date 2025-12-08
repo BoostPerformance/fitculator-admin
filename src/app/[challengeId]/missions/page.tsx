@@ -12,6 +12,12 @@ interface UserWithCompletions {
   name: string;
   username: string;
   completions: { [missionId: string]: MissionCompletion };
+  group?: {
+    id: string;
+    name: string;
+    color_code: string;
+    sort_order: number;
+  };
 }
 
 interface User {
@@ -78,6 +84,8 @@ export default function MissionsPage() {
   const [memberSortOrder, setMemberSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedMissionIds, setSelectedMissionIds] = useState<Set<string>>(new Set());
   const [showMissionFilter, setShowMissionFilter] = useState(false);
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>(''); // group_id
+  const [selectedWeek, setSelectedWeek] = useState<number | 'all'>(1); // 주차 선택 (1~16 또는 'all')
 
   // 매핑 모달 상태
   const [showMappingModal, setShowMappingModal] = useState(false);
@@ -112,7 +120,12 @@ export default function MissionsPage() {
       const result = await response.json();
       const groups = result.data || result;
       if (Array.isArray(groups)) {
-        setChallengeGroups(groups.sort((a: ChallengeGroup, b: ChallengeGroup) => a.sort_order - b.sort_order));
+        const sortedGroups = groups.sort((a: ChallengeGroup, b: ChallengeGroup) => a.sort_order - b.sort_order);
+        setChallengeGroups(sortedGroups);
+        // 첫 번째 그룹을 기본 선택
+        if (sortedGroups.length > 0 && !selectedGroupFilter) {
+          setSelectedGroupFilter(sortedGroups[0].id);
+        }
       }
     } catch (error) {
       console.error('Error fetching challenge groups:', error);
@@ -155,9 +168,98 @@ export default function MissionsPage() {
     setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
   };
 
+  // 챌린지 시작일 기준 주차 계산
+  const getWeekRange = (weekNumber: number) => {
+    if (!currentChallenge) return null;
+
+    const challengeStart = new Date(currentChallenge.challenges.start_date);
+    challengeStart.setHours(0, 0, 0, 0);
+
+    const weekStart = new Date(challengeStart);
+    weekStart.setDate(challengeStart.getDate() + (weekNumber - 1) * 7);
+
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    return { start: weekStart, end: weekEnd };
+  };
+
+  // 현재 주차 계산 (오늘 날짜 기준)
+  const getCurrentWeekNumber = () => {
+    if (!currentChallenge) return 1;
+
+    const challengeStart = new Date(currentChallenge.challenges.start_date);
+    challengeStart.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.floor((today.getTime() - challengeStart.getTime()) / (1000 * 60 * 60 * 24));
+    const weekNumber = Math.floor(diffDays / 7) + 1;
+
+    // 1 ~ 총 주차 범위 내로 제한
+    return Math.max(1, Math.min(weekNumber, getTotalWeeks()));
+  };
+
+  // 총 주차 계산
+  const getTotalWeeks = () => {
+    if (!currentChallenge) return 16;
+
+    const start = new Date(currentChallenge.challenges.start_date);
+    const end = new Date(currentChallenge.challenges.end_date);
+    const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    return Math.ceil(diffDays / 7);
+  };
+
+  // 미션이 선택된 주차에 해당하는지 확인
+  const isInSelectedWeek = (mission: ChallengeMission) => {
+    if (selectedWeek === 'all') return true;
+
+    const weekRange = getWeekRange(selectedWeek);
+    if (!weekRange) return true;
+
+    const missionStart = new Date(mission.start_date);
+    const missionEnd = new Date(mission.end_date);
+
+    // 미션 기간이 선택된 주차와 겹치는지 확인
+    return missionStart <= weekRange.end && missionEnd >= weekRange.start;
+  };
+
+  // 컴포넌트 마운트 시 현재 주차로 설정
+  useEffect(() => {
+    if (currentChallenge && selectedWeek === 1) {
+      const currentWeek = getCurrentWeekNumber();
+      setSelectedWeek(currentWeek);
+    }
+  }, [currentChallenge]);
+
   // 선택된 미션들 (컬럼 순서: start_date 빠른순서, sort_order 작은 순서)
+  // 그룹 필터가 적용된 경우, 해당 그룹에 매핑된 미션만 표시
   const filteredMissions = missions
-    .filter(m => selectedMissionIds.has(m.id))
+    .filter(m => {
+      // 미션 필터에서 선택된 미션인지 확인
+      if (!selectedMissionIds.has(m.id)) return false;
+
+      // 주차 필터 적용
+      if (!isInSelectedWeek(m)) return false;
+
+      // 그룹 필터가 없으면 모든 미션 표시
+      if (!selectedGroupFilter) return true;
+
+      // '그룹 미지정' 선택 시 타겟 그룹이 없는 미션(전체 대상)만 표시
+      if (selectedGroupFilter === 'none') {
+        return !m.challenge_mission_target_groups || m.challenge_mission_target_groups.length === 0;
+      }
+
+      // 미션에 타겟 그룹이 지정되지 않은 경우 (전체 그룹 대상) 표시
+      if (!m.challenge_mission_target_groups || m.challenge_mission_target_groups.length === 0) {
+        return true;
+      }
+
+      // 선택된 그룹이 미션의 타겟 그룹에 포함되어 있는지 확인
+      return m.challenge_mission_target_groups.some(tg => tg.group_id === selectedGroupFilter);
+    })
     .sort((a, b) => {
       // start_date 빠른 순서 (asc)
       const dateCompare = new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
@@ -181,8 +283,15 @@ export default function MissionsPage() {
     return Math.round((completedMissions / totalMissions) * 100);
   };
 
+  // 그룹 필터링된 사용자 목록
+  const filteredUsers = selectedGroupFilter === 'none'
+    ? users.filter(u => !u.group)
+    : selectedGroupFilter
+      ? users.filter(u => u.group?.id === selectedGroupFilter)
+      : users;
+
   // 정렬된 사용자 목록
-  const sortedUsers = [...users].sort((a, b) => {
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (memberSortField === 'name') {
       const nameA = a.name.toLowerCase();
       const nameB = b.name.toLowerCase();
@@ -266,11 +375,22 @@ export default function MissionsPage() {
             userCompletions[completion.mission_id] = completion;
           }
         });
+
+        // 그룹 정보 추출
+        let group = participant.current_group || null;
+        if (!group && participant.challenge_group_participants) {
+          const activeGroup = participant.challenge_group_participants.find(
+            (gp: any) => gp.is_active === true
+          );
+          group = activeGroup?.challenge_groups || null;
+        }
+
         return {
           id: participant.service_user_id,
           name: participant.users?.name || '이름 없음',
           username: participant.users?.username || '-',
-          completions: userCompletions
+          completions: userCompletions,
+          group: group
         };
       });
 
@@ -544,7 +664,7 @@ export default function MissionsPage() {
   }
 
   return (
-    <div className="flex-1 p-4 overflow-x-hidden">
+    <div className="flex-1 p-4">
       <div className="px-8 pt-4 sm:px-4 sm:pt-4">
         {currentChallenge && isMounted && (
           <div className="text-0.875-400 text-gray-6 mb-2">
@@ -565,7 +685,7 @@ export default function MissionsPage() {
         <Title title="미션" />
       </div>
 
-      <div className="mt-6 px-8 sm:px-4 space-y-8 w-full max-w-full overflow-x-hidden">
+      <div className="mt-6 px-8 sm:px-4 space-y-8">
         {/* 미션 관리 섹션 */}
         <div>
           <div className="flex justify-between items-center mb-6">
@@ -589,8 +709,8 @@ export default function MissionsPage() {
         </div>
 
         {/* 미션 테이블 */}
-        <div className="bg-white rounded-lg shadow overflow-hidden mb-8" style={{ width: '100%', maxWidth: '90vw' }}>
-          <div className="overflow-x-auto" style={{ width: '100%', maxWidth: '90vw', WebkitOverflowScrolling: 'touch' }}>
+        <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+          <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             {missions.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg mb-4">등록된 미션이 없습니다.</p>
@@ -687,16 +807,55 @@ export default function MissionsPage() {
             )}
           </div>
         </div>
-      </div>
 
-      {/* 달성 현황 섹션 */}
-      <div className="mt-2 w-full overflow-x-hidden">
+        {/* 달성 현황 섹션 */}
+        <div>
         <div className="mb-4">
           <h2 className="text-2xl lg:text-3xl font-bold mb-4">미션 달성 현황</h2>
 
           <div className="flex justify-between items-center mb-4">
-            <div>
-              <p className="text-sm text-gray-500">총 {users.length}명의 멤버</p>
+            <div className="flex items-center gap-4">
+              {/* 주차 선택 */}
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedWeek}
+                  onChange={(e) => setSelectedWeek(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {Array.from({ length: getCurrentWeekNumber() }, (_, i) => i + 1).map((week) => (
+                    <option key={week} value={week}>
+                      {week}주차
+                      {week === getCurrentWeekNumber() && ' (현재)'}
+                    </option>
+                  ))}
+                  <option value="all">전체</option>
+                </select>
+                {selectedWeek !== 'all' && getWeekRange(selectedWeek) && (
+                  <span className="text-xs text-gray-500">
+                    {isMounted && `${getWeekRange(selectedWeek)!.start.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} ~ ${getWeekRange(selectedWeek)!.end.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}`}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-500">
+                {filteredUsers.length}명
+              </p>
+              {/* 그룹 필터 */}
+              {challengeGroups.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <select
+                    value={selectedGroupFilter}
+                    onChange={(e) => setSelectedGroupFilter(e.target.value)}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {challengeGroups.map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.name}
+                      </option>
+                    ))}
+                    <option value="none">그룹 미지정</option>
+                  </select>
+                </div>
+              )}
             </div>
             <div className="relative">
               <button
@@ -781,8 +940,8 @@ export default function MissionsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden" style={{ maxWidth: '90vw' }}>
-          <div className="overflow-x-auto sm:max-w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             <table className="min-w-full border-collapse">
               <thead className="bg-gray-50">
                 <tr>
@@ -892,9 +1051,10 @@ export default function MissionsPage() {
             </div>
           )}
         </div>
+        </div>
       </div>
 
-        {/* 미션 상세/수정/삭제 모달 */}
+      {/* 미션 상세/수정/삭제 모달 */}
         {showDetailModal && viewingMission && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4">

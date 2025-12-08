@@ -122,7 +122,7 @@ function ChallengeLayoutContent({
           selectedChallengeId={selectedChallengeId}
           username={displayUsername}
         />
-        <main id="main-content" className="flex-1 px-[1rem] py-[1.25rem] sm:px-0 sm:py-0 bg-white-1 dark:bg-blue-4" tabIndex={-1}>
+        <main id="main-content" className="flex-1 min-w-0 overflow-x-auto px-[1rem] py-[1.25rem] sm:px-0 sm:py-0 bg-white-1 dark:bg-blue-4" tabIndex={-1}>
           {children}
         </main>
       </div>
