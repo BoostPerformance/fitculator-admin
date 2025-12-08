@@ -20,7 +20,7 @@ interface Challenges {
     title: string;
     start_date: string;
     end_date: string;
-    challenge_type: 'diet' | 'exercise' | 'diet_and_exercise';
+    challenge_type: 'diet' | 'exercise' | 'diet_and_exercise' | 'running';
     enable_benchmark?: boolean;
     enable_mission?: boolean;
   };
@@ -510,22 +510,21 @@ export default function Sidebar({
         ${isScrolled && isSidebarOpen ? 'shadow-md' : ''}
         bg-white dark:bg-blue-4 flex-shrink-0 transition-shadow duration-300
       `}>
-        {/* <div className="sticky flex justify-end sm:justify-between md:justify-between py-[1.25rem] px-[1.5rem] lg:gap-[1rem] lg:w-[15rem]"> */}
-        <div className={`flex justify-start gap-[0.5rem] pt-[2.25rem] sm:pt-[0rem] md:hidden ${isMobile && !isSidebarOpen ? 'hidden' : ''}`}>
-          {/* <Image src="/svg/logo_light.svg" width={30} height={30} alt="logo" /> */}
+        {/* 모바일에서 사이드바 열렸을 때: 로고와 X 버튼을 같은 줄에 배치 */}
+        <div className={`flex justify-between items-center py-[1.25rem] sm:px-4 md:px-4 lg:px-0 lg:gap-[1rem] relative z-[100]`}>
+          {/* 로고 - 모바일 사이드바 열렸을 때 표시 */}
           <Image
             src="/svg/logo_text_light.svg"
             width={120}
             height={30}
             alt="Fitculator 로고"
-            className={`${isMobile || (!isMobile && !isSidebarOpen) ? 'hidden' : ''}`}
+            className={`${isMobile && isSidebarOpen ? 'block' : 'hidden'} ${!isMobile && isSidebarOpen ? 'block' : ''} ${!isSidebarOpen ? 'hidden' : ''}`}
             loading="lazy"
           />
-        </div>
-        <div className={`flex justify-between items-center py-[1.25rem] sm:px-4 md:px-4 lg:px-0 lg:gap-[1rem] relative z-[100]`}>
+          {/* 햄버거/X 버튼 */}
           <button
             onClick={handleSidebarOpen}
-            className="flex items-center justify-center w-[1.5rem] h-[1.5rem] relative rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400"
+            className={`flex items-center justify-center w-[1.5rem] h-[1.5rem] relative rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 ${isMobile && isSidebarOpen ? 'ml-auto' : ''}`}
             aria-label={isSidebarOpen ? 'close menu' : 'open menu'}
           >
             <div className="w-full h-full flex flex-col justify-center items-center gap-[0.25rem]">
@@ -534,7 +533,7 @@ export default function Sidebar({
               <span className={`block w-full h-[0.125rem] bg-gray-800 dark:bg-white transition-all duration-300 ease-in-out ${isSidebarOpen ? '-rotate-45 -translate-y-[0.375rem]' : ''}`}></span>
             </div>
           </button>
-        <div className={`flex items-center gap-2 sm:flex md:flex lg:hidden relative ${isMobile && isSidebarOpen ? 'invisible' : ''}`}>
+        <div className={`flex items-center gap-2 sm:flex md:flex lg:hidden relative ${isMobile && isSidebarOpen ? 'hidden' : ''}`}>
           <div
             className={`text-gray-800 dark:text-white text-sm whitespace-nowrap ${adminDataLoading ? 'animate-pulse' : ''}`}
             onClick={handleUserDropdown}
@@ -753,6 +752,25 @@ export default function Sidebar({
                                       </div>
                                     </li>
                                   )}
+                                  {challenge.challenges.challenge_type === 'running' && (
+                                    <li>
+                                      <div
+                                        className={`cursor-pointer text-1-500 py-2 px-8 rounded transition-colors duration-300 ${
+                                          isActiveRoute(`/${challenge.challenges.id}/running`)
+                                            ? 'bg-blue-100 dark:bg-blue-600 text-blue-600 dark:text-blue-200'
+                                            : 'text-1-500 dark:text-white hover:text-gray-1 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                        }`}
+                                        onClick={() => {
+                                          router.push(
+                                            `/${challenge.challenges.id}/running?refresh=${Date.now()}`
+                                          );
+                                          closeSidebarOnMobile();
+                                        }}
+                                      >
+                                        운동
+                                      </div>
+                                    </li>
+                                  )}
                                   <li>
                                     <div
                                       className={`cursor-pointer font-medium py-2 px-8 rounded transition-colors duration-300 ${
@@ -961,6 +979,25 @@ export default function Sidebar({
                                             // 운동 페이지로 이동하면서 강제 새로고침
                                             router.push(
                                               `/${challenge.challenges.id}/workout?refresh=${Date.now()}`
+                                            );
+                                            closeSidebarOnMobile();
+                                          }}
+                                        >
+                                          운동
+                                        </div>
+                                      </li>
+                                    )}
+                                    {challenge.challenges.challenge_type === 'running' && (
+                                      <li>
+                                        <div
+                                          className={`cursor-pointer font-medium py-2 px-8 rounded transition-colors duration-300 ${
+                                            isActiveRoute(`/${challenge.challenges.id}/running`)
+                                              ? 'bg-blue-100 dark:bg-blue-600 text-blue-600 dark:text-blue-200'
+                                              : 'text-1-500 dark:text-white hover:text-gray-1 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                          }`}
+                                          onClick={() => {
+                                            router.push(
+                                              `/${challenge.challenges.id}/running?refresh=${Date.now()}`
                                             );
                                             closeSidebarOnMobile();
                                           }}

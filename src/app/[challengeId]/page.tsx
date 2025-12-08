@@ -14,6 +14,8 @@ import DailyWorkoutRecord from '@/components/graph/dailyWorkoutRecord';
 import { useAdminData } from '@/components/hooks/useAdminData';
 import { useChallenge } from '@/components/hooks/useChallenges';
 import { useWorkoutDataQuery } from '@/components/hooks/useWorkoutDataQuery';
+import RunningLeaderboard from '@/components/runningDashboard/RunningLeaderboard';
+import WorkoutNotesFeed from '@/components/runningDashboard/WorkoutNotesFeed';
 // import { cachedAPI } from '@/utils/api';
 //import DailyWorkoutRecordMobile from '@/components/graph/dailyWorkoutRecordMobile';
 
@@ -49,7 +51,7 @@ interface Challenges {
     title: string;
     start_date: string;
     end_date: string;
-    challenge_type: 'diet' | 'exercise' | 'diet_and_exercise';
+    challenge_type: 'diet' | 'exercise' | 'diet_and_exercise' | 'running';
   };
 }
 
@@ -343,21 +345,25 @@ export default function User() {
     if (selectedChallengeId && formattedChallenges.length > 0) {
       // 챌린지가 변경되면 캐시 초기화
       dailyRecordsCache.current.clear();
-      
+
       // 현재 선택된 챌린지 정보 가져오기
       const currentChallenge = formattedChallenges.find(
         (challenge) => challenge.challenges.id === selectedChallengeId
       );
-      
+
       // 데이터 불러오기
-      // 식단이 포함된 챌린지만 식단 관련 API 호출
-      if (currentChallenge?.challenges.challenge_type !== 'exercise') {
+      // 식단이 포함된 챌린지만 식단 관련 API 호출 (exercise, running 제외)
+      const challengeType = currentChallenge?.challenges.challenge_type;
+      if (challengeType !== 'exercise' && challengeType !== 'running') {
         fetchTodayDietUploads(selectedChallengeId);
-        fetchFeedbackData(selectedChallengeId);
+        // fetchFeedbackData는 성능 이슈로 제거 - 각 참가자마다 개별 API 호출 발생
       }
-      
-      // 모든 멤버를 가져오기 위해 loadAll을 true로 설정
-      fetchDailyRecords(1, true);
+
+      // running, exercise 타입은 운동 대시보드와 동일하게 처리 (dailyRecords 불필요)
+      if (challengeType !== 'running' && challengeType !== 'exercise') {
+        // 모든 멤버를 가져오기 위해 loadAll을 true로 설정
+        fetchDailyRecords(1, true);
+      }
 
       // React Query hook으로 운동 데이터 가져오기 최적화됨
     }
@@ -456,36 +462,48 @@ export default function User() {
                 borderColor="border-green"
                 textColor="text-green"
               />
-              {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
-                ?.challenges.challenge_type !== 'diet' && (
-                <TotalFeedbackCounts
-                  counts={`${workOutCountToday}`}
-                  total={`${totalParticipants} 명`}
-                  title={
-                    <span>
-                      오늘 운동 <br className="md:inline sm:hidden lg:hidden" />
-                      업로드 멤버
-                    </span>
-                  }
-                  borderColor="border-blue-5"
-                  textColor="text-blue-5"
-                />
-              )}
-              {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
-                ?.challenges.challenge_type !== 'exercise' && (
-                <TotalFeedbackCounts
-                  counts={todayDietUploads?.counts || '0'}
-                  total={todayDietUploads?.total || '0명'}
-                  title={
-                    <span>
-                      오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
-                      업로드 멤버
-                    </span>
-                  }
-                  borderColor="border-yellow"
-                  textColor="text-yellow"
-                />
-              )}
+              {(() => {
+                const challengeType = formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)?.challenges.challenge_type;
+                // 운동/러닝 타입은 운동 업로드 멤버 표시
+                if (challengeType !== 'diet') {
+                  return (
+                    <TotalFeedbackCounts
+                      counts={`${workOutCountToday}`}
+                      total={`${totalParticipants} 명`}
+                      title={
+                        <span>
+                          오늘 {challengeType === 'running' ? '러닝' : '운동'} <br className="md:inline sm:hidden lg:hidden" />
+                          업로드 멤버
+                        </span>
+                      }
+                      borderColor="border-blue-5"
+                      textColor="text-blue-5"
+                    />
+                  );
+                }
+                return null;
+              })()}
+              {(() => {
+                const challengeType = formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)?.challenges.challenge_type;
+                // 식단 타입만 식단 업로드 멤버 표시 (exercise, running 제외)
+                if (challengeType !== 'exercise' && challengeType !== 'running') {
+                  return (
+                    <TotalFeedbackCounts
+                      counts={todayDietUploads?.counts || '0'}
+                      total={todayDietUploads?.total || '0명'}
+                      title={
+                        <span>
+                          오늘 식단 <br className="md:inline sm:hidden lg:hidden" />
+                          업로드 멤버
+                        </span>
+                      }
+                      borderColor="border-yellow"
+                      textColor="text-yellow"
+                    />
+                  );
+                }
+                return null;
+              })()}
             </div>
 
             <div className="dark:bg-blue-4 grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4 ">
@@ -496,10 +514,10 @@ export default function User() {
                   <DailyDietRecord activities={filteredDailyRecordsbyId} />
                   <DailyWorkoutRecord activities={filteredDailyRecordsbyId} />
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
-                  <WeeklyWorkoutChart 
-                    data={weeklyChart} 
-                    isLoading={workoutDataLoading} 
-                    error={workoutDataError} 
+                  <WeeklyWorkoutChart
+                    data={weeklyChart}
+                    isLoading={workoutDataLoading}
+                    error={workoutDataError}
                   />
                 </>
               )}
@@ -511,16 +529,24 @@ export default function User() {
                 ?.challenges.challenge_type === 'exercise' && (
                 <>
                   <TrafficSourceChart challengeId={selectedChallengeId} />
-                  <DailyWorkoutRecord activities={filteredDailyRecordsbyId} />
-                  {/* <DailyWorkoutRecordMobile
-                    activities={filteredDailyRecordsbyId}
-                  /> */}
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
-                  <WeeklyWorkoutChart 
-                    data={weeklyChart} 
-                    isLoading={workoutDataLoading} 
-                    error={workoutDataError} 
+                  <WeeklyWorkoutChart
+                    data={weeklyChart}
+                    isLoading={workoutDataLoading}
+                    error={workoutDataError}
                   />
+                </>
+              )}
+              {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
+                ?.challenges.challenge_type === 'running' && (
+                <>
+                  <TrafficSourceChart challengeId={selectedChallengeId} />
+                  <RunningLeaderboard
+                    challengeId={selectedChallengeId}
+                    startDate={challengeDates?.startDate}
+                    endDate={challengeDates?.endDate}
+                  />
+                  <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} />
                 </>
               )}
             </div>

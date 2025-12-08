@@ -71,6 +71,49 @@ export async function GET(request: Request) {
         );
       }
       return await getTodayCountData(userId, challengeId);
+    } else if (type === 'distance-leaderboard') {
+      // 거리 리더보드 - 챌린지 ID 필수 확인
+      if (!challengeId) {
+        return NextResponse.json(
+          { error: 'Challenge ID is required for distance leaderboard data' },
+          { status: 400 }
+        );
+      }
+      const period = url.searchParams.get('period') || 'all';
+      const weekStart = url.searchParams.get('weekStart') || undefined;
+      const weekEnd = url.searchParams.get('weekEnd') || undefined;
+      return await getDistanceLeaderboardData(challengeId, period, weekStart, weekEnd);
+    } else if (type === 'recent-notes') {
+      // 최근 운동 노트 - 챌린지 ID 필수 확인
+      if (!challengeId) {
+        return NextResponse.json(
+          { error: 'Challenge ID is required for recent notes data' },
+          { status: 400 }
+        );
+      }
+      const limit = parseInt(url.searchParams.get('limit') || '10');
+      const offset = parseInt(url.searchParams.get('offset') || '0');
+      return await getRecentNotesData(challengeId, limit, offset);
+    } else if (type === 'participant-list') {
+      // 참가자 목록만 가져오기 (가벼운 API)
+      if (!challengeId) {
+        return NextResponse.json(
+          { error: 'Challenge ID is required for participant list' },
+          { status: 400 }
+        );
+      }
+      return await getParticipantList(challengeId);
+    } else if (type === 'paginated-user-data') {
+      // 서버 사이드 페이지네이션된 유저 데이터
+      if (!challengeId) {
+        return NextResponse.json(
+          { error: 'Challenge ID is required for paginated user data' },
+          { status: 400 }
+        );
+      }
+      const page = parseInt(url.searchParams.get('page') || '1');
+      const limit = parseInt(url.searchParams.get('limit') || '30');
+      return await getPaginatedUserData(challengeId, page, limit);
     } else {
       // 기본 유저 데이터 요청
       if (!userId) {
@@ -1022,6 +1065,530 @@ async function getBatchUserWorkoutData(
 // console.error('Error fetching batch user workout data:', error);
     return NextResponse.json(
       { error: 'Failed to fetch batch user workout data' },
+      { status: 500 }
+    );
+  }
+}
+
+// 거리 리더보드 데이터 조회
+async function getDistanceLeaderboardData(
+  challengeId: string,
+  period: string = 'all',
+  weekStart?: string,
+  weekEnd?: string
+): Promise<NextResponse> {
+  try {
+    // 1. 챌린지 정보 및 참가자 조회
+    const { data: challenge } = await supabase
+      .from('challenges')
+      .select('start_date, end_date')
+      .eq('id', challengeId)
+      .single();
+
+    if (!challenge) {
+      return NextResponse.json(
+        { error: 'Challenge not found' },
+        { status: 404 }
+      );
+    }
+
+    const { data: participants } = await supabase
+      .from('challenge_participants')
+      .select('service_user_id')
+      .eq('challenge_id', challengeId)
+      .eq('status', 'active');
+
+    const participantIds = participants?.map((p) => p.service_user_id) || [];
+
+    if (participantIds.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    // 2. 사용자 정보 가져오기
+    const { data: users } = await supabase
+      .from('users')
+      .select('id, name, username')
+      .in('id', participantIds);
+
+    // 3. 기간 설정 (주간 또는 전체)
+    let startDate = challenge.start_date;
+    let endDate = challenge.end_date;
+
+    if (period === 'weekly' && weekStart && weekEnd) {
+      // 선택된 주차 사용
+      startDate = weekStart;
+      endDate = weekEnd;
+    } else if (period === 'weekly') {
+      // 주차 미선택 시 현재 주
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() + mondayOffset);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      startDate = monday.toISOString().split('T')[0];
+      endDate = sunday.toISOString().split('T')[0];
+    }
+
+    // 4. 운동 기록에서 거리 합계 계산
+    const { data: workouts, error: workoutsError } = await supabase
+      .from('workouts')
+      .select('user_id, distance, points, title, category_id')
+      .in('user_id', participantIds)
+      .gte('timestamp', `${startDate}T00:00:00`)
+      .lte('timestamp', `${endDate}T23:59:59`);
+
+    if (workoutsError) {
+      console.error('Workouts query error:', workoutsError);
+    }
+
+    // 5. 사용자별 거리/포인트 집계
+    const userStats = new Map<string, { distance: number; points: number }>();
+
+    workouts?.forEach((workout) => {
+      const current = userStats.get(workout.user_id) || { distance: 0, points: 0 };
+      userStats.set(workout.user_id, {
+        distance: current.distance + (workout.distance || 0),
+        points: current.points + (workout.points || 0),
+      });
+    });
+
+    // 5. 리더보드 데이터 생성
+    const leaderboardData = users?.map((user) => {
+      const stats = userStats.get(user.id) || { distance: 0, points: 0 };
+      return {
+        user_id: user.id,
+        user_name: user.name || user.username,
+        total_distance: Math.round(stats.distance * 100) / 100, // km 단위, 소수점 2자리
+        total_points: Math.round(stats.points * 10) / 10,
+      };
+    }) || [];
+
+    // 거리 내림차순 정렬
+    leaderboardData.sort((a, b) => b.total_distance - a.total_distance);
+
+    // 순위 추가
+    leaderboardData.forEach((item, index) => {
+      (item as any).rank = index + 1;
+    });
+
+    return NextResponse.json(leaderboardData, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
+  } catch (error) {
+    console.error('Error in distance leaderboard:', error);
+    return NextResponse.json(
+      { error: 'Failed to process distance leaderboard data' },
+      { status: 500 }
+    );
+  }
+}
+
+// 최근 운동 노트 데이터 조회
+async function getRecentNotesData(
+  challengeId: string,
+  limit: number = 10,
+  offset: number = 0
+): Promise<NextResponse> {
+  try {
+    // 1. 챌린지 참가자 조회 (id와 service_user_id 모두 필요)
+    const { data: participants, error: participantsError } = await supabase
+      .from('challenge_participants')
+      .select('id, service_user_id')
+      .eq('challenge_id', challengeId)
+      .eq('status', 'active');
+
+    if (participantsError) {
+      console.error('Participants query error:', participantsError);
+    }
+
+    const participantIds = participants?.map((p) => p.service_user_id) || [];
+    const participantIdMap = new Map(
+      participants?.map((p) => [p.service_user_id, p.id]) || []
+    );
+
+    if (participantIds.length === 0) {
+      return NextResponse.json({ notes: [], hasMore: false });
+    }
+
+    // 2. 노트가 있는 최근 운동 기록 조회 (페이지네이션)
+    const { data: workouts, error: workoutsError } = await supabase
+      .from('workouts')
+      .select(`
+        id,
+        user_id,
+        title,
+        timestamp,
+        duration_minutes,
+        distance,
+        points,
+        note,
+        intensity,
+        pace_per_km,
+        workout_categories (
+          name_ko,
+          name_en
+        )
+      `)
+      .in('user_id', participantIds)
+      .not('note', 'is', null)
+      .neq('note', '')
+      .order('timestamp', { ascending: false })
+      .range(offset, offset + limit);
+
+    if (workoutsError) {
+      console.error('Workouts query error in recent-notes:', workoutsError);
+    }
+
+    // 3. 사용자 정보 가져오기
+    const userIds = [...new Set(workouts?.map((w) => w.user_id) || [])];
+    const { data: users } = userIds.length > 0 ? await supabase
+      .from('users')
+      .select('id, name, username')
+      .in('id', userIds) : { data: [] };
+
+    const userMap = new Map(users?.map((u) => [u.id, u]) || []);
+
+    // 4. 그룹 정보 가져오기 (challenge_group_participants 통해)
+    const challengeParticipantIds = [...new Set(
+      userIds.map((uid) => participantIdMap.get(uid)).filter(Boolean)
+    )];
+
+    const { data: groupParticipants } = challengeParticipantIds.length > 0 ? await supabase
+      .from('challenge_group_participants')
+      .select(`
+        participant_id,
+        challenge_groups (
+          id,
+          name,
+          color_code
+        )
+      `)
+      .in('participant_id', challengeParticipantIds)
+      .eq('is_active', true) : { data: [] };
+
+    // participant_id -> { name, color_code } 맵
+    const participantGroupMap = new Map(
+      groupParticipants?.map((gp: any) => [
+        gp.participant_id,
+        { name: gp.challenge_groups?.name, color: gp.challenge_groups?.color_code }
+      ]) || []
+    );
+
+    // 5. 미션 완료 정보 가져오기 (challenge_mission_completions 통해)
+    const workoutIds = workouts?.map((w) => w.id) || [];
+    const { data: missionCompletions } = workoutIds.length > 0 ? await supabase
+      .from('challenge_mission_completions')
+      .select(`
+        workout_id,
+        challenge_missions (
+          id,
+          title
+        )
+      `)
+      .in('workout_id', workoutIds) : { data: [] };
+
+    // workout_id -> mission_title 맵
+    const workoutMissionMap = new Map(
+      missionCompletions?.map((mc: any) => [mc.workout_id, mc.challenge_missions?.title]) || []
+    );
+
+    // 6. 결과 포맷팅
+    const notesData = workouts?.map((workout) => {
+      const user = userMap.get(workout.user_id);
+      const challengeParticipantId = participantIdMap.get(workout.user_id);
+      const groupInfo = challengeParticipantId ? participantGroupMap.get(challengeParticipantId) : null;
+      const missionTitle = workoutMissionMap.get(workout.id);
+
+      // 페이스: pace_per_km 있으면 사용 (분 단위), 없으면 계산
+      let pace = null;
+      if (workout.pace_per_km) {
+        // pace_per_km는 분 단위 (예: 6.44 = 6'26")
+        const paceMin = Math.floor(workout.pace_per_km);
+        const paceSec = Math.round((workout.pace_per_km - paceMin) * 60);
+        pace = `${paceMin}'${paceSec.toString().padStart(2, '0')}"`;
+      } else if (workout.distance && workout.distance > 0 && workout.duration_minutes && workout.duration_minutes > 0) {
+        // 계산: duration_minutes / distance
+        const paceMinutes = workout.duration_minutes / workout.distance;
+        const paceMin = Math.floor(paceMinutes);
+        const paceSec = Math.round((paceMinutes - paceMin) * 60);
+        pace = `${paceMin}'${paceSec.toString().padStart(2, '0')}"`;
+      }
+
+      return {
+        id: workout.id,
+        user_id: workout.user_id,
+        user_name: user?.name || user?.username || '알 수 없음',
+        title: workout.title,
+        category: (workout.workout_categories as any)?.name_ko || workout.title,
+        timestamp: workout.timestamp,
+        duration_minutes: workout.duration_minutes,
+        distance: workout.distance,
+        points: workout.points,
+        note: workout.note,
+        intensity: workout.intensity,
+        pace: pace,
+        group_name: groupInfo?.name || null,
+        group_color: groupInfo?.color || null,
+        mission_title: missionTitle || null,
+      };
+    }) || [];
+
+    // 더 있는지 확인 (가져온 개수가 limit+1이면 더 있음)
+    const hasMore = workouts?.length === limit + 1;
+    if (hasMore) {
+      notesData.pop(); // 마지막 항목 제거
+    }
+
+    return NextResponse.json({
+      notes: notesData,
+      hasMore: (workouts?.length || 0) > limit,
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
+  } catch (error) {
+    console.error('Error in recent notes:', error);
+    return NextResponse.json(
+      { error: 'Failed to process recent notes data' },
+      { status: 500 }
+    );
+  }
+}
+
+// 참가자 목록만 가져오기 (가벼운 API)
+async function getParticipantList(challengeId: string): Promise<NextResponse> {
+  try {
+    // 1. 챌린지 정보
+    const { data: challenge } = await supabase
+      .from('challenges')
+      .select('start_date, end_date, title')
+      .eq('id', challengeId)
+      .single();
+
+    // 2. 참가자 목록 (유저 정보 join)
+    const { data: participants } = await supabase
+      .from('challenge_participants')
+      .select(`
+        service_user_id,
+        users!service_user_id (
+          id,
+          name,
+          username
+        )
+      `)
+      .eq('challenge_id', challengeId)
+      .eq('status', 'active');
+
+    const users = participants?.map((p: any) => ({
+      id: p.service_user_id,
+      name: p.users?.name || p.users?.username || 'Unknown',
+      username: p.users?.username,
+    })) || [];
+
+    return NextResponse.json({
+      challenge: challenge ? {
+        startDate: challenge.start_date,
+        endDate: challenge.end_date,
+        title: challenge.title,
+      } : null,
+      users,
+      totalCount: users.length,
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+    });
+  } catch (error) {
+    console.error('Error in participant list:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch participant list' },
+      { status: 500 }
+    );
+  }
+}
+
+// 서버 사이드 페이지네이션된 유저 데이터
+async function getPaginatedUserData(
+  challengeId: string,
+  page: number,
+  limit: number
+): Promise<NextResponse> {
+  try {
+    // 1. 챌린지 정보
+    const { data: challenge } = await supabase
+      .from('challenges')
+      .select('start_date, end_date')
+      .eq('id', challengeId)
+      .single();
+
+    if (!challenge) {
+      return NextResponse.json({ error: 'Challenge not found' }, { status: 404 });
+    }
+
+    // 2. 전체 참가자 수 (페이지네이션 정보용)
+    const { count: totalCount } = await supabase
+      .from('challenge_participants')
+      .select('*', { count: 'exact', head: true })
+      .eq('challenge_id', challengeId)
+      .eq('status', 'active');
+
+    // 3. 페이지네이션된 참가자 목록
+    const offset = (page - 1) * limit;
+    const { data: participants } = await supabase
+      .from('challenge_participants')
+      .select(`
+        service_user_id,
+        users!service_user_id (
+          id,
+          name,
+          username
+        )
+      `)
+      .eq('challenge_id', challengeId)
+      .eq('status', 'active')
+      .range(offset, offset + limit - 1);
+
+    const userIds = participants?.map((p: any) => p.service_user_id) || [];
+
+    if (userIds.length === 0) {
+      return NextResponse.json({
+        users: [],
+        pagination: {
+          currentPage: page,
+          totalPages: 0,
+          totalItems: 0,
+          itemsPerPage: limit,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      });
+    }
+
+    // 4. W1 시작일 계산
+    const [startYear, startMonth, startDay] = challenge.start_date.split('-').map(Number);
+    const challengeStart = new Date(startYear, startMonth - 1, startDay);
+    const dayOfWeek = challengeStart.getDay();
+    let w1StartDate = new Date(challengeStart);
+    if (dayOfWeek !== 1) {
+      const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      w1StartDate.setDate(w1StartDate.getDate() - daysSinceMonday);
+    }
+
+    // 5. 해당 유저들의 주간 기록 한번에 가져오기
+    const { data: weeklyRecords } = await supabase
+      .from('workout_weekly_records')
+      .select('*')
+      .in('user_id', userIds)
+      .gte('end_date', w1StartDate.toISOString().split('T')[0])
+      .lte('end_date', challenge.end_date)
+      .order('start_date', { ascending: true });
+
+    // 6. 주간 기록 ID 목록으로 피드백 한번에 가져오기
+    const recordIds = weeklyRecords?.map((r) => r.id) || [];
+    const { data: feedbacks } = recordIds.length > 0 ? await supabase
+      .from('workout_feedbacks')
+      .select('workout_weekly_records_id, id, ai_feedback, coach_feedback, coach_memo, coach_id, created_at')
+      .in('workout_weekly_records_id', recordIds)
+      .eq('challenge_id', challengeId) : { data: [] };
+
+    // 7. 코치 ID 목록으로 코치 정보 한번에 가져오기
+    const coachIds = [...new Set(feedbacks?.filter((f) => f.coach_id).map((f) => f.coach_id) || [])];
+    const { data: coaches } = coachIds.length > 0 ? await supabase
+      .from('coaches')
+      .select(`
+        id,
+        profile_image_url,
+        admin_users!admin_user_id (
+          username
+        )
+      `)
+      .in('id', coachIds) : { data: [] };
+
+    // 피드백/코치 맵 생성
+    const feedbackMap = new Map(feedbacks?.map((f) => [f.workout_weekly_records_id, f]) || []);
+    const coachMap = new Map(coaches?.map((c: any) => [c.id, {
+      id: c.id,
+      name: c.admin_users?.[0]?.username || 'Unknown Coach',
+      profile_image_url: c.profile_image_url,
+    }]) || []);
+
+    // 8. 유저별 데이터 구성
+    const usersData = participants?.map((p: any) => {
+      const userId = p.service_user_id;
+      const userRecords = weeklyRecords?.filter((r) => r.user_id === userId) || [];
+
+      // 중복 제거
+      const uniqueRecords: any[] = [];
+      const seenWeeks = new Set<string>();
+      for (const record of userRecords) {
+        const weekKey = record.start_date;
+        if (!seenWeeks.has(weekKey)) {
+          seenWeeks.add(weekKey);
+
+          const feedback = feedbackMap.get(record.id);
+          const coach = feedback?.coach_id ? coachMap.get(feedback.coach_id) : null;
+
+          uniqueRecords.push({
+            ...record,
+            feedback: feedback || null,
+            coach: coach || null,
+          });
+        }
+      }
+
+      const totalCardioPoints = uniqueRecords.reduce(
+        (sum, r) => sum + (r.cardio_points_total || 0), 0
+      );
+      const totalStrengthSessions = uniqueRecords.reduce(
+        (sum, r) => sum + (r.strength_sessions_count || 0), 0
+      );
+
+      return {
+        userId,
+        user: {
+          id: userId,
+          name: p.users?.name || p.users?.username || 'Unknown',
+          displayName: p.users?.username,
+        },
+        weeklyRecords: uniqueRecords,
+        stats: {
+          totalWeeks: uniqueRecords.length,
+          totalCardioPoints,
+          totalStrengthSessions,
+        },
+      };
+    }) || [];
+
+    const totalPages = Math.ceil((totalCount || 0) / limit);
+
+    return NextResponse.json({
+      users: usersData,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: totalCount || 0,
+        itemsPerPage: limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+    });
+  } catch (error) {
+    console.error('Error in paginated user data:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch paginated user data' },
       { status: 500 }
     );
   }
