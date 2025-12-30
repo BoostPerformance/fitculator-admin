@@ -91,52 +91,67 @@ export default function Modal({
   // };
   return (
     <>
+      {/* 배경 오버레이 */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 ">
-        <div className="bg-white rounded-lg p-6 w-[30rem] shadow-xl sm:w-[22rem]">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex flex-col">
-              <h2 className="text-lg font-medium">코치메모</h2>
-              {/* <h3>{formatDate(memoDate)}</h3> */}
-            </div>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
+      {/* 모바일: 하단 시트, 데스크톱: 중앙 모달 */}
+      <div className="fixed z-50 sm:inset-x-0 sm:bottom-0 sm:top-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
+        <div className="bg-white dark:bg-gray-800 shadow-xl sm:rounded-t-2xl sm:rounded-b-none lg:rounded-xl md:rounded-xl sm:w-full lg:w-[30rem] md:w-[28rem] sm:max-h-[90vh] sm:animate-slide-up lg:animate-none md:animate-none">
+          {/* 모바일 드래그 핸들 */}
+          <div className="sm:flex lg:hidden md:hidden justify-center pt-3 pb-1">
+            <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <textarea
-              value={coachMemo}
-              onChange={handleMemoChange}
-              className="w-full h-32 p-2 border border-gray-300 rounded-md resize-none"
-              placeholder="메모를 남겨주세요!"
-              required
-            />
-
-            <div className="flex justify-end gap-2 mt-4">
+          <div className="p-5 sm:p-4">
+            {/* 헤더 */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">코치메모</h2>
               <button
-                type="button"
                 onClick={onClose}
-                className="px-[3rem] py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                className="w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
+                aria-label="닫기"
               >
-                닫기
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-[3rem] py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-              >
-                저장
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
-          </form>
+
+            {/* 폼 */}
+            <form onSubmit={handleSubmit}>
+              <textarea
+                value={coachMemo}
+                onChange={handleMemoChange}
+                className="w-full h-40 sm:h-32 p-4 border border-gray-300 dark:border-gray-600 rounded-xl resize-none text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all"
+                placeholder="메모를 남겨주세요!"
+                required
+              />
+
+              {/* 버튼 - 모바일에서 전체 너비, 터치 친화적 크기 */}
+              <div className="flex gap-3 mt-5 sm:flex-col-reverse lg:flex-row md:flex-row">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 py-3 px-6 text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 rounded-xl font-medium transition-colors min-h-[48px]"
+                >
+                  닫기
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 py-3 px-6 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[48px]"
+                >
+                  {isLoading ? '저장 중...' : '저장'}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* iOS Safe Area */}
+          <div className="sm:h-[env(safe-area-inset-bottom)] lg:hidden md:hidden" />
         </div>
       </div>
     </>

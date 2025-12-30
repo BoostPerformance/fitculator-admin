@@ -73,85 +73,120 @@ const EditUsernameModal: React.FC<EditUsernameModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-96 max-w-[90vw]">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">이름 수정</h2>
-            <button
-              onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <FaTimes size={20} />
-            </button>
+      {/* 배경 오버레이 */}
+      <div
+        className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
+        onClick={handleClose}
+      />
+
+      {/* 모바일: 하단 시트, 데스크톱: 중앙 모달 */}
+      <div className="fixed z-50 sm:inset-x-0 sm:bottom-0 sm:top-auto lg:inset-0 lg:flex lg:items-center lg:justify-center md:inset-0 md:flex md:items-center md:justify-center">
+        <div className="bg-white dark:bg-gray-800 shadow-xl sm:rounded-t-2xl sm:rounded-b-none lg:rounded-xl md:rounded-xl sm:w-full lg:w-96 md:w-96 lg:max-w-[90vw] md:max-w-[90vw] sm:max-h-[90vh] sm:animate-slide-up lg:animate-fade-in md:animate-fade-in">
+          {/* 모바일 드래그 핸들 */}
+          <div className="sm:flex lg:hidden md:hidden justify-center pt-3 pb-1">
+            <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              이름
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="이름을 입력하세요"
-              maxLength={50}
-              disabled={isLoading}
-            />
-            {error && (
-              <p className="text-red-500 text-sm mt-1">{error}</p>
-            )}
+          <div className="p-5 sm:p-4">
+            {/* 헤더 */}
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">이름 수정</h2>
+              <button
+                onClick={handleClose}
+                className="w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
+                aria-label="닫기"
+              >
+                <FaTimes size={18} />
+              </button>
+            </div>
+
+            {/* 입력 필드 */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                이름
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all min-h-[48px]"
+                placeholder="이름을 입력하세요"
+                maxLength={50}
+                disabled={isLoading}
+              />
+              {error && (
+                <p className="text-red-500 text-sm mt-2">{error}</p>
+              )}
+            </div>
+
+            {/* 버튼 - 모바일에서 전체 너비, 터치 친화적 크기 */}
+            <div className="flex gap-3 sm:flex-col-reverse lg:flex-row md:flex-row">
+              <button
+                onClick={handleClose}
+                className="flex-1 py-3 px-6 text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 rounded-xl font-medium transition-colors min-h-[48px]"
+                disabled={isLoading}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isLoading || !hasChanges || !username.trim()}
+                className={`flex-1 py-3 px-6 rounded-xl font-medium transition-colors min-h-[48px] ${
+                  hasChanges && username.trim() && !isLoading
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
+                    : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {isLoading ? '저장 중...' : '저장'}
+              </button>
+            </div>
           </div>
 
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={handleClose}
-              className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
-              disabled={isLoading}
-            >
-              취소
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isLoading || !hasChanges || !username.trim()}
-              className={`px-4 py-2 rounded-md ${
-                hasChanges && username.trim() && !isLoading
-                  ? 'bg-blue-500 text-white hover:bg-blue-600'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              {isLoading ? '저장 중...' : '저장'}
-            </button>
-          </div>
+          {/* iOS Safe Area */}
+          <div className="sm:h-[env(safe-area-inset-bottom)] lg:hidden md:hidden" />
         </div>
       </div>
 
       {/* 확인 모달 */}
       {showConfirmClose && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg p-6 w-80 max-w-[90vw]">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              변경사항이 있습니다
-            </h3>
-            <p className="text-gray-600 mb-4">
-              저장하지 않은 변경사항이 있습니다. 정말 닫으시겠습니까?
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={handleCancelClose}
-                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
-              >
-                계속 수정
-              </button>
-              <button
-                onClick={handleConfirmClose}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-              >
-                닫기
-              </button>
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-[60]"
+            onClick={handleCancelClose}
+          />
+          <div className="fixed z-[60] sm:inset-x-0 sm:bottom-0 sm:top-auto lg:inset-0 lg:flex lg:items-center lg:justify-center md:inset-0 md:flex md:items-center md:justify-center">
+            <div className="bg-white dark:bg-gray-800 shadow-xl sm:rounded-t-2xl sm:rounded-b-none lg:rounded-xl md:rounded-xl sm:w-full lg:w-80 md:w-80 lg:max-w-[90vw] md:max-w-[90vw] p-5 sm:p-4 sm:animate-slide-up lg:animate-fade-in md:animate-fade-in">
+              {/* 모바일 드래그 핸들 */}
+              <div className="sm:flex lg:hidden md:hidden justify-center pb-2 -mt-1">
+                <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
+              </div>
+
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                변경사항이 있습니다
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-5">
+                저장하지 않은 변경사항이 있습니다. 정말 닫으시겠습니까?
+              </p>
+              <div className="flex gap-3 sm:flex-col-reverse lg:flex-row md:flex-row">
+                <button
+                  onClick={handleCancelClose}
+                  className="flex-1 py-3 px-4 text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 transition-colors min-h-[48px]"
+                >
+                  계속 수정
+                </button>
+                <button
+                  onClick={handleConfirmClose}
+                  className="flex-1 py-3 px-4 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 active:bg-red-700 transition-colors min-h-[48px]"
+                >
+                  닫기
+                </button>
+              </div>
+
+              {/* iOS Safe Area */}
+              <div className="sm:h-[env(safe-area-inset-bottom)] lg:hidden md:hidden" />
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );

@@ -300,8 +300,8 @@ export default function BenchmarksPage() {
   }
 
   return (
-    <div className="flex-1 p-4">
-      <div className="px-8 pt-4 sm:px-4 sm:pt-4">
+    <div className="flex-1 p-4 sm:p-2">
+      <div className="px-8 pt-4 sm:px-3 sm:pt-3">
         {currentChallenge && (
           <div className="text-0.875-400 text-gray-6 mb-2">
             {new Date(currentChallenge.challenges.start_date).toLocaleDateString('ko-KR', {
@@ -321,55 +321,55 @@ export default function BenchmarksPage() {
         <Title title="벤치마크" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 px-8 sm:px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-3 mt-6 sm:mt-4 px-8 sm:px-3">
         {/* 벤치마크 목록 */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">벤치마크 목록</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-3">
+            <div className="flex justify-between items-center mb-4 sm:mb-3">
+              <h2 className="text-lg sm:text-base font-semibold dark:text-white">벤치마크 목록</h2>
               <button
                 onClick={() => {
                   setEditingBenchmark(null);
                   setIsModalOpen(true);
                 }}
-                className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="p-2 sm:p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-colors"
               >
-                <FaPlus />
+                <FaPlus className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-2">
               {benchmarks?.length === 0 && (
-                <p className="text-gray-500 text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400 text-center py-8 sm:py-6 text-sm">
                   벤치마크가 없습니다.
                 </p>
               )}
               {benchmarks?.map((benchmark) => (
                 <div
                   key={benchmark.id}
-                  className={`p-3 border rounded cursor-pointer hover:bg-gray-50 ${
-                    selectedBenchmark?.id === benchmark.id ? 'bg-blue-50 border-blue-500' : ''
+                  className={`p-3 sm:p-4 border dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-h-[56px] ${
+                    selectedBenchmark?.id === benchmark.id ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 dark:border-blue-400' : ''
                   }`}
                   onClick={() => setSelectedBenchmark(benchmark)}
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="font-medium">{benchmark.title}</h3>
-                      <p className="text-sm text-gray-600">{benchmark.description}</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-sm sm:text-base dark:text-white truncate">{benchmark.title}</h3>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{benchmark.description}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-500 mt-1">
                         단위: {benchmark.unit_label} | {benchmark.is_lower_better ? '낮을수록 좋음' : '높을수록 좋음'}
                       </p>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-shrink-0">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setEditingBenchmark(benchmark);
                           setIsModalOpen(true);
                         }}
-                        className="p-1 text-blue-500 hover:bg-blue-50 rounded"
+                        className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                       >
-                        <FaEdit />
+                        <FaEdit className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={(e) => {
@@ -378,9 +378,9 @@ export default function BenchmarksPage() {
                             deleteBenchmarkMutation.mutate(benchmark.id);
                           }
                         }}
-                        className="p-1 text-red-500 hover:bg-red-50 rounded"
+                        className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                       >
-                        <FaTrash />
+                        <FaTrash className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -393,68 +393,130 @@ export default function BenchmarksPage() {
         {/* 리더보드 */}
         <div className="lg:col-span-2">
           {selectedBenchmark ? (
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">{selectedBenchmark.title} 순위</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-3">
+              <div className="flex justify-between items-center mb-4 sm:mb-3 gap-2">
+                <h2 className="text-lg sm:text-base font-semibold dark:text-white truncate">{selectedBenchmark.title} 순위</h2>
                 <button
                   onClick={() => setIsRecordModalOpen(true)}
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                  className="px-4 py-2 sm:px-3 sm:py-2.5 min-h-[44px] bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 active:bg-green-700 transition-colors whitespace-nowrap"
                 >
                   기록 추가
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* 모바일: 카드 뷰 */}
+              <div className="sm:block lg:hidden space-y-3">
+                {leaderboardLoading ? (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
+                ) : leaderboard?.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+                    아직 기록이 없습니다.
+                  </div>
+                ) : (
+                  leaderboard?.map((record, index) => (
+                    <div key={record.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-100 dark:border-gray-600">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-gray-800 shadow-sm">
+                            {getRankIcon(index + 1)}
+                          </div>
+                          <div>
+                            <div className="font-medium text-sm dark:text-white">{record.users?.name}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {record.users?.birth
+                                ? `${new Date().getFullYear() - new Date(record.users.birth).getFullYear()}세`
+                                : '-'}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setEditingRecord(record)}
+                          className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                          title="기록 수정"
+                        >
+                          <FaEdit className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                          {formatValue(record.record_value, selectedBenchmark.unit, selectedBenchmark.unit_label)}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(record.record_date).toLocaleDateString('ko-KR')}
+                          </span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                            record.verification_level === 'official_verified'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                              : record.verification_level === 'photo_verified'
+                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-300'
+                          }`}>
+                            {record.verification_level === 'official_verified'
+                              ? '공식'
+                              : record.verification_level === 'photo_verified'
+                              ? '사진'
+                              : '직접'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* 데스크톱: 테이블 뷰 */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2">순위</th>
-                      <th className="text-left py-2">이름</th>
-                      <th className="text-left py-2">나이</th>
-                      <th className="text-left py-2">기록</th>
-                      <th className="text-left py-2">날짜</th>
-                      <th className="text-left py-2">인증</th>
-                      <th className="text-left py-2">수정</th>
+                    <tr className="border-b dark:border-gray-700">
+                      <th className="text-left py-2 text-sm text-gray-600 dark:text-gray-300">순위</th>
+                      <th className="text-left py-2 text-sm text-gray-600 dark:text-gray-300">이름</th>
+                      <th className="text-left py-2 text-sm text-gray-600 dark:text-gray-300">나이</th>
+                      <th className="text-left py-2 text-sm text-gray-600 dark:text-gray-300">기록</th>
+                      <th className="text-left py-2 text-sm text-gray-600 dark:text-gray-300">날짜</th>
+                      <th className="text-left py-2 text-sm text-gray-600 dark:text-gray-300">인증</th>
+                      <th className="text-left py-2 text-sm text-gray-600 dark:text-gray-300">수정</th>
                     </tr>
                   </thead>
                   <tbody>
                     {leaderboardLoading ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-8">Loading...</td>
+                        <td colSpan={6} className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</td>
                       </tr>
                     ) : leaderboard?.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="text-center py-8 text-gray-500">
+                        <td colSpan={7} className="text-center py-8 text-gray-500 dark:text-gray-400">
                           아직 기록이 없습니다.
                         </td>
                       </tr>
                     ) : (
                       leaderboard?.map((record, index) => (
-                        <tr key={record.id} className="border-b hover:bg-gray-50">
+                        <tr key={record.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                           <td className="py-2">
                             <div className="flex items-center gap-2">
                               {getRankIcon(index + 1)}
                             </div>
                           </td>
-                          <td className="py-2">{record.users?.name}</td>
-                          <td className="py-2">
+                          <td className="py-2 dark:text-white">{record.users?.name}</td>
+                          <td className="py-2 dark:text-gray-300">
                             {record.users?.birth
                               ? `${new Date().getFullYear() - new Date(record.users.birth).getFullYear()}세`
                               : '-'}
                           </td>
-                          <td className="py-2 font-semibold">
+                          <td className="py-2 font-semibold dark:text-white">
                             {formatValue(record.record_value, selectedBenchmark.unit, selectedBenchmark.unit_label)}
                           </td>
-                          <td className="py-2">
+                          <td className="py-2 dark:text-gray-300">
                             {new Date(record.record_date).toLocaleDateString('ko-KR')}
                           </td>
                           <td className="py-2">
                             <span className={`text-xs px-2 py-1 rounded ${
                               record.verification_level === 'official_verified'
-                                ? 'bg-green-100 text-green-800'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                                 : record.verification_level === 'photo_verified'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-gray-100 text-gray-800'
+                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-300'
                             }`}>
                               {record.verification_level === 'official_verified'
                                 ? '공식인증'
@@ -466,7 +528,7 @@ export default function BenchmarksPage() {
                           <td className="py-2">
                             <button
                               onClick={() => setEditingRecord(record)}
-                              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-1 rounded"
+                              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1 rounded"
                               title="기록 수정"
                             >
                               <FaEdit />
@@ -480,8 +542,9 @@ export default function BenchmarksPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
-              왼쪽에서 벤치마크를 선택해주세요.
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 sm:p-6 text-center text-gray-500 dark:text-gray-400 text-sm">
+              <span className="sm:inline lg:hidden">위에서</span>
+              <span className="hidden lg:inline">왼쪽에서</span> 벤치마크를 선택해주세요.
             </div>
           )}
         </div>

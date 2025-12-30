@@ -193,13 +193,13 @@ export default function AnnouncementsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto p-8">
+      <div className="max-w-6xl mx-auto p-8 sm:p-4">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
           <Title title="공지사항" subtitle="챌린지 참여자에게 전달할 공지사항을 관리합니다" />
           <button
             onClick={() => router.push(`/${challengeId}/announcements/create`)}
-            className="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-slate-900 px-5 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
+            className="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-slate-900 px-4 sm:px-5 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium shadow-sm hover:shadow-md min-h-[44px] text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start"
           >
             <Plus size={18} strokeWidth={2.5} />
             새 공지사항
@@ -207,12 +207,12 @@ export default function AnnouncementsPage() {
         </div>
 
         {/* List Header with Filters */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
           <p className="text-sm text-slate-500 dark:text-slate-400">총 <span className="font-medium text-slate-700 dark:text-slate-200">{stats.total}개</span>의 공지사항</p>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="w-[130px] bg-white dark:bg-gray-800 h-9 text-sm">
+              <SelectTrigger className="flex-1 sm:w-[130px] bg-white dark:bg-gray-800 h-11 sm:h-9 text-sm">
                 <SelectValue placeholder="모든 유형" />
               </SelectTrigger>
               <SelectContent>
@@ -223,7 +223,7 @@ export default function AnnouncementsPage() {
             </Select>
 
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-[130px] bg-white dark:bg-gray-800 h-9 text-sm">
+              <SelectTrigger className="flex-1 sm:w-[130px] bg-white dark:bg-gray-800 h-11 sm:h-9 text-sm">
                 <SelectValue placeholder="모든 상태" />
               </SelectTrigger>
               <SelectContent>
@@ -236,93 +236,44 @@ export default function AnnouncementsPage() {
           </div>
         </div>
 
-        {/* Announcements Table */}
+        {/* Announcements - Desktop: Table, Mobile: Cards */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200/60 dark:border-gray-700 shadow-sm overflow-hidden">
           {sortedAnnouncements.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 bg-slate-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileText size={28} className="text-slate-400 dark:text-gray-500" />
+            <div className="text-center py-12 sm:py-16">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FileText size={24} className="text-slate-400 dark:text-gray-500 sm:hidden" />
+                <FileText size={28} className="text-slate-400 dark:text-gray-500 hidden sm:block" />
               </div>
-              <p className="text-slate-600 dark:text-slate-300 font-medium">공지사항이 없습니다</p>
-              <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">새 공지사항을 작성해보세요</p>
+              <p className="text-slate-600 dark:text-slate-300 font-medium text-sm sm:text-base">공지사항이 없습니다</p>
+              <p className="text-slate-400 dark:text-slate-500 text-xs sm:text-sm mt-1">새 공지사항을 작성해보세요</p>
               <button
                 onClick={() => router.push(`/${challengeId}/announcements/create`)}
-                className="mt-4 text-slate-900 dark:text-white font-medium text-sm hover:underline"
+                className="mt-4 text-slate-900 dark:text-white font-medium text-sm hover:underline min-h-[44px] px-4"
               >
                 공지사항 작성하기 →
               </button>
             </div>
           ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50">
-                  <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">제목</th>
-                  <th className="text-center py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[80px]">순서</th>
-                  <th
-                    className="text-left py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 select-none w-[150px]"
-                    onClick={() => handleSort('created_at')}
-                  >
-                    <span className="flex items-center gap-1">
-                      작성일
-                      <ArrowUpDown size={14} className={sortField === 'created_at' ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'} />
-                    </span>
-                  </th>
-                  <th
-                    className="text-left py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 select-none w-[280px]"
-                    onClick={() => handleSort('start_date')}
-                  >
-                    <span className="flex items-center gap-1">
-                      게시기간
-                      <ArrowUpDown size={14} className={sortField === 'start_date' ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'} />
-                    </span>
-                  </th>
-                  <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[160px]">상태</th>
-                  <th className="w-12"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-gray-700">
+            <>
+              {/* 모바일 카드 뷰 */}
+              <div className="sm:hidden divide-y divide-slate-100 dark:divide-gray-700">
                 {sortedAnnouncements.map((announcement) => (
-                  <tr
+                  <div
                     key={announcement.id}
-                    className="group hover:bg-slate-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                    className="p-4 active:bg-slate-50 dark:active:bg-gray-700/50 cursor-pointer transition-colors"
                     onClick={() => router.push(`/${challengeId}/announcements/${announcement.id}`)}
                   >
-                    <td className="py-3 px-4">
-                      <span className="font-medium text-slate-900 dark:text-white text-sm">{announcement.title}</span>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="text-sm text-slate-500 dark:text-slate-400">{announcement.priority}</span>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">
-                      {formatDate(announcement.created_at)}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">
-                      {announcement.start_date && announcement.end_date
-                        ? `${formatDate(announcement.start_date)} - ${formatDate(announcement.end_date)}`
-                        : '-'
-                      }
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${typeConfig[announcement.type].bg} ${typeConfig[announcement.type].text}`}>
-                          {typeLabels[announcement.type]}
-                        </span>
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${statusConfig[announcement.status].bg} ${statusConfig[announcement.status].text}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[announcement.status].dot}`}></span>
-                          {statusLabels[announcement.status]}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-2">
-                      <div className="relative">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <h3 className="font-medium text-slate-900 dark:text-white text-sm flex-1 line-clamp-2">{announcement.title}</h3>
+                      <div className="relative flex-shrink-0">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setOpenMenuId(openMenuId === announcement.id ? null : announcement.id);
                           }}
-                          className="p-1.5 hover:bg-slate-200 dark:hover:bg-gray-600 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                          className="p-2 hover:bg-slate-200 dark:hover:bg-gray-600 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
                         >
-                          <MoreHorizontal size={16} className="text-slate-400 dark:text-slate-500" />
+                          <MoreHorizontal size={18} className="text-slate-400 dark:text-slate-500" />
                         </button>
 
                         {openMenuId === announcement.id && (
@@ -332,7 +283,7 @@ export default function AnnouncementsPage() {
                                 e.stopPropagation();
                                 router.push(`/${challengeId}/announcements/${announcement.id}`);
                               }}
-                              className="w-full px-3 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                              className="w-full px-3 py-2.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2"
                             >
                               <Eye size={14} />
                               보기
@@ -342,7 +293,7 @@ export default function AnnouncementsPage() {
                                 e.stopPropagation();
                                 router.push(`/${challengeId}/announcements/edit/${announcement.id}`);
                               }}
-                              className="w-full px-3 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                              className="w-full px-3 py-2.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2"
                             >
                               <Edit2 size={14} />
                               수정
@@ -350,7 +301,7 @@ export default function AnnouncementsPage() {
                             <div className="border-t border-slate-100 dark:border-gray-700 my-1"></div>
                             <button
                               onClick={(e) => handleDelete(e, announcement.id)}
-                              className="w-full px-3 py-1.5 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 flex items-center gap-2"
+                              className="w-full px-3 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 flex items-center gap-2"
                             >
                               <Trash2 size={14} />
                               삭제
@@ -358,11 +309,138 @@ export default function AnnouncementsPage() {
                           </div>
                         )}
                       </div>
-                    </td>
-                  </tr>
+                    </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${typeConfig[announcement.type].bg} ${typeConfig[announcement.type].text}`}>
+                        {typeLabels[announcement.type]}
+                      </span>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full ${statusConfig[announcement.status].bg} ${statusConfig[announcement.status].text}`}>
+                        <span className={`w-1 h-1 rounded-full ${statusConfig[announcement.status].dot}`}></span>
+                        {statusLabels[announcement.status]}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 space-y-0.5">
+                      <div>작성일: {formatDate(announcement.created_at)}</div>
+                      {announcement.start_date && announcement.end_date && (
+                        <div>게시기간: {formatDate(announcement.start_date)} - {formatDate(announcement.end_date)}</div>
+                      )}
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+
+              {/* 데스크톱 테이블 뷰 */}
+              <table className="w-full hidden sm:table">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50">
+                    <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">제목</th>
+                    <th className="text-center py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[80px]">순서</th>
+                    <th
+                      className="text-left py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 select-none w-[150px]"
+                      onClick={() => handleSort('created_at')}
+                    >
+                      <span className="flex items-center gap-1">
+                        작성일
+                        <ArrowUpDown size={14} className={sortField === 'created_at' ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'} />
+                      </span>
+                    </th>
+                    <th
+                      className="text-left py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 select-none w-[280px]"
+                      onClick={() => handleSort('start_date')}
+                    >
+                      <span className="flex items-center gap-1">
+                        게시기간
+                        <ArrowUpDown size={14} className={sortField === 'start_date' ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'} />
+                      </span>
+                    </th>
+                    <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[160px]">상태</th>
+                    <th className="w-12"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-gray-700">
+                  {sortedAnnouncements.map((announcement) => (
+                    <tr
+                      key={announcement.id}
+                      className="group hover:bg-slate-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                      onClick={() => router.push(`/${challengeId}/announcements/${announcement.id}`)}
+                    >
+                      <td className="py-3 px-4">
+                        <span className="font-medium text-slate-900 dark:text-white text-sm">{announcement.title}</span>
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span className="text-sm text-slate-500 dark:text-slate-400">{announcement.priority}</span>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">
+                        {formatDate(announcement.created_at)}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">
+                        {announcement.start_date && announcement.end_date
+                          ? `${formatDate(announcement.start_date)} - ${formatDate(announcement.end_date)}`
+                          : '-'
+                        }
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center justify-end gap-2">
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${typeConfig[announcement.type].bg} ${typeConfig[announcement.type].text}`}>
+                            {typeLabels[announcement.type]}
+                          </span>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${statusConfig[announcement.status].bg} ${statusConfig[announcement.status].text}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[announcement.status].dot}`}></span>
+                            {statusLabels[announcement.status]}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-2">
+                        <div className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuId(openMenuId === announcement.id ? null : announcement.id);
+                            }}
+                            className="p-1.5 hover:bg-slate-200 dark:hover:bg-gray-600 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                          >
+                            <MoreHorizontal size={16} className="text-slate-400 dark:text-slate-500" />
+                          </button>
+
+                          {openMenuId === announcement.id && (
+                            <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-slate-200 dark:border-gray-700 py-1 z-10">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(`/${challengeId}/announcements/${announcement.id}`);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                              >
+                                <Eye size={14} />
+                                보기
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(`/${challengeId}/announcements/edit/${announcement.id}`);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                              >
+                                <Edit2 size={14} />
+                                수정
+                              </button>
+                              <div className="border-t border-slate-100 dark:border-gray-700 my-1"></div>
+                              <button
+                                onClick={(e) => handleDelete(e, announcement.id)}
+                                className="w-full px-3 py-1.5 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 flex items-center gap-2"
+                              >
+                                <Trash2 size={14} />
+                                삭제
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           )}
         </div>
       </div>

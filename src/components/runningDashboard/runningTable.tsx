@@ -444,6 +444,156 @@ const RunningTable: React.FC<
     );
   }
 
+  // Mobile card component
+  const MobileCard = ({ item, index }: { item: RunningItem; index: number }) => {
+    const currentWeekIndex = weekInfo.findIndex((week) =>
+      isCurrentWeek(week.startDate, week.endDate)
+    );
+    const currentWeekData = currentWeekIndex >= 0 ? item.weeklyData[currentWeekIndex] : null;
+    const displayIndex = pagination
+      ? (pagination.currentPage - 1) * pagination.itemsPerPage + index + 1
+      : index + 1;
+
+    return (
+      <div
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-3 active:bg-gray-50 dark:active:bg-gray-700 transition-colors"
+        onClick={() => {
+          if (currentWeekData) {
+            router.push(
+              `/${item.challenge_id}/running/${item.userId}/${currentWeekData.weekNumber}?label=${currentWeekData.label}`
+            );
+          }
+        }}
+      >
+        {/* 헤더: 순위, 이름, ID */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300 font-semibold text-sm">
+              {displayIndex}
+            </div>
+            <div>
+              <div className="font-medium text-gray-900 dark:text-white">{item.name}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{item.userName}</div>
+            </div>
+          </div>
+          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+
+        {/* 이번 주 데이터 */}
+        {currentWeekData && (
+          <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-3 mb-3">
+            <div className="text-xs text-green-600 dark:text-green-300 font-medium mb-1">
+              이번 주 (W{currentWeekData.weekNumber})
+            </div>
+            <div className="flex items-center gap-4">
+              <div>
+                <span className="text-lg font-bold text-green-600 dark:text-green-300">
+                  {currentWeekData.aerobicPercentage === 0
+                    ? '-'
+                    : `${currentWeekData.aerobicPercentage.toFixed(1)}%`}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">달성률</span>
+              </div>
+              <div className="w-px h-6 bg-gray-200 dark:bg-gray-600" />
+              <div>
+                <span className="text-lg font-bold text-gray-700 dark:text-gray-200">
+                  {currentWeekData.strengthSessions === 0
+                    ? '-'
+                    : currentWeekData.strengthSessions}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">세션</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 주차별 미니 차트 */}
+        <div className="flex gap-1 overflow-x-auto pb-1">
+          {item.weeklyData.slice(-6).map((week, weekIndex) => {
+            const actualIndex = Math.max(0, item.weeklyData.length - 6) + weekIndex;
+            const weekData = weekInfo[actualIndex];
+            const isCurrent = weekData ? isCurrentWeek(weekData.startDate, weekData.endDate) : false;
+            const percentage = Math.min(week.aerobicPercentage, 100);
+
+            return (
+              <div
+                key={weekIndex}
+                className={`flex-1 min-w-[40px] ${isCurrent ? 'opacity-100' : 'opacity-70'}`}
+              >
+                <div className="text-[10px] text-center text-gray-500 dark:text-gray-400 mb-1">
+                  W{week.weekNumber}
+                </div>
+                <div className="h-12 bg-gray-100 dark:bg-gray-700 rounded relative overflow-hidden">
+                  <div
+                    className={`absolute bottom-0 left-0 right-0 transition-all ${
+                      isCurrent ? 'bg-green-500' : 'bg-green-300 dark:bg-green-600'
+                    }`}
+                    style={{ height: `${percentage}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-center text-gray-600 dark:text-gray-300 mt-1">
+                  {week.aerobicPercentage === 0 ? '-' : `${week.aerobicPercentage.toFixed(0)}%`}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Render mobile view
+  if (isMobile) {
+    return (
+      <div className="mt-4 px-4">
+        {/* 모바일 헤더 */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            참가자 ({pagination?.totalItems || sortedRunningItems.length}명)
+          </h2>
+        </div>
+
+        {/* 모바일 카드 리스트 */}
+        <div className="space-y-3">
+          {sortedRunningItems.map((item, index) => (
+            <MobileCard key={item.id} item={item} index={index} />
+          ))}
+        </div>
+
+        {sortedRunningItems.length === 0 && (
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            참가자 데이터가 없습니다
+          </div>
+        )}
+
+        {/* 모바일 페이지네이션 */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-6 pb-4">
+            <button
+              onClick={() => onPageChange?.(pagination.currentPage - 1)}
+              disabled={!pagination.hasPrevPage}
+              className="px-4 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed active:bg-gray-100 dark:active:bg-gray-700"
+            >
+              이전
+            </button>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              {pagination.currentPage} / {pagination.totalPages}
+            </span>
+            <button
+              onClick={() => onPageChange?.(pagination.currentPage + 1)}
+              disabled={!pagination.hasNextPage}
+              className="px-4 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed active:bg-gray-100 dark:active:bg-gray-700"
+            >
+              다음
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // Desktop rendering
   return (
     <div className="mt-6 px-8 overflow-x-auto w-full">

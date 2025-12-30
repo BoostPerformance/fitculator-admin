@@ -68,18 +68,20 @@ export default function Login() {
 
   return (
     <div
-      className={`flex flex-col justify-center items-center py-[12rem] dark:bg-blue-4`}
+      className="flex flex-col justify-center items-center min-h-screen py-12 sm:py-[12rem] px-4 dark:bg-blue-4"
     >
-      <div className="flex justify-center items-center h-[10rem]">
+      <div className="flex justify-center items-center h-32 sm:h-[10rem] mb-6 sm:mb-0">
         <Image
           src={`/image/${resolvedTheme === 'light' ? 'logo' : 'logo-dark'}.png`}
           alt="logo"
           width={100}
           height={100}
-          className="w-[8rem]"
+          className="w-24 sm:w-[8rem]"
         />
       </div>
-      <GoogleButton onClick={handleGoogleSignIn} />
+      <div className="w-full max-w-xs sm:max-w-none">
+        <GoogleButton onClick={handleGoogleSignIn} />
+      </div>
     </div>
   );
 }

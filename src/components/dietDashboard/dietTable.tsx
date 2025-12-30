@@ -8,6 +8,22 @@ import {
 import Modal from '../layout/modal';
 import { DietTableSkeleton } from '../layout/skeleton';
 
+// 모바일 감지 hook
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  return isMobile;
+};
+
 const DietTable: React.FC<DietTableProps> = ({
   dailyRecordsData,
   loading,
@@ -135,14 +151,79 @@ const DietTable: React.FC<DietTableProps> = ({
     setExistCoachMemo(participant.coach_memo || '');
   };
 
+  const isMobile = useIsMobile();
+
   if (loading) {
     return <DietTableSkeleton />;
   }
 
   const participantsList = participants(dailyRecordsData);
 
+  // Mobile card component
+  const MobileCard = ({ data, index }: { data: any; index: number }) => {
+    const feedbackPercent = data.feedbackRatio.total > 0
+      ? Math.round((data.feedbackRatio.completed / data.feedbackRatio.total) * 100)
+      : 0;
+
+    return (
+      <div
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-3"
+      >
+        {/* 헤더: 순위, 이름, ID */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center text-orange-600 dark:text-orange-300 font-semibold text-sm">
+              {index + 1}
+            </div>
+            <div>
+              <div className="font-medium text-gray-900 dark:text-white">
+                {data.participant.users?.name}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {data.participant.users?.username}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 피드백 진행률 */}
+        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-gray-500 dark:text-gray-400">피드백 진행률</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
+              {data.feedbackRatio.formatted}
+            </span>
+          </div>
+          <div className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-orange-500 rounded-full transition-all"
+              style={{ width: `${feedbackPercent}%` }}
+            />
+          </div>
+        </div>
+
+        {/* 코치메모 버튼 */}
+        <button
+          className="w-full py-3 px-4 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 transition-colors flex items-center justify-between min-h-[48px]"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleModalOpen(data.participant);
+          }}
+        >
+          <span className="text-gray-500 dark:text-gray-400">코치메모</span>
+          <span className="text-gray-900 dark:text-white truncate max-w-[60%] text-right">
+            {selectedParticipant && selectedParticipant.id === data.participant.id
+              ? selectedParticipant.coach_memo || '작성하기'
+              : data.participant.coach_memo || '작성하기'}
+          </span>
+        </button>
+      </div>
+    );
+  };
+
   return (
-    <div className="mt-[1.4rem] ">
+    <div className="mt-4">
+      {/* 모달 */}
       <div className="absolute items-center justify-center">
         {isModalOpen && selectedParticipant && (
           <Modal
@@ -155,90 +236,114 @@ const DietTable: React.FC<DietTableProps> = ({
           />
         )}
       </div>
-      <table className="table-auto w-full bg-white shadow rounded-lg ">
-        <thead>
-          <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
-            <th className="p-[1rem] lg:w-[15%] sm:w-[18%] sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="sm:text-0.75-500 sm:p-0">ID</div>
-                <button>
-                  <Image
-                    src="/svg/arrow-down.svg"
-                    width={10}
-                    height={10}
-                    alt="arrow-down"
-                  />
-                </button>
-              </div>
-            </th>
-            <th className="p-[1rem] lg:w-[15%] sm:w-[18%] sm:p-0 sm:pt-[1.4rem]">
-              <div className="relative flex items-center justify-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem]">
-                <div className="sm:text-0.75-500 sm:p-0">이름</div>
-                <button>
-                  <Image
-                    src="/svg/arrow-down.svg"
-                    width={10}
-                    height={10}
-                    alt="arrow-down"
-                  />
-                </button>
-              </div>
-            </th>
-            <th className="p-[1rem] sm:p-0 sm:pt-[1.4rem]">
-              <div className="flex justify-center items-center lg:gap-[1rem] sm:flex-col sm:gap-[1rem] sm:p-0">
-                <div className="sm:text-0.75-500 sm:p-0">코치메모</div>
-                <button>
-                  <Image
-                    src="/svg/arrow-down.svg"
-                    width={10}
-                    height={10}
-                    alt="arrow-down"
-                  />
-                </button>
-              </div>
-            </th>
-            <th className="p-[1rem] lg:w-[20%] sm:p-0 sm:text-0.75-500 text-center">
-              피드백 수
-            </th>
-          </tr>
-        </thead>
-        <tbody className="text-center">
-          {participantsList.map((data, index) => (
-            <tr key={index} className="text-[#6F6F6F]">
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0 lg:py-[2rem] sm:py-[1rem]">
-                {data.participant.users?.username}
-              </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {data.participant.users?.name}
-              </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                <button
-                  className="cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleModalOpen(data.participant);
-                  }}
-                >
-                  {selectedParticipant &&
-                  selectedParticipant.id === data.participant.id
-                    ? selectedParticipant.coach_memo || '코치메모'
-                    : data.participant.coach_memo || '코치메모'}
-                </button>
-              </td>
-              <td className="p-[1rem] sm:text-0.625-500 sm:p-0">
-                {data.feedbackRatio.formatted}
-              </td>
-            </tr>
-          ))}
+
+      {/* 모바일 카드 뷰 */}
+      {isMobile ? (
+        <div className="px-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              참가자 ({participantsList.length}명)
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {participantsList.map((data, index) => (
+              <MobileCard key={index} data={data} index={index} />
+            ))}
+          </div>
           {participantsList.length === 0 && (
-            <tr>
-              <td colSpan={4} className="p-4 text-center text-gray-500">
-                표시할 참가자 데이터가 없습니다.
-              </td>
-            </tr>
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              참가자 데이터가 없습니다
+            </div>
           )}
-        </tbody>
-      </table>
+        </div>
+      ) : (
+        /* 데스크톱 테이블 뷰 */
+        <table className="table-auto w-full bg-white shadow rounded-lg">
+          <thead>
+            <tr className="bg-white text-left text-1.125-500 text-[#A1A1A1]">
+              <th className="p-[1rem] lg:w-[15%]">
+                <div className="relative flex items-center justify-center lg:gap-[1rem]">
+                  <div>ID</div>
+                  <button>
+                    <Image
+                      src="/svg/arrow-down.svg"
+                      width={10}
+                      height={10}
+                      alt="arrow-down"
+                    />
+                  </button>
+                </div>
+              </th>
+              <th className="p-[1rem] lg:w-[15%]">
+                <div className="relative flex items-center justify-center lg:gap-[1rem]">
+                  <div>이름</div>
+                  <button>
+                    <Image
+                      src="/svg/arrow-down.svg"
+                      width={10}
+                      height={10}
+                      alt="arrow-down"
+                    />
+                  </button>
+                </div>
+              </th>
+              <th className="p-[1rem]">
+                <div className="flex justify-center items-center lg:gap-[1rem]">
+                  <div>코치메모</div>
+                  <button>
+                    <Image
+                      src="/svg/arrow-down.svg"
+                      width={10}
+                      height={10}
+                      alt="arrow-down"
+                    />
+                  </button>
+                </div>
+              </th>
+              <th className="p-[1rem] lg:w-[20%] text-center">
+                피드백 수
+              </th>
+            </tr>
+          </thead>
+          <tbody className="text-center">
+            {participantsList.map((data, index) => (
+              <tr key={index} className="text-[#6F6F6F] hover:bg-gray-50">
+                <td className="p-[1rem] lg:py-[2rem]">
+                  {data.participant.users?.username}
+                </td>
+                <td className="p-[1rem]">
+                  {data.participant.users?.name}
+                </td>
+                <td className="p-[1rem]">
+                  <button
+                    className="cursor-pointer hover:text-blue-600 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleModalOpen(data.participant);
+                    }}
+                  >
+                    {selectedParticipant &&
+                    selectedParticipant.id === data.participant.id
+                      ? selectedParticipant.coach_memo || '코치메모'
+                      : data.participant.coach_memo || '코치메모'}
+                  </button>
+                </td>
+                <td className="p-[1rem]">
+                  {data.feedbackRatio.formatted}
+                </td>
+              </tr>
+            ))}
+            {participantsList.length === 0 && (
+              <tr>
+                <td colSpan={4} className="p-4 text-center text-gray-500">
+                  표시할 참가자 데이터가 없습니다.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      )}
+
       {loading && (
         <div className="w-full text-center py-4">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />

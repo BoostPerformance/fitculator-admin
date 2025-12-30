@@ -49,14 +49,15 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="relative">
+    <div className="relative min-h-screen">
+      {/* 데스크톱 사용자 드롭다운 */}
       <div className="absolute right-8 top-4 z-50 hidden lg:flex md:hidden items-center gap-2">
         <div className="text-gray-500 text-sm whitespace-nowrap">
           안녕하세요, {adminData?.username} !
         </div>
         <button
           onClick={() => setUserDropdown(!userDropdown)}
-          className="flex items-center"
+          className="flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors"
         >
           <Image
             src="/svg/arrow-down.svg"
@@ -72,7 +73,7 @@ export default function AdminLayout({
           </div>
         )}
       </div>
-      <div className="flex md:flex-col sm:flex-col min-h-screen">
+      <div className="flex lg:flex-row md:flex-col sm:flex-col min-h-screen">
         <Sidebar
           data={formattedChallenges as any}
           onSelectChallenge={handleChallengeSelect}
@@ -80,7 +81,7 @@ export default function AdminLayout({
           selectedChallengeId={selectedChallengeId}
           username={adminData?.username}
         />
-        <main className="flex-1 px-[1rem] py-[1.25rem] sm:px-0 sm:py-0 bg-white-1 dark:bg-blue-4">
+        <main className="flex-1 bg-white-1 dark:bg-blue-4 lg:px-4 lg:py-5 md:px-4 md:py-4 sm:px-0 sm:py-0">
           {children}
         </main>
       </div>
