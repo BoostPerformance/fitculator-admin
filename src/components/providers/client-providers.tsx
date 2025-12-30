@@ -35,7 +35,7 @@ export default function ClientProviders({
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
-        <ThemeProvider enableSystem={true} attribute="class">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true} disableTransitionOnChange>
           <ServiceWorkerRegister />
           {children}
         </ThemeProvider>

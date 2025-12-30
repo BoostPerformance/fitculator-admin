@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Save, X, Plus, Trash2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Tiptap 에디터를 클라이언트 사이드에서만 로드
+const AnnouncementEditor = dynamic(
+  () => import('@/components/AnnouncementEditor'),
+  { ssr: false }
+);
 
 interface WorkoutSession {
   time: string;
@@ -58,13 +65,13 @@ function AbbreviationInput({ onAdd }: { onAdd: (key: string, value: string) => v
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 items-center">
       <input
         type="text"
         value={key}
         onChange={(e) => setKey(e.target.value)}
         onKeyPress={handleKeyPress}
-        className="px-2 py-1 text-sm border border-gray-300 rounded w-24"
+        className="px-2 py-1.5 text-sm border border-slate-200 dark:border-gray-600 rounded-lg w-20 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white bg-white dark:bg-gray-800 text-slate-900 dark:text-white"
         placeholder="약어"
       />
       <input
@@ -72,13 +79,13 @@ function AbbreviationInput({ onAdd }: { onAdd: (key: string, value: string) => v
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyPress={handleKeyPress}
-        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+        className="flex-1 px-2 py-1.5 text-sm border border-slate-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white bg-white dark:bg-gray-800 text-slate-900 dark:text-white"
         placeholder="설명"
       />
       <button
         type="button"
         onClick={handleAdd}
-        className="text-blue-600 hover:text-blue-700 p-1"
+        className="text-slate-400 hover:text-slate-900 dark:hover:text-white p-1 transition-colors"
       >
         <Plus size={16} />
       </button>
@@ -97,9 +104,9 @@ export default function CreateAnnouncementPage() {
   const [formData, setFormData] = useState({
     title: '',
     type: 'general' as 'general' | 'workout_schedule',
-    content: '',
+    content: { type: 'doc', content: [] } as object,
     status: 'published' as 'published',
-    priority: 0,
+    priority: 1,
     start_date: '',
     end_date: '',
     target_audience: 'all' as 'all' | 'beginner' | 'intermediate' | 'advanced'
@@ -171,11 +178,20 @@ export default function CreateAnnouncementPage() {
   const [workoutSchedule, setWorkoutSchedule] = useState<WorkoutScheduleData>(initializeWorkoutSchedule());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
+  // Tiptap content가 비어있는지 확인하는 함수
+  const isTiptapContentEmpty = (content: object): boolean => {
+    const doc = content as { type?: string; content?: Array<{ content?: unknown[] }> };
+    if (doc.type !== 'doc') return true;
+    if (!doc.content || doc.content.length === 0) return true;
+    // 빈 paragraph만 있는 경우도 비어있는 것으로 처리
+    return doc.content.every(node => !node.content || node.content.length === 0);
+  };
+
   // 변경사항 감지
   useEffect(() => {
     const hasChanges = !!(
       formData.title ||
-      formData.content ||
+      !isTiptapContentEmpty(formData.content) ||
       formData.priority > 0 ||
       formData.start_date ||
       formData.end_date ||
@@ -343,7 +359,7 @@ export default function CreateAnnouncementPage() {
       return;
     }
     
-    if (formData.type === 'general' && !formData.content.trim()) {
+    if (formData.type === 'general' && isTiptapContentEmpty(formData.content)) {
       alert('공지사항 내용을 입력해주세요.');
       return;
     }
@@ -351,7 +367,7 @@ export default function CreateAnnouncementPage() {
     setLoading(true);
 
     try {
-      let processedContent = formData.content;
+      let processedContent: string | object = formData.content;
 
       // 운동 일정의 경우 구조화된 데이터 사용
       if (formData.type === 'workout_schedule') {
@@ -434,364 +450,287 @@ export default function CreateAnnouncementPage() {
 
 
   return (
-    <div className="p-6 flex justify-center">
-      <div className="w-full max-w-4xl">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+      <div className="max-w-3xl mx-auto px-8 py-12">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="mb-10">
           <button
             onClick={handleBack}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors mb-6"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={16} />
+            돌아가기
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">새 공지사항 작성</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">새 공지사항</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">공지사항을 작성하고 발행합니다</p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Info */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">기본 정보</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <section>
+          <h2 className="text-sm font-medium text-slate-900 dark:text-white mb-4">기본 정보</h2>
+
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                제목 *
-              </label>
+              <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">제목</label>
               <input
                 type="text"
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="공지사항 제목을 입력하세요"
+                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent transition-shadow bg-white dark:bg-gray-800 text-slate-900 dark:text-white"
+                placeholder="공지사항 제목"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                유형 *
-              </label>
-              <select
-                required
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="general">일반 공지</option>
-                <option value="workout_schedule">운동 일정</option>
-              </select>
-            </div>
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">유형</label>
+                <select
+                  required
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-white"
+                >
+                  <option value="general">일반 공지</option>
+                  <option value="workout_schedule">운동 일정</option>
+                </select>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                상태
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="published">발행</option>
-              </select>
+              <div>
+                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">우선순위</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={formData.priority}
+                  onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 1 })}
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-white"
+                />
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">숫자가 높을수록 상단에 표시됩니다</p>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                우선순위
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="10"
-                value={formData.priority}
-                onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                대상 그룹
-              </label>
-              {challengeGroups.length === 0 ? (
-                <p className="text-sm text-gray-500">그룹이 없습니다. 전체 공지로 발송됩니다.</p>
-              ) : (
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="targetGroup"
-                      checked={selectedGroupIds.length === 0}
-                      onChange={selectAllGroups}
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className="text-sm font-medium text-gray-700">전체 (모든 그룹)</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="targetGroup"
-                      checked={selectedGroupIds.length > 0}
-                      onChange={() => {
-                        if (selectedGroupIds.length === 0 && challengeGroups.length > 0) {
-                          setSelectedGroupIds([challengeGroups[0].id]);
+            {challengeGroups.length > 0 && (
+              <div>
+                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">대상 그룹</label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={selectAllGroups}
+                    className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${
+                      selectedGroupIds.length === 0
+                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
+                        : 'bg-white dark:bg-gray-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-gray-600 hover:border-slate-300 dark:hover:border-gray-500'
+                    }`}
+                  >
+                    전체
+                  </button>
+                  {challengeGroups.map((group) => (
+                    <button
+                      key={group.id}
+                      type="button"
+                      onClick={() => {
+                        if (selectedGroupIds.length === 0) {
+                          setSelectedGroupIds([group.id]);
+                        } else {
+                          toggleGroupSelection(group.id);
                         }
                       }}
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className="text-sm font-medium text-gray-700">특정 그룹 선택</span>
-                  </label>
-                  {selectedGroupIds.length > 0 && (
-                    <div className="ml-6 space-y-2 border-l-2 border-gray-200 pl-4">
-                      {challengeGroups.map((group) => (
-                        <label key={group.id} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedGroupIds.includes(group.id)}
-                            onChange={() => toggleGroupSelection(group.id)}
-                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                          />
-                          <span
-                            className="text-sm text-gray-700"
-                            style={{
-                              borderLeft: group.color_code ? `3px solid ${group.color_code}` : undefined,
-                              paddingLeft: group.color_code ? '8px' : undefined
-                            }}
-                          >
-                            {group.name}
-                          </span>
-                        </label>
-                      ))}
-                      <p className="text-xs text-blue-600 mt-1">
-                        선택된 {selectedGroupIds.length}개 그룹에만 공지가 표시됩니다.
-                      </p>
-                    </div>
-                  )}
+                      className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${
+                        selectedGroupIds.includes(group.id)
+                          ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
+                          : 'bg-white dark:bg-gray-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-gray-600 hover:border-slate-300 dark:hover:border-gray-500'
+                      }`}
+                    >
+                      {group.name}
+                    </button>
+                  ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-        </div>
+        </section>
 
         {/* Date Range */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">게시 기간 *</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section>
+          <h2 className="text-sm font-medium text-slate-900 dark:text-white mb-4">게시 기간</h2>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                시작일 *
-              </label>
+              <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">시작일</label>
               <input
                 type="date"
                 required
                 value={formData.start_date}
                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                종료일 *
-              </label>
+              <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">종료일</label>
               <input
                 type="date"
                 required
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent bg-white dark:bg-gray-800 text-slate-900 dark:text-white"
               />
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Content */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">내용</h2>
-          
+        <section>
+          <h2 className="text-sm font-medium text-slate-900 dark:text-white mb-4">내용</h2>
+
           {formData.type === 'general' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                공지사항 내용 *
-              </label>
-              <textarea
-                required
-                rows={10}
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="공지사항 내용을 입력하세요."
+            <div className="border border-slate-200 dark:border-gray-600 rounded-lg overflow-hidden">
+              <AnnouncementEditor
+                content={formData.content}
+                onChange={(content) => setFormData({ ...formData, content })}
               />
             </div>
           )}
 
           {formData.type === 'workout_schedule' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">주간 운동 일정</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  💡 세션이 없는 요일은 자동으로 휴식일로 처리됩니다. 필요한 요일만 세션을 추가하세요.
-                </p>
-              </div>
-              
-              {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day, dayIndex) => {
+            <div className="space-y-4">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                세션이 없는 요일은 자동으로 휴식일로 처리됩니다
+              </p>
+
+              {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => {
                 const dayData = workoutSchedule.days[day];
                 return (
-                  <div key={day} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <h4 className="font-medium text-gray-900">
-                        {dayData.korean_name} ({dayData.english_name})
-                      </h4>
+                  <div key={day} className="border border-slate-200 dark:border-gray-700 rounded-lg">
+                    <div className="flex justify-between items-center px-4 py-3 border-b border-slate-100 dark:border-gray-700">
+                      <span className="text-sm font-medium text-slate-900 dark:text-white">
+                        {dayData.korean_name}
+                        <span className="text-slate-400 dark:text-slate-500 font-normal ml-1.5">{dayData.english_name}</span>
+                      </span>
                       <button
                         type="button"
                         onClick={() => addSession(day)}
-                        className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm"
+                        className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 transition-colors"
                       >
-                        <Plus size={16} />
+                        <Plus size={14} />
                         세션 추가
                       </button>
                     </div>
 
-                    {dayData.sessions.length === 0 ? (
-                      <p className="text-gray-400 text-sm">세션이 없습니다. 세션을 추가해주세요.</p>
-                    ) : (
-                      <div className="space-y-4">
-                        {dayData.sessions.map((session, sessionIndex) => (
-                          <div key={sessionIndex} className="bg-gray-50 rounded-lg p-4 space-y-3">
-                            <div className="flex justify-between items-start">
-                              <div className="grid grid-cols-2 gap-4 flex-1">
-                                <div>
-                                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                                    시간
-                                  </label>
-                                  <select
-                                    value={session.time}
-                                    onChange={(e) => updateSession(day, sessionIndex, 'time', e.target.value)}
-                                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                                  >
-                                    <option value="AM">AM</option>
-                                    <option value="PM">PM</option>
-                                    <option value="-">시간 미정</option>
-                                  </select>
+                    <div className="p-4">
+                      {dayData.sessions.length === 0 ? (
+                        <p className="text-xs text-slate-400 dark:text-slate-500">세션 없음</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {dayData.sessions.map((session, sessionIndex) => (
+                            <div key={sessionIndex} className="bg-slate-50 dark:bg-gray-800 rounded-lg p-3 space-y-3">
+                              <div className="flex justify-between items-start gap-3">
+                                <div className="grid grid-cols-2 gap-3 flex-1">
+                                  <div>
+                                    <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">시간</label>
+                                    <select
+                                      value={session.time}
+                                      onChange={(e) => updateSession(day, sessionIndex, 'time', e.target.value)}
+                                      className="w-full px-2 py-1.5 text-sm border border-slate-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white"
+                                    >
+                                      <option value="AM">AM</option>
+                                      <option value="PM">PM</option>
+                                      <option value="-">미정</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">운동 타입</label>
+                                    <input
+                                      type="text"
+                                      value={session.type}
+                                      onChange={(e) => updateSession(day, sessionIndex, 'type', e.target.value)}
+                                      className="w-full px-2 py-1.5 text-sm border border-slate-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white"
+                                      placeholder="Hyrox Flow"
+                                    />
+                                  </div>
                                 </div>
-                                <div>
-                                  <label className="block text-xs font-medium text-gray-600 mb-1">
-                                    운동 타입
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={session.type}
-                                    onChange={(e) => updateSession(day, sessionIndex, 'type', e.target.value)}
-                                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                                    placeholder="예: Hyrox Flow"
-                                  />
-                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeSession(day, sessionIndex)}
+                                  className="text-slate-400 hover:text-rose-500 p-1 transition-colors"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => removeSession(day, sessionIndex)}
-                                className="text-red-500 hover:text-red-700 p-1"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
 
-                            <div>
-                              <label className="block text-xs font-medium text-gray-600 mb-1">
-                                워밍업
-                              </label>
-                              <textarea
-                                value={session.warmup}
-                                onChange={(e) => updateSession(day, sessionIndex, 'warmup', e.target.value)}
-                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                                rows={3}
-                                placeholder="3:00 foam roller massage&#10;2x 12 Band pull-aparts&#10;5 thoracic spine rotation"
-                              />
-                            </div>
+                              <div>
+                                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">워밍업</label>
+                                <textarea
+                                  value={session.warmup}
+                                  onChange={(e) => updateSession(day, sessionIndex, 'warmup', e.target.value)}
+                                  className="w-full px-2 py-1.5 text-sm border border-slate-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white resize-none"
+                                  rows={2}
+                                  placeholder="줄바꿈으로 구분"
+                                />
+                              </div>
 
-                            <div>
-                              <label className="block text-xs font-medium text-gray-600 mb-1">
-                                메인 세션
-                              </label>
-                              <textarea
-                                value={session.main_session}
-                                onChange={(e) => updateSession(day, sessionIndex, 'main_session', e.target.value)}
-                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                                rows={6}
-                                placeholder="A) Strength - 8min&#10;3×5reps Deadlift @68–75% 1RM&#10;&#10;B) HYROX FLOW&#10;600m Ski&#10;30 DB One arm snatch"
-                              />
+                              <div>
+                                <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">메인 세션</label>
+                                <textarea
+                                  value={session.main_session}
+                                  onChange={(e) => updateSession(day, sessionIndex, 'main_session', e.target.value)}
+                                  className="w-full px-2 py-1.5 text-sm border border-slate-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white resize-none font-mono"
+                                  rows={4}
+                                  placeholder="운동 내용"
+                                />
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
 
               {/* Notes 섹션 */}
-              <div className="border-t border-gray-300 pt-6">
-                <h4 className="font-medium text-gray-900 mb-4">참고사항 (선택사항)</h4>
-                
+              <div className="pt-4 border-t border-slate-200 dark:border-gray-700">
+                <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-4">참고사항</h3>
+
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      안전 주의사항
-                    </label>
+                    <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">안전 주의사항</label>
                     <textarea
                       value={workoutSchedule.notes?.safety || ''}
                       onChange={(e) => updateNotes('safety', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="⚠️ 운동 전 충분한 워밍업 필수. 무리하지 마세요."
-                      rows={3}
+                      className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white resize-none"
+                      rows={2}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      일반 안내사항
-                    </label>
+                    <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">일반 안내</label>
                     <textarea
                       value={workoutSchedule.notes?.general || ''}
                       onChange={(e) => updateNotes('general', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="💡 운동 후 쿨다운과 수분 섭취를 잊지 마세요."
-                      rows={3}
+                      className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white resize-none"
+                      rows={2}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      약어 설명
-                    </label>
+                    <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">약어 설명</label>
                     <div className="space-y-2">
                       {Object.entries(workoutSchedule.notes?.abbreviations || {}).map(([key, value]) => (
-                        <div key={key} className="flex gap-2">
-                          <input
-                            type="text"
-                            value={key}
-                            readOnly
-                            className="px-2 py-1 text-sm border border-gray-300 rounded bg-gray-50 w-24"
-                          />
-                          <input
-                            type="text"
-                            value={value}
-                            readOnly
-                            className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-gray-50"
-                          />
+                        <div key={key} className="flex gap-2 items-center">
+                          <span className="px-2 py-1 text-xs bg-slate-100 dark:bg-gray-700 rounded font-medium text-slate-700 dark:text-slate-300 min-w-[60px]">{key}</span>
+                          <span className="text-sm text-slate-600 dark:text-slate-400 flex-1">{value}</span>
                           <button
                             type="button"
                             onClick={() => removeAbbreviation(key)}
-                            className="text-red-500 hover:text-red-700 p-1"
+                            className="text-slate-400 hover:text-rose-500 transition-colors"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       ))}
-                      
                       <AbbreviationInput onAdd={addAbbreviation} />
                     </div>
                   </div>
@@ -799,25 +738,23 @@ export default function CreateAnnouncementPage() {
               </div>
             </div>
           )}
-        </div>
+        </section>
 
         {/* Actions */}
-        <div className="flex gap-4">
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-200 dark:border-gray-700">
           <button
             type="button"
             onClick={handleBack}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+            className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
-            <X size={16} />
             취소
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+            className="px-4 py-2 text-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-gray-100 disabled:opacity-50 transition-colors"
           >
-            <Save size={16} />
-            {loading ? '저장 중...' : '저장'}
+            {loading ? '저장 중...' : '발행하기'}
           </button>
         </div>
         </form>

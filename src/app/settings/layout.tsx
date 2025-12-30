@@ -1,0 +1,92 @@
+'use client';
+import React, { useState } from 'react';
+import Image from 'next/image';
+import Sidebar from '@/components/fixedBars/sidebar';
+import LogoutButton from '@/components/buttons/logoutButton';
+import { useAdminData } from '@/components/hooks/useAdminData';
+import { useChallenge } from '@/components/hooks/useChallenges';
+
+interface Challenges {
+  challenges: {
+    id: string;
+    title: string;
+    start_date: string;
+    end_date: string;
+    challenge_type: 'diet' | 'exercise' | 'diet_and_exercise' | 'running';
+    enable_benchmark?: boolean;
+    enable_mission?: boolean;
+  };
+}
+
+export default function SettingsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
+  const [userDropdown, setUserDropdown] = useState(false);
+
+  const { adminData } = useAdminData();
+  const { challenges } = useChallenge();
+
+  const formattedChallenges: Challenges[] = challenges?.map((challenge) => ({
+    challenges: {
+      id: challenge.challenges.id,
+      title: challenge.challenges.title,
+      start_date: challenge.challenges.start_date,
+      end_date: challenge.challenges.end_date,
+      challenge_type: challenge.challenges.challenge_type,
+      enable_benchmark: challenge.challenges.enable_benchmark,
+      enable_mission: challenge.challenges.enable_mission,
+    },
+  })) || [];
+
+  const handleChallengeSelect = (challengeId: string) => {
+    const selectedChallenge = formattedChallenges.find(
+      (challenge) => challenge.challenges.id === challengeId
+    );
+
+    if (selectedChallenge) {
+      setSelectedChallengeId(challengeId);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <div className="absolute right-8 top-4 z-50 hidden lg:flex md:hidden items-center gap-2">
+        <div className="text-gray-500 dark:text-gray-400 text-sm whitespace-nowrap">
+          안녕하세요, {adminData?.username} !
+        </div>
+        <button
+          onClick={() => setUserDropdown(!userDropdown)}
+          className="flex items-center"
+        >
+          <Image
+            src="/svg/arrow-down.svg"
+            width={20}
+            height={20}
+            alt="arrow-down"
+            className="w-[0.8rem] dark:invert"
+          />
+        </button>
+        {userDropdown && (
+          <div className="absolute right-0 top-full mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-md px-4 py-2 z-50 min-w-[100px]">
+            <LogoutButton />
+          </div>
+        )}
+      </div>
+      <div className="flex md:flex-col sm:flex-col min-h-screen">
+        <Sidebar
+          data={formattedChallenges as any}
+          onSelectChallenge={handleChallengeSelect}
+          coach={adminData?.username}
+          selectedChallengeId={selectedChallengeId}
+          username={adminData?.username}
+        />
+        <main className="flex-1 px-[1rem] py-[1.25rem] sm:px-0 sm:py-0 bg-white-1 dark:bg-blue-4">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}

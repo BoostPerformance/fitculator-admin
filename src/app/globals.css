@@ -42,7 +42,7 @@ body {
   --chart-5: 27 87% 67%;
 }
 
-[data-theme='dark'] {
+.dark {
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
   --card: 222.2 84% 4.9%;
@@ -115,6 +115,332 @@ body {
   display: none; /* Chrome, Safari, Opera */
 }
 
-.dark {
-  background-color: #181c32;
+/* Announcement Editor Styles */
+.announcement-editor {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+}
+
+.announcement-editor .toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  background: #f9f9f9;
+  flex-wrap: wrap;
+}
+
+.announcement-editor .toolbar button {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.announcement-editor .toolbar button:hover {
+  background: #f0f0f0;
+  border-color: #ccc;
+}
+
+.announcement-editor .toolbar button.active {
+  background: #3E82F1;
+  color: white;
+  border-color: #3E82F1;
+}
+
+.announcement-editor .toolbar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.announcement-editor .toolbar-divider {
+  width: 1px;
+  background: #ddd;
+  margin: 0 4px;
+}
+
+.announcement-editor .editor-content {
+  min-height: 300px;
+  padding: 16px;
+}
+
+.announcement-editor .editor-content .ProseMirror {
+  outline: none;
+  min-height: 250px;
+}
+
+.announcement-editor .editor-content .ProseMirror p {
+  margin-bottom: 1em;
+}
+
+.announcement-editor .editor-content .ProseMirror h1,
+.announcement-editor .editor-content .ProseMirror h2,
+.announcement-editor .editor-content .ProseMirror h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+
+.announcement-editor .editor-content .ProseMirror h1 {
+  font-size: 1.875rem;
+}
+
+.announcement-editor .editor-content .ProseMirror h2 {
+  font-size: 1.5rem;
+}
+
+.announcement-editor .editor-content .ProseMirror h3 {
+  font-size: 1.25rem;
+}
+
+.announcement-editor .editor-content .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.announcement-editor .editor-content .youtube-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.announcement-editor .editor-content .youtube-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.announcement-editor .editor-content .youtube-error {
+  padding: 20px;
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.announcement-editor .editor-content .ProseMirror a {
+  color: #3E82F1;
+  text-decoration: underline;
+}
+
+.announcement-editor .editor-content .ProseMirror ul,
+.announcement-editor .editor-content .ProseMirror ol {
+  padding-left: 24px;
+  margin-bottom: 1em;
+}
+
+.announcement-editor .editor-content .ProseMirror li {
+  margin-bottom: 0.25em;
+}
+
+.announcement-editor .editor-content .ProseMirror blockquote {
+  border-left: 4px solid #3E82F1;
+  padding-left: 16px;
+  margin-left: 0;
+  color: #666;
+  font-style: italic;
+}
+
+.announcement-editor .editor-content .ProseMirror code {
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.875em;
+}
+
+.announcement-editor .editor-content .ProseMirror pre {
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.announcement-editor .editor-content .ProseMirror pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.announcement-editor .editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #aaa;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* Tiptap Content Preview Styles (상세 페이지) */
+.tiptap-content p {
+  margin-bottom: 1em;
+}
+
+.tiptap-content h1,
+.tiptap-content h2,
+.tiptap-content h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+
+.tiptap-content h1 {
+  font-size: 1.875rem;
+}
+
+.tiptap-content h2 {
+  font-size: 1.5rem;
+}
+
+.tiptap-content h3 {
+  font-size: 1.25rem;
+}
+
+.tiptap-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.tiptap-content .youtube-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tiptap-content .youtube-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.tiptap-content a {
+  color: #3E82F1;
+  text-decoration: underline;
+}
+
+.tiptap-content ul,
+.tiptap-content ol {
+  padding-left: 24px;
+  margin-bottom: 1em;
+}
+
+.tiptap-content li {
+  margin-bottom: 0.25em;
+}
+
+.tiptap-content blockquote {
+  border-left: 4px solid #3E82F1;
+  padding-left: 16px;
+  margin-left: 0;
+  color: #666;
+  font-style: italic;
+}
+
+.tiptap-content code {
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.875em;
+}
+
+.tiptap-content pre {
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.tiptap-content pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* Dark Mode - Announcement Editor */
+.dark .announcement-editor {
+  border-color: #374151;
+  background: #1f2937;
+}
+
+.dark .announcement-editor .toolbar {
+  border-bottom-color: #374151;
+  background: #111827;
+}
+
+.dark .announcement-editor .toolbar button {
+  border-color: #4b5563;
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+.dark .announcement-editor .toolbar button:hover {
+  background: #374151;
+  border-color: #6b7280;
+}
+
+.dark .announcement-editor .toolbar button.active {
+  background: #3E82F1;
+  color: white;
+  border-color: #3E82F1;
+}
+
+.dark .announcement-editor .toolbar-divider {
+  background: #4b5563;
+}
+
+.dark .announcement-editor .editor-content {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+.dark .announcement-editor .editor-content .ProseMirror {
+  color: #e5e7eb;
+}
+
+.dark .announcement-editor .editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  color: #6b7280;
+}
+
+.dark .announcement-editor .editor-content .ProseMirror blockquote {
+  color: #9ca3af;
+}
+
+.dark .announcement-editor .editor-content .ProseMirror code {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+/* Dark Mode - Tiptap Content Preview */
+.dark .tiptap-content {
+  color: #e5e7eb;
+}
+
+.dark .tiptap-content blockquote {
+  color: #9ca3af;
+}
+
+.dark .tiptap-content code {
+  background: #374151;
+  color: #e5e7eb;
 }

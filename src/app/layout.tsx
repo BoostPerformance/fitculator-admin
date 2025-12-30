@@ -2,7 +2,6 @@ import './globals.css';
 import React from 'react';
 import { Metadata, Viewport } from 'next';
 import ClientProviders from '@/components/providers/client-providers';
-import Footer from '@/components/layout/footer';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -35,7 +34,6 @@ export default function RootLayout({
       <body className="font-pretendard">
         <ClientProviders>
           {children}
-          <Footer />
         </ClientProviders>
       </body>
     </html>

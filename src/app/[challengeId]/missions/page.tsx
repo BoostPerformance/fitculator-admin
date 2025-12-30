@@ -660,14 +660,14 @@ export default function MissionsPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">로딩 중...</div>;
+    return <div className="flex justify-center items-center h-screen dark:bg-gray-900 dark:text-white">로딩 중...</div>;
   }
 
   return (
-    <div className="flex-1 p-4">
+    <div className="flex-1 p-4 dark:bg-gray-900">
       <div className="px-8 pt-4 sm:px-4 sm:pt-4">
         {currentChallenge && isMounted && (
-          <div className="text-0.875-400 text-gray-6 mb-2">
+          <div className="text-0.875-400 text-gray-6 dark:text-gray-400 mb-2">
             {new Date(currentChallenge.challenges.start_date).toLocaleDateString('ko-KR', {
               year: 'numeric',
               month: 'long',
@@ -679,7 +679,7 @@ export default function MissionsPage() {
             })}
           </div>
         )}
-        <div className="text-gray-2 text-1.25-700 mb-2">
+        <div className="text-gray-2 dark:text-white text-1.25-700 mb-2">
           {currentChallenge?.challenges.title || ''}
         </div>
         <Title title="미션" />
@@ -690,7 +690,7 @@ export default function MissionsPage() {
         <div>
           <div className="flex justify-between items-center mb-6">
             <div>
-              <p className="text-sm text-gray-500">총 {missions.length}개의 미션</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">총 {missions.length}개의 미션</p>
             </div>
           <div className="flex gap-2">
             <button
@@ -709,11 +709,11 @@ export default function MissionsPage() {
         </div>
 
         {/* 미션 테이블 */}
-        <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden mb-8">
           <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             {missions.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg mb-4">등록된 미션이 없습니다.</p>
+                <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">등록된 미션이 없습니다.</p>
                 <button
                   onClick={() => setShowAddModal(true)}
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -723,21 +723,21 @@ export default function MissionsPage() {
               </div>
             ) : (
               <table className="w-full sm:min-w-full" style={{ tableLayout: 'fixed', width: '100%' }}>
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="w-10 px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sm:w-8 sm:px-1.5 sm:py-2 sm:text-[10px]">
+                  <th className="w-10 px-2 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sm:w-8 sm:px-1.5 sm:py-2 sm:text-[10px]">
                     #
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '30%' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '30%' }}>
                     제목
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '20%' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '20%' }}>
                     그룹
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '30%' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '30%' }}>
                     <button
                       onClick={handleSortToggle}
-                      className="flex items-center gap-1 hover:text-gray-700"
+                      className="flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-200"
                     >
                       기간
                       <svg className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''} sm:w-3 sm:h-3`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -745,22 +745,22 @@ export default function MissionsPage() {
                       </svg>
                     </button>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '10%' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sm:px-3 sm:py-2 sm:text-[10px]" style={{ width: '10%' }}>
                     상태
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {sortedMissions.map((mission, index) => (
-                <tr key={mission.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => {
+                <tr key={mission.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" onClick={() => {
                   setViewingMission(mission);
                   setShowDetailModal(true);
                 }}>
                   <td className="px-2 py-4 text-center sm:px-1.5 sm:py-2">
-                    <span className="text-sm text-gray-600 sm:text-[10px]">{index + 1}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300 sm:text-[10px]">{index + 1}</span>
                   </td>
                   <td className="px-6 py-4 sm:px-3 sm:py-2">
-                    <div className="text-sm font-medium text-gray-900 sm:text-[10px]">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white sm:text-[10px]">
                       {mission.title}
                     </div>
                   </td>
@@ -784,11 +784,11 @@ export default function MissionsPage() {
                           ) : null;
                         })
                       ) : (
-                        <span className="text-xs text-gray-400 sm:text-[9px]">전체</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500 sm:text-[9px]">전체</span>
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 sm:px-3 sm:py-2 sm:text-[10px]">
+                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 sm:px-3 sm:py-2 sm:text-[10px]">
                     <div className="text-xs sm:text-[9px]">
                       {isMounted && `${new Date(mission.start_date).toLocaleDateString()} ~ ${new Date(mission.end_date).toLocaleDateString()}`}
                     </div>
@@ -811,7 +811,7 @@ export default function MissionsPage() {
         {/* 달성 현황 섹션 */}
         <div>
         <div className="mb-4">
-          <h2 className="text-2xl lg:text-3xl font-bold mb-4">미션 달성 현황</h2>
+          <h2 className="text-2xl lg:text-3xl font-bold mb-4 dark:text-white">미션 달성 현황</h2>
 
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-4">
@@ -820,7 +820,7 @@ export default function MissionsPage() {
                 <select
                   value={selectedWeek}
                   onChange={(e) => setSelectedWeek(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white"
                 >
                   {Array.from({ length: getCurrentWeekNumber() }, (_, i) => i + 1).map((week) => (
                     <option key={week} value={week}>
@@ -831,12 +831,12 @@ export default function MissionsPage() {
                   <option value="all">전체</option>
                 </select>
                 {selectedWeek !== 'all' && getWeekRange(selectedWeek) && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     {isMounted && `${getWeekRange(selectedWeek)!.start.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} ~ ${getWeekRange(selectedWeek)!.end.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}`}
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {filteredUsers.length}명
               </p>
               {/* 그룹 필터 */}
@@ -845,7 +845,7 @@ export default function MissionsPage() {
                   <select
                     value={selectedGroupFilter}
                     onChange={(e) => setSelectedGroupFilter(e.target.value)}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white"
                   >
                     {challengeGroups.map((group) => (
                       <option key={group.id} value={group.id}>
@@ -860,7 +860,7 @@ export default function MissionsPage() {
             <div className="relative">
               <button
                 onClick={() => setShowMissionFilter(!showMissionFilter)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 flex items-center gap-2"
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2"
               >
                 미션 필터 ({selectedMissionIds.size}/{missions.length})
                 <svg className={`w-4 h-4 transition-transform ${showMissionFilter ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -869,10 +869,10 @@ export default function MissionsPage() {
               </button>
 
               {showMissionFilter && (
-                <div className="absolute right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[300px]">
+                <div className="absolute right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 min-w-[300px]">
                   <div className="p-3">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700">미션 선택</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-200">미션 선택</span>
                       <div className="flex gap-1">
                         <button
                           onClick={() => {
@@ -924,11 +924,11 @@ export default function MissionsPage() {
                               }
                               setSelectedMissionIds(newSelected);
                             }}
-                            className="rounded border-gray-300"
+                            className="rounded border-gray-300 dark:border-gray-600"
                           />
-                          <span className={`${mission.is_active ? 'text-gray-900' : 'text-gray-500'}`}>
+                          <span className={`${mission.is_active ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                             {mission.title}
-                            {!mission.is_active && <span className="text-xs text-gray-400 ml-1">(비활성)</span>}
+                            {!mission.is_active && <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">(비활성)</span>}
                           </span>
                         </label>
                       ))}
@@ -940,18 +940,18 @@ export default function MissionsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             <table className="min-w-full border-collapse">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="w-12 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sm:sticky sm:left-0 sm:z-40 sm:bg-gray-50 sm:w-[28px] sm:px-2 sm:py-2 sm:text-[10px]">
+                  <th className="w-12 px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sm:sticky sm:left-0 sm:z-40 sm:bg-gray-50 dark:sm:bg-gray-700 sm:w-[28px] sm:px-2 sm:py-2 sm:text-[10px]">
                     #
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[140px] sm:sticky sm:left-[26px] sm:z-40 sm:bg-gray-50 sm:px-3 sm:py-2 sm:text-[10px] sm:min-w-[100px] sm:border-l-4 sm:border-l-gray-50 sm:border-r-2 sm:border-gray-300 sm:shadow-[2px_0_4px_rgba(0,0,0,0.05)]">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[140px] sm:sticky sm:left-[26px] sm:z-40 sm:bg-gray-50 dark:sm:bg-gray-700 sm:px-3 sm:py-2 sm:text-[10px] sm:min-w-[100px] sm:border-l-4 sm:border-l-gray-50 dark:sm:border-l-gray-700 sm:border-r-2 sm:border-gray-300 dark:sm:border-gray-600 sm:shadow-[2px_0_4px_rgba(0,0,0,0.05)]">
                     <button
                       onClick={() => handleMemberSortToggle('name')}
-                      className="flex items-center gap-1 hover:text-gray-700"
+                      className="flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-200"
                     >
                       멤버
                       <svg className={`w-4 h-4 transition-transform sm:w-3 sm:h-3 ${
@@ -961,10 +961,10 @@ export default function MissionsPage() {
                       </svg>
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] sm:px-3 sm:py-2 sm:text-[10px] sm:min-w-[90px]">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[120px] sm:px-3 sm:py-2 sm:text-[10px] sm:min-w-[90px]">
                     <button
                       onClick={() => handleMemberSortToggle('completion_rate')}
-                      className="flex items-center gap-1 hover:text-gray-700"
+                      className="flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-200"
                     >
                       달성률
                       <svg className={`w-4 h-4 transition-transform sm:w-3 sm:h-3 ${
@@ -977,7 +977,7 @@ export default function MissionsPage() {
                   {filteredMissions.map((mission) => (
                     <th
                       key={mission.id}
-                      className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px] whitespace-nowrap sm:px-2 sm:py-2 sm:text-[10px] sm:min-w-[80px]"
+                      className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[100px] whitespace-nowrap sm:px-2 sm:py-2 sm:text-[10px] sm:min-w-[80px]"
                     >
                       <div className="text-xs sm:text-[10px]">
                         {mission.title}
@@ -986,30 +986,30 @@ export default function MissionsPage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {sortedUsers.map((user, index) => {
                   const completionRate = calculateCompletionRate(user);
 
                   return (
-                    <tr key={user.id} className="group hover:bg-gray-50">
-                      <td className="w-12 px-3 py-3 text-center sm:sticky sm:left-0 sm:z-10 sm:bg-white sm:w-[28px] sm:px-2 sm:py-2 sm:group-hover:bg-gray-50">
-                        <span className="text-xs font-medium text-gray-900 sm:text-[10px]">{index + 1}</span>
+                    <tr key={user.id} className="group hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="w-12 px-3 py-3 text-center sm:sticky sm:left-0 sm:z-10 sm:bg-white dark:sm:bg-gray-800 sm:w-[28px] sm:px-2 sm:py-2 sm:group-hover:bg-gray-50 dark:sm:group-hover:bg-gray-700">
+                        <span className="text-xs font-medium text-gray-900 dark:text-white sm:text-[10px]">{index + 1}</span>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap sm:sticky sm:left-[26px] sm:z-10 sm:bg-white sm:px-3 sm:py-2 sm:border-l-4 sm:border-l-white sm:group-hover:border-l-gray-50 sm:border-r-2 sm:border-gray-300 sm:shadow-[2px_0_4px_rgba(0,0,0,0.05)] sm:group-hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap sm:sticky sm:left-[26px] sm:z-10 sm:bg-white dark:sm:bg-gray-800 sm:px-3 sm:py-2 sm:border-l-4 sm:border-l-white dark:sm:border-l-gray-800 sm:group-hover:border-l-gray-50 dark:sm:group-hover:border-l-gray-700 sm:border-r-2 sm:border-gray-300 dark:sm:border-gray-600 sm:shadow-[2px_0_4px_rgba(0,0,0,0.05)] sm:group-hover:bg-gray-50 dark:sm:group-hover:bg-gray-700">
                         <div>
-                          <div className="text-xs font-medium text-gray-900 sm:text-[10px]">{user.name}</div>
-                          <div className="text-[11px] text-gray-400 sm:text-[9px]">@{user.username}</div>
+                          <div className="text-xs font-medium text-gray-900 dark:text-white sm:text-[10px]">{user.name}</div>
+                          <div className="text-[11px] text-gray-400 dark:text-gray-500 sm:text-[9px]">@{user.username}</div>
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap sm:px-3 sm:py-2">
                         <div className="flex items-center gap-2 sm:gap-1.5">
-                          <div className="flex-1 bg-gray-200 rounded-full h-1.5 min-w-[50px] sm:h-1 sm:min-w-[40px]">
+                          <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 min-w-[50px] sm:h-1 sm:min-w-[40px]">
                             <div
                               className="bg-blue-600 h-1.5 rounded-full transition-all sm:h-1"
                               style={{ width: `${completionRate}%` }}
                             />
                           </div>
-                          <span className="text-xs font-medium text-gray-900 min-w-[35px] sm:text-[10px] sm:min-w-[30px]">{completionRate}%</span>
+                          <span className="text-xs font-medium text-gray-900 dark:text-white min-w-[35px] sm:text-[10px] sm:min-w-[30px]">{completionRate}%</span>
                         </div>
                       </td>
                       {filteredMissions.map((mission) => {
@@ -1046,7 +1046,7 @@ export default function MissionsPage() {
           </div>
 
           {users.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               참가자가 없습니다.
             </div>
           )}
@@ -1057,15 +1057,15 @@ export default function MissionsPage() {
       {/* 미션 상세/수정/삭제 모달 */}
         {showDetailModal && viewingMission && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4">
               <div className="flex justify-between items-start mb-4">
-                <h2 className="text-xl font-bold">미션 상세</h2>
+                <h2 className="text-xl font-bold dark:text-white">미션 상세</h2>
                 <button
                   onClick={() => {
                     setShowDetailModal(false);
                     setViewingMission(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1077,13 +1077,13 @@ export default function MissionsPage() {
                 {/* 왼쪽 컬럼 - 제목과 설명 */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">제목</label>
-                    <p className="text-lg font-semibold">{viewingMission.title}</p>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">제목</label>
+                    <p className="text-lg font-semibold dark:text-white">{viewingMission.title}</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">설명</label>
-                    <p className="text-gray-600 whitespace-pre-wrap break-words">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">설명</label>
+                    <p className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-words">
                       {viewingMission.description || '설명 없음'}
                     </p>
                   </div>
@@ -1093,14 +1093,14 @@ export default function MissionsPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">미션 타입</label>
-                      <p className="text-sm">
-                        {viewingMission.mission_type === 'workout' ? '운동' : 
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">미션 타입</label>
+                      <p className="text-sm dark:text-gray-400">
+                        {viewingMission.mission_type === 'workout' ? '운동' :
                          viewingMission.mission_type === 'diet' ? '식단' : '커스텀'}
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">상태</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">상태</label>
                       <p className="text-sm">
                         <span className={`px-2 py-1 text-xs rounded-full ${
                           viewingMission.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -1113,23 +1113,23 @@ export default function MissionsPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">시작일</label>
-                      <p className="text-sm">{isMounted && new Date(viewingMission.start_date).toLocaleDateString('ko-KR')}</p>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">시작일</label>
+                      <p className="text-sm dark:text-gray-400">{isMounted && new Date(viewingMission.start_date).toLocaleDateString('ko-KR')}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">종료일</label>
-                      <p className="text-sm">{isMounted && new Date(viewingMission.end_date).toLocaleDateString('ko-KR')}</p>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">종료일</label>
+                      <p className="text-sm dark:text-gray-400">{isMounted && new Date(viewingMission.end_date).toLocaleDateString('ko-KR')}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">검증 필요</label>
-                      <p className="text-sm">{viewingMission.requires_verification ? '필요' : '불필요'}</p>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">검증 필요</label>
+                      <p className="text-sm dark:text-gray-400">{viewingMission.requires_verification ? '필요' : '불필요'}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">정렬 순서</label>
-                      <p className="text-sm">{viewingMission.sort_order}</p>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">정렬 순서</label>
+                      <p className="text-sm dark:text-gray-400">{viewingMission.sort_order}</p>
                     </div>
                   </div>
                 </div>
@@ -1178,14 +1178,14 @@ export default function MissionsPage() {
         {/* 미션 추가/수정 모달 */}
         {showAddModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
               <div className="flex justify-between items-start mb-4 flex-shrink-0">
-                <h2 className="text-xl font-bold">
+                <h2 className="text-xl font-bold dark:text-white">
                   {editingMission ? '미션 수정' : '미션 추가'}
                 </h2>
                 <button
                   onClick={resetForm}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1195,39 +1195,39 @@ export default function MissionsPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-1">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     제목 *
                   </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     설명
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                     rows={3}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       미션 타입 *
                     </label>
                     <select
                       value={formData.mission_type}
                       onChange={(e) => setFormData({ ...formData, mission_type: e.target.value as 'workout' | 'diet' | 'custom' })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                     >
                       <option value="workout">운동</option>
                       {/* <option value="diet">식단</option> */}
@@ -1236,41 +1236,41 @@ export default function MissionsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       정렬 순서
                     </label>
                     <input
                       type="number"
                       value={formData.sort_order}
                       onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       시작일 *
                     </label>
                     <input
                       type="date"
                       value={formData.start_date}
                       onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       종료일 *
                     </label>
                     <input
                       type="date"
                       value={formData.end_date}
                       onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                       required
                     />
                   </div>
@@ -1282,9 +1282,9 @@ export default function MissionsPage() {
                     id="requires_verification"
                     checked={formData.requires_verification}
                     onChange={(e) => setFormData({ ...formData, requires_verification: e.target.checked })}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
                   />
-                  <label htmlFor="requires_verification" className="ml-2 block text-sm text-gray-900">
+                  <label htmlFor="requires_verification" className="ml-2 block text-sm text-gray-900 dark:text-white">
                     검증 필요
                   </label>
                 </div>
@@ -1292,7 +1292,7 @@ export default function MissionsPage() {
                 {/* 타겟 그룹 선택 */}
                 {challengeGroups.length > 0 && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       대상 그룹
                     </label>
                     <div className="space-y-2">
@@ -1303,7 +1303,7 @@ export default function MissionsPage() {
                           onChange={() => setSelectedGroupIds([])}
                           className="mr-2"
                         />
-                        <span className="text-sm text-gray-700">전체 (모든 그룹)</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">전체 (모든 그룹)</span>
                       </label>
                       <label className="flex items-center">
                         <input
@@ -1316,10 +1316,10 @@ export default function MissionsPage() {
                           }}
                           className="mr-2"
                         />
-                        <span className="text-sm text-gray-700">특정 그룹 선택</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">특정 그룹 선택</span>
                       </label>
                       {selectedGroupIds.length > 0 && (
-                        <div className="ml-6 mt-2 space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md p-2">
+                        <div className="ml-6 mt-2 space-y-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-md p-2">
                           {challengeGroups.map((group) => (
                             <label key={group.id} className="flex items-center">
                               <input
@@ -1329,7 +1329,7 @@ export default function MissionsPage() {
                                 className="mr-2"
                               />
                               <span
-                                className="text-sm"
+                                className="text-sm dark:text-gray-300"
                                 style={{
                                   borderLeft: group.color_code ? `3px solid ${group.color_code}` : undefined,
                                   paddingLeft: group.color_code ? '8px' : undefined
@@ -1352,7 +1352,7 @@ export default function MissionsPage() {
 
               </form>
 
-              <div className="flex justify-end gap-2 pt-4 border-t mt-4 flex-shrink-0">
+              <div className="flex justify-end gap-2 pt-4 border-t dark:border-gray-700 mt-4 flex-shrink-0">
                 <button
                   type="button"
                   onClick={resetForm}

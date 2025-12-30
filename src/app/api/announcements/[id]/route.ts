@@ -95,11 +95,16 @@ export async function PUT(
 
     // content를 올바른 JSON 형태로 변환
     let processedContent = content;
-    if (type === 'general' && typeof content === 'string') {
-      // 일반 공지의 경우 텍스트를 JSONB 형태로 변환 (줄바꿈 유지)
-      processedContent = {
-        text: content
-      };
+    if (type === 'general') {
+      if (typeof content === 'string') {
+        // 일반 공지의 경우 텍스트를 JSONB 형태로 변환 (줄바꿈 유지)
+        processedContent = {
+          text: content
+        };
+      } else if (content?.type === 'doc') {
+        // Tiptap JSON 형식인 경우 그대로 저장
+        processedContent = content;
+      }
     }
     // workout_schedule의 경우 이미 구조화된 객체이므로 그대로 사용
 
