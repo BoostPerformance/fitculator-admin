@@ -162,7 +162,12 @@ export async function GET(
 
 // console.log('🔍 Enriched data:', enrichedData);
 // console.log('✅ Successfully fetched admin challenges');
-      return NextResponse.json(enrichedData);
+      // Coach 응답과 동일한 구조로 맞춤 (layout.tsx에서 challenge.challenges.xxx 형태로 접근)
+      const formattedData = enrichedData.map((challenge) => ({
+        id: challenge.id,
+        challenges: challenge,
+      }));
+      return NextResponse.json(formattedData);
     }
 
     // Handle coach users
