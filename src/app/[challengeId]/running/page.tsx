@@ -165,6 +165,7 @@ export default function RunningPage() {
           weeklyChart={weeklyChart}
           todayCount={todayCount}
           isLoading={runningFetching}
+          challengeEndDate={currentChallenge?.challenges.end_date}
         />
       </div>
 

@@ -174,6 +174,7 @@ export default function WorkoutPage() {
           weeklyChart={weeklyChart}
           todayCount={todayCount}
           isLoading={workoutFetching} // 백그라운드 업데이트 상태 사용
+          challengeEndDate={currentChallenge?.challenges.end_date}
         />
       </div>
 

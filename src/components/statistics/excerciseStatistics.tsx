@@ -13,6 +13,7 @@ interface ExcerciseStatsProps {
   weeklyChart?: any;
   todayCount?: any;
   isLoading?: boolean;
+  challengeEndDate?: string;
 }
 
 const ExcerciseStatistics = memo(function ExcerciseStatistics({
@@ -23,6 +24,7 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
   weeklyChart,
   todayCount,
   isLoading = false,
+  challengeEndDate,
 }: ExcerciseStatsProps) {
 
   // 계산 결과를 useMemo로 캐싱하여 불필요한 재계산 방지
@@ -37,10 +39,10 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
       let totalCount = 0;
       let totalCardioPoints = 0;
       let participantCount = 0;
-      
+
       // 사용자별 유산소 포인트 집계
       const userCardioPoints = new Map();
-      
+
       if (Array.isArray(weeklyChart.cardioData)) {
         weeklyChart.cardioData.forEach(item => {
           if (item.points > 0) {
@@ -50,52 +52,64 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
           }
         });
       }
-      
+
       if (Array.isArray(weeklyChart.strengthData)) {
         weeklyChart.strengthData.forEach(item => {
           totalCount += item.sessions || 0;
         });
       }
-      
-      // 이번주에 해당하는 주차 찾기 (현재 날짜 기준)
+
+      // 기준 날짜 결정: 종료된 프로그램은 종료일, 진행 중인 프로그램은 오늘
       const now = new Date();
-      const thisWeekCardioData = weeklyChart.cardioData.filter(item => {
+      let referenceDate = now;
+
+      if (challengeEndDate) {
+        const endDate = new Date(challengeEndDate);
+        // 종료일이 오늘보다 이전이면 종료된 프로그램
+        if (endDate < now) {
+          referenceDate = endDate;
+        }
+      }
+
+      // 해당 주에 해당하는 주차 찾기 (referenceDate 기준)
+      const targetWeekCardioData = weeklyChart.cardioData.filter(item => {
         const startDate = new Date(item.startDate);
         const endDate = new Date(item.endDate);
-        return now >= startDate && now <= endDate && item.points > 0;
+        return referenceDate >= startDate && referenceDate <= endDate && item.points > 0;
       });
 
-      // 사용자별 이번주 유산소 포인트 계산
-      const thisWeekUserPoints = new Map();
-      thisWeekCardioData.forEach(item => {
-        const currentPoints = thisWeekUserPoints.get(item.userId) || 0;
-        thisWeekUserPoints.set(item.userId, currentPoints + item.points);
+      // 사용자별 해당 주 유산소 포인트 계산
+      const targetWeekUserPoints = new Map();
+      targetWeekCardioData.forEach(item => {
+        const currentPoints = targetWeekUserPoints.get(item.userId) || 0;
+        targetWeekUserPoints.set(item.userId, currentPoints + item.points);
       });
 
-      // 주간 평균 운동점수 = 이번주 참여한 사용자들의 평균 유산소 포인트
-      participantCount = thisWeekUserPoints.size;
-      console.log('🔍 이번주 데이터:', {
-        현재날짜: new Date().toISOString().split('T')[0],
-        이번주운동한사용자수: participantCount,
-        이번주사용자포인트맵: Array.from(thisWeekUserPoints.entries()),
+      // 주간 평균 운동점수 = 해당 주 참여한 사용자들의 평균 유산소 포인트
+      participantCount = targetWeekUserPoints.size;
+      console.log('🔍 해당 주 데이터:', {
+        기준날짜: referenceDate.toISOString().split('T')[0],
+        종료일: challengeEndDate,
+        해당주운동한사용자수: participantCount,
+        해당주사용자포인트맵: Array.from(targetWeekUserPoints.entries()),
         전체cardioData길이: weeklyChart.cardioData.length
       });
-      
+
       if (participantCount > 0) {
-        thisWeekUserPoints.forEach(points => {
+        targetWeekUserPoints.forEach(points => {
           totalCardioPoints += points;
         });
       }
-      
+
       const avgPercentage = participantCount > 0 ? Math.round(totalCardioPoints / participantCount * 10) / 10 : 0;
       console.log('📊 주간 평균 계산 결과:', {
         총참여자수: participantCount,
         총포인트: totalCardioPoints,
         평균점수: avgPercentage
       });
-      
-      return { 
-        totalWorkouts: totalCount, 
+
+      return {
+        totalWorkouts: totalCount,
         weeklyAverage: avgPercentage
       };
     }
@@ -113,10 +127,21 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
     // 주간 평균 계산
     let avgPercentage = 0;
     if (weeklyChart.cardio && weeklyChart.cardio.length > 0) {
+      // 기준 날짜 결정: 종료된 프로그램은 종료일, 진행 중인 프로그램은 오늘
       const now = new Date();
-      const dayOfWeek = now.getDay();
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - dayOfWeek);
+      let referenceDate = now;
+
+      if (challengeEndDate) {
+        const endDate = new Date(challengeEndDate);
+        // 종료일이 오늘보다 이전이면 종료된 프로그램
+        if (endDate < now) {
+          referenceDate = endDate;
+        }
+      }
+
+      const dayOfWeek = referenceDate.getDay();
+      const startOfWeek = new Date(referenceDate);
+      startOfWeek.setDate(referenceDate.getDate() - dayOfWeek);
       startOfWeek.setHours(0, 0, 0, 0);
 
       const endOfWeek = new Date(startOfWeek);
@@ -140,7 +165,7 @@ const ExcerciseStatistics = memo(function ExcerciseStatistics({
     }
 
     return { totalWorkouts: totalCount, weeklyAverage: avgPercentage };
-  }, [weeklyChart]);
+  }, [weeklyChart, challengeEndDate]);
 
   const todayStats = useMemo(() => 
     todayCount || { count: 0, total: 0 }, 

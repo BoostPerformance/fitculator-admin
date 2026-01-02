@@ -168,11 +168,20 @@ export async function GET(request: Request) {
       }
 
 
-      // 3. 이번 주의 시작일(월요일)과 종료일(일요일) 계산
-      const today = new Date();
-      const day = today.getDay();
-      const diff = today.getDate() - (day === 0 ? 6 : day - 1);
-      const monday = new Date(today.setDate(diff));
+      // 3. 기준 날짜 결정: 종료된 챌린지는 종료일, 진행 중인 챌린지는 오늘
+      const now = new Date();
+      const challengeEndDate = new Date(challenge.end_date);
+
+      // 기준 날짜: 챌린지 종료일이 오늘보다 이전이면 종료일, 아니면 오늘
+      let referenceDate = new Date(now);
+      if (challengeEndDate < now) {
+        referenceDate = new Date(challengeEndDate);
+      }
+
+      // 해당 주의 시작일(월요일)과 종료일(일요일) 계산
+      const day = referenceDate.getDay();
+      const diff = referenceDate.getDate() - (day === 0 ? 6 : day - 1);
+      const monday = new Date(referenceDate.setDate(diff));
       monday.setHours(0, 0, 0, 0);
 
       const sunday = new Date(monday);
@@ -470,26 +479,34 @@ export async function GET(request: Request) {
         );
       }
 
-      // 3. 한국 시간 기준으로 이번 주의 시작일(월요일)과 종료일(일요일) 계산
+      // 3. 기준 날짜 결정: 종료된 챌린지는 종료일, 진행 중인 챌린지는 오늘
       const now = new Date();
+      const challengeEndDate = new Date(challenge.end_date);
+
+      // 기준 날짜: 챌린지 종료일이 오늘보다 이전이면 종료일, 아니면 오늘
+      let referenceTime = now;
+      if (challengeEndDate < now) {
+        referenceTime = challengeEndDate;
+      }
+
       // 한국 시간으로 변환 (UTC + 9시간)
-      const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+      const koreaTime = new Date(referenceTime.getTime() + (9 * 60 * 60 * 1000));
       const day = koreaTime.getDay();
-      
-      // 한국 시간 기준 이번 주 월요일 00:00:00 계산
+
+      // 한국 시간 기준 해당 주 월요일 00:00:00 계산
       const daysSinceMonday = day === 0 ? 6 : day - 1;
       // 한국 시간 월요일 00:00을 밀리초로 계산
       const koreaYear = koreaTime.getFullYear();
       const koreaMonth = koreaTime.getMonth();
       const koreaDate = koreaTime.getDate() - daysSinceMonday;
-      
+
       // 한국 시간 월요일 00:00:00 생성 (UTC로 저장되지만 한국 시간 값)
       // Date.UTC는 UTC 기준이므로 한국 시간을 표현하려면 9시간 더해야 함
       const mondayKorea = new Date(Date.UTC(koreaYear, koreaMonth, koreaDate, 0, 0, 0, 0) + (9 * 60 * 60 * 1000));
-      
+
       // 한국 시간 일요일 23:59:59 생성
       const sundayKorea = new Date(Date.UTC(koreaYear, koreaMonth, koreaDate + 6, 23, 59, 59, 999) + (9 * 60 * 60 * 1000));
-      
+
       // DB 쿼리용: 한국 시간에서 UTC로 변환 (9시간 빼기)
       const monday = new Date(mondayKorea.getTime() - (9 * 60 * 60 * 1000));
       const sunday = new Date(sundayKorea.getTime() - (9 * 60 * 60 * 1000));
@@ -649,26 +666,35 @@ export async function GET(request: Request) {
     let startStr: string, endStr: string;
 
     if (period === 'weekly') {
-      // 이번 주 월요일과 일요일 계산 (UTC 기준)
+      // 기준 날짜 결정: 종료된 챌린지는 종료일, 진행 중인 챌린지는 오늘
       const now = new Date();
-      const day = now.getUTCDay();
-      const date = now.getUTCDate();
-      const year = now.getUTCFullYear();
-      const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+      const challengeEndDate = new Date(challenge.end_date);
 
-      // 이번 주 월요일 날짜 계산
+      // 기준 날짜: 챌린지 종료일이 오늘보다 이전이면 종료일, 아니면 오늘
+      let referenceDate = now;
+      if (challengeEndDate < now) {
+        referenceDate = challengeEndDate;
+      }
+
+      // 해당 주 월요일과 일요일 계산 (UTC 기준)
+      const day = referenceDate.getUTCDay();
+      const date = referenceDate.getUTCDate();
+      const year = referenceDate.getUTCFullYear();
+      const month = String(referenceDate.getUTCMonth() + 1).padStart(2, '0');
+
+      // 해당 주 월요일 날짜 계산
       const mondayDate = date - (day === 0 ? 6 : day - 1);
       const mondayMonth =
-        mondayDate < 1 ? String(now.getUTCMonth()).padStart(2, '0') : month;
+        mondayDate < 1 ? String(referenceDate.getUTCMonth()).padStart(2, '0') : month;
       startStr = `${year}-${mondayMonth}-${String(
         Math.abs(mondayDate)
       ).padStart(2, '0')}`;
 
-      // 이번 주 일요일 날짜 계산
+      // 해당 주 일요일 날짜 계산
       const sundayDate = date + (day === 0 ? 0 : 7 - day);
       const sundayMonth =
         sundayDate > 31
-          ? String(now.getUTCMonth() + 2).padStart(2, '0')
+          ? String(referenceDate.getUTCMonth() + 2).padStart(2, '0')
           : month;
       endStr = `${year}-${sundayMonth}-${String(sundayDate).padStart(2, '0')}`;
     } else {
