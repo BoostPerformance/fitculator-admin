@@ -337,29 +337,87 @@ export const WorkoutPageSkeleton = () => {
     <div className="flex-1 p-4 sm:p-0">
       {/* 헤더 섹션 스켈레톤 */}
       <div className="px-8 pt-4 sm:px-4 sm:pt-4">
-        <Skeleton className="h-6 w-48 mb-2" />
-        <Skeleton className="h-8 w-32" />
+        {/* 챌린지 기간 */}
+        <Skeleton className="h-4 w-56 mb-2" />
+        {/* 챌린지 제목 */}
+        <Skeleton className="h-7 w-40 mb-4" />
+        {/* 타이틀 + 새로고침 버튼 */}
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-9 w-24 rounded-lg" />
+        </div>
+      </div>
+
+      {/* 통계 카드 섹션 (ExcerciseStatistics) */}
+      <div className="mt-6 px-8 sm:px-4">
+        <div className="grid grid-cols-3 gap-4 sm:grid-cols-1">
+          {/* 주별 유산소 운동량 카드 */}
+          <div className="bg-white dark:bg-blue-4 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-600">
+            <Skeleton className="h-5 w-32 mb-4" />
+            <div className="h-48 flex items-end justify-around gap-2">
+              {[...Array(7)].map((_, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <Skeleton className="w-6" style={{ height: `${Math.random() * 80 + 20}%` }} />
+                  <Skeleton className="h-3 w-4" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 주별 근력 운동량 카드 */}
+          <div className="bg-white dark:bg-blue-4 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-600">
+            <Skeleton className="h-5 w-32 mb-4" />
+            <div className="h-48 flex items-end justify-around gap-2">
+              {[...Array(7)].map((_, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <Skeleton className="w-6" style={{ height: `${Math.random() * 60 + 10}%` }} />
+                  <Skeleton className="h-3 w-4" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 주간 평균 운동점수 카드 */}
+          <div className="bg-white dark:bg-blue-4 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-600">
+            <div className="flex justify-between items-center mb-4">
+              <Skeleton className="h-5 w-36" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+            </div>
+            <div className="flex flex-col items-center justify-center h-48">
+              <Skeleton className="h-12 w-24 mb-2" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* PC 테이블 스켈레톤 */}
       <div className="mt-6 px-8 overflow-x-auto w-full sm:hidden">
-        <div className="w-full overflow-x-auto">
-          <div className="w-full bg-white rounded-lg border border-gray-200 min-w-[1000px] p-4">
+        <div className="w-full overflow-x-auto bg-white dark:bg-blue-4 shadow rounded-lg border border-gray-200 dark:border-gray-600">
+          <div className="min-w-[1000px] p-4">
             {/* 테이블 헤더 */}
-            <div className="flex gap-4 mb-4">
-              <Skeleton className="h-6 w-16" />
-              <Skeleton className="h-6 w-20" />
-              {[...Array(8)].map((_, i) => (
-                <Skeleton key={i} className="h-6 w-24" />
+            <div className="flex gap-4 mb-4 pb-3 border-b border-gray-200 dark:border-gray-600">
+              <Skeleton className="h-5 w-8" />
+              <Skeleton className="h-5 w-16" />
+              <Skeleton className="h-5 w-20" />
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <Skeleton className="h-5 w-12" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
               ))}
             </div>
             {/* 테이블 로우 */}
-            {[...Array(10)].map((_, i) => (
-              <div key={i} className="flex gap-4 py-3 border-t">
-                <Skeleton className="h-6 w-16" />
-                <Skeleton className="h-6 w-20" />
-                {[...Array(8)].map((_, j) => (
-                  <Skeleton key={j} className="h-6 w-24" />
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="flex gap-4 py-3 border-b border-gray-200 dark:border-gray-600">
+                <Skeleton className="h-5 w-8" />
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-5 w-20" />
+                {[...Array(6)].map((_, j) => (
+                  <div key={j} className="flex flex-col items-center gap-1">
+                    <Skeleton className="h-4 w-10" />
+                    <Skeleton className="h-3 w-6" />
+                  </div>
                 ))}
               </div>
             ))}
@@ -371,15 +429,17 @@ export const WorkoutPageSkeleton = () => {
       <div className="mt-[3rem] sm:px-[1rem] lg:hidden md:hidden sm:block w-full">
         <div className="flex flex-col gap-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="pb-[2rem] sm:bg-white rounded-md shadow">
+            <div key={i} className="pb-[2rem] bg-white dark:bg-blue-4 rounded-md shadow dark:shadow-none dark:border dark:border-gray-600">
               <Skeleton className="h-6 w-32 mt-4 ml-4 mb-4" />
               <div className="px-4">
-                <div className="flex gap-2 mb-3">
+                <div className="flex gap-3 mb-2">
                   {[...Array(7)].map((_, j) => (
-                    <div key={j} className="flex flex-col items-center">
-                      <Skeleton className="h-4 w-8 mb-2" />
-                      <Skeleton className="h-6 w-6 rounded-full" />
-                    </div>
+                    <Skeleton key={j} className="h-4 w-8" />
+                  ))}
+                </div>
+                <div className="flex gap-3">
+                  {[...Array(7)].map((_, j) => (
+                    <Skeleton key={j} className="h-6 w-6 rounded" />
                   ))}
                 </div>
               </div>

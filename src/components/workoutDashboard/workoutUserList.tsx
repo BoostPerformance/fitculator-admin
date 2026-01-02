@@ -460,7 +460,7 @@ const WorkoutUserList: React.FC<
           return (
             <div
               key={index}
-              className="pt-[0rem] pb-[2rem] sm:bg-white rounded-md shadow cursor-pointer"
+              className="pt-[0rem] pb-[2rem] sm:bg-white dark:bg-blue-4 rounded-md shadow dark:shadow-none dark:border dark:border-gray-600 cursor-pointer"
               onClick={() => {
                 // console.log('👤 사용자 카드 클릭됨!', {
                 //   user: user.name,
@@ -489,7 +489,7 @@ const WorkoutUserList: React.FC<
                 }
               }}
             >
-              <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]">
+              <div className="text-[#6F6F6F] dark:text-gray-4 text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]">
                 {user.name}
               </div>
               <table className="w-full">
@@ -502,7 +502,7 @@ const WorkoutUserList: React.FC<
                     const weekSlice = user.weeklyData.slice(start, end);
                     return (
                       <React.Fragment key={groupIdx}>
-                        <tr className="sm:pl-[0.5rem] flex w-full justify-start gap-[0.9rem] text-gray-11 text-1-500">
+                        <tr className="sm:pl-[0.5rem] flex w-full justify-start gap-[0.9rem] text-gray-11 dark:text-gray-5 text-1-500">
                           {weekSlice.map((week, i) => (
                             <th key={i} className="text-center min-w-[2.5rem]">
                               {week.weekNumber}주
@@ -513,7 +513,7 @@ const WorkoutUserList: React.FC<
                           {weekSlice.map((week, i) => (
                             <td
                               key={i}
-                              className="text-center p-3 cursor-pointer hover:bg-gray-50"
+                              className="text-center p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                               onClick={(e) => {
                                 e.stopPropagation(); // 부모 클릭 이벤트 방지
                                 // console.log('🎯 주차별 운동량 칸 클릭됨!', {
@@ -538,7 +538,7 @@ const WorkoutUserList: React.FC<
                             >
                               <div className="flex flex-col items-center">
                                 {isWorkoutUploaded(week.aerobicPercentage)}
-                                <div className="text-xs text-gray-400 mt-1">
+                                <div className="text-xs text-gray-400 dark:text-gray-5 mt-1">
                                   {week.strengthSessions === 0
                                     ? '-'
                                     : `${week.strengthSessions}`}

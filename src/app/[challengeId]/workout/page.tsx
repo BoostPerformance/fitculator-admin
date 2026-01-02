@@ -121,7 +121,7 @@ export default function WorkoutPage() {
       <div className="px-8 pt-4 sm:px-4 sm:pt-4">
         {/* 챌린지 기간 표시 */}
         {currentChallenge && (
-          <div className="text-0.875-400 text-gray-6 mb-2">
+          <div className="text-0.875-400 text-gray-6 dark:text-gray-7 mb-2">
             {new Date(currentChallenge.challenges.start_date).toLocaleDateString('ko-KR', {
               year: 'numeric',
               month: 'long',
@@ -133,7 +133,7 @@ export default function WorkoutPage() {
             })}
           </div>
         )}
-        <div className="text-gray-2 text-1.25-700">
+        <div className="text-gray-2 dark:text-gray-4 text-1.25-700">
           {currentChallenge?.challenges.title || ''}
         </div>
         <div className="flex items-center justify-between">
@@ -141,7 +141,7 @@ export default function WorkoutPage() {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing || workoutFetching}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-4 bg-white dark:bg-blue-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="데이터 새로고침"
           >
             <IoRefresh 

@@ -607,10 +607,10 @@ const WorkoutTable: React.FC<
   return (
     <div className="mt-6 px-8 overflow-x-auto w-full">
       {/* Main workout table */}
-      <div className="w-full overflow-x-auto bg-white shadow rounded-lg border border-gray-200">
+      <div className="w-full overflow-x-auto bg-white dark:bg-blue-4 shadow rounded-lg border border-gray-200 dark:border-gray-600">
         <table className="w-full min-w-[1000px]">
           <thead>
-            <tr className="bg-white text-gray-500">
+            <tr className="bg-white dark:bg-blue-4 text-gray-500 dark:text-gray-4">
               <th className="w-[3%] p-3 text-center">
                 <span className="text-sm">#</span>
               </th>
@@ -644,7 +644,7 @@ const WorkoutTable: React.FC<
                     key={index}
                     className={`w-[10%] p-3 text-center ${
                       isCurrent
-                        ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200'
+                        ? 'bg-blue-50 dark:bg-blue-900/30'
                         : ''
                     }`}
                   >
@@ -688,15 +688,15 @@ const WorkoutTable: React.FC<
                   ref={
                     index === sortedWorkoutItems.length - 1 ? lastRowRef : null
                   }
-                  className="border-b border-gray-200 hover:bg-[#F4F6FC]"
+                  className="border-b border-gray-200 dark:border-gray-600 hover:bg-[#F4F6FC] dark:hover:bg-gray-700"
                 >
-                  <td className="p-3 text-center text-gray-500">{index + 1}</td>
+                  <td className="p-3 text-center text-gray-500 dark:text-gray-4">{index + 1}</td>
                   <td className="p-3">
-                    <div className="text-black dark:text-black">
+                    <div className="text-black dark:text-gray-4">
                       {item.userName || '-'}
                     </div>
                   </td>
-                  <td className="p-3 text-black">{item.name}</td>
+                  <td className="p-3 text-black dark:text-gray-4">{item.name}</td>
                   {item.weeklyData.map((week, weekIndex) => {
                     const currentWeekInfo = weekInfo[weekIndex];
                     const isCurrent = currentWeekInfo
@@ -711,7 +711,7 @@ const WorkoutTable: React.FC<
                         key={weekIndex}
                         className={`p-3 text-center cursor-pointer ${
                           isCurrent
-                            ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200'
+                            ? 'bg-blue-50 dark:bg-blue-900/30'
                             : ''
                         }`}
                         onClick={() =>
@@ -732,7 +732,7 @@ const WorkoutTable: React.FC<
                               ? '-'
                               : `${week.aerobicPercentage.toFixed(1)}%`}
                           </span>
-                          <span className="text-gray-400 text-sm">
+                          <span className="text-gray-400 dark:text-gray-5 text-sm">
                             {week.strengthSessions === 0
                               ? '-'
                               : `${week.strengthSessions}`}
@@ -760,7 +760,7 @@ const WorkoutTable: React.FC<
                         key={`empty-${i}`}
                         className={`p-3 text-center ${
                           isCurrent
-                            ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200'
+                            ? 'bg-blue-50 dark:bg-blue-900/30'
                             : ''
                         }`}
                       >
