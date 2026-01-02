@@ -238,7 +238,7 @@ export default function MembersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-900">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-4">
             <div className="absolute inset-0 rounded-full border-4 border-slate-200 dark:border-gray-700"></div>
@@ -251,7 +251,7 @@ export default function MembersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-900">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -267,36 +267,36 @@ export default function MembersPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-4 sm:grid-cols-2 gap-2 sm:gap-4 mb-6 sm:mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm border border-slate-100 dark:border-gray-700 flex items-center gap-2 sm:gap-3">
-                        <div className="min-w-0">
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">전체 멤버</p>
-              <p className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">{participants.length}</p>
+        <div className="grid grid-cols-4 gap-4 mb-8 sm:grid-cols-2 sm:gap-2 sm:mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-sm border border-slate-100 dark:border-gray-700 flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
+            <div className="min-w-0">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium sm:text-[11px]">전체 멤버</p>
+              <p className="text-xl font-bold text-slate-800 dark:text-white sm:text-lg">{participants.length}</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm border border-slate-100 dark:border-gray-700 flex items-center gap-2 sm:gap-3">
-                        <div className="min-w-0">
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">그룹 수</p>
-              <p className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">{groups.length}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-sm border border-slate-100 dark:border-gray-700 flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
+            <div className="min-w-0">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium sm:text-[11px]">그룹 수</p>
+              <p className="text-xl font-bold text-slate-800 dark:text-white sm:text-lg">{groups.length}</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm border border-slate-100 dark:border-gray-700 flex items-center gap-2 sm:gap-3">
-                        <div className="min-w-0">
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">배정 완료</p>
-              <p className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">{participants.filter(p => p.current_group).length}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-sm border border-slate-100 dark:border-gray-700 flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
+            <div className="min-w-0">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium sm:text-[11px]">배정 완료</p>
+              <p className="text-xl font-bold text-slate-800 dark:text-white sm:text-lg">{participants.filter(p => p.current_group).length}</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm border border-slate-100 dark:border-gray-700 flex items-center gap-2 sm:gap-3">
-                        <div className="min-w-0">
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">미배정</p>
-              <p className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">{participants.filter(p => !p.current_group).length}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-sm border border-slate-100 dark:border-gray-700 flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
+            <div className="min-w-0">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium sm:text-[11px]">미배정</p>
+              <p className="text-xl font-bold text-slate-800 dark:text-white sm:text-lg">{participants.filter(p => !p.current_group).length}</p>
             </div>
           </div>
         </div>
 
         {/* Group Filter */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 p-4 sm:p-6 mb-4 sm:mb-6">
-          <div className="flex items-center justify-between gap-4 mb-4 sm:mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 p-6 mb-6 sm:rounded-xl sm:p-4 sm:mb-4">
+          <div className="flex items-center justify-between gap-4 mb-6 sm:mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-white">그룹</h2>
               <button
@@ -310,10 +310,10 @@ export default function MembersPage() {
           </div>
 
           {/* Group Pills - 모바일에서 가로 스크롤 */}
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible scrollbar-hide">
+          <div className="flex gap-2 flex-wrap overflow-visible sm:overflow-x-auto sm:flex-nowrap sm:pb-2 sm:-mx-4 sm:px-4 scrollbar-hide">
             <button
               onClick={() => setSelectedGroup('all')}
-              className={`flex-shrink-0 px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium transition-all duration-200 min-h-[40px] whitespace-nowrap ${
+              className={`flex-shrink-0 px-4 py-2 rounded-xl text-base font-medium transition-all duration-200 min-h-[40px] whitespace-nowrap sm:px-3 sm:rounded-lg sm:text-sm ${
                 selectedGroup === 'all'
                   ? 'bg-slate-800 dark:bg-white text-white dark:text-slate-800 shadow-md'
                   : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-gray-600'
@@ -323,7 +323,7 @@ export default function MembersPage() {
             </button>
             <button
               onClick={() => setSelectedGroup('none')}
-              className={`flex-shrink-0 px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium transition-all duration-200 min-h-[40px] whitespace-nowrap ${
+              className={`flex-shrink-0 px-4 py-2 rounded-xl text-base font-medium transition-all duration-200 min-h-[40px] whitespace-nowrap sm:px-3 sm:rounded-lg sm:text-sm ${
                 selectedGroup === 'none'
                   ? 'bg-slate-600 text-white shadow-md'
                   : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-gray-600'
@@ -335,7 +335,7 @@ export default function MembersPage() {
               <button
                 key={group.id}
                 onClick={() => setSelectedGroup(group.id)}
-                className="flex-shrink-0 px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl text-sm sm:text-base font-medium transition-all duration-200 flex items-center gap-2 min-h-[40px] whitespace-nowrap"
+                className="flex-shrink-0 px-4 py-2 rounded-xl text-base font-medium transition-all duration-200 flex items-center gap-2 min-h-[40px] whitespace-nowrap sm:px-3 sm:rounded-lg sm:text-sm"
                 style={{
                   backgroundColor: selectedGroup === group.id ? group.color_code : `${group.color_code}15`,
                   color: selectedGroup === group.id ? 'white' : group.color_code
@@ -372,22 +372,22 @@ export default function MembersPage() {
 
         {/* Bulk Actions Bar */}
         {selectedParticipants.length > 0 && (
-          <div className="bg-indigo-500 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 shadow-lg animate-in slide-in-from-bottom-4 duration-300">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="bg-indigo-500 rounded-2xl p-4 mb-6 shadow-lg animate-in slide-in-from-bottom-4 duration-300 sm:rounded-xl sm:p-3 sm:mb-4">
+            <div className="flex flex-row items-center justify-between gap-3 sm:flex-col">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
-                  <FiCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 sm:w-8 sm:h-8 sm:rounded-lg">
+                  <FiCheck className="w-5 h-5 text-white sm:w-4 sm:h-4" />
                 </div>
-                <span className="text-white font-medium text-sm sm:text-base">{selectedParticipants.length}명 선택됨</span>
+                <span className="text-white font-medium text-base sm:text-sm">{selectedParticipants.length}명 선택됨</span>
               </div>
-              <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-3 sm:gap-2">
                 <select
                   onChange={(e) => {
                     if (e.target.value) {
                       bulkAssignToGroup(e.target.value);
                     }
                   }}
-                  className="flex-1 sm:flex-none px-3 sm:px-4 py-2.5 rounded-lg sm:rounded-xl bg-white/20 text-white border-0 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer min-h-[44px]"
+                  className="px-4 py-2.5 rounded-xl bg-white/20 text-white border-0 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer min-h-[44px] sm:flex-1 sm:px-3 sm:rounded-lg"
                 >
                   <option value="" className="text-slate-800">그룹 선택...</option>
                   {groups.map(group => (
@@ -396,7 +396,7 @@ export default function MembersPage() {
                 </select>
                 <button
                   onClick={() => setSelectedParticipants([])}
-                  className="px-3 sm:px-4 py-2.5 bg-white/20 text-white rounded-lg sm:rounded-xl hover:bg-white/30 transition-colors font-medium text-sm min-h-[44px]"
+                  className="px-4 py-2.5 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-colors font-medium text-sm min-h-[44px] sm:px-3 sm:rounded-lg"
                 >
                   취소
                 </button>
@@ -406,23 +406,23 @@ export default function MembersPage() {
         )}
 
         {/* Search & Member List */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 overflow-hidden sm:rounded-xl">
           {/* Search Bar */}
-          <div className="p-3 sm:p-4 border-b border-slate-100 dark:border-gray-700">
+          <div className="p-4 border-b border-slate-100 dark:border-gray-700 sm:p-3">
             <div className="relative">
-              <FiSearch className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 sm:w-5 sm:h-5" />
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 sm:left-3 sm:w-4 sm:h-4" />
               <input
                 type="text"
                 placeholder="이름, 이메일로 검색..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base bg-slate-50 dark:bg-gray-700 rounded-lg sm:rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white dark:focus:bg-gray-600 dark:text-white transition-all"
+                className="w-full pl-12 pr-4 py-3 text-base bg-slate-50 dark:bg-gray-700 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white dark:focus:bg-gray-600 dark:text-white transition-all sm:pl-10 sm:py-2.5 sm:text-sm sm:rounded-lg"
               />
             </div>
           </div>
 
           {/* 모바일 카드 뷰 */}
-          <div className="sm:hidden divide-y divide-slate-100 dark:divide-gray-700">
+          <div className="hidden sm:block divide-y divide-slate-100 dark:divide-gray-700">
             {filteredParticipants.map((participant) => (
               <div
                 key={participant.id}
@@ -542,7 +542,7 @@ export default function MembersPage() {
           </div>
 
           {/* 데스크톱 테이블 뷰 */}
-          <div className="hidden sm:block overflow-x-auto">
+          <div className="sm:hidden overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-slate-50/50 dark:bg-gray-700/50">

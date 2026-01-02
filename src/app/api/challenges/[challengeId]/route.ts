@@ -12,11 +12,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: Request,
-  { params }: { params: { challengeId: string } }
+  { params }: { params: Promise<{ challengeId: string }> }
 ) {
   try {
     // console.log('🔍 === Challenge Detail API Start ===');
-    const { challengeId } = params;
+    const { challengeId } = await params;
     // console.log('📝 Challenge ID:', challengeId);
 
     const session = (await getServerSession(authOptions)) as Session;
@@ -132,7 +132,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { challengeId: string } }
+  { params }: { params: Promise<{ challengeId: string }> }
 ) {
   try {
     const session = (await getServerSession(authOptions)) as Session;
@@ -165,7 +165,7 @@ export async function PUT(
     }
 
     // 챌린지 ID 확인
-    const { challengeId } = params;
+    const { challengeId } = await params;
     if (!challengeId) {
       return NextResponse.json(
         {

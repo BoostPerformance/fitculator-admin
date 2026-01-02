@@ -547,7 +547,7 @@ export default function EditAnnouncementPage() {
 
   if (fetching) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
+      <div className="min-h-screen">
         <div className="max-w-3xl mx-auto px-8 py-12">
           <div className="animate-pulse space-y-6">
             <div className="h-4 bg-slate-100 dark:bg-gray-700 rounded w-16"></div>
@@ -563,7 +563,7 @@ export default function EditAnnouncementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen">
       <div className="max-w-3xl mx-auto px-8 py-12">
         {/* Header */}
         <div className="mb-10">

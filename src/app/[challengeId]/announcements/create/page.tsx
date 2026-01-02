@@ -450,7 +450,7 @@ export default function CreateAnnouncementPage() {
 
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen">
       <div className="max-w-3xl mx-auto px-8 py-12">
         {/* Header */}
         <div className="mb-10">

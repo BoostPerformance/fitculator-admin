@@ -270,7 +270,7 @@ export default function AnnouncementDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
+      <div className="min-h-screen">
         <div className="max-w-4xl mx-auto px-8 py-12">
           <div className="animate-pulse space-y-6">
             <div className="h-4 bg-slate-100 dark:bg-gray-700 rounded w-16"></div>
@@ -290,7 +290,7 @@ export default function AnnouncementDetailPage() {
 
   if (!announcement) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
+      <div className="min-h-screen">
         <div className="max-w-4xl mx-auto px-8 py-12">
           <p className="text-slate-500 dark:text-slate-400 text-sm">공지사항을 찾을 수 없습니다.</p>
           <button
@@ -305,7 +305,7 @@ export default function AnnouncementDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-8 py-12">
         {/* Back button */}
         <button

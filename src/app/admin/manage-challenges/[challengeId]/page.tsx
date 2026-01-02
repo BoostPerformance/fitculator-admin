@@ -1,11 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import Image from 'next/image';
 import Title from '@/components/layout/title';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  Building2,
+  Users,
+  ImageIcon,
+  Save,
+  UserPlus,
+  Trash2,
+  ToggleLeft,
+  ToggleRight,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
+  Mail,
+  User,
+  Pencil,
+  X,
+} from 'lucide-react';
 
 // Supabase 클라이언트 초기화
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -38,12 +56,19 @@ interface Participant {
   status?: string;
 }
 
+const challengeTypeConfig: { [key: string]: { label: string; bg: string; text: string } } = {
+  diet: { label: '식단', bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400' },
+  exercise: { label: '운동', bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400' },
+  diet_and_exercise: { label: '식단 및 운동', bg: 'bg-violet-50 dark:bg-violet-900/30', text: 'text-violet-700 dark:text-violet-400' },
+  running: { label: '러닝', bg: 'bg-orange-50 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-400' },
+};
+
 export default function ChallengeDetail({
   params,
 }: {
-  params: { challengeId: string };
+  params: Promise<{ challengeId: string }>;
 }) {
-  const { challengeId } = params;
+  const { challengeId } = use(params);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,6 +91,8 @@ export default function ChallengeDetail({
   const [isDeletingParticipant, setIsDeletingParticipant] = useState(false);
   const [sortBy, setSortBy] = useState<'email' | 'name' | 'username' | 'created_at'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const router = useRouter();
 
   // 챌린지 정보 가져오기
@@ -74,11 +101,9 @@ export default function ChallengeDetail({
       try {
         setIsLoading(true);
         const response = await fetch(`/api/challenges/${challengeId}`);
-        // console.log('챌린지 API 응답 상태:', response.status);
-        
+
         if (response.ok) {
           const data = await response.json();
-          // console.log('챌린지 데이터:', data);
           setChallenge(data);
           setTitle(data.title);
           setDescription(data.description || '');
@@ -88,16 +113,9 @@ export default function ChallengeDetail({
           setCoverImageUrl(data.cover_image_url || '');
           setSelectedOrganization(data.organization_id);
           setChallengeType(data.challenge_type || 'diet_and_exercise');
-        } else {
-          const errorText = await response.text();
-          // console.error('챌린지 정보 가져오기 실패:', {
-          //   status: response.status,
-          //   statusText: response.statusText,
-          //   error: errorText
-          // });
         }
       } catch (error) {
-        // console.error('챌린지 정보 가져오기 오류:', error);
+        // Error handling
       } finally {
         setIsLoading(false);
       }
@@ -116,7 +134,7 @@ export default function ChallengeDetail({
           setOrganizations(data);
         }
       } catch (error) {
-// console.error('조직 목록 가져오기 오류:', error);
+        // Error handling
       }
     };
 
@@ -144,7 +162,7 @@ export default function ChallengeDetail({
           );
         }
       } catch (error) {
-// console.error('참가자 목록 가져오기 오류:', error);
+        // Error handling
       }
     };
 
@@ -152,6 +170,21 @@ export default function ChallengeDetail({
       fetchParticipants();
     }
   }, [challengeId]);
+
+  // ESC 키로 모달 닫기
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsEditModalOpen(false);
+    };
+    if (isEditModalOpen) {
+      document.addEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isEditModalOpen]);
 
   // 이미지 업로드 핸들러
   const handleBannerImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,7 +210,6 @@ export default function ChallengeDetail({
     const filePath = `${folder}/${fileName}`;
 
     try {
-      // 진행 상황을 시뮬레이션하기 위한 간단한 타이머 설정
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev >= 90) {
@@ -188,7 +220,7 @@ export default function ChallengeDetail({
         });
       }, 300);
 
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('challenge-images')
         .upload(filePath, image, {
           cacheControl: '3600',
@@ -200,14 +232,12 @@ export default function ChallengeDetail({
 
       if (error) throw error;
 
-      // 업로드된 이미지의 공개 URL 생성
       const { data: urlData } = supabase.storage
         .from('challenge-images')
         .getPublicUrl(filePath);
 
       return urlData.publicUrl;
     } catch (error) {
-// console.error('이미지 업로드 오류:', error);
       alert('이미지 업로드 중 오류가 발생했습니다.');
       return '';
     }
@@ -219,10 +249,9 @@ export default function ChallengeDetail({
 
     if (!challenge) return;
 
-    setIsLoading(true);
+    setIsSaving(true);
 
     try {
-      // 이미지 업로드
       let bannerUrl = bannerImageUrl;
       let coverUrl = coverImageUrl;
 
@@ -234,7 +263,6 @@ export default function ChallengeDetail({
         coverUrl = await uploadImage(coverImage, 'challenge-covers');
       }
 
-      // PUT 요청으로 챌린지 업데이트
       const response = await fetch(`/api/challenges/${challengeId}`, {
         method: 'PUT',
         headers: {
@@ -256,15 +284,17 @@ export default function ChallengeDetail({
         throw new Error('챌린지 수정에 실패했습니다.');
       }
 
-      // 성공 시 챌린지 정보 업데이트
       const updatedChallenge = await response.json();
       setChallenge(updatedChallenge);
-      alert('챌린지가 성공적으로 수정되었습니다!');
+      setBannerImageUrl(bannerUrl);
+      setCoverImageUrl(coverUrl);
+      setIsEditModalOpen(false);
+      setBannerImage(null);
+      setCoverImage(null);
     } catch (error) {
-// console.error('Error updating challenge:', error);
       alert('챌린지 수정 중 오류가 발생했습니다.');
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
       setUploadProgress(0);
     }
   };
@@ -274,7 +304,6 @@ export default function ChallengeDetail({
     participantId: string,
     currentStatus: string
   ) => {
-    // 상태 변경 확인
     const newStatus = currentStatus === 'active' ? 'dropped' : 'active';
     const confirmMessage =
       newStatus === 'active'
@@ -288,24 +317,15 @@ export default function ChallengeDetail({
     setIsUpdatingStatus(true);
 
     try {
-      // console.log('클라이언트에서 상태 토글 요청:', {
-      //   participantId,
-      //   status: newStatus,
-      // });
-
-      const requestBody = {
-        participantId,
-        status: newStatus,
-      };
-
-      // console.log('요청 본문:', JSON.stringify(requestBody));
-
       const response = await fetch('/api/challenge-participants', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          participantId,
+          status: newStatus,
+        }),
       });
 
       if (!response.ok) {
@@ -313,14 +333,12 @@ export default function ChallengeDetail({
         throw new Error(errorData.error || '참가자 상태 변경에 실패했습니다.');
       }
 
-      // 참가자 목록 업데이트
       setParticipants(
         participants.map((p) =>
           p.id === participantId ? { ...p, status: newStatus } : p
         )
       );
     } catch (error) {
-// console.error('참가자 상태 변경 오류:', error);
       alert(
         error instanceof Error
           ? error.message
@@ -333,7 +351,6 @@ export default function ChallengeDetail({
 
   // 참가자 삭제 핸들러
   const handleDeleteParticipant = async (participantId: string) => {
-    // 삭제 확인
     if (!confirm('정말로 이 참가자를 삭제하시겠습니까?')) {
       return;
     }
@@ -353,10 +370,8 @@ export default function ChallengeDetail({
         throw new Error(errorData.error || '참가자 삭제에 실패했습니다.');
       }
 
-      // 참가자 목록 업데이트
       setParticipants(participants.filter((p) => p.id !== participantId));
     } catch (error) {
-// console.error('참가자 삭제 오류:', error);
       alert(
         error instanceof Error
           ? error.message
@@ -398,7 +413,6 @@ export default function ChallengeDetail({
 
       const newParticipantData = await response.json();
 
-      // 참가자 목록 업데이트
       setParticipants([
         ...participants,
         {
@@ -407,17 +421,13 @@ export default function ChallengeDetail({
           name: newParticipantData.user_info.name || '',
           username: newParticipantData.user_info.username || '',
           created_at: new Date().toISOString(),
-          status: 'dropped', // 기본값으로 비활성 상태 설정
+          status: 'dropped',
         },
       ]);
 
-      // 입력 필드 초기화
       setNewParticipantEmail('');
       setNewParticipantName('');
-
-      alert('참가자가 성공적으로 추가되었습니다!');
     } catch (error) {
-// console.error('참가자 추가 오류:', error);
       alert(
         error instanceof Error
           ? error.message
@@ -434,29 +444,11 @@ export default function ChallengeDetail({
     return org ? org.name : '알 수 없음';
   };
 
-  // 챌린지 유형 한글 변환
-  const getChallengeTypeText = (type: string) => {
-    switch (type) {
-      case 'diet':
-        return '식단';
-      case 'exercise':
-        return '운동';
-      case 'diet_and_exercise':
-        return '식단 및 운동';
-      case 'running':
-        return '러닝';
-      default:
-        return '알 수 없음';
-    }
-  };
-
   // 정렬 핸들러
   const handleSort = (field: 'email' | 'name' | 'username' | 'created_at') => {
     if (sortBy === field) {
-      // 같은 필드를 클릭하면 정렬 순서 변경
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
-      // 다른 필드를 클릭하면 해당 필드로 오름차순 정렬
       setSortBy(field);
       setSortOrder('asc');
     }
@@ -465,26 +457,24 @@ export default function ChallengeDetail({
   // 정렬 아이콘 렌더링
   const renderSortIcon = (field: 'email' | 'name' | 'username' | 'created_at') => {
     if (sortBy !== field) {
-      return <ArrowUpDown className="ml-2 h-4 w-4" />;
+      return <ChevronsUpDown className="w-3.5 h-3.5 text-slate-400" />;
     }
     return sortOrder === 'asc' ? (
-      <ArrowUp className="ml-2 h-4 w-4" />
+      <ChevronUp className="w-3.5 h-3.5 text-slate-700 dark:text-slate-200" />
     ) : (
-      <ArrowDown className="ml-2 h-4 w-4" />
+      <ChevronDown className="w-3.5 h-3.5 text-slate-700 dark:text-slate-200" />
     );
   };
 
   // 정렬된 참가자 목록
   const sortedParticipants = [...participants].sort((a, b) => {
-    let aValue = a[sortBy] || '';
-    let bValue = b[sortBy] || '';
+    let aValue: string | number = a[sortBy] || '';
+    let bValue: string | number = b[sortBy] || '';
 
-    // 날짜 비교
     if (sortBy === 'created_at') {
       aValue = new Date(aValue).getTime();
       bValue = new Date(bValue).getTime();
     } else {
-      // 문자열 비교 (대소문자 구분 없이)
       aValue = String(aValue).toLowerCase();
       bValue = String(bValue).toLowerCase();
     }
@@ -494,11 +484,26 @@ export default function ChallengeDetail({
     return 0;
   });
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const activeCount = participants.filter(p => p.status === 'active').length;
+
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <p className="text-gray-500 dark:text-gray-400">로딩 중...</p>
+      <div className="min-h-screen p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse space-y-6">
+            <div className="h-10 bg-slate-200 dark:bg-gray-700 rounded-lg w-1/4"></div>
+            <div className="h-48 bg-slate-200 dark:bg-gray-700 rounded-xl"></div>
+            <div className="h-96 bg-slate-200 dark:bg-gray-700 rounded-xl"></div>
+          </div>
         </div>
       </div>
     );
@@ -506,424 +511,279 @@ export default function ChallengeDetail({
 
   if (!challenge) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-white dark:bg-blue-4 rounded-lg shadow p-6 text-center">
-          <p className="text-gray-500 dark:text-gray-400">
-            챌린지를 찾을 수 없습니다.
-          </p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-slate-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Calendar className="w-8 h-8 text-slate-400" />
+          </div>
+          <p className="text-slate-600 dark:text-slate-300 font-medium">챌린지를 찾을 수 없습니다</p>
+          <button
+            onClick={() => router.push('/admin/manage-challenges')}
+            className="mt-4 text-slate-900 dark:text-white font-medium text-sm hover:underline"
+          >
+            목록으로 돌아가기 →
+          </button>
         </div>
       </div>
     );
   }
 
+  const typeConfig = challengeTypeConfig[challengeType] || challengeTypeConfig.diet_and_exercise;
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <Title title="챌린지 관리" />
-        <button
-          onClick={() => router.push('/admin/manage-challenges')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-blue-3 dark:text-white dark:hover:bg-blue-2"
-        >
-          목록으로 돌아가기
-        </button>
-      </div>
-
-      <div className="bg-white dark:bg-blue-4 rounded-lg shadow-lg overflow-hidden mb-8">
-        {bannerImageUrl && (
-          <div className="w-full h-48 relative">
-            <Image
-              src={bannerImageUrl}
-              alt={title}
-              fill
-              style={{ objectFit: 'cover' }}
-            />
-          </div>
-        )}
-
-        <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4 dark:text-white">{title}</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                <span className="font-semibold">조직:</span>{' '}
-                {getOrganizationName(selectedOrganization)}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                <span className="font-semibold">유형:</span>{' '}
-                {getChallengeTypeText(challengeType)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                <span className="font-semibold">시작일:</span>{' '}
-                {new Date(startDate).toLocaleDateString()}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                <span className="font-semibold">종료일:</span>{' '}
-                {new Date(endDate).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-2 dark:text-white">
-              챌린지 설명
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              {description || '설명이 없습니다.'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* 챌린지 수정 폼 */}
-        <div className="bg-white dark:bg-blue-4 rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-bold mb-4 dark:text-white">
-            챌린지 수정
-          </h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label
-                htmlFor="organization"
-                className="block mb-2 font-medium dark:text-white"
-              >
-                조직
-              </label>
-              <select
-                id="organization"
-                value={selectedOrganization}
-                onChange={(e) => setSelectedOrganization(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white bg-gray-100"
-                disabled
-              >
-                {organizations.length === 0 ? (
-                  <option value="">조직 없음</option>
-                ) : (
-                  organizations.map((org) => (
-                    <option key={org.id} value={org.id}>
-                      {org.name}
-                    </option>
-                  ))
-                )}
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="challengeType"
-                className="block mb-2 font-medium dark:text-white"
-              >
-                챌린지 유형
-              </label>
-              <select
-                id="challengeType"
-                value={challengeType}
-                onChange={(e) => setChallengeType(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white bg-gray-100"
-                disabled
-              >
-                <option value="diet">식단</option>
-                <option value="exercise">운동</option>
-                <option value="diet_and_exercise">식단 및 운동</option>
-                <option value="running">러닝</option>
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="title"
-                className="block mb-2 font-medium dark:text-white"
-              >
-                챌린지 제목
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white bg-gray-100"
-                disabled
-              />
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="description"
-                className="block mb-2 font-medium dark:text-white"
-              >
-                챌린지 설명
-              </label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
-                rows={4}
-              />
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="coverImage"
-                className="block mb-2 font-medium dark:text-white"
-              >
-                커버 사진 (리스트나 썸네일용)
-              </label>
-              {coverImageUrl && (
-                <div className="mb-2 relative h-40 w-full">
-                  <Image
-                    src={coverImageUrl}
-                    alt="현재 커버 이미지"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    className="rounded-md"
-                  />
-                </div>
-              )}
-              <input
-                type="file"
-                id="coverImage"
-                accept="image/*"
-                onChange={handleCoverImageChange}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="bannerImage"
-                className="block mb-2 font-medium dark:text-white"
-              >
-                배너 사진 (상세 페이지용)
-              </label>
-              {bannerImageUrl && (
-                <div className="mb-2 relative h-40 w-full">
-                  <Image
-                    src={bannerImageUrl}
-                    alt="현재 배너 이미지"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    className="rounded-md"
-                  />
-                </div>
-              )}
-              <input
-                type="file"
-                id="bannerImage"
-                accept="image/*"
-                onChange={handleBannerImageChange}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
-              />
-              {uploadProgress > 0 && uploadProgress < 100 && (
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                  <div
-                    className="bg-blue-600 h-2.5 rounded-full"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
-                </div>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="startDate"
-                className="block mb-2 font-medium dark:text-white"
-              >
-                시작 날짜
-              </label>
-              <input
-                type="date"
-                id="startDate"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label
-                htmlFor="endDate"
-                className="block mb-2 font-medium dark:text-white"
-              >
-                종료 날짜
-              </label>
-              <input
-                type="date"
-                id="endDate"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
-              />
-            </div>
-
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4">
             <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => router.push('/admin/manage-challenges')}
+              className="p-2 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
-              {isLoading ? '처리 중...' : '챌린지 수정'}
+              <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
             </button>
-          </form>
+            <div>
+              <Title title="챌린지 관리" />
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 hidden sm:block">
+                챌린지 정보를 수정하고 참가자를 관리합니다
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* 참가자 관리 섹션 */}
-        <div className="bg-white dark:bg-blue-4 rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-bold mb-4 dark:text-white">
-            참가자 관리
-          </h2>
+        {/* Challenge Info Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-slate-200/60 dark:border-gray-700 shadow-sm overflow-hidden mb-6 sm:mb-8">
+          <div className="p-4 sm:p-6">
+            {/* 제목 + 수정 버튼 */}
+            <div className="flex items-start justify-between gap-4 mb-3 sm:mb-4">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white">{title}</h1>
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="flex-shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-gray-700 hover:bg-slate-200 dark:hover:bg-gray-600 rounded-xl transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+                <span className="hidden sm:inline">수정</span>
+              </button>
+            </div>
+
+            {/* 설명 */}
+            {description && (
+              <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base mb-4 line-clamp-2">{description}</p>
+            )}
+
+            {/* 메타 정보 + 통계 */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5">
+              {/* 메타 정보 */}
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <span className={`px-3 py-1 text-xs font-medium rounded-full ${typeConfig.bg} ${typeConfig.text}`}>
+                  {typeConfig.label}
+                </span>
+                <span className="text-slate-500 dark:text-slate-400 text-sm flex items-center gap-1.5">
+                  <Building2 className="w-4 h-4" />
+                  {getOrganizationName(selectedOrganization)}
+                </span>
+                <span className="text-slate-500 dark:text-slate-400 text-sm flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4" />
+                  {formatDate(startDate)} - {formatDate(endDate)}
+                </span>
+              </div>
+
+              {/* Stats */}
+              <div className="flex items-center gap-4 sm:gap-6 lg:gap-8 flex-shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-gray-700">
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{participants.length}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">전체</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">{activeCount}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">활성</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-slate-400 dark:text-slate-500">{participants.length - activeCount}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">비활성</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                    {participants.length > 0 ? Math.round((activeCount / participants.length) * 100) : 0}%
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">활성화율</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 이미지 미리보기 */}
+            {(coverImageUrl || bannerImageUrl) && (
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-gray-700">
+                {/* 커버 이미지 */}
+                <div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">커버 이미지 (1:1)</p>
+                  {coverImageUrl ? (
+                    <div className="relative aspect-square overflow-hidden border border-slate-200 dark:border-gray-600 bg-slate-100 dark:bg-gray-700">
+                      <Image
+                        src={coverImageUrl}
+                        alt="커버 이미지"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center aspect-square border border-dashed border-slate-200 dark:border-gray-600 bg-slate-50 dark:bg-gray-700/50">
+                      <span className="text-xs text-slate-400">이미지 없음</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 배너 이미지 */}
+                <div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">배너 이미지 (16:9)</p>
+                  {bannerImageUrl ? (
+                    <div className="relative aspect-video overflow-hidden border border-slate-200 dark:border-gray-600 bg-slate-100 dark:bg-gray-700">
+                      <Image
+                        src={bannerImageUrl}
+                        alt="배너 이미지"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center aspect-video border border-dashed border-slate-200 dark:border-gray-600 bg-slate-50 dark:bg-gray-700/50">
+                      <span className="text-xs text-slate-400">이미지 없음</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 참가자 관리 */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-slate-200/60 dark:border-gray-700 shadow-sm overflow-hidden">
+          <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <Users className="w-5 h-5 text-slate-400" />
+              참가자 관리
+            </h2>
+          </div>
 
           {/* 참가자 추가 폼 */}
-          <form onSubmit={handleAddParticipant} className="mb-6">
-            <div className="mb-4">
-              <label
-                htmlFor="participantEmail"
-                className="block mb-2 font-medium dark:text-white"
+          <form onSubmit={handleAddParticipant} className="p-4 sm:p-6 border-b border-slate-100 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50">
+            <div className="flex flex-row sm:flex-col gap-3">
+              <div className="relative flex-1">
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="email"
+                  value={newParticipantEmail}
+                  onChange={(e) => setNewParticipantEmail(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent text-slate-900 dark:text-white placeholder-slate-400 transition-all"
+                  placeholder="이메일 주소 *"
+                  required
+                />
+              </div>
+              <div className="relative flex-1 lg:max-w-[200px]">
+                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={newParticipantName}
+                  onChange={(e) => setNewParticipantName(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent text-slate-900 dark:text-white placeholder-slate-400 transition-all"
+                  placeholder="이름 (선택)"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isAddingParticipant || !newParticipantEmail.trim()}
+                className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white py-3 px-6 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
               >
-                참가자 이메일 *
-              </label>
-              <input
-                type="email"
-                id="participantEmail"
-                value={newParticipantEmail}
-                onChange={(e) => setNewParticipantEmail(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
-                required
-                placeholder="example@email.com"
-              />
+                <UserPlus className="w-4 h-4" />
+                {isAddingParticipant ? '추가 중...' : '참가자 추가'}
+              </button>
             </div>
-
-            <div className="mb-4">
-              <label
-                htmlFor="participantName"
-                className="block mb-2 font-medium dark:text-white"
-              >
-                참가자 이름 (선택사항)
-              </label>
-              <input
-                type="text"
-                id="participantName"
-                value={newParticipantName}
-                onChange={(e) => setNewParticipantName(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
-                placeholder="홍길동"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isAddingParticipant || !newParticipantEmail.trim()}
-              className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isAddingParticipant ? '추가 중...' : '참가자 추가'}
-            </button>
           </form>
 
           {/* 참가자 목록 */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3 dark:text-white">
-              참가자 목록
-            </h3>
-
+          <div className="max-h-[500px] overflow-y-auto">
             {participants.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                등록된 참가자가 없습니다.
-              </p>
+              <div className="text-center py-12">
+                <div className="w-14 h-14 bg-slate-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-7 h-7 text-slate-400" />
+                </div>
+                <p className="text-slate-600 dark:text-slate-300 font-medium">등록된 참가자가 없습니다</p>
+                <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">위 폼에서 참가자를 추가해보세요</p>
+              </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-blue-2">
-                  <thead className="bg-gray-50 dark:bg-blue-3">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                      >
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                      >
+                <table className="w-full">
+                  <thead className="sticky top-0 bg-slate-50 dark:bg-gray-700/50 border-b border-slate-200 dark:border-gray-600">
+                    <tr className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-center w-12">#</th>
+                      <th className="px-4 py-3 text-left">
                         <button
                           onClick={() => handleSort('email')}
-                          className="flex items-center hover:text-gray-900 dark:hover:text-white transition-colors"
+                          className="flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
                         >
-                          이메일
-                          {renderSortIcon('email')}
+                          이메일 {renderSortIcon('email')}
                         </button>
                       </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                      >
+                      <th className="px-4 py-3 text-left w-32">
                         <button
                           onClick={() => handleSort('name')}
-                          className="flex items-center hover:text-gray-900 dark:hover:text-white transition-colors"
+                          className="flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
                         >
-                          이름
-                          {renderSortIcon('name')}
+                          이름 {renderSortIcon('name')}
                         </button>
                       </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                      >
+                      <th className="px-4 py-3 text-left w-32">
                         <button
                           onClick={() => handleSort('username')}
-                          className="flex items-center hover:text-gray-900 dark:hover:text-white transition-colors"
+                          className="flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
                         >
-                          닉네임
-                          {renderSortIcon('username')}
+                          닉네임 {renderSortIcon('username')}
                         </button>
                       </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                      >
+                      <th className="px-4 py-3 text-left w-28">
                         <button
                           onClick={() => handleSort('created_at')}
-                          className="flex items-center hover:text-gray-900 dark:hover:text-white transition-colors"
+                          className="flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
                         >
-                          등록일
-                          {renderSortIcon('created_at')}
+                          등록일 {renderSortIcon('created_at')}
                         </button>
                       </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                      >
-                        액션
-                      </th>
+                      <th className="px-4 py-3 text-right w-40">액션</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-blue-4 divide-y divide-gray-200 dark:divide-blue-2">
+                  <tbody className="divide-y divide-slate-100 dark:divide-gray-700">
                     {sortedParticipants.map((participant, index) => (
-                      <tr key={participant.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                      <tr
+                        key={participant.id}
+                        className="hover:bg-slate-50 dark:hover:bg-gray-700/30 transition-colors"
+                      >
+                        <td className="px-4 py-3 text-center text-sm text-slate-500 dark:text-slate-400">
                           {index + 1}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                          {participant.email}
+                        <td className="px-4 py-3">
+                          <p className="text-sm font-medium text-slate-900 dark:text-white">
+                            {participant.email}
+                          </p>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                        <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">
                           {participant.name || '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                          {participant.username || '-'}
+                        <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-500">
+                          {participant.username ? `@${participant.username}` : '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                          {participant.created_at
-                            ? new Date(
-                                participant.created_at
-                              ).toLocaleDateString()
-                            : '-'}
+                        <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                          {new Date(participant.created_at).toLocaleDateString('ko-KR')}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <div className="flex items-center space-x-2">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-1.5">
                             {participant.status === 'active' ? (
-                              <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                 활성
                               </span>
                             ) : (
-                              <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-slate-400">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                                 비활성
                               </span>
                             )}
@@ -935,24 +795,22 @@ export default function ChallengeDetail({
                                 )
                               }
                               disabled={isUpdatingStatus}
-                              className={`px-3 py-1 rounded text-xs font-medium ${
-                                participant.status === 'active'
-                                  ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-800 dark:text-yellow-100'
-                                  : 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-800 dark:text-green-100'
-                              }`}
+                              className="p-1.5 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                              title={participant.status === 'active' ? '비활성화' : '활성화'}
                             >
-                              {participant.status === 'active'
-                                ? '비활성화'
-                                : '활성화'}
+                              {participant.status === 'active' ? (
+                                <ToggleRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                              ) : (
+                                <ToggleLeft className="w-4 h-4 text-slate-400" />
+                              )}
                             </button>
                             <button
-                              onClick={() =>
-                                handleDeleteParticipant(participant.id)
-                              }
+                              onClick={() => handleDeleteParticipant(participant.id)}
                               disabled={isDeletingParticipant}
-                              className="px-3 py-1 rounded text-xs font-medium bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-800 dark:text-red-100"
+                              className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
+                              title="삭제"
                             >
-                              삭제
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
@@ -965,6 +823,228 @@ export default function ChallengeDetail({
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setIsEditModalOpen(false)}
+          />
+
+          {/* Modal */}
+          <div className="relative w-full max-w-2xl max-h-[90vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-slate-200 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white">챌린지 정보 수정</h2>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(90vh-140px)]">
+              <div className="p-4 sm:p-6 space-y-5">
+                {/* 조직 & 유형 (읽기 전용) */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      조직
+                    </label>
+                    <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 dark:bg-gray-700/50 border border-slate-200 dark:border-gray-600 rounded-xl text-slate-600 dark:text-slate-400 text-sm">
+                      <Building2 className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{getOrganizationName(selectedOrganization)}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      유형
+                    </label>
+                    <div className="px-4 py-3 bg-slate-50 dark:bg-gray-700/50 border border-slate-200 dark:border-gray-600 rounded-xl">
+                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${typeConfig.bg} ${typeConfig.text}`}>
+                        {typeConfig.label}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 챌린지 제목 */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    챌린지 제목
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent text-slate-900 dark:text-white placeholder-slate-400 transition-all"
+                    placeholder="챌린지 제목을 입력하세요"
+                  />
+                </div>
+
+                {/* 챌린지 설명 */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    챌린지 설명
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent text-slate-900 dark:text-white placeholder-slate-400 transition-all resize-none"
+                    rows={3}
+                    placeholder="챌린지에 대한 설명을 입력하세요"
+                  />
+                </div>
+
+                {/* 날짜 */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      시작일
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent text-slate-900 dark:text-white transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      종료일
+                    </label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent text-slate-900 dark:text-white transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* 이미지 */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* 커버 이미지 */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      커버 이미지
+                    </label>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-2">1:1 · 썸네일용</p>
+                    <div className="relative">
+                      {coverImageUrl || coverImage ? (
+                        <div className="relative aspect-square overflow-hidden border border-slate-200 dark:border-gray-600">
+                          <Image
+                            src={coverImage ? URL.createObjectURL(coverImage) : coverImageUrl}
+                            alt="커버 이미지"
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <label className="cursor-pointer text-white text-xs font-medium">
+                              변경
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleCoverImageChange}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-slate-200 dark:border-gray-600 cursor-pointer hover:border-slate-400 dark:hover:border-gray-500 transition-colors">
+                          <ImageIcon className="w-6 h-6 text-slate-400 mb-1" />
+                          <span className="text-xs text-slate-500">이미지 업로드</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCoverImageChange}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 배너 이미지 */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      배너 이미지
+                    </label>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mb-2">16:9 · 상세용</p>
+                    <div className="relative">
+                      {bannerImageUrl || bannerImage ? (
+                        <div className="relative aspect-video overflow-hidden border border-slate-200 dark:border-gray-600">
+                          <Image
+                            src={bannerImage ? URL.createObjectURL(bannerImage) : bannerImageUrl}
+                            alt="배너 이미지"
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <label className="cursor-pointer text-white text-xs font-medium">
+                              변경
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleBannerImageChange}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-slate-200 dark:border-gray-600 cursor-pointer hover:border-slate-400 dark:hover:border-gray-500 transition-colors">
+                          <ImageIcon className="w-6 h-6 text-slate-400 mb-1" />
+                          <span className="text-xs text-slate-500">이미지 업로드</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleBannerImageChange}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="w-full bg-slate-100 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className="bg-slate-900 dark:bg-white h-2 rounded-full transition-all"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-3 p-4 sm:p-6 border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-4 h-4" />
+                  {isSaving ? '저장 중...' : '저장'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -171,7 +171,7 @@ export default function AnnouncementsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50/50 dark:bg-gray-900 p-8">
+      <div className="min-h-screen p-8">
         <div className="max-w-6xl mx-auto">
           <div className="animate-pulse space-y-6">
             <div className="h-10 bg-slate-200 dark:bg-gray-700 rounded-lg w-1/4"></div>
@@ -192,14 +192,14 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto p-8 sm:p-4">
+    <div className="min-h-screen">
+      <div className="max-w-6xl mx-auto p-4 sm:p-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
+        <div className="flex flex-row sm:flex-col justify-between items-center sm:items-start gap-0 sm:gap-4 mb-8 sm:mb-6">
           <Title title="공지사항" subtitle="챌린지 참여자에게 전달할 공지사항을 관리합니다" />
           <button
             onClick={() => router.push(`/${challengeId}/announcements/create`)}
-            className="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-slate-900 px-4 sm:px-5 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium shadow-sm hover:shadow-md min-h-[44px] text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start"
+            className="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-slate-900 px-5 sm:px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium shadow-sm hover:shadow-md min-h-[44px] text-base sm:text-sm w-auto sm:w-full justify-start sm:justify-center"
           >
             <Plus size={18} strokeWidth={2.5} />
             새 공지사항
@@ -207,30 +207,30 @@ export default function AnnouncementsPage() {
         </div>
 
         {/* List Header with Filters */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
+        <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between gap-0 sm:gap-3 mb-4">
           <p className="text-sm text-slate-500 dark:text-slate-400">총 <span className="font-medium text-slate-700 dark:text-slate-200">{stats.total}개</span>의 공지사항</p>
 
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex gap-2 w-auto sm:w-full">
             <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="flex-1 sm:w-[130px] bg-white dark:bg-gray-800 h-11 sm:h-9 text-sm">
+              <SelectTrigger className="w-[130px] sm:flex-1 bg-white dark:bg-gray-800 h-9 sm:h-11 text-sm dark:text-white dark:border-gray-600">
                 <SelectValue placeholder="모든 유형" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">모든 유형</SelectItem>
-                <SelectItem value="general">일반</SelectItem>
-                <SelectItem value="workout_schedule">운동 일정</SelectItem>
+              <SelectContent className="bg-white dark:bg-gray-800 border-slate-200 dark:border-gray-600">
+                <SelectItem value="all" className="dark:text-white dark:focus:bg-gray-700">모든 유형</SelectItem>
+                <SelectItem value="general" className="dark:text-white dark:focus:bg-gray-700">일반</SelectItem>
+                <SelectItem value="workout_schedule" className="dark:text-white dark:focus:bg-gray-700">운동 일정</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="flex-1 sm:w-[130px] bg-white dark:bg-gray-800 h-11 sm:h-9 text-sm">
+              <SelectTrigger className="w-[130px] sm:flex-1 bg-white dark:bg-gray-800 h-9 sm:h-11 text-sm dark:text-white dark:border-gray-600">
                 <SelectValue placeholder="모든 상태" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">모든 상태</SelectItem>
-                <SelectItem value="draft">초안</SelectItem>
-                <SelectItem value="published">발행됨</SelectItem>
-                <SelectItem value="archived">보관됨</SelectItem>
+              <SelectContent className="bg-white dark:bg-gray-800 border-slate-200 dark:border-gray-600">
+                <SelectItem value="all" className="dark:text-white dark:focus:bg-gray-700">모든 상태</SelectItem>
+                <SelectItem value="draft" className="dark:text-white dark:focus:bg-gray-700">초안</SelectItem>
+                <SelectItem value="published" className="dark:text-white dark:focus:bg-gray-700">발행됨</SelectItem>
+                <SelectItem value="archived" className="dark:text-white dark:focus:bg-gray-700">보관됨</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -256,7 +256,7 @@ export default function AnnouncementsPage() {
           ) : (
             <>
               {/* 모바일 카드 뷰 */}
-              <div className="sm:hidden divide-y divide-slate-100 dark:divide-gray-700">
+              <div className="hidden sm:block divide-y divide-slate-100 dark:divide-gray-700">
                 {sortedAnnouncements.map((announcement) => (
                   <div
                     key={announcement.id}
@@ -330,7 +330,7 @@ export default function AnnouncementsPage() {
               </div>
 
               {/* 데스크톱 테이블 뷰 */}
-              <table className="w-full hidden sm:table">
+              <table className="w-full sm:hidden">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50">
                     <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">제목</th>
@@ -353,7 +353,7 @@ export default function AnnouncementsPage() {
                         <ArrowUpDown size={14} className={sortField === 'start_date' ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'} />
                       </span>
                     </th>
-                    <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[160px]">상태</th>
+                    <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[200px]">상태</th>
                     <th className="w-12"></th>
                   </tr>
                 </thead>
@@ -379,12 +379,12 @@ export default function AnnouncementsPage() {
                           : '-'
                         }
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">
-                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${typeConfig[announcement.type].bg} ${typeConfig[announcement.type].text}`}>
+                          <span className={`px-2.5 py-1 text-xs font-medium rounded-full whitespace-nowrap ${typeConfig[announcement.type].bg} ${typeConfig[announcement.type].text}`}>
                             {typeLabels[announcement.type]}
                           </span>
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${statusConfig[announcement.status].bg} ${statusConfig[announcement.status].text}`}>
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full whitespace-nowrap ${statusConfig[announcement.status].bg} ${statusConfig[announcement.status].text}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[announcement.status].dot}`}></span>
                             {statusLabels[announcement.status]}
                           </span>

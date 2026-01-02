@@ -14,7 +14,7 @@ export default function SettingsPage() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-slate-50/50 dark:bg-gray-900 p-8">
+      <div className="min-h-screen p-8">
         <div className="max-w-2xl">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-slate-200 dark:bg-gray-700 rounded w-20"></div>
@@ -26,7 +26,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-gray-900">
+    <div className="min-h-screen">
       <div className="max-w-2xl p-4 sm:p-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
