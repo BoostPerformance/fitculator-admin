@@ -2,7 +2,8 @@
 import Image from 'next/image';
 //import { FaBars } from 'react-icons/fa';
 import LogoutButton from '../buttons/logoutButton';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, usePathname } from 'next/navigation';
 import NoticeModal from '../input/noticeModal';
 import EditUsernameModal from '../modals/editUsernameModal';
@@ -49,6 +50,12 @@ export default function Sidebar({
   const [sidebarWidth, setSidebarWidth] = useState<number>(256); // 기본 너비 16rem = 256px
   const [isResizing, setIsResizing] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Portal을 위한 마운트 상태 확인
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // localStorage를 활용한 사이드바 상태 관리
   const {
@@ -223,99 +230,21 @@ export default function Sidebar({
   }, []);
 
   const toggleChallengeDropdown = useCallback((challengeId: string) => {
-    // 모바일에서 클릭한 요소의 y축 위치 고정
-    if (isMobile) {
-      const container = document.getElementById('sidebar-menu-container');
-      const element = document.getElementById(`challenge-${challengeId}`);
-
-      if (container && element) {
-        // 클릭한 요소의 컨테이너 기준 현재 위치
-        const elementTop = element.offsetTop;
-        const currentScrollTop = container.scrollTop;
-        const relativeTop = elementTop - currentScrollTop;
-
-        setIsOpenChallengeDropdown((prev) => ({
-          ...prev,
-          [challengeId]: !prev[challengeId],
-        }));
-
-        // DOM 업데이트 후 요소의 y축 위치를 동일하게 유지
-        setTimeout(() => {
-          if (container && element) {
-            const newElementTop = element.offsetTop;
-            const targetScrollTop = newElementTop - relativeTop;
-            container.scrollTop = targetScrollTop;
-          }
-        }, 0);
-      } else {
-        setIsOpenChallengeDropdown((prev) => ({
-          ...prev,
-          [challengeId]: !prev[challengeId],
-        }));
-      }
-    } else {
-      setIsOpenChallengeDropdown((prev) => ({
-        ...prev,
-        [challengeId]: !prev[challengeId],
-      }));
-    }
-  }, [isMobile, setIsOpenChallengeDropdown]);
+    setIsOpenChallengeDropdown((prev) => ({
+      ...prev,
+      [challengeId]: !prev[challengeId],
+    }));
+  }, [setIsOpenChallengeDropdown]);
 
   const handleDropdown = useCallback(() => {
-    if (isMobile) {
-      const container = document.getElementById('sidebar-menu-container');
-      const element = document.getElementById('program-menu-section');
-
-      if (container && element) {
-        const elementTop = element.offsetTop;
-        const currentScrollTop = container.scrollTop;
-        const relativeTop = elementTop - currentScrollTop;
-
-        setIsOpenDropdown(!isOpenDropdown);
-
-        setTimeout(() => {
-          if (container && element) {
-            const newElementTop = element.offsetTop;
-            const targetScrollTop = newElementTop - relativeTop;
-            container.scrollTop = targetScrollTop;
-          }
-        }, 0);
-      } else {
-        setIsOpenDropdown(!isOpenDropdown);
-      }
-    } else {
-      setIsOpenDropdown(!isOpenDropdown);
-    }
-  }, [isMobile, isOpenDropdown, setIsOpenDropdown]);
+    setIsOpenDropdown(!isOpenDropdown);
+  }, [isOpenDropdown, setIsOpenDropdown]);
 
   //() => handleChallengeClick(challenge)
 
   const handleAdminDropdown = useCallback(() => {
-    if (isMobile) {
-      const container = document.getElementById('sidebar-menu-container');
-      const element = document.getElementById('admin-menu-section');
-
-      if (container && element) {
-        const elementTop = element.offsetTop;
-        const currentScrollTop = container.scrollTop;
-        const relativeTop = elementTop - currentScrollTop;
-
-        setIsAdminDropdownOpen(!isAdminDropdownOpen);
-
-        setTimeout(() => {
-          if (container && element) {
-            const newElementTop = element.offsetTop;
-            const targetScrollTop = newElementTop - relativeTop;
-            container.scrollTop = targetScrollTop;
-          }
-        }, 0);
-      } else {
-        setIsAdminDropdownOpen(!isAdminDropdownOpen);
-      }
-    } else {
-      setIsAdminDropdownOpen(!isAdminDropdownOpen);
-    }
-  }, [isMobile, isAdminDropdownOpen, setIsAdminDropdownOpen]);
+    setIsAdminDropdownOpen(!isAdminDropdownOpen);
+  }, [isAdminDropdownOpen, setIsAdminDropdownOpen]);
 
   const handleSidebarOpen = useCallback(() => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -463,6 +392,552 @@ export default function Sidebar({
     };
   }, [isSidebarOpen]);
 
+  // 모바일 열린 사이드바 컨텐츠 (Portal로 렌더링됨)
+  const mobileSidebarContent = (
+    <aside
+      className="fixed inset-0 z-[9999] flex flex-col bg-white dark:bg-gray-900"
+      role="navigation"
+      aria-label="주 내비게이션"
+    >
+      {/* 모바일 사이드바 헤더 */}
+      <div className="flex items-center justify-between h-16 px-5 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0">
+        <Image
+          src="/svg/logo_text_light.svg"
+          width={110}
+          height={28}
+          alt="Fitculator 로고"
+          className="dark:hidden"
+          loading="lazy"
+        />
+        <Image
+          src="/svg/logo_text_dark.svg"
+          width={110}
+          height={28}
+          alt="Fitculator 로고"
+          className="hidden dark:block"
+          loading="lazy"
+        />
+        <button
+          onClick={handleSidebarOpen}
+          className="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 transition-all"
+          aria-label="메뉴 닫기"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-gray-500 dark:text-gray-400">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* 스크롤 가능한 메뉴 영역 */}
+      <div
+        id="sidebar-menu-container-mobile"
+        className="flex-1 overflow-y-auto overflow-x-hidden bg-white dark:bg-gray-900"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <nav className="w-full py-4 px-4" aria-label="챌린지 및 관리 메뉴">
+          {(!data || data.length === 0) && <SidebarSkeleton />}
+          {data && data.length > 0 && (
+            <ul>
+              <li id="program-menu-section-mobile" className="w-full items-center justify-between text-sm font-semibold mb-2">
+                <button
+                  className="flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all px-2 py-3 active:bg-gray-100 dark:active:bg-gray-800"
+                  onClick={handleDropdown}
+                  aria-expanded={isOpenDropdown}
+                  aria-controls="program-menu-list-mobile"
+                  aria-label="프로그램 메뉴"
+                >
+                  <span className="font-semibold text-gray-900 dark:text-white text-[15px]">프로그램</span>
+                  <ChevronIcon isOpen={isOpenDropdown} className="text-gray-400 dark:text-gray-500" />
+                </button>
+
+                {isOpenDropdown && (
+                  <ul id="program-menu-list-mobile" className="font-medium text-gray-1 mt-3 flex flex-col gap-1" role="group" aria-label="프로그램 목록">
+                    {/* 최근 방문한 챌린지 섹션 */}
+                    {recentChallengesData.length > 0 && (
+                      <>
+                        <li className="list-none">
+                          <div className="text-0.875-500 text-gray-2 pl-2 mb-2 flex items-center gap-2" role="heading" aria-level={3}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-blue-500">
+                              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" />
+                            </svg>
+                            최근 방문
+                          </div>
+                        </li>
+                        {recentChallengesData.map((challenge) => (
+                          <li key={`recent-mobile-${challenge.challenges.id}`} className="list-none">
+                            <div className="flex items-center justify-between py-1 pl-2 pr-1 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
+                              <div
+                                className={`cursor-pointer text-0.875-500 flex-1 ${
+                                  challenge.challenges.id === selectedChallengeId
+                                    ? 'text-blue-600 dark:text-blue-300'
+                                    : 'text-gray-800 dark:text-white'
+                                }`}
+                                onClick={() => handleChallengeClick(challenge)}
+                              >
+                                {challenge.challenges.title}
+                              </div>
+                              <button
+                                onClick={() => removeRecentChallenge(challenge.challenges.id)}
+                                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                                aria-label={`${challenge.challenges.title} 최근 방문에서 제거`}
+                              >
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-gray-400 dark:text-gray-500">
+                                  <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                </svg>
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                        <li className="list-none border-t border-gray-200 dark:border-gray-700 my-2" />
+                      </>
+                    )}
+
+                    {/* 진행 중인 챌린지 섹션 */}
+                    <li className="list-none">
+                      <div className="text-0.875-500 text-gray-2 pl-2 mb-2" role="heading" aria-level={3}>진행 중</div>
+                    </li>
+                    {activeChallenges && activeChallenges.length > 0 ? (
+                      activeChallenges.map((challenge) => {
+                        const isDropdownOpen = isOpenChallengeDropdown[challenge.challenges.id];
+                        return (
+                          <li key={`mobile-${challenge.challenges.id}`} id={`challenge-mobile-${challenge.challenges.id}`}>
+                            <div
+                              className={`font-medium py-2 px-3 rounded-lg flex justify-between items-center min-h-[48px] transition-all cursor-pointer active:scale-[0.98] ${
+                                challenge.challenges.id === selectedChallengeId
+                                  ? 'bg-blue-50 dark:bg-blue-900/30'
+                                  : 'hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                              }`}
+                              onClick={() => handleChallengeClick(challenge)}
+                            >
+                              <span
+                                className={`text-sm font-medium flex-1 py-1 ${
+                                  challenge.challenges.id === selectedChallengeId
+                                    ? 'text-blue-600 dark:text-blue-300'
+                                    : 'text-gray-800 dark:text-white'
+                                }`}
+                              >
+                                {challenge.challenges.title || '제목 없음'}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleChallengeDropdown(challenge.challenges.id);
+                                }}
+                                className="ml-2 hover:bg-gray-200 dark:hover:bg-gray-600 p-2.5 rounded-lg transition-all active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                                aria-label={isDropdownOpen ? '챌린지 메뉴 닫기' : '챌린지 메뉴 열기'}
+                                aria-expanded={isDropdownOpen}
+                              >
+                                <ChevronIcon isOpen={isDropdownOpen} size={14} className="text-gray-600 dark:text-gray-300" />
+                              </button>
+                            </div>
+
+                            {isDropdownOpen && (
+                              <ul className="mt-1 ml-3 border-l-2 border-gray-200 dark:border-gray-600 space-y-0.5">
+                                {(challenge.challenges.challenge_type === 'diet' || challenge.challenges.challenge_type === 'diet_and_exercise') && (
+                                  <li>
+                                    <div
+                                      className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                                        isActiveRoute(`/${challenge.challenges.id}/diet`)
+                                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                                          : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                                      }`}
+                                      onClick={() => {
+                                        const today = new Date().toISOString().split('T')[0];
+                                        router.push(`/${challenge.challenges.id}/diet?date=${today}`);
+                                        closeSidebarOnMobile();
+                                      }}
+                                    >
+                                      식단
+                                    </div>
+                                  </li>
+                                )}
+                                {(challenge.challenges.challenge_type === 'exercise' || challenge.challenges.challenge_type === 'diet_and_exercise') && (
+                                  <li>
+                                    <div
+                                      className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                                        isActiveRoute(`/${challenge.challenges.id}/workout`)
+                                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                                          : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                                      }`}
+                                      onClick={() => {
+                                        router.push(`/${challenge.challenges.id}/workout?refresh=${Date.now()}`);
+                                        closeSidebarOnMobile();
+                                      }}
+                                    >
+                                      운동
+                                    </div>
+                                  </li>
+                                )}
+                                {challenge.challenges.challenge_type === 'running' && (
+                                  <li>
+                                    <div
+                                      className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                                        isActiveRoute(`/${challenge.challenges.id}/running`)
+                                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                                          : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                                      }`}
+                                      onClick={() => {
+                                        router.push(`/${challenge.challenges.id}/running?refresh=${Date.now()}`);
+                                        closeSidebarOnMobile();
+                                      }}
+                                    >
+                                      운동
+                                    </div>
+                                  </li>
+                                )}
+                                <li>
+                                  <div
+                                    className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                                      isActiveRoute(`/${challenge.challenges.id}/members`)
+                                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                                    }`}
+                                    onClick={() => {
+                                      router.push(`/${challenge.challenges.id}/members`);
+                                      closeSidebarOnMobile();
+                                    }}
+                                  >
+                                    멤버
+                                  </div>
+                                </li>
+                                {challenge.challenges.enable_benchmark && (
+                                  <li>
+                                    <div
+                                      className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                                        isActiveRoute(`/${challenge.challenges.id}/benchmarks`)
+                                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                                          : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                                      }`}
+                                      onClick={() => {
+                                        router.push(`/${challenge.challenges.id}/benchmarks`);
+                                        closeSidebarOnMobile();
+                                      }}
+                                    >
+                                      벤치마크
+                                    </div>
+                                  </li>
+                                )}
+                                {challenge.challenges.enable_mission && (
+                                  <li>
+                                    <div
+                                      className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                                        isActiveRoute(`/${challenge.challenges.id}/missions`)
+                                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                                          : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                                      }`}
+                                      onClick={() => {
+                                        router.push(`/${challenge.challenges.id}/missions`);
+                                        closeSidebarOnMobile();
+                                      }}
+                                    >
+                                      미션
+                                    </div>
+                                  </li>
+                                )}
+                                <li>
+                                  <div
+                                    className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                                      isActiveRoute(`/${challenge.challenges.id}/announcements`)
+                                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                                    }`}
+                                    onClick={() => {
+                                      router.push(`/${challenge.challenges.id}/announcements`);
+                                      closeSidebarOnMobile();
+                                    }}
+                                  >
+                                    공지사항
+                                  </div>
+                                </li>
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      })
+                    ) : (
+                      <li className="list-none py-2 px-3 text-0.875-400 text-gray-11">
+                        진행 중인 챌린지가 없습니다
+                      </li>
+                    )}
+
+                    {/* 종료된 챌린지 섹션 */}
+                    {endedChallenges && endedChallenges.length > 0 && (
+                      <li id="ended-challenges-section-mobile" className="list-none mt-4 border-t border-gray-13 pt-4">
+                        <button
+                          className="flex justify-between items-center pl-2 mb-2 cursor-pointer w-full text-left rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 py-1"
+                          onClick={() => setIsOpenEndedDropdown(!isOpenEndedDropdown)}
+                          aria-expanded={isOpenEndedDropdown}
+                          aria-controls="ended-challenges-list-mobile"
+                          aria-label={`종료된 챌린지 ${endedChallenges.length}개`}
+                        >
+                          <span className="text-0.875-500 text-gray-2">종료됨 ({endedChallenges.length})</span>
+                          <ChevronIcon isOpen={isOpenEndedDropdown} size={14} className="text-gray-600 dark:text-gray-400" />
+                        </button>
+                        {isOpenEndedDropdown && (
+                          <ul id="ended-challenges-list-mobile" className="flex flex-col gap-2" role="group" aria-label="종료된 챌린지 목록">
+                            {endedChallenges.map((challenge) => {
+                              const isDropdownOpen = isOpenChallengeDropdown[challenge.challenges.id];
+                              return (
+                                <li key={`mobile-ended-${challenge.challenges.id}`} className="opacity-60">
+                                  <div className={`font-medium py-2 pl-2 rounded dark:hover:bg-blue-3 flex justify-between items-center ${
+                                    challenge.challenges.id === selectedChallengeId ? 'bg-blue-50 dark:bg-blue-4 opacity-100' : ''
+                                  }`}>
+                                    <div
+                                      className={`cursor-pointer text-0.875-500 hover:bg-gray-100 dark:hover:text-black ${
+                                        challenge.challenges.id === selectedChallengeId
+                                          ? 'text-blue-600 dark:text-blue-300'
+                                          : 'text-gray-800 dark:text-white'
+                                      }`}
+                                      onClick={() => handleChallengeClick(challenge)}
+                                    >
+                                      {challenge.challenges.title || '제목 없음'}
+                                    </div>
+                                    <button
+                                      onClick={() => toggleChallengeDropdown(challenge.challenges.id)}
+                                      className="flex-shrink-0 hover:bg-gray-100 p-2 rounded transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400"
+                                      aria-label={isDropdownOpen ? '챌린지 메뉴 닫기' : '챌린지 메뉴 열기'}
+                                      aria-expanded={isDropdownOpen}
+                                    >
+                                      <ChevronIcon isOpen={isDropdownOpen} size={14} className="text-gray-600 dark:text-gray-300" />
+                                    </button>
+                                  </div>
+                                  {isDropdownOpen && (
+                                    <ul className="mt-2 ml-2 border-l-2 border-gray-100 dark:border-blue-3">
+                                      {(challenge.challenges.challenge_type === 'diet' || challenge.challenges.challenge_type === 'diet_and_exercise') && (
+                                        <li>
+                                          <div
+                                            className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
+                                              isActiveRoute(`/${challenge.challenges.id}/diet`)
+                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                                : 'text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                            onClick={() => {
+                                              const today = new Date().toISOString().split('T')[0];
+                                              router.push(`/${challenge.challenges.id}/diet?date=${today}`);
+                                              closeSidebarOnMobile();
+                                            }}
+                                          >
+                                            식단
+                                          </div>
+                                        </li>
+                                      )}
+                                      {(challenge.challenges.challenge_type === 'exercise' || challenge.challenges.challenge_type === 'diet_and_exercise') && (
+                                        <li>
+                                          <div
+                                            className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
+                                              isActiveRoute(`/${challenge.challenges.id}/workout`)
+                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                                : 'text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                            onClick={() => {
+                                              router.push(`/${challenge.challenges.id}/workout?refresh=${Date.now()}`);
+                                              closeSidebarOnMobile();
+                                            }}
+                                          >
+                                            운동
+                                          </div>
+                                        </li>
+                                      )}
+                                      {challenge.challenges.challenge_type === 'running' && (
+                                        <li>
+                                          <div
+                                            className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
+                                              isActiveRoute(`/${challenge.challenges.id}/running`)
+                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                                : 'text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                            onClick={() => {
+                                              router.push(`/${challenge.challenges.id}/running?refresh=${Date.now()}`);
+                                              closeSidebarOnMobile();
+                                            }}
+                                          >
+                                            운동
+                                          </div>
+                                        </li>
+                                      )}
+                                      <li>
+                                        <div
+                                          className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
+                                            isActiveRoute(`/${challenge.challenges.id}/members`)
+                                              ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                              : 'text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                                          }`}
+                                          onClick={() => {
+                                            router.push(`/${challenge.challenges.id}/members`);
+                                            closeSidebarOnMobile();
+                                          }}
+                                        >
+                                          멤버
+                                        </div>
+                                      </li>
+                                      {challenge.challenges.enable_benchmark && (
+                                        <li>
+                                          <div
+                                            className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
+                                              isActiveRoute(`/${challenge.challenges.id}/benchmarks`)
+                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                                : 'text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                            onClick={() => {
+                                              router.push(`/${challenge.challenges.id}/benchmarks`);
+                                              closeSidebarOnMobile();
+                                            }}
+                                          >
+                                            벤치마크
+                                          </div>
+                                        </li>
+                                      )}
+                                      {challenge.challenges.enable_mission && (
+                                        <li>
+                                          <div
+                                            className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
+                                              isActiveRoute(`/${challenge.challenges.id}/missions`)
+                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                                : 'text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                            onClick={() => {
+                                              router.push(`/${challenge.challenges.id}/missions`);
+                                              closeSidebarOnMobile();
+                                            }}
+                                          >
+                                            미션
+                                          </div>
+                                        </li>
+                                      )}
+                                      <li>
+                                        <div
+                                          className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
+                                            isActiveRoute(`/${challenge.challenges.id}/announcements`)
+                                              ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                              : 'text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                                          }`}
+                                          onClick={() => {
+                                            router.push(`/${challenge.challenges.id}/announcements`);
+                                            closeSidebarOnMobile();
+                                          }}
+                                        >
+                                          공지사항
+                                        </div>
+                                      </li>
+                                    </ul>
+                                  )}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </li>
+                    )}
+                  </ul>
+                )}
+              </li>
+
+              {/* 운영 관리 메뉴 */}
+              {hasOperationalAccess() && (
+                <li id="admin-menu-section-mobile" className="w-full items-center justify-between text-sm font-semibold mb-2 mt-4">
+                  <button
+                    className="flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all px-2 py-3 active:bg-gray-100 dark:active:bg-gray-800"
+                    onClick={handleAdminDropdown}
+                    aria-expanded={isAdminDropdownOpen}
+                    aria-controls="admin-menu-list-mobile"
+                    aria-label="운영 관리 메뉴"
+                  >
+                    <span className="font-semibold text-gray-900 dark:text-white text-[15px]">운영 관리</span>
+                    <ChevronIcon isOpen={isAdminDropdownOpen} className="text-gray-400 dark:text-gray-500" />
+                  </button>
+                  {isAdminDropdownOpen && (
+                    <ul id="admin-menu-list-mobile" className="font-medium text-gray-1 mt-3 flex flex-col gap-1" role="group" aria-label="운영 관리 목록">
+                      <li>
+                        <div
+                          className={`cursor-pointer text-sm py-3 px-4 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                            isActiveRoute('/admin/create-challenge')
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                          }`}
+                          onClick={() => {
+                            router.push('/admin/create-challenge');
+                            closeSidebarOnMobile();
+                          }}
+                        >
+                          챌린지 생성
+                        </div>
+                      </li>
+                      <li>
+                        <div
+                          className={`cursor-pointer text-sm py-3 px-4 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                            isActiveRoute('/admin/manage-challenges')
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                          }`}
+                          onClick={() => {
+                            router.push('/admin/manage-challenges');
+                            closeSidebarOnMobile();
+                          }}
+                        >
+                          챌린지 관리
+                        </div>
+                      </li>
+                      <li>
+                        <div
+                          className={`cursor-pointer text-sm py-3 px-4 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                            isActiveRoute('/admin/manage-organizations')
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                          }`}
+                          onClick={() => {
+                            router.push('/admin/manage-organizations');
+                            closeSidebarOnMobile();
+                          }}
+                        >
+                          조직 관리
+                        </div>
+                      </li>
+                    </ul>
+                  )}
+                </li>
+              )}
+            </ul>
+          )}
+        </nav>
+
+        {/* Footer */}
+        <div className="mt-auto pt-6 pb-4 px-4">
+          <button
+            onClick={() => {
+              router.push('/settings');
+              closeSidebarOnMobile();
+            }}
+            className={`flex items-center gap-3 w-full text-sm text-gray-600 dark:text-gray-300 rounded-xl transition-all px-2 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 active:scale-[0.98] ${
+              isActiveRoute('/settings') ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-medium' : ''
+            }`}
+            aria-label="설정"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            설정
+          </button>
+          <div className="flex items-center gap-3 px-2 mt-4">
+            <a href="https://www.instagram.com/fitculator.io" target="_blank" rel="noopener noreferrer" className="text-gray-800 hover:text-gray-600 dark:text-white dark:hover:text-gray-300 transition-colors">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </a>
+            <a href="mailto:support@fitculator.io" className="text-gray-800 hover:text-gray-600 dark:text-white dark:hover:text-gray-300 transition-colors">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+              </svg>
+            </a>
+          </div>
+          <p className="text-0.875-500 text-gray-800 dark:text-white px-2 mt-2">© 2026 Fitculator</p>
+        </div>
+      </div>
+    </aside>
+  );
+
   return (
     <>
       {/* Skip navigation 링크 */}
@@ -473,33 +948,20 @@ export default function Sidebar({
         메인 콘텐츠로 건너뛰기
       </a>
 
-      {/* 모바일 오버레이 배경 - 블러 효과 */}
-      {isMobile && isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-200"
-          onClick={handleSidebarOpen}
-          role="button"
-          aria-label="사이드바 닫기"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              handleSidebarOpen();
-            }
-          }}
-        />
-      )}
+      {/* 모바일 열린 사이드바 - Portal로 렌더링 */}
+      {mounted && isMobile && isSidebarOpen && createPortal(mobileSidebarContent, document.body)}
 
-      {/* 사이드바 */}
+      {/* 모바일 닫힌 상태 + 데스크톱 사이드바 */}
+      {(!isMobile || !isSidebarOpen) && (
       <aside
         className={`
-        ${isMobile && isSidebarOpen ? 'fixed inset-y-0 left-0 w-[85%] max-w-[320px] z-50 flex flex-col animate-in slide-in-from-left duration-300' : ''}
         ${isMobile && !isSidebarOpen ? 'w-full sticky top-0 z-[100]' : ''}
         ${!isMobile && !isSidebarOpen ? 'lg:w-[4rem] min-w-[4rem]' : ''}
         ${!isMobile && isSidebarOpen ? 'sm:min-w-[12rem] md:min-w-[14rem]' : ''}
         min-h-fit md:min-h-fit lg:min-h-screen lg:px-[1rem]
         bg-white dark:bg-gray-900 relative
         transition-all duration-300 ease-in-out
-        ${isMobile && isSidebarOpen ? 'shadow-2xl' : 'drop-shadow-sm'}
+        ${!isMobile ? 'drop-shadow-sm' : ''}
         safe-area-inset-bottom
       `}
         style={!isMobile && isSidebarOpen ? { width: `${sidebarWidth}px` } : undefined}
@@ -570,39 +1032,6 @@ export default function Sidebar({
         </div>
       )}
 
-      {/* 모바일 사이드바 헤더 - 열린 상태 */}
-      {isMobile && isSidebarOpen && (
-        <div className="flex items-center justify-between h-16 px-5 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0">
-          {/* 로고 */}
-          <Image
-            src="/svg/logo_text_light.svg"
-            width={110}
-            height={28}
-            alt="Fitculator 로고"
-            className="dark:hidden"
-            loading="lazy"
-          />
-          <Image
-            src="/svg/logo_text_dark.svg"
-            width={110}
-            height={28}
-            alt="Fitculator 로고"
-            className="hidden dark:block"
-            loading="lazy"
-          />
-          {/* 닫기 버튼 */}
-          <button
-            onClick={handleSidebarOpen}
-            className="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 transition-all"
-            aria-label="메뉴 닫기"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-gray-500 dark:text-gray-400">
-              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          </button>
-        </div>
-      )}
-
       {/* 데스크톱 헤더 */}
       {!isMobile && (
         <div className={`
@@ -633,14 +1062,16 @@ export default function Sidebar({
           </div>
         </div>
       )}
-      {isSidebarOpen && (
+      {/* 데스크톱 사이드바 메뉴 (모바일 열린 상태는 Portal로 렌더링됨) */}
+      {!isMobile && isSidebarOpen && (
         <div
           id="sidebar-menu-container"
-          className={`w-full flex flex-col z-50 ${isMobile ? 'flex-1 overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900' : 'flex-1'}`}
+          className="w-full flex flex-col z-50 flex-1"
           role="region"
           aria-label="메뉴 목록"
+          onClick={(e) => e.stopPropagation()}
         >
-          <nav className={`w-full gap-[2rem] items-start flex-1 ${isMobile ? 'py-4 px-4 pb-32' : 'py-2 px-3 lg:py-4 lg:px-2'}`} aria-label="챌린지 및 관리 메뉴">
+          <nav className="w-full gap-[2rem] items-start py-2 px-3 lg:py-4 lg:px-2 flex-1" aria-label="챌린지 및 관리 메뉴">
             {/* 로딩 스켈레톤 - 데이터가 없을 때 */}
             {(!data || data.length === 0) && <SidebarSkeleton />}
 
@@ -649,17 +1080,13 @@ export default function Sidebar({
             <ul>
               <li id="program-menu-section" className="w-full items-center justify-between text-sm font-semibold mb-2">
                 <button
-                  className={`flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all ${
-                    isMobile
-                      ? 'px-2 py-3 active:bg-gray-100 dark:active:bg-gray-800'
-                      : 'border-b border-gray-200 dark:border-gray-700 py-3 px-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
-                  }`}
+                  className="flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all border-b border-gray-200 dark:border-gray-700 py-3 px-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600"
                   onClick={handleDropdown}
                   aria-expanded={isOpenDropdown}
                   aria-controls="program-menu-list"
                   aria-label="프로그램 메뉴"
                 >
-                  <span className={`font-semibold text-gray-900 dark:text-white ${isMobile ? 'text-[15px]' : 'text-base'}`}>프로그램</span>
+                  <span className="font-semibold text-gray-900 dark:text-white text-base">프로그램</span>
                   <ChevronIcon isOpen={isOpenDropdown} className="text-gray-400 dark:text-gray-500" />
                 </button>
 
@@ -753,10 +1180,8 @@ export default function Sidebar({
                               {/* 식단/운동 드롭다운 */}
                               {isDropdownOpen && (
                                 <ul className="mt-1 ml-3 border-l-2 border-gray-200 dark:border-gray-600 space-y-0.5">
-                                  {(challenge.challenges.challenge_type ===
-                                    'diet' ||
-                                    challenge.challenges.challenge_type ===
-                                      'diet_and_exercise') && (
+                                  {(challenge.challenges.challenge_type === 'diet' ||
+                                    challenge.challenges.challenge_type === 'diet_and_exercise') && (
                                     <li>
                                       <div
                                         className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-colors duration-200 min-h-[44px] flex items-center ${
@@ -778,10 +1203,8 @@ export default function Sidebar({
                                       </div>
                                     </li>
                                   )}
-                                  {(challenge.challenges.challenge_type ===
-                                    'exercise' ||
-                                    challenge.challenges.challenge_type ===
-                                      'diet_and_exercise') && (
+                                  {(challenge.challenges.challenge_type === 'exercise' ||
+                                    challenge.challenges.challenge_type === 'diet_and_exercise') && (
                                     <li>
                                       <div
                                         className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-colors duration-200 min-h-[44px] flex items-center ${
@@ -908,32 +1331,7 @@ export default function Sidebar({
                       <li id="ended-challenges-section" className="list-none mt-4 border-t border-gray-13 pt-4">
                         <button
                           className="flex justify-between items-center pl-2 mb-2 cursor-pointer w-full text-left rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 py-1"
-                          onClick={() => {
-                            if (isMobile) {
-                              const container = document.getElementById('sidebar-menu-container');
-                              const element = document.getElementById('ended-challenges-section');
-
-                              if (container && element) {
-                                const elementTop = element.offsetTop;
-                                const currentScrollTop = container.scrollTop;
-                                const relativeTop = elementTop - currentScrollTop;
-
-                                setIsOpenEndedDropdown(!isOpenEndedDropdown);
-
-                                setTimeout(() => {
-                                  if (container && element) {
-                                    const newElementTop = element.offsetTop;
-                                    const targetScrollTop = newElementTop - relativeTop;
-                                    container.scrollTop = targetScrollTop;
-                                  }
-                                }, 0);
-                              } else {
-                                setIsOpenEndedDropdown(!isOpenEndedDropdown);
-                              }
-                            } else {
-                              setIsOpenEndedDropdown(!isOpenEndedDropdown);
-                            }
-                          }}
+                          onClick={() => setIsOpenEndedDropdown(!isOpenEndedDropdown)}
                           aria-expanded={isOpenEndedDropdown}
                           aria-controls="ended-challenges-list"
                           aria-label={`종료된 챌린지 ${endedChallenges.length}개`}
@@ -987,10 +1385,8 @@ export default function Sidebar({
                                 {/* 식단/운동 드롭다운 */}
                                 {isDropdownOpen && (
                                   <ul className="mt-2 ml-2 border-l-2 border-gray-100 dark:border-blue-3">
-                                    {(challenge.challenges.challenge_type ===
-                                      'diet' ||
-                                      challenge.challenges.challenge_type ===
-                                        'diet_and_exercise') && (
+                                    {(challenge.challenges.challenge_type === 'diet' ||
+                                      challenge.challenges.challenge_type === 'diet_and_exercise') && (
                                       <li>
                                         <div
                                           className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
@@ -1012,10 +1408,8 @@ export default function Sidebar({
                                         </div>
                                       </li>
                                     )}
-                                    {(challenge.challenges.challenge_type ===
-                                      'exercise' ||
-                                      challenge.challenges.challenge_type ===
-                                        'diet_and_exercise') && (
+                                    {(challenge.challenges.challenge_type === 'exercise' ||
+                                      challenge.challenges.challenge_type === 'diet_and_exercise') && (
                                       <li>
                                         <div
                                           className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
@@ -1142,17 +1536,13 @@ export default function Sidebar({
               {hasOperationalAccess() && (
                 <li id="admin-menu-section" className="w-full items-center justify-between text-sm font-semibold mb-2 mt-4">
                   <button
-                    className={`flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all ${
-                      isMobile
-                        ? 'px-2 py-3 active:bg-gray-100 dark:active:bg-gray-800'
-                        : 'border-b border-gray-200 dark:border-gray-700 py-3 px-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
-                    }`}
+                    className="flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all border-b border-gray-200 dark:border-gray-700 py-3 px-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600"
                     onClick={handleAdminDropdown}
                     aria-expanded={isAdminDropdownOpen}
                     aria-controls="admin-menu-list"
                     aria-label="운영 관리 메뉴"
                   >
-                    <span className={`font-semibold text-gray-900 dark:text-white ${isMobile ? 'text-[15px]' : 'text-base'}`}>운영 관리</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-base">운영 관리</span>
                     <ChevronIcon isOpen={isAdminDropdownOpen} className="text-gray-400 dark:text-gray-500" />
                   </button>
 
@@ -1273,35 +1663,31 @@ export default function Sidebar({
               설정
             </button>
 
-            {/* Social Links & Copyright - 데스크톱에서만 표시 */}
-            {!isMobile && (
-              <>
-                <div className="flex items-center gap-3 px-2 mt-8">
-                  <a
-                    href="https://www.instagram.com/fitculator.io"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-800 hover:text-gray-600 dark:text-white dark:hover:text-gray-300 transition-colors"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                    </svg>
-                  </a>
-                  <a
-                    href="mailto:support@fitculator.io"
-                    className="text-gray-800 hover:text-gray-600 dark:text-white dark:hover:text-gray-300 transition-colors"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                    </svg>
-                  </a>
-                </div>
-                <p className="text-0.875-500 text-gray-800 dark:text-white px-2 mt-2">
-                  © 2025 Fitculator
-                </p>
-              </>
-            )}
+            {/* Social Links & Copyright */}
+            <div className="flex items-center gap-3 px-2 mt-8">
+              <a
+                href="https://www.instagram.com/fitculator.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-800 hover:text-gray-600 dark:text-white dark:hover:text-gray-300 transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </a>
+              <a
+                href="mailto:support@fitculator.io"
+                className="text-gray-800 hover:text-gray-600 dark:text-white dark:hover:text-gray-300 transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                </svg>
+              </a>
+            </div>
+            <p className="text-0.875-500 text-gray-800 dark:text-white px-2 mt-2">
+              © 2026 Fitculator
+            </p>
           </div>
         </div>
       )}
@@ -1339,6 +1725,7 @@ export default function Sidebar({
         </div>
       )}
       </aside>
+      )}
     </>
   );
 }

@@ -9,6 +9,9 @@ interface Challenges {
     id: string;
     start_date: string;
     title: string;
+    challenge_type?: 'diet' | 'exercise' | 'diet_and_exercise' | 'running';
+    enable_benchmark?: boolean;
+    enable_mission?: boolean;
     challenge_participants: {
       daily_records: {
         feedbacks: {
