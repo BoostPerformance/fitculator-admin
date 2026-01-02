@@ -598,14 +598,14 @@ const RunningTable: React.FC<
   return (
     <div className="mt-6 px-8 overflow-x-auto w-full">
       {/* Main running table */}
-      <div className="w-full overflow-x-auto bg-white shadow rounded-lg border border-gray-200">
+      <div className="w-full overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700">
         <table className="w-full min-w-[1000px]">
           <thead>
-            <tr className="bg-white text-gray-500">
+            <tr className="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
               <th className="w-[3%] p-3 text-center">
                 <span className="text-sm">#</span>
               </th>
-              <th className="w-[5%] p-3 text-left">
+              <th className="w-[6%] p-3 text-left">
                 <div className="flex items-center justify-start gap-1">
                   <span className="text-sm">ID</span>
                   <button
@@ -616,7 +616,7 @@ const RunningTable: React.FC<
                   </button>
                 </div>
               </th>
-              <th className="w-[10%] p-3 text-left">
+              <th className="w-[14%] p-3 text-left">
                 <div className="flex items-center justify-start gap-1">
                   <span className="text-sm">이름</span>
                   <button
@@ -635,7 +635,7 @@ const RunningTable: React.FC<
                     key={index}
                     className={`w-[10%] p-3 text-center ${
                       isCurrent
-                        ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200'
+                        ? 'bg-blue-50 dark:bg-blue-900/30'
                         : ''
                     }`}
                   >
@@ -643,7 +643,7 @@ const RunningTable: React.FC<
                       <div className="flex items-center justify-center gap-1">
                         <div
                           className={`font-semibold ${
-                            isCurrent ? 'text-blue-600' : ''
+                            isCurrent ? 'text-blue-600 dark:text-blue-400' : ''
                           }`}
                         >
                           W{week.weekNumber}
@@ -657,7 +657,7 @@ const RunningTable: React.FC<
                       </div>
                       <div
                         className={`text-[10px] font-normal mt-1 ${
-                          isCurrent ? 'text-blue-500' : 'text-gray-500'
+                          isCurrent ? 'text-blue-500 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
                         }`}
                       >
                         {typeof week.label === 'string'
@@ -678,17 +678,17 @@ const RunningTable: React.FC<
                   ref={
                     index === sortedRunningItems.length - 1 ? lastRowRef : null
                   }
-                  className="border-b border-gray-200 hover:bg-[#F4F6FC]"
+                  className="border-b border-gray-200 dark:border-gray-700 hover:bg-[#F4F6FC] dark:hover:bg-gray-700"
                 >
-                  <td className="p-3 text-center text-gray-500">
+                  <td className="p-3 text-center text-gray-500 dark:text-gray-400">
                     {pagination ? (pagination.currentPage - 1) * pagination.itemsPerPage + index + 1 : index + 1}
                   </td>
                   <td className="p-3">
-                    <div className="text-black dark:text-black">
+                    <div className="text-black dark:text-white">
                       {item.userName || '-'}
                     </div>
                   </td>
-                  <td className="p-3 text-black">{item.name}</td>
+                  <td className="p-3 text-black dark:text-white">{item.name}</td>
                   {item.weeklyData.map((week, weekIndex) => {
                     const currentWeekInfo = weekInfo[weekIndex];
                     const isCurrent = currentWeekInfo
@@ -703,7 +703,7 @@ const RunningTable: React.FC<
                         key={weekIndex}
                         className={`p-3 text-center cursor-pointer ${
                           isCurrent
-                            ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200'
+                            ? 'bg-blue-50 dark:bg-blue-900/30'
                             : ''
                         }`}
                         onClick={() =>
@@ -716,15 +716,15 @@ const RunningTable: React.FC<
                           <span
                             className={
                               week.aerobicPercentage === 0
-                                ? 'text-gray-400'
-                                : 'text-blue-500'
+                                ? 'text-gray-400 dark:text-gray-500'
+                                : 'text-blue-500 dark:text-blue-400'
                             }
                           >
                             {week.aerobicPercentage === 0
                               ? '-'
                               : `${week.aerobicPercentage.toFixed(1)}%`}
                           </span>
-                          <span className="text-gray-400 text-sm">
+                          <span className="text-gray-400 dark:text-gray-500 text-sm">
                             {week.strengthSessions === 0
                               ? '-'
                               : `${week.strengthSessions}`}
@@ -750,9 +750,9 @@ const RunningTable: React.FC<
                     return (
                       <td
                         key={`empty-${i}`}
-                        className={`p-3 text-center ${
+                        className={`p-3 text-center text-gray-400 dark:text-gray-500 ${
                           isCurrent
-                            ? 'bg-blue-50 border-l-2 border-r-2 border-blue-200'
+                            ? 'bg-blue-50 dark:bg-blue-900/30'
                             : ''
                         }`}
                       >
@@ -770,7 +770,7 @@ const RunningTable: React.FC<
       {/* 페이지네이션 UI */}
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between mt-4 px-2">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             총 {pagination.totalItems}명 중 {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}-
             {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)}명
           </div>
@@ -778,14 +778,14 @@ const RunningTable: React.FC<
             <button
               onClick={() => onPageChange?.(1)}
               disabled={!pagination.hasPrevPage}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               처음
             </button>
             <button
               onClick={() => onPageChange?.(pagination.currentPage - 1)}
               disabled={!pagination.hasPrevPage}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               이전
             </button>
@@ -808,7 +808,7 @@ const RunningTable: React.FC<
                     className={`w-8 h-8 text-sm rounded-md ${
                       pageNum === pagination.currentPage
                         ? 'bg-blue-500 text-white'
-                        : 'border border-gray-300 hover:bg-gray-50'
+                        : 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300'
                     }`}
                   >
                     {pageNum}
@@ -819,14 +819,14 @@ const RunningTable: React.FC<
             <button
               onClick={() => onPageChange?.(pagination.currentPage + 1)}
               disabled={!pagination.hasNextPage}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               다음
             </button>
             <button
               onClick={() => onPageChange?.(pagination.totalPages)}
               disabled={!pagination.hasNextPage}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               마지막
             </button>

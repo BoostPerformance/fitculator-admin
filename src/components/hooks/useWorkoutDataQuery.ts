@@ -262,31 +262,36 @@ export const useWorkoutDataQuery = (challengeId: string, refreshParam?: string |
   });
   
   const batchUserData = batchUserDataQuery.data || [];
-  const isBatchUserDataLoading = batchUserDataQuery.isLoading;
   const batchUserDataError = batchUserDataQuery.error;
 
-  // 통합된 로딩 및 에러 상태
-  const isLoading = 
-    weeklyChartQuery.isLoading || 
-    leaderboardQuery.isLoading || 
-    todayCountQuery.isLoading ||
-    (userIds.length > 0 && isBatchUserDataLoading);
+  // isLoading은 캐시된 데이터가 없을 때만 true
+  // 캐시된 데이터가 있으면 즉시 표시하고 백그라운드에서 refetch
+  const hasWeeklyData = !!weeklyChartQuery.data;
+  const hasLeaderboardData = !!leaderboardQuery.data;
+  const hasTodayCountData = !!todayCountQuery.data;
+  const hasBatchUserData = batchUserData?.length > 0;
 
-  const isFetching = 
-    weeklyChartQuery.isFetching || 
-    leaderboardQuery.isFetching || 
+  const isLoading =
+    (!hasWeeklyData && weeklyChartQuery.isLoading) ||
+    (!hasLeaderboardData && leaderboardQuery.isLoading) ||
+    (!hasTodayCountData && todayCountQuery.isLoading) ||
+    (userIds.length > 0 && !hasBatchUserData && batchUserDataQuery.isLoading);
+
+  const isFetching =
+    weeklyChartQuery.isFetching ||
+    leaderboardQuery.isFetching ||
     todayCountQuery.isFetching ||
     (userIds.length > 0 && batchUserDataQuery.isFetching);
 
-  const error = 
-    weeklyChartQuery.error || 
-    leaderboardQuery.error || 
+  const error =
+    weeklyChartQuery.error ||
+    leaderboardQuery.error ||
     todayCountQuery.error ||
     batchUserDataError;
 
   // API 연결 상태 확인
-  const isApiConnected = !error && (weeklyChartQuery.data || leaderboardQuery.data || todayCountQuery.data);
-  const hasAnyData = weeklyChartQuery.data || leaderboardQuery.data || todayCountQuery.data || batchUserData?.length > 0;
+  const isApiConnected = !error && (hasWeeklyData || hasLeaderboardData || hasTodayCountData);
+  const hasAnyData = hasWeeklyData || hasLeaderboardData || hasTodayCountData || hasBatchUserData;
   
   // 연결 상태 로깅 - Production 환경에서 더 상세히
   if (error) {

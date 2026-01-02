@@ -194,12 +194,13 @@ const RunningUserList: React.FC<
       batchUserData?: any
     ): Promise<RunningItem[]> => {
       // paginatedUsers 데이터가 있으면 직접 사용 (이미 user 정보와 weeklyRecords 포함)
-      const usePaginatedData = batchUserData?.length > 0 && batchUserData[0]?.user;
+      // batchUserData[0]?.user 또는 batchUserData[0]?.userId 형태 둘 다 지원
+      const usePaginatedData = batchUserData?.length > 0 && (batchUserData[0]?.user || batchUserData[0]?.userId);
       const users = usePaginatedData
         ? batchUserData.map((item: any) => ({
-            id: item.userId,
-            name: item.user?.name || '유저',
-            username: item.user?.displayName || '-',
+            id: item.userId || item.user?.id,
+            name: item.user?.name || item.name || '유저',
+            username: item.user?.displayName || item.username || '-',
           }))
         : weeklyChartData.users || [];
 
@@ -221,18 +222,51 @@ const RunningUserList: React.FC<
         const batchResults = await Promise.all(
           userBatch.map(async (user) => {
             const userData = batchUserData?.find(
-              (data: any) => data.userId === user.id
+              (data: any) => data.userId === user.id || data.user?.id === user.id
             );
             const totalCardioPoints = userData?.stats?.totalCardioPoints || 0;
 
             // 주차별 데이터 처리
-            const weeklyData = generatedWeeks.map((week, idx) => {
-              // 날짜 범위로 운동 데이터 매칭
-              const cardioPoints = cardioData
-                .filter((c) => {
-                  if (c.userId !== user.id) return false;
-                  const apiStartDate = new Date(c.startDate + 'T00:00:00Z');
-                  const apiEndDate = new Date(c.endDate + 'T00:00:00Z');
+            let weeklyData: any[] = [];
+
+            // paginatedUsers에서 weeklyRecords가 있으면 직접 사용
+            if (userData?.weeklyRecords && userData.weeklyRecords.length > 0) {
+              weeklyData = userData.weeklyRecords.map((record: any, idx: number) => {
+                const startDate = formatDateToMMDD(record.start_date);
+                const endDate = formatDateToMMDD(record.end_date);
+                return {
+                  weekNumber: idx + 1,
+                  startDate,
+                  endDate,
+                  aerobicPercentage: record.cardio_points_total || 0,
+                  actualPercentage: record.cardio_points_total || 0,
+                  strengthSessions: record.strength_sessions_count || 0,
+                  cardio_points_total: record.cardio_points_total || 0,
+                };
+              });
+            } else if (generatedWeeks.length > 0) {
+              // 기존 방식: generatedWeeks 기반으로 처리
+              weeklyData = generatedWeeks.map((week, idx) => {
+                // 날짜 범위로 운동 데이터 매칭
+                const cardioPoints = cardioData
+                  .filter((c) => {
+                    if (c.userId !== user.id) return false;
+                    const apiStartDate = new Date(c.startDate + 'T00:00:00Z');
+                    const apiEndDate = new Date(c.endDate + 'T00:00:00Z');
+                    const weekStartDate = new Date(week.startDate);
+                    const weekEndDate = new Date(week.endDate);
+
+                    return (
+                      apiStartDate.getTime() <= weekEndDate.getTime() &&
+                      apiEndDate.getTime() >= weekStartDate.getTime()
+                    );
+                  })
+                  .reduce((sum, c) => sum + c.y, 0);
+
+                const strengthSessions = strengthData.filter((s) => {
+                  if (s.userId !== user.id) return false;
+                  const apiStartDate = new Date(s.startDate + 'T00:00:00Z');
+                  const apiEndDate = new Date(s.endDate + 'T00:00:00Z');
                   const weekStartDate = new Date(week.startDate);
                   const weekEndDate = new Date(week.endDate);
 
@@ -240,47 +274,34 @@ const RunningUserList: React.FC<
                     apiStartDate.getTime() <= weekEndDate.getTime() &&
                     apiEndDate.getTime() >= weekStartDate.getTime()
                   );
-                })
-                .reduce((sum, c) => sum + c.y, 0);
+                }).length;
 
-              const strengthSessions = strengthData.filter((s) => {
-                if (s.userId !== user.id) return false;
-                const apiStartDate = new Date(s.startDate + 'T00:00:00Z');
-                const apiEndDate = new Date(s.endDate + 'T00:00:00Z');
-                const weekStartDate = new Date(week.startDate);
-                const weekEndDate = new Date(week.endDate);
-
-                return (
-                  apiStartDate.getTime() <= weekEndDate.getTime() &&
-                  apiEndDate.getTime() >= weekStartDate.getTime()
+                const weekRecord = userData?.weeklyRecords?.find(
+                  (record: any) => {
+                    const recordStartDate = new Date(record.start_date);
+                    const recordEndDate = new Date(record.end_date);
+                    return (
+                      recordStartDate.getTime() === week.startDate.getTime() &&
+                      recordEndDate.getTime() === week.endDate.getTime()
+                    );
+                  }
                 );
-              }).length;
 
-              const weekRecord = userData?.weeklyRecords?.find(
-                (record: any) => {
-                  const recordStartDate = new Date(record.start_date);
-                  const recordEndDate = new Date(record.end_date);
-                  return (
-                    recordStartDate.getTime() === week.startDate.getTime() &&
-                    recordEndDate.getTime() === week.endDate.getTime()
-                  );
-                }
-              );
+                const finalWeekNumber = week.weekNumber
+                  ? parseInt(week.weekNumber.replace('W', ''))
+                  : idx + 1;
 
-              const finalWeekNumber = week.weekNumber
-                ? parseInt(week.weekNumber.replace('W', ''))
-                : idx + 1;
-
-              return {
-                weekNumber: finalWeekNumber,
-                startDate: week.label.split('-')[0],
-                endDate: week.label.split('-')[1],
-                aerobicPercentage: cardioPoints,
-                actualPercentage: cardioPoints,
-                strengthSessions,
-                cardio_points_total: weekRecord?.cardio_points_total || 0,
-              };
-            });
+                return {
+                  weekNumber: finalWeekNumber,
+                  startDate: week.label.split('-')[0],
+                  endDate: week.label.split('-')[1],
+                  aerobicPercentage: cardioPoints,
+                  actualPercentage: cardioPoints,
+                  strengthSessions,
+                  cardio_points_total: weekRecord?.cardio_points_total || 0,
+                };
+              });
+            }
 
             return {
               id: user.id,
@@ -311,26 +332,47 @@ const RunningUserList: React.FC<
 
   // Process data when React Query data changes
   const processRunningData = useCallback(async () => {
-    if (
-      !weeklyChart ||
-      !leaderboard ||
-      !todayCount ||
-      generatedWeeks.length === 0
-    ) {
+    console.log('[processRunningData] 시작');
+    // 페이지네이션 데이터가 있으면 weeklyChart 없어도 진행 가능
+    const hasPaginatedData = paginatedUsers && paginatedUsers.length > 0;
+    console.log('[processRunningData] hasPaginatedData:', hasPaginatedData, 'weeklyChart:', !!weeklyChart);
+
+    if (!hasPaginatedData && !weeklyChart) {
+      console.log('[processRunningData] 조건 불충족으로 return');
       return;
     }
 
     try {
+      // RunningTable과 동일하게 generatedWeeks를 여기서 생성
+      let localGeneratedWeeks: WeekInfo[] = [];
+      if (
+        weeklyChart?.challengePeriod &&
+        weeklyChart.challengePeriod.startDate &&
+        weeklyChart.challengePeriod.endDate
+      ) {
+        localGeneratedWeeks = generateWeekLabels(
+          weeklyChart.challengePeriod.startDate,
+          weeklyChart.challengePeriod.endDate
+        );
+        setWeekInfo(localGeneratedWeeks);
+      } else if (weeklyChart?.weeks && weeklyChart.weeks.length > 0) {
+        setWeekInfo(weeklyChart.weeks);
+        localGeneratedWeeks = weeklyChart.weeks;
+      }
+      console.log('[processRunningData] localGeneratedWeeks:', localGeneratedWeeks.length);
+
       // 페이지네이션 데이터가 있으면 사용, 없으면 기존 batchUserData 사용
-      const userData = paginatedUsers && paginatedUsers.length > 0 ? paginatedUsers : batchUserData;
+      const userData = hasPaginatedData ? paginatedUsers : batchUserData;
+      console.log('[processRunningData] userData:', userData?.length);
 
       const runningData = await processApiDataToRunningItems(
-        weeklyChart,
-        leaderboard,
-        todayCount,
-        generatedWeeks,
+        weeklyChart || { users: [], cardioData: [], strengthData: [] },
+        leaderboard || [],
+        todayCount || {},
+        localGeneratedWeeks,
         userData
       );
+      console.log('[processRunningData] runningData 결과:', runningData?.length);
 
       setRunningItems(runningData);
       setTotalAchievements(calculateTotalAchievements(runningData));
@@ -345,7 +387,6 @@ const RunningUserList: React.FC<
     todayCount,
     batchUserData,
     paginatedUsers,
-    generatedWeeks,
     processApiDataToRunningItems,
   ]);
 
@@ -433,14 +474,20 @@ const RunningUserList: React.FC<
     );
   }
 
+  // 디버깅용 로그
+  console.log('[RunningUserList] paginatedUsers:', paginatedUsers?.length, paginatedUsers);
+  console.log('[RunningUserList] runningItems:', runningItems?.length, runningItems);
+  console.log('[RunningUserList] weeklyChart:', weeklyChart);
+  console.log('[RunningUserList] generatedWeeks:', generatedWeeks?.length);
+
   return (
-    <div className="mt-[3rem]  sm:px-[1rem] lg:hidden md:hidden sm:block w-full">
+    <div className="mt-[3rem] px-[1rem] lg:hidden md:hidden block w-full">
       <div className="flex flex-col gap-4">
         {runningItems.map((user, index) => {
           return (
             <div
               key={index}
-              className="pt-[0rem] pb-[2rem] sm:bg-white rounded-md shadow cursor-pointer"
+              className="pt-[0rem] pb-[2rem] sm:bg-white dark:sm:bg-gray-800 rounded-md shadow cursor-pointer"
               onClick={() => {
                 const firstWeek = user.weeklyData[0];
                 if (firstWeek) {
@@ -457,7 +504,7 @@ const RunningUserList: React.FC<
                 }
               }}
             >
-              <div className="text-[#6F6F6F] text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]">
+              <div className="text-[#6F6F6F] dark:text-gray-300 text-1.125-700 pt-[1rem] pl-[1rem] pb-[1rem]">
                 {user.name}
               </div>
               <table className="w-full">
@@ -470,7 +517,7 @@ const RunningUserList: React.FC<
                     const weekSlice = user.weeklyData.slice(start, end);
                     return (
                       <React.Fragment key={groupIdx}>
-                        <tr className="sm:pl-[0.5rem] flex w-full justify-start gap-[0.9rem] text-gray-11 text-1-500">
+                        <tr className="sm:pl-[0.5rem] flex w-full justify-start gap-[0.9rem] text-gray-11 dark:text-gray-400 text-1-500">
                           {weekSlice.map((week, i) => (
                             <th key={i} className="text-center min-w-[2.5rem]">
                               {week.weekNumber}주
@@ -481,7 +528,7 @@ const RunningUserList: React.FC<
                           {weekSlice.map((week, i) => (
                             <td
                               key={i}
-                              className="text-center p-3 cursor-pointer hover:bg-gray-50"
+                              className="text-center p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 const weekLabel =
@@ -495,7 +542,7 @@ const RunningUserList: React.FC<
                             >
                               <div className="flex flex-col items-center">
                                 {isRunningUploaded(week.aerobicPercentage)}
-                                <div className="text-xs text-gray-400 mt-1">
+                                <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                                   {week.strengthSessions === 0
                                     ? '-'
                                     : `${week.strengthSessions}`}
@@ -517,7 +564,7 @@ const RunningUserList: React.FC<
       {/* 페이지네이션 UI (모바일) */}
       {pagination && pagination.totalPages > 1 && (
         <div className="flex flex-col items-center gap-3 mt-6 pb-6">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             총 {pagination.totalItems}명 중 {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}-
             {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)}명
           </div>
@@ -525,17 +572,17 @@ const RunningUserList: React.FC<
             <button
               onClick={() => onPageChange?.(pagination.currentPage - 1)}
               disabled={!pagination.hasPrevPage}
-              className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               이전
             </button>
-            <span className="px-3 py-2 text-sm font-medium">
+            <span className="px-3 py-2 text-sm font-medium dark:text-gray-300">
               {pagination.currentPage} / {pagination.totalPages}
             </span>
             <button
               onClick={() => onPageChange?.(pagination.currentPage + 1)}
               disabled={!pagination.hasNextPage}
-              className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               다음
             </button>

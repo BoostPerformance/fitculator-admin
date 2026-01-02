@@ -179,11 +179,14 @@ export async function PUT(
     // 요청 본문 파싱
     const body = await request.json();
     const {
+      title,
       description,
       start_date,
       end_date,
       banner_image_url,
       cover_image_url,
+      challenge_type,
+      organization_id,
     } = body;
 
     // 필수 필드 검증
@@ -218,11 +221,14 @@ export async function PUT(
     const { data: updatedChallenge, error: updateError } = await supabase
       .from('challenges')
       .update({
+        title,
         description,
         start_date,
         end_date,
         banner_image_url,
         cover_image_url,
+        challenge_type,
+        organization_id,
         updated_at: new Date().toISOString(),
       })
       .eq('id', challengeId)

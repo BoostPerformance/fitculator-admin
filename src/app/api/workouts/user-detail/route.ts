@@ -897,7 +897,7 @@ function getDayLabel(date: Date): string {
   return dayNames[date.getDay()];
 }
 
-// 배치 사용자 데이터 조회
+// 배치 사용자 데이터 조회 (N+1 쿼리 최적화 적용)
 async function getBatchUserWorkoutData(
   userIds: string[],
   challengeId?: string | null
@@ -906,6 +906,7 @@ async function getBatchUserWorkoutData(
     // 챌린지 정보를 먼저 한 번만 가져오기
     let challengeStartDate: string | null = null;
     let challengeEndDate: string | null = null;
+    let w1StartDateStr: string | null = null;
 
     if (challengeId) {
       const { data: challenge } = await supabase
@@ -917,6 +918,17 @@ async function getBatchUserWorkoutData(
       if (challenge) {
         challengeStartDate = challenge.start_date;
         challengeEndDate = challenge.end_date;
+
+        // W1 시작일 계산 (한 번만)
+        const [year, month, day] = challengeStartDate.split('-').map(Number);
+        const challengeStart = new Date(year, month - 1, day);
+        const startDay = challengeStart.getDay();
+        let w1StartDate = new Date(challengeStart);
+        if (startDay !== 1) {
+          const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
+          w1StartDate.setDate(w1StartDate.getDate() - daysSinceMonday);
+        }
+        w1StartDateStr = w1StartDate.toISOString().split('T')[0];
       }
     }
 
@@ -930,110 +942,143 @@ async function getBatchUserWorkoutData(
       return NextResponse.json([]);
     }
 
-    // 모든 사용자의 데이터를 병렬로 처리
-    const promises = users.map(async (user) => {
+    // ========================================
+    // 배치 쿼리 최적화: 모든 사용자의 주간 기록을 한 번에 조회
+    // ========================================
+    let weeklyRecordsQuery = supabase
+      .from('workout_weekly_records')
+      .select('*')
+      .in('user_id', userIds);
 
-      // 주간 기록 가져오기 (피드백 포함)
-      let query = supabase
-        .from('workout_weekly_records')
-        .select('*')
-        .eq('user_id', user.id);
+    if (w1StartDateStr && challengeEndDate) {
+      weeklyRecordsQuery = weeklyRecordsQuery
+        .gte('start_date', w1StartDateStr)
+        .lte('end_date', challengeEndDate);
+    }
 
-      if (challengeStartDate && challengeEndDate) {
-        // W1을 포함한 전체 기간 조회 - 챌린지 시작일이 포함된 주의 월요일부터
-        const [year, month, day] = challengeStartDate.split('-').map(Number);
-        const challengeStart = new Date(year, month - 1, day);
-        const startDay = challengeStart.getDay();
-        
-        // 챌린지 시작일이 포함된 주의 월요일 계산
-        let w1StartDate = new Date(challengeStart);
-        if (startDay !== 1) {
-          const daysSinceMonday = startDay === 0 ? 6 : startDay - 1;
-          w1StartDate.setDate(w1StartDate.getDate() - daysSinceMonday);
+    const { data: allWeeklyRecords } = await weeklyRecordsQuery.order('start_date', {
+      ascending: true,
+    });
+
+    // 사용자별로 중복 제거된 레코드 생성
+    const userRecordsMap = new Map<string, any[]>();
+    const allUniqueRecordIds: string[] = [];
+
+    if (allWeeklyRecords) {
+      for (const record of allWeeklyRecords) {
+        const userId = record.user_id;
+        if (!userRecordsMap.has(userId)) {
+          userRecordsMap.set(userId, []);
         }
-        
-        query = query
-          .gte('start_date', w1StartDate.toISOString().split('T')[0])
-          .lte('end_date', challengeEndDate);
-      }
 
-      const { data: weeklyRecords } = await query.order('start_date', {
-        ascending: true,
+        // 중복 체크
+        const [recordYear, recordMonth, recordDayNum] = record.start_date.split('-').map(Number);
+        const recordStart = new Date(recordYear, recordMonth - 1, recordDayNum);
+        const recordDay = recordStart.getDay();
+        let weekMonday = new Date(recordStart);
+        if (recordDay !== 1) {
+          const daysSinceMonday = recordDay === 0 ? 6 : recordDay - 1;
+          weekMonday.setDate(weekMonday.getDate() - daysSinceMonday);
+        }
+        const weekKey = `${userId}-${weekMonday.toISOString().split('T')[0]}`;
+
+        const userRecords = userRecordsMap.get(userId)!;
+        const alreadyExists = userRecords.some(r => {
+          const [rYear, rMonth, rDay] = r.start_date.split('-').map(Number);
+          const rStart = new Date(rYear, rMonth - 1, rDay);
+          const rDayOfWeek = rStart.getDay();
+          let rMonday = new Date(rStart);
+          if (rDayOfWeek !== 1) {
+            const days = rDayOfWeek === 0 ? 6 : rDayOfWeek - 1;
+            rMonday.setDate(rMonday.getDate() - days);
+          }
+          return `${userId}-${rMonday.toISOString().split('T')[0]}` === weekKey;
+        });
+
+        if (!alreadyExists) {
+          userRecords.push(record);
+          allUniqueRecordIds.push(record.id);
+        }
+      }
+    }
+
+    // ========================================
+    // 배치 쿼리: 모든 피드백을 한 번에 조회
+    // ========================================
+    let feedbackMap = new Map<string, any>();
+    if (allUniqueRecordIds.length > 0 && challengeId) {
+      const { data: allFeedbacks } = await supabase
+        .from('workout_feedbacks')
+        .select('workout_weekly_records_id, id, ai_feedback, coach_feedback, coach_memo, coach_id, created_at')
+        .in('workout_weekly_records_id', allUniqueRecordIds)
+        .eq('challenge_id', challengeId);
+
+      if (allFeedbacks) {
+        for (const feedback of allFeedbacks) {
+          feedbackMap.set(feedback.workout_weekly_records_id, feedback);
+        }
+      }
+    }
+
+    // ========================================
+    // 배치 쿼리: 모든 코치 정보를 한 번에 조회
+    // ========================================
+    const coachIds = [...new Set(
+      Array.from(feedbackMap.values())
+        .filter(f => f.coach_id)
+        .map(f => f.coach_id)
+    )];
+
+    let coachMap = new Map<string, any>();
+    if (coachIds.length > 0) {
+      const { data: allCoaches } = await supabase
+        .from('coaches')
+        .select(`
+          id,
+          profile_image_url,
+          admin_users!admin_user_id (
+            username
+          )
+        `)
+        .in('id', coachIds);
+
+      if (allCoaches) {
+        for (const coach of allCoaches) {
+          coachMap.set(coach.id, {
+            id: coach.id,
+            name: (coach.admin_users as any)?.[0]?.username || 'Unknown Coach',
+            profile_image_url: coach.profile_image_url
+          });
+        }
+      }
+    }
+
+    // ========================================
+    // 메모리에서 데이터 조합 (추가 DB 쿼리 없음)
+    // ========================================
+    const results = users.map((user) => {
+      const userRecords = userRecordsMap.get(user.id) || [];
+
+      const weeklyRecordsWithFeedback = userRecords.map(record => {
+        const feedback = feedbackMap.get(record.id) || null;
+        const coach = feedback?.coach_id ? coachMap.get(feedback.coach_id) || null : null;
+
+        return {
+          ...record,
+          feedback,
+          coach,
+        };
       });
 
-      // 중복 레코드 제거
-      const uniqueWeeklyRecords = [];
-      const seenWeeks = new Map<string, boolean>();
-      
-      if (weeklyRecords) {
-        for (const record of weeklyRecords) {
-          // 로컬 타임으로 파싱
-          const [recordYear, recordMonth, recordDayNum] = record.start_date.split('-').map(Number);
-          const recordStart = new Date(recordYear, recordMonth - 1, recordDayNum);
-          const recordDay = recordStart.getDay();
-          let weekMonday = new Date(recordStart);
-          if (recordDay !== 1) {
-            const daysSinceMonday = recordDay === 0 ? 6 : recordDay - 1;
-            weekMonday.setDate(weekMonday.getDate() - daysSinceMonday);
-          }
-          const weekKey = `${user.id}-${weekMonday.toISOString().split('T')[0]}`;
-          
-          if (!seenWeeks.has(weekKey)) {
-            seenWeeks.set(weekKey, true);
-            uniqueWeeklyRecords.push(record);
-          }
-        }
-      }
-
-      // 각 주간 기록에 피드백 정보 추가
-      const weeklyRecordsWithFeedback = [];
-      for (const record of uniqueWeeklyRecords) {
-        const { data: feedback } = await supabase
-          .from('workout_feedbacks')
-          .select('id, ai_feedback, coach_feedback, coach_memo, coach_id, created_at')
-          .eq('workout_weekly_records_id', record.id)
-          .eq('challenge_id', challengeId)
-          .maybeSingle();
-
-        let coach = null;
-        if (feedback && feedback.coach_id) {
-          const { data: coachData } = await supabase
-            .from('coaches')
-            .select(`
-              id, 
-              profile_image_url,
-              admin_users!admin_user_id (
-                username
-              )
-            `)
-            .eq('id', feedback.coach_id)
-            .maybeSingle();
-
-          if (coachData) {
-            coach = {
-              id: coachData.id,
-              name: coachData.admin_users?.[0]?.username || 'Unknown Coach',
-              profile_image_url: coachData.profile_image_url
-            };
-          }
-        }
-
-        weeklyRecordsWithFeedback.push({
-          ...record,
-          feedback: feedback || null,
-          coach: coach || null,
-        });
-      }
-
-      const totalCardioPoints = uniqueWeeklyRecords.reduce(
+      const totalCardioPoints = userRecords.reduce(
         (sum, record) => sum + (record.cardio_points_total || 0),
         0
       );
 
-      const totalStrengthSessions = uniqueWeeklyRecords.reduce(
+      const totalStrengthSessions = userRecords.reduce(
         (sum, record) => sum + (record.strength_sessions_count || 0),
         0
-      ) || 0;
+      );
 
       return {
         userId: user.id,
@@ -1044,17 +1089,14 @@ async function getBatchUserWorkoutData(
         },
         weeklyRecords: weeklyRecordsWithFeedback,
         stats: {
-          totalWeeks: uniqueWeeklyRecords.length,
+          totalWeeks: userRecords.length,
           totalCardioPoints,
           totalStrengthSessions,
         },
       };
     });
 
-    const results = await Promise.all(promises);
-    const validResults = results.filter((result) => result !== null);
-
-    return NextResponse.json(validResults, {
+    return NextResponse.json(results, {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
