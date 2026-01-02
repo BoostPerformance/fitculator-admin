@@ -220,7 +220,7 @@ export async function GET(
           organization_id,
           enable_benchmark,
           enable_mission,
-          challenge_participants!inner (
+          challenge_participants (
             id,
             service_user_id
           )
