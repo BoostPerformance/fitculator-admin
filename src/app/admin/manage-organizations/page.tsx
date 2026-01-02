@@ -150,7 +150,7 @@ export default function ManageOrganizationsPage() {
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* 조직 목록 */}
-        <div className="w-full md:w-1/3 bg-white dark:bg-blue-3 rounded-lg shadow p-4">
+        <div className="w-full md:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">조직 목록</h2>
             <button
@@ -164,7 +164,7 @@ export default function ManageOrganizationsPage() {
           {showAddForm && (
             <form
               onSubmit={handleAddOrganization}
-              className="mb-4 p-3 bg-gray-50 dark:bg-blue-4 rounded-md"
+              className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-md"
             >
               <div className="mb-3">
                 <label className="block text-sm font-medium mb-1">
@@ -179,7 +179,7 @@ export default function ManageOrganizationsPage() {
                       name: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 border rounded-md dark:bg-blue-3 dark:border-blue-2"
+                  className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   required
                 />
               </div>
@@ -193,7 +193,7 @@ export default function ManageOrganizationsPage() {
                       description: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 border rounded-md dark:bg-blue-3 dark:border-blue-2"
+                  className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   rows={3}
                 />
               </div>
@@ -210,7 +210,7 @@ export default function ManageOrganizationsPage() {
                       logo_url: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 border rounded-md dark:bg-blue-3 dark:border-blue-2"
+                  className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   placeholder="https://example.com/logo.png"
                 />
               </div>
@@ -240,8 +240,8 @@ export default function ManageOrganizationsPage() {
                   onClick={() => handleSelectOrganization(org)}
                   className={`p-3 rounded-md cursor-pointer ${
                     selectedOrganization?.id === org.id
-                      ? 'bg-blue-100 dark:bg-blue-2'
-                      : 'hover:bg-gray-100 dark:hover:bg-blue-4'
+                      ? 'bg-blue-100 dark:bg-blue-900'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
                   <div className="flex items-center">
@@ -256,7 +256,7 @@ export default function ManageOrganizationsPage() {
                         />
                       </div>
                     ) : (
-                      <div className="w-10 h-10 mr-3 rounded-full bg-gray-200 dark:bg-blue-4 flex items-center justify-center">
+                      <div className="w-10 h-10 mr-3 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                         <span className="text-gray-500 dark:text-gray-300 text-lg font-semibold">
                           {org.name.charAt(0).toUpperCase()}
                         </span>
@@ -278,7 +278,7 @@ export default function ManageOrganizationsPage() {
         </div>
 
         {/* 조직 상세 정보 및 멤버 */}
-        <div className="w-full md:w-2/3 bg-white dark:bg-blue-3 rounded-lg shadow p-4">
+        <div className="w-full md:w-2/3 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
           {selectedOrganization ? (
             <>
               <div className="mb-6">
@@ -307,8 +307,8 @@ export default function ManageOrganizationsPage() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-blue-2">
-                      <thead className="bg-gray-50 dark:bg-blue-4">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                      <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             이름
@@ -324,7 +324,7 @@ export default function ManageOrganizationsPage() {
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white dark:bg-blue-3 divide-y divide-gray-200 dark:divide-blue-2">
+                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         {organizationMembers.map((member) => (
                           <tr key={member.id}>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -338,7 +338,7 @@ export default function ManageOrganizationsPage() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-blue-2 text-green-800 dark:text-green-400">
+                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-400">
                                 {member.role}
                               </span>
                             </td>

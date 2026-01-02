@@ -176,7 +176,7 @@ export default function CreateChallenge() {
             id="organization"
             value={selectedOrganization}
             onChange={(e) => setSelectedOrganization(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
             required
           >
             {organizations.length === 0 ? (
@@ -202,7 +202,7 @@ export default function CreateChallenge() {
             id="challengeType"
             value={challengeType}
             onChange={(e) => setChallengeType(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
             required
           >
             <option value="diet">식단</option>
@@ -224,7 +224,7 @@ export default function CreateChallenge() {
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
             required
           />
         </div>
@@ -240,7 +240,7 @@ export default function CreateChallenge() {
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
             rows={4}
           />
         </div>
@@ -257,7 +257,7 @@ export default function CreateChallenge() {
             id="coverImage"
             accept="image/*"
             onChange={handleCoverImageChange}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-500 file:text-white file:cursor-pointer"
           />
         </div>
 
@@ -273,7 +273,7 @@ export default function CreateChallenge() {
             id="bannerImage"
             accept="image/*"
             onChange={handleBannerImageChange}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-500 file:text-white file:cursor-pointer"
           />
           {uploadProgress > 0 && uploadProgress < 100 && (
             <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
@@ -297,7 +297,7 @@ export default function CreateChallenge() {
             id="startDate"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:[color-scheme:dark]"
             required
           />
         </div>
@@ -314,7 +314,7 @@ export default function CreateChallenge() {
             id="endDate"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-3 dark:border-blue-2 dark:text-white"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:[color-scheme:dark]"
             required
           />
         </div>
