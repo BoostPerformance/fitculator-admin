@@ -21,9 +21,9 @@ export default function Stats() {
   return (
     <div className="grid grid-cols-4 gap-4">
       {stats.map((stat, idx) => (
-        <div key={idx} className="p-4 bg-white shadow rounded-lg">
-          <div className="text-sm text-gray-500">{stat.name}</div>
-          <div className="text-2xl font-semibold text-gray-900">
+        <div key={idx} className="p-4 bg-white dark:bg-blue-4 shadow rounded-lg border border-gray-200 dark:border-gray-600">
+          <div className="text-sm text-gray-500 dark:text-gray-4">{stat.name}</div>
+          <div className="text-2xl font-semibold text-gray-900 dark:text-gray-3">
             {stat.value}
           </div>
           <div

@@ -95,27 +95,27 @@ const DailyWorkoutRecord = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg p-3 col-span-2 h-[36rem] flex items-center justify-center">
-        <div className="text-gray-500">로딩 중...</div>
+      <div className="bg-white dark:bg-blue-4 rounded-lg p-3 col-span-2 h-[36rem] flex items-center justify-center">
+        <div className="text-gray-500 dark:text-gray-4">로딩 중...</div>
       </div>
     );
   }
 
   if (!workoutRecords || workoutRecords.length === 0) {
     return (
-      <div className="bg-white rounded-lg p-3 col-span-2 h-[36rem] flex items-center justify-center shadow-[0_0_12px_0_rgba(121,120,132,0.15)]">
+      <div className="bg-white dark:bg-blue-4 rounded-lg p-3 col-span-2 h-[36rem] flex items-center justify-center shadow-[0_0_12px_0_rgba(121,120,132,0.15)] dark:shadow-none border border-gray-200 dark:border-gray-600">
         <div className="text-center">
-          <div className="text-gray-500 mb-2">일별 운동 기록 현황</div>
-          <div className="text-gray-400 text-sm">운동 기록이 없습니다.</div>
+          <div className="text-gray-500 dark:text-gray-4 mb-2">일별 운동 기록 현황</div>
+          <div className="text-gray-400 dark:text-gray-5 text-sm">운동 기록이 없습니다.</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg p-4 col-span-2 overflow-y-auto h-[36rem] [&::-webkit-scrollbar]:!hidden [scrollbar-width:none] shadow-[0_0_12px_0_rgba(121,120,132,0.15)] ">
+    <div className="bg-white dark:bg-blue-4 rounded-lg p-4 col-span-2 overflow-y-auto h-[36rem] [&::-webkit-scrollbar]:!hidden [scrollbar-width:none] shadow-[0_0_12px_0_rgba(121,120,132,0.15)] dark:shadow-none border border-gray-200 dark:border-gray-600">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold dark:text-gray-5 text-[#6F6F6F] pt-3">
+        <h2 className="text-lg font-semibold dark:text-gray-4 text-[#6F6F6F] pt-3">
           일별 운동 기록 현황
         </h2>
       </div>
@@ -129,7 +129,7 @@ const DailyWorkoutRecord = ({
             {days.map((day, idx) => (
               <div
                 key={idx}
-                className="flex justify-center  text-gray-500 lg:text-0.75-500 sm:text-0.875-500"
+                className="flex justify-center text-gray-500 dark:text-gray-5 lg:text-0.75-500 sm:text-0.875-500"
               >
                 {day}
               </div>
@@ -137,7 +137,7 @@ const DailyWorkoutRecord = ({
           </div>
         </div>
         {/* 전체 현황 헤더 */}
-        <div className="col-span-2 flex justify-end pr-2 text-gray-500 lg:text-0.75-500 md:text-0.875-500 sm:text-0.875-500 pt-[1rem]">
+        <div className="col-span-2 flex justify-end pr-2 text-gray-500 dark:text-gray-5 lg:text-0.75-500 md:text-0.875-500 sm:text-0.875-500 pt-[1rem]">
           전체
         </div>
       </div>
@@ -150,7 +150,7 @@ const DailyWorkoutRecord = ({
             <div key={index} className="grid grid-cols-12 items-center">
               {/* 사용자 이름 */}
               <div className="col-span-3 px-1">
-                <span className="text-gray-700 text-[12px]">
+                <span className="text-gray-700 dark:text-gray-4 text-[12px]">
                   {record.user.name.split(' ')[0]}
                 </span>
               </div>
@@ -162,7 +162,7 @@ const DailyWorkoutRecord = ({
                     <div key={idx} className="flex justify-center">
                       <div
                         className={`w-[1.2rem] h-[1.2rem] rounded-[0.2rem] ${
-                          weekDate.hasWorkout ? 'bg-[#FAAA16]' : 'bg-gray-100'
+                          weekDate.hasWorkout ? 'bg-[#FAAA16]' : 'bg-gray-100 dark:bg-gray-700'
                         }`}
                       />
                     </div>
@@ -188,7 +188,7 @@ const DailyWorkoutRecord = ({
                       />
                     </svg>
                   </div> */}
-                  <span className="text-gray-600 text-0.875-500">
+                  <span className="text-gray-600 dark:text-gray-4 text-0.875-500">
                     {`${record.totalWorkouts}일`}
                   </span>
                 </div>

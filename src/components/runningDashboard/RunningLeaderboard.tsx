@@ -119,12 +119,12 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
 
   if (isLoading) {
     return (
-      <div className="col-span-2 bg-white dark:bg-blue-3 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto shadow">
+      <div className="col-span-2 bg-white dark:bg-gray-8 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto shadow">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-8 bg-gray-100 rounded"></div>
+              <div key={i} className="h-8 bg-gray-100 dark:bg-gray-700 rounded"></div>
             ))}
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
 
   if (error) {
     return (
-      <div className="col-span-2 bg-white dark:bg-blue-3 rounded-[0.625rem] p-[1.25rem] h-[36rem] shadow">
+      <div className="col-span-2 bg-white dark:bg-gray-8 rounded-[0.625rem] p-[1.25rem] h-[36rem] shadow">
         <p className="text-red-500">리더보드를 불러오는데 실패했습니다.</p>
       </div>
     );
@@ -152,7 +152,7 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
   const maxValue = sortMetric === 'distance' ? 100 : 100;
 
   return (
-    <div className="col-span-2 bg-white dark:bg-blue-3 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100 shadow">
+    <div className="col-span-2 bg-white dark:bg-gray-8 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100 shadow">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold dark:text-gray-5 text-[#6F6F6F] pt-1 pl-1">
@@ -240,13 +240,13 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
 
           return (
             <div key={entry.user_id} className="grid grid-cols-12 gap-2 items-center">
-              <div className="col-span-1 text-center font-bold text-[#6F6F6F] text-[14px]">
+              <div className="col-span-1 text-center font-bold text-[#6F6F6F] dark:text-gray-4 text-[14px]">
                 {index + 1}
               </div>
-              <div className="col-span-3 font-medium text-[#6F6F6F] text-[12px]">
+              <div className="col-span-3 font-medium text-[#6F6F6F] dark:text-gray-4 text-[12px]">
                 {entry.user_name?.split(' ')[0] || '유저'}
               </div>
-              <div className="col-span-5 bg-gray-200 rounded-full h-2 relative">
+              <div className="col-span-5 bg-gray-200 dark:bg-gray-700 rounded-full h-2 relative">
                 <div
                   className="h-2 rounded-full transition-all duration-300"
                   style={{
@@ -267,14 +267,14 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
                   </div>
                 )}
               </div>
-              <div className="col-span-3 text-right text-[12px] text-[#6F6F6F]">
+              <div className="col-span-3 text-right text-[12px] text-[#6F6F6F] dark:text-gray-4">
                 {displayValue}
               </div>
             </div>
           );
         })}
         {sortedLeaderboard.length === 0 && (
-          <div className="text-center text-gray-500 py-4">
+          <div className="text-center text-gray-500 dark:text-gray-5 py-4">
             아직 러닝 기록이 없습니다
           </div>
         )}

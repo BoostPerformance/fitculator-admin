@@ -18,9 +18,9 @@ const TotalFeedbackCounts = ({
   return (
     <div className={`w-full h-full overflow-hidden dark:bg-blue-4 ${grids}`}>
       <div
-        className={`flex flex-col py-[1.25rem] lg:w-full min-h-[8.5rem] bg-white justify-center border-b-[0.4rem] ${borderColor} px-[1.3rem] rounded-lg border border-gray-200 sm:items-center sm:gap-[0.6rem] md:items-center md:justify-between md:w-full md:max-h-[8rem] md:p-0 md:py-[1rem] w-full`}
+        className={`flex flex-col py-[1.25rem] lg:w-full min-h-[8.5rem] bg-white dark:bg-blue-4 justify-center border-b-[0.4rem] ${borderColor} px-[1.3rem] rounded-lg border border-gray-200 dark:border-gray-600 sm:items-center sm:gap-[0.6rem] md:items-center md:justify-between md:w-full md:max-h-[8rem] md:p-0 md:py-[1rem] w-full`}
       >
-        <div className="text-left text-1.125-700 text-[#6F6F6F] sm:text-center sm:text-1-700 sm:whitespace-nowrap md:text-1-700 md:inline-block md:text-center">
+        <div className="text-left text-1.125-700 text-[#6F6F6F] dark:text-gray-4 sm:text-center sm:text-1-700 sm:whitespace-nowrap md:text-1-700 md:inline-block md:text-center">
           {title}
         </div>
         <div className={`text-right ${textColor}`}>

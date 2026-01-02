@@ -146,8 +146,8 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
       const data = payload[0].payload;
 
       return (
-        <div className="bg-white p-2 border border-gray-200 shadow-md rounded text-xs">
-          <p className="text-gray-700">{`${data.user}: ${data.y.toFixed(1)}`}</p>
+        <div className="bg-white dark:bg-blue-4 p-2 border border-gray-200 dark:border-gray-600 shadow-md rounded text-xs">
+          <p className="text-gray-700 dark:text-gray-4">{`${data.user}: ${data.y.toFixed(1)}`}</p>
         </div>
       );
     }
@@ -260,8 +260,8 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   // 로딩 중 표시
   if (isLoading) {
     return (
-      <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 bg-white p-4 md:p-6 shadow rounded-lg flex items-center justify-center h-40 md:h-64">
-        <p className="text-gray-500 text-sm md:text-base">
+      <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 bg-white dark:bg-blue-4 p-4 md:p-6 shadow rounded-lg flex items-center justify-center h-40 md:h-64">
+        <p className="text-gray-500 dark:text-gray-4 text-sm md:text-base">
           데이터를 불러오는 중...
         </p>
       </div>
@@ -271,7 +271,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   // 오류 표시
   if (error) {
     return (
-      <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 bg-white p-4 md:p-6 shadow rounded-lg flex flex-col items-center justify-center h-40 md:h-64">
+      <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 bg-white dark:bg-blue-4 p-4 md:p-6 shadow rounded-lg flex flex-col items-center justify-center h-40 md:h-64">
         <p className="text-red-500 mb-2 md:mb-4 text-sm md:text-base">
           {error}
         </p>
@@ -290,8 +290,8 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   // 주차 데이터가 없는 경우
   if (weekLabels.length === 0) {
     return (
-      <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 bg-white p-4 md:p-6 shadow rounded-lg flex items-center justify-center h-40 md:h-64">
-        <p className="text-gray-500 text-sm md:text-base">
+      <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 bg-white dark:bg-blue-4 p-4 md:p-6 shadow rounded-lg flex items-center justify-center h-40 md:h-64">
+        <p className="text-gray-500 dark:text-gray-4 text-sm md:text-base">
           주차 데이터를 생성할 수 없습니다.
         </p>
       </div>
@@ -307,8 +307,8 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
   return (
     <div className="col-span-6 sm:col-span-6 md:col-span-6 lg:col-span-6 space-y-4 md:space-y-6 ">
       {/* 유산소 운동 차트 */}
-      <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 overflow-hidden">
-        <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
+      <div className="bg-white dark:bg-blue-4 p-4 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+        <h2 className="text-lg font-semibold mb-4 dark:text-gray-4 text-[#6F6F6F] pt-3">
           주별 유산소 운동량
         </h2>
         <div className="overflow-x-auto pb-2">
@@ -390,8 +390,8 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
       </div>
 
       {/* 근력 운동 차트 */}
-      <div className="bg-white p-4 shadow rounded-lg dark:bg-gray-8 overflow-hidden">
-        <h2 className="text-lg font-semibold mb-4 dark:text-gray-5 text-[#6F6F6F] pt-3">
+      <div className="bg-white dark:bg-blue-4 p-4 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+        <h2 className="text-lg font-semibold mb-4 dark:text-gray-4 text-[#6F6F6F] pt-3">
           주별 근력 운동량
         </h2>
         <div className="overflow-x-auto pb-2">

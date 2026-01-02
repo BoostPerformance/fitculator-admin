@@ -13,13 +13,13 @@ export default function TopReferrals() {
   ];
 
   return (
-    <div className="bg-white p-4 shadow rounded-lg">
-      <h2 className="text-lg font-semibold mb-4 text-black">Top Referrals</h2>
+    <div className="bg-white dark:bg-blue-4 p-4 shadow rounded-lg border border-gray-200 dark:border-gray-600">
+      <h2 className="text-lg font-semibold mb-4 text-black dark:text-gray-4">Top Referrals</h2>
       <ul>
         {referrals.map((referral, idx) => (
           <li
             key={idx}
-            className="flex justify-between py-2 border-b text-black"
+            className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700 text-black dark:text-gray-4"
           >
             <span>{referral.source}</span>
             <span>{referral.value}</span>

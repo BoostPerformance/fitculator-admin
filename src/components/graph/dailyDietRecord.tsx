@@ -173,9 +173,9 @@ const DailyDietRecord = ({
   };
 
   return (
-    <div className="bg-white rounded-lg p-3 col-span-2 overflow-y-auto h-[36rem] [&::-webkit-scrollbar]:!hidden [scrollbar-width:none] shadow-[0_0_12px_0_rgba(121,120,132,0.15)]">
+    <div className="bg-white dark:bg-blue-4 rounded-lg p-3 col-span-2 overflow-y-auto h-[36rem] [&::-webkit-scrollbar]:!hidden [scrollbar-width:none] shadow-[0_0_12px_0_rgba(121,120,132,0.15)] dark:shadow-none border border-gray-200 dark:border-gray-600">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold dark:text-gray-5 text-[#6F6F6F] pt-4 pl-1">
+        <h2 className="text-lg font-semibold dark:text-gray-4 text-[#6F6F6F] pt-4 pl-1">
           일별 식단 기록 현황
         </h2>
       </div>
@@ -189,7 +189,7 @@ const DailyDietRecord = ({
             {days.map((day, idx) => (
               <div
                 key={idx}
-                className="flex justify-center  text-gray-500 lg:text-0.75-500 sm:text-0.875-500"
+                className="flex justify-center text-gray-500 dark:text-gray-5 lg:text-0.75-500 sm:text-0.875-500"
               >
                 {day}
               </div>
@@ -197,7 +197,7 @@ const DailyDietRecord = ({
           </div>
         </div>
         {/* 총 업로드 현황 헤더 */}
-        <div className="col-span-2 flex justify-center text-gray-500 lg:text-0.75-500 md:text-0.875-500 sm:text-0.875-500 text-center pt-[1rem]">
+        <div className="col-span-2 flex justify-center text-gray-500 dark:text-gray-5 lg:text-0.75-500 md:text-0.875-500 sm:text-0.875-500 text-center pt-[1rem]">
           총 업로드
           <br className="md:inline lg:hidden" />
         </div>
@@ -222,7 +222,7 @@ const DailyDietRecord = ({
               <div key={index} className="grid grid-cols-6 items-center">
                 {/* 사용자 이름 */}
                 <div className="col-span-1">
-                  <span className="text-gray-700 text-0.625-500">
+                  <span className="text-gray-700 dark:text-gray-4 text-0.625-500">
                     {activity.users.name.split(' ')[0]}
                   </span>
                 </div>
@@ -237,7 +237,7 @@ const DailyDietRecord = ({
                         ${
                           hasRecordForDate(date, activity)
                             ? 'bg-[#FAAA16]'
-                            : 'bg-gray-100'
+                            : 'bg-gray-100 dark:bg-gray-700'
                         }`}
                         />
                       </div>
@@ -263,7 +263,7 @@ const DailyDietRecord = ({
                         />
                       </svg>
                     </div>
-                    <span className="text-gray-600 text-0.875-500">
+                    <span className="text-gray-600 dark:text-gray-4 text-0.875-500">
                       {`${activity.daily_records_count}일`}
                     </span>
                   </div>
