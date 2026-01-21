@@ -530,6 +530,7 @@ export default function User() {
                 <>
                   <TrafficSourceChart challengeId={selectedChallengeId} />
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
+                  <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} />
                   <WeeklyWorkoutChart
                     data={weeklyChart}
                     isLoading={workoutDataLoading}

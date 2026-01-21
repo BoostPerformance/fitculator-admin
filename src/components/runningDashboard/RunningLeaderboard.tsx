@@ -119,7 +119,7 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
 
   if (isLoading) {
     return (
-      <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto shadow dark:shadow-gray-900">
+      <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto shadow dark:shadow-gray-900 border border-gray-200 dark:border-gray-700">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
           <div className="space-y-3">
@@ -134,7 +134,7 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
 
   if (error) {
     return (
-      <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] shadow dark:shadow-gray-900">
+      <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] shadow dark:shadow-gray-900 border border-gray-200 dark:border-gray-700">
         <p className="text-red-500">리더보드를 불러오는데 실패했습니다.</p>
       </div>
     );
@@ -152,7 +152,7 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
   const maxValue = sortMetric === 'distance' ? 100 : 100;
 
   return (
-    <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-track]:bg-gray-700 shadow dark:shadow-gray-900">
+    <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-track]:bg-gray-700 shadow dark:shadow-gray-900 border border-gray-200 dark:border-gray-700">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-[#6F6F6F] dark:text-gray-300 pt-1 pl-1">
