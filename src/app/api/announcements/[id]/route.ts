@@ -12,9 +12,10 @@ export const dynamic = 'force-dynamic';
 // 개별 공지사항 조회
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -26,7 +27,7 @@ export async function GET(
         *,
         challenge_announcement_target_groups(group_id)
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error) {
@@ -53,9 +54,10 @@ export async function GET(
 // 공지사항 수정
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -129,7 +131,7 @@ export async function PUT(
     const { data: announcement, error } = await supabase
       .from('challenge_announcement')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -142,12 +144,12 @@ export async function PUT(
     await supabase
       .from('challenge_announcement_target_groups')
       .delete()
-      .eq('announcement_id', params.id);
+      .eq('announcement_id', id);
 
     // 새로운 타겟 그룹 추가 (target_group_ids가 있는 경우에만)
     if (target_group_ids && Array.isArray(target_group_ids) && target_group_ids.length > 0) {
       const targetGroupInserts = target_group_ids.map((groupId: string) => ({
-        announcement_id: params.id,
+        announcement_id: id,
         group_id: groupId
       }));
 
@@ -174,9 +176,10 @@ export async function PUT(
 // 공지사항 삭제
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -196,7 +199,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('challenge_announcement')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       throw error;
