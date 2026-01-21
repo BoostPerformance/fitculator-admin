@@ -119,7 +119,7 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
 
   if (isLoading) {
     return (
-      <div className="col-span-2 bg-white dark:bg-gray-8 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto shadow">
+      <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto shadow dark:shadow-gray-900">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
           <div className="space-y-3">
@@ -134,7 +134,7 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
 
   if (error) {
     return (
-      <div className="col-span-2 bg-white dark:bg-gray-8 rounded-[0.625rem] p-[1.25rem] h-[36rem] shadow">
+      <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] shadow dark:shadow-gray-900">
         <p className="text-red-500">리더보드를 불러오는데 실패했습니다.</p>
       </div>
     );
@@ -152,21 +152,21 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
   const maxValue = sortMetric === 'distance' ? 100 : 100;
 
   return (
-    <div className="col-span-2 bg-white dark:bg-gray-8 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100 shadow">
+    <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-track]:bg-gray-700 shadow dark:shadow-gray-900">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold dark:text-gray-5 text-[#6F6F6F] pt-1 pl-1">
+          <h2 className="text-lg font-semibold text-[#6F6F6F] dark:text-gray-300 pt-1 pl-1">
             리더보드
           </h2>
           <div className="flex items-center gap-1.5">
             {/* 거리/운동량 토글 */}
-            <div className="flex rounded-full bg-gray-100 dark:bg-blue-4 p-0.5">
+            <div className="flex rounded-full bg-gray-100 dark:bg-gray-700 p-0.5">
               <button
                 onClick={() => setSortMetric('distance')}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${
                   sortMetric === 'distance'
-                    ? 'bg-white dark:bg-blue-5 text-blue-600 dark:text-blue-400 shadow-sm'
-                    : 'text-gray-500 dark:text-gray-6 hover:text-gray-700'
+                    ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
                 거리
@@ -175,21 +175,21 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
                 onClick={() => setSortMetric('points')}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${
                   sortMetric === 'points'
-                    ? 'bg-white dark:bg-blue-5 text-pink-600 dark:text-pink-400 shadow-sm'
-                    : 'text-gray-500 dark:text-gray-6 hover:text-gray-700'
+                    ? 'bg-white dark:bg-gray-600 text-pink-600 dark:text-pink-400 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
                 운동량
               </button>
             </div>
             {/* 주간/전체 토글 */}
-            <div className="flex rounded-full bg-gray-100 dark:bg-blue-4 p-0.5">
+            <div className="flex rounded-full bg-gray-100 dark:bg-gray-700 p-0.5">
               <button
                 onClick={() => setPeriod('weekly')}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${
                   period === 'weekly'
-                    ? 'bg-white dark:bg-blue-5 text-gray-700 dark:text-gray-4 shadow-sm'
-                    : 'text-gray-500 dark:text-gray-6 hover:text-gray-700'
+                    ? 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
                 주간
@@ -198,8 +198,8 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
                 onClick={() => setPeriod('all')}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${
                   period === 'all'
-                    ? 'bg-white dark:bg-blue-5 text-gray-700 dark:text-gray-4 shadow-sm'
-                    : 'text-gray-500 dark:text-gray-6 hover:text-gray-700'
+                    ? 'bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-200 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
                 전체
@@ -213,7 +213,7 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
             <select
               value={selectedWeekIndex}
               onChange={(e) => setSelectedWeekIndex(Number(e.target.value))}
-              className="px-2 py-1 rounded-lg text-[10px] bg-gray-100 dark:bg-blue-4 text-gray-600 dark:text-gray-5 border-none outline-none cursor-pointer"
+              className="px-2 py-1 rounded-lg text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-none outline-none cursor-pointer"
             >
               {weeks.map((week, idx) => {
                 const today = new Date().toISOString().split('T')[0];
@@ -229,7 +229,7 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
         )}
       </div>
       <div className="space-y-4">
-        <div className="text-right text-0.7-500 text-gray-5">
+        <div className="text-right text-0.7-500 text-gray-500 dark:text-gray-400">
           {sortMetric === 'distance' ? '총 거리 (km)' : '총 운동량 (pt)'}
         </div>
         {sortedLeaderboard.map((entry: LeaderboardEntry, index: number) => {
@@ -240,10 +240,10 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
 
           return (
             <div key={entry.user_id} className="grid grid-cols-12 gap-2 items-center">
-              <div className="col-span-1 text-center font-bold text-[#6F6F6F] dark:text-gray-4 text-[14px]">
+              <div className="col-span-1 text-center font-bold text-[#6F6F6F] dark:text-gray-300 text-[14px]">
                 {index + 1}
               </div>
-              <div className="col-span-3 font-medium text-[#6F6F6F] dark:text-gray-4 text-[12px]">
+              <div className="col-span-3 font-medium text-[#6F6F6F] dark:text-gray-300 text-[12px]">
                 {entry.user_name?.split(' ')[0] || '유저'}
               </div>
               <div className="col-span-5 bg-gray-200 dark:bg-gray-700 rounded-full h-2 relative">
@@ -267,14 +267,14 @@ export default function RunningLeaderboard({ challengeId, startDate, endDate }: 
                   </div>
                 )}
               </div>
-              <div className="col-span-3 text-right text-[12px] text-[#6F6F6F] dark:text-gray-4">
+              <div className="col-span-3 text-right text-[12px] text-[#6F6F6F] dark:text-gray-300">
                 {displayValue}
               </div>
             </div>
           );
         })}
         {sortedLeaderboard.length === 0 && (
-          <div className="text-center text-gray-500 dark:text-gray-5 py-4">
+          <div className="text-center text-gray-500 dark:text-gray-400 py-4">
             아직 러닝 기록이 없습니다
           </div>
         )}

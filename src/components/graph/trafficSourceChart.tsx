@@ -110,13 +110,13 @@ export default function TrafficSourceChart({
   }));
 
   return (
-    <div className="bg-white dark:bg-blue-4 p-4 shadow rounded-lg col-span-2 h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100 border border-gray-200 dark:border-gray-600">
-      <h2 className="text-lg font-semibold mb-4 dark:text-gray-4 text-[#6F6F6F] pt-3">
+    <div className="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-900 rounded-lg col-span-2 h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-track]:bg-gray-700 border border-gray-200 dark:border-gray-700">
+      <h2 className="text-lg font-semibold mb-4 text-[#6F6F6F] dark:text-gray-300 pt-3">
         인기운동
       </h2>
       {(isLoading || internalLoading) ? (
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500 dark:text-gray-4">데이터를 불러오는 중...</p>
+          <p className="text-gray-500 dark:text-gray-400">데이터를 불러오는 중...</p>
         </div>
       ) : error ? (
         <div className="flex items-center justify-center h-64">
@@ -148,7 +148,7 @@ export default function TrafficSourceChart({
 
         <div className="w-full gap-[2rem] ">
           <div className="lg:px-[2rem] border-t border-gray-200 dark:border-gray-700 pt-4 sm:px-[3rem]">
-            <div className="flex justify-between text-gray-7 sm:py-[1.5rem] mb-4 ">
+            <div className="flex justify-between text-gray-500 dark:text-gray-400 sm:py-[1.5rem] mb-4 ">
               <div className="flex ">
                 <span className="w-6"></span>
                 <span className="flex-1 font-medium text-[14px]">운동종목</span>
@@ -162,13 +162,13 @@ export default function TrafficSourceChart({
                   index: number
                 ) => (
                   <li key={index} className="flex items-center text-[1rem]">
-                    <span className="w-6 font-medium text-[14px] text-[#6F6F6F] dark:text-gray-4">
+                    <span className="w-6 font-medium text-[14px] text-[#6F6F6F] dark:text-gray-300">
                       {exercise.rank}
                     </span>
-                    <span className="flex-1 font-medium text-[14px] text-[#6F6F6F] dark:text-gray-4">
+                    <span className="flex-1 font-medium text-[14px] text-[#6F6F6F] dark:text-gray-300">
                       {exercise.name}
                     </span>
-                    <span className="font-medium text-[14px] text-[#6F6F6F] dark:text-gray-4">
+                    <span className="font-medium text-[14px] text-[#6F6F6F] dark:text-gray-300">
                       {exercise.percentage}
                     </span>
                   </li>

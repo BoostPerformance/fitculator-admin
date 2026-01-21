@@ -13,7 +13,7 @@ function NoteContent({ note }: { note: string }) {
   return (
     <div>
       <p
-        className={`text-[12px] text-[#5A5A5A] dark:text-gray-5 whitespace-pre-wrap break-words leading-relaxed ${
+        className={`text-[12px] text-[#5A5A5A] dark:text-gray-400 whitespace-pre-wrap break-words leading-relaxed ${
           !isExpanded && isLong ? 'line-clamp-3' : ''
         }`}
       >
@@ -22,7 +22,7 @@ function NoteContent({ note }: { note: string }) {
       {isLong && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="text-[11px] text-blue-500 hover:text-blue-600 mt-1"
+          className="text-[11px] text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
         >
           {isExpanded ? '접기' : '더보기'}
         </button>
@@ -115,7 +115,7 @@ export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps)
 
   if (isLoading) {
     return (
-      <div className="col-span-2 bg-white dark:bg-gray-8 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto shadow">
+      <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto shadow dark:shadow-gray-900">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
           <div className="space-y-4">
@@ -133,7 +133,7 @@ export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps)
 
   if (error) {
     return (
-      <div className="col-span-2 bg-white dark:bg-gray-8 rounded-[0.625rem] p-[1.25rem] h-[36rem] shadow">
+      <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] shadow dark:shadow-gray-900">
         <p className="text-red-500">운동 노트를 불러오는데 실패했습니다.</p>
       </div>
     );
@@ -159,10 +159,10 @@ export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps)
   const allNotes = data?.pages.flatMap((page) => page.notes) || [];
 
   return (
-    <div className="col-span-2 bg-white dark:bg-gray-8 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100 shadow">
+    <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-track]:bg-gray-700 shadow dark:shadow-gray-900">
       {/* 헤더 */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold dark:text-gray-5 text-[#6F6F6F] pt-1 pl-1">
+        <h2 className="text-lg font-semibold text-[#6F6F6F] dark:text-gray-300 pt-1 pl-1">
           운동 노트
         </h2>
       </div>
@@ -170,7 +170,7 @@ export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps)
       {/* 노트 목록 */}
       <div className="space-y-3">
         {allNotes.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-5 py-4">
+          <div className="text-center text-gray-500 dark:text-gray-400 py-4">
             아직 운동 노트가 없습니다
           </div>
         ) : (
@@ -179,12 +179,12 @@ export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps)
               <div
                 key={note.id}
                 ref={index === allNotes.length - 1 ? lastElementRef : null}
-                className="border border-gray-100 dark:border-blue-4 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-blue-4 transition-colors"
+                className="border border-gray-100 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
               >
                 {/* 1행: 사용자 이름 + 그룹 + 시간 */}
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-[#4A4A4A] dark:text-gray-4 text-[13px]">
+                    <span className="font-semibold text-[#4A4A4A] dark:text-gray-200 text-[13px]">
                       {note.user_name}
                     </span>
                     {note.group_name && (
@@ -196,7 +196,7 @@ export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps)
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-[11px] text-gray-400 dark:text-gray-6">
+                  <div className="flex items-center gap-2 text-[11px] text-gray-400 dark:text-gray-500">
                     <span>
                       {new Date(note.timestamp).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', weekday: 'short' })}{' '}
                       {new Date(note.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
@@ -208,11 +208,11 @@ export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps)
 
                 {/* 2행: 운동 타이틀 */}
                 <div className="mb-2">
-                  <span className="font-medium text-[12px] text-[#6F6F6F] dark:text-gray-5">{note.title}</span>
+                  <span className="font-medium text-[12px] text-[#6F6F6F] dark:text-gray-300">{note.title}</span>
                 </div>
 
                 {/* 3행: 운동 정보 (Zone, 거리, 시간, 페이스) */}
-                <div className="flex items-center gap-3 mb-2 text-[12px] text-[#6F6F6F] dark:text-gray-5">
+                <div className="flex items-center gap-3 mb-2 text-[12px] text-[#6F6F6F] dark:text-gray-300">
                   <span
                     className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium text-white"
                     style={{
@@ -233,14 +233,14 @@ export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps)
                     <span>{formatDuration(note.duration_minutes)}</span>
                   )}
                   {note.pace && (
-                    <span className="text-gray-400">{note.pace}/km</span>
+                    <span className="text-gray-400 dark:text-gray-500">{note.pace}/km</span>
                   )}
                 </div>
 
                 {/* 3행: 미션 (있을 경우) */}
                 {note.mission_title && (
                   <div className="mb-2">
-                    <span className="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium bg-purple-50 text-purple-600 dark:bg-purple-900 dark:text-purple-300">
+                    <span className="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300">
                       🚩 {note.mission_title}
                     </span>
                   </div>
@@ -252,7 +252,7 @@ export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps)
             ))}
             {isFetchingNextPage && (
               <div className="text-center py-2">
-                <div className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500"></div>
+                <div className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-blue-500"></div>
               </div>
             )}
           </>
