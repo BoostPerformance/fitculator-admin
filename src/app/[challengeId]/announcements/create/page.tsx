@@ -107,6 +107,7 @@ export default function CreateAnnouncementPage() {
     content: { type: 'doc', content: [] } as object,
     status: 'published' as 'published',
     priority: 1,
+    show_on_main: false,
     start_date: '',
     end_date: '',
     target_audience: 'all' as 'all' | 'beginner' | 'intermediate' | 'advanced'
@@ -509,6 +510,19 @@ export default function CreateAnnouncementPage() {
                 />
                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">숫자가 높을수록 상단에 표시됩니다</p>
               </div>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.show_on_main}
+                  onChange={(e) => setFormData({ ...formData, show_on_main: e.target.checked })}
+                  className="w-4 h-4 rounded border-slate-300 dark:border-gray-600 text-slate-900 dark:text-white focus:ring-slate-900 dark:focus:ring-white"
+                />
+                <span className="text-sm text-slate-700 dark:text-slate-300">메인에 표시</span>
+              </label>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 ml-6">체크하면 앱 메인 화면에 공지사항이 표시됩니다</p>
             </div>
 
             {challengeGroups.length > 0 && (

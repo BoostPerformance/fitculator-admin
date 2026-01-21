@@ -19,6 +19,7 @@ interface Announcement {
   content: any;
   status: 'draft' | 'published' | 'archived';
   priority: number;
+  show_on_main?: boolean;
   start_date?: string;
   end_date?: string;
   target_audience: 'all' | 'beginner' | 'intermediate' | 'advanced';
@@ -311,6 +312,11 @@ export default function AnnouncementsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mb-2">
+                      {announcement.show_on_main && (
+                        <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
+                          메인
+                        </span>
+                      )}
                       <span className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${typeConfig[announcement.type].bg} ${typeConfig[announcement.type].text}`}>
                         {typeLabels[announcement.type]}
                       </span>
@@ -381,6 +387,11 @@ export default function AnnouncementsPage() {
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">
+                          {announcement.show_on_main && (
+                            <span className="px-2.5 py-1 text-xs font-medium rounded-full whitespace-nowrap bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">
+                              메인
+                            </span>
+                          )}
                           <span className={`px-2.5 py-1 text-xs font-medium rounded-full whitespace-nowrap ${typeConfig[announcement.type].bg} ${typeConfig[announcement.type].text}`}>
                             {typeLabels[announcement.type]}
                           </span>
