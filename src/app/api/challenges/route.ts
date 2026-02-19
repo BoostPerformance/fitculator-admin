@@ -438,6 +438,26 @@ export async function POST(request: Request) {
       );
     }
 
+    // 생성한 코치를 challenge_coaches에 자동 등록
+    const { data: coach } = await supabase
+      .from('coaches')
+      .select('id')
+      .eq('admin_user_id', adminUser.id)
+      .single();
+
+    if (coach) {
+      const { error: coachLinkError } = await supabase
+        .from('challenge_coaches')
+        .insert({
+          coach_id: coach.id,
+          challenge_id: challenge.id,
+        });
+
+      if (coachLinkError) {
+        console.warn('challenge_coaches 자동 등록 실패:', coachLinkError.message);
+      }
+    }
+
     return NextResponse.json(challenge);
   } catch (error) {
 // console.error('❌ === Challenge Creation API Error ===', {
