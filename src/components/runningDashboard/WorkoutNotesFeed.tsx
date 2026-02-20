@@ -52,6 +52,8 @@ interface WorkoutNote {
 interface WorkoutNotesFeedProps {
   challengeId: string;
   limit?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface NotesResponse {
@@ -64,16 +66,19 @@ const ITEMS_PER_PAGE = 10;
 const fetchRecentNotes = async (
   challengeId: string,
   offset: number,
-  limit: number
+  limit: number,
+  startDate?: string,
+  endDate?: string
 ): Promise<NotesResponse> => {
-  const response = await fetch(
-    `/api/workouts/user-detail?type=recent-notes&challengeId=${challengeId}&limit=${limit}&offset=${offset}&t=${Date.now()}`
-  );
+  let url = `/api/workouts/user-detail?type=recent-notes&challengeId=${challengeId}&limit=${limit}&offset=${offset}&t=${Date.now()}`;
+  if (startDate) url += `&startDate=${startDate}`;
+  if (endDate) url += `&endDate=${endDate}`;
+  const response = await fetch(url);
   if (!response.ok) throw new Error('Failed to fetch notes');
   return response.json();
 };
 
-export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps) {
+export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: WorkoutNotesFeedProps) {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   const {
@@ -84,8 +89,8 @@ export default function WorkoutNotesFeed({ challengeId }: WorkoutNotesFeedProps)
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['running', 'recent-notes', challengeId],
-    queryFn: ({ pageParam = 0 }) => fetchRecentNotes(challengeId, pageParam, ITEMS_PER_PAGE),
+    queryKey: ['running', 'recent-notes', challengeId, startDate, endDate],
+    queryFn: ({ pageParam = 0 }) => fetchRecentNotes(challengeId, pageParam, ITEMS_PER_PAGE, startDate, endDate),
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage.hasMore) return undefined;
       return allPages.reduce((acc, page) => acc + page.notes.length, 0);

@@ -93,7 +93,9 @@ export async function GET(request: Request) {
       }
       const limit = parseInt(url.searchParams.get('limit') || '10');
       const offset = parseInt(url.searchParams.get('offset') || '0');
-      return await getRecentNotesData(challengeId, limit, offset);
+      const startDate = url.searchParams.get('startDate') || undefined;
+      const endDate = url.searchParams.get('endDate') || undefined;
+      return await getRecentNotesData(challengeId, limit, offset, startDate, endDate);
     } else if (type === 'participant-list') {
       // 참가자 목록만 가져오기 (가벼운 API)
       if (!challengeId) {
@@ -1235,7 +1237,9 @@ async function getDistanceLeaderboardData(
 async function getRecentNotesData(
   challengeId: string,
   limit: number = 10,
-  offset: number = 0
+  offset: number = 0,
+  startDate?: string,
+  endDate?: string
 ): Promise<NextResponse> {
   try {
     // 1. 챌린지 참가자 조회 (id와 service_user_id 모두 필요)
@@ -1259,7 +1263,7 @@ async function getRecentNotesData(
     }
 
     // 2. 노트가 있는 최근 운동 기록 조회 (페이지네이션)
-    const { data: workouts, error: workoutsError } = await supabase
+    let notesQuery = supabase
       .from('workouts')
       .select(`
         id,
@@ -1279,7 +1283,17 @@ async function getRecentNotesData(
       `)
       .in('user_id', participantIds)
       .not('note', 'is', null)
-      .neq('note', '')
+      .neq('note', '');
+
+    // 챌린지 기간 필터링
+    if (startDate) {
+      notesQuery = notesQuery.gte('timestamp', `${startDate}T00:00:00`);
+    }
+    if (endDate) {
+      notesQuery = notesQuery.lte('timestamp', `${endDate}T23:59:59`);
+    }
+
+    const { data: workouts, error: workoutsError } = await notesQuery
       .order('timestamp', { ascending: false })
       .range(offset, offset + limit);
 

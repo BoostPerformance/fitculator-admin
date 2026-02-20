@@ -973,11 +973,12 @@ export async function GET(request: Request) {
       return NextResponse.json(leaderboardData);
     } else {
       // Get workouts with categories for chart
-      const { data: workoutData, error: workoutError } = await supabase
+      let chartQuery = supabase
         .from('workouts')
         .select(
           `
           points,
+          timestamp,
           workout_categories:workout_categories!inner (
             id,
             name_ko,
@@ -988,6 +989,16 @@ export async function GET(request: Request) {
         )
         .in('user_id', participantIds)
         .eq('workout_categories.type_id', cardioTypeId);
+
+      // 챌린지 기간 필터링
+      if (startDate) {
+        chartQuery = chartQuery.gte('timestamp', `${startDate}T00:00:00`);
+      }
+      if (endDate) {
+        chartQuery = chartQuery.lte('timestamp', `${endDate}T23:59:59`);
+      }
+
+      const { data: workoutData, error: workoutError } = await chartQuery;
 
       //console.log(workoutData);
 

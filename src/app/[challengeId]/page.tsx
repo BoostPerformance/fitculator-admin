@@ -510,7 +510,7 @@ export default function User() {
               {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type === 'diet_and_exercise' && (
                 <>
-                  <TrafficSourceChart challengeId={selectedChallengeId} />
+                  <TrafficSourceChart challengeId={selectedChallengeId} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
                   <DailyDietRecord activities={filteredDailyRecordsbyId} />
                   <DailyWorkoutRecord activities={filteredDailyRecordsbyId} />
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
@@ -528,9 +528,9 @@ export default function User() {
               {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type === 'exercise' && (
                 <>
-                  <TrafficSourceChart challengeId={selectedChallengeId} />
+                  <TrafficSourceChart challengeId={selectedChallengeId} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
                   <WorkoutLeaderboard challengeId={selectedChallengeId} />
-                  <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} />
+                  <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
                   <WeeklyWorkoutChart
                     data={weeklyChart}
                     isLoading={workoutDataLoading}
@@ -541,13 +541,13 @@ export default function User() {
               {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
                 ?.challenges.challenge_type === 'running' && (
                 <>
-                  <TrafficSourceChart challengeId={selectedChallengeId} />
+                  <TrafficSourceChart challengeId={selectedChallengeId} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
                   <RunningLeaderboard
                     challengeId={selectedChallengeId}
                     startDate={challengeDates?.startDate}
                     endDate={challengeDates?.endDate}
                   />
-                  <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} />
+                  <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
                 </>
               )}
             </div>

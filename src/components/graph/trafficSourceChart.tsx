@@ -11,6 +11,8 @@ interface TrafficSourceChartProps {
   data?: ChartDataPoint[]; // 외부에서 데이터를 받을 수 있도록
   isLoading?: boolean;
   error?: any;
+  startDate?: string;
+  endDate?: string;
 }
 
 const COLORS = ['#3FE2FF', '#3E82F1', '#ADB9FF', '#7CF5DD', '#3FE2FF'];
@@ -57,6 +59,8 @@ export default function TrafficSourceChart({
   data: externalData,
   isLoading = false,
   error,
+  startDate,
+  endDate,
 }: TrafficSourceChartProps) {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -78,9 +82,10 @@ export default function TrafficSourceChart({
     const fetchData = async () => {
       try {
         setInternalLoading(true);
-        const response = await fetch(
-          `/api/workouts?challengeId=${challengeId}&type=chart`
-        );
+        let chartUrl = `/api/workouts?challengeId=${challengeId}&type=chart`;
+        if (startDate) chartUrl += `&startDate=${startDate}`;
+        if (endDate) chartUrl += `&endDate=${endDate}`;
+        const response = await fetch(chartUrl);
         const data = await response.json();
         
         if (Array.isArray(data)) {
@@ -97,7 +102,7 @@ export default function TrafficSourceChart({
     };
 
     fetchData();
-  }, [challengeId, externalData]);
+  }, [challengeId, externalData, startDate, endDate]);
 
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
