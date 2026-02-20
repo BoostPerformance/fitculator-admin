@@ -7,7 +7,8 @@ interface CompetitionEvent {
   competition_type: 'hyrox' | 'marathon';
   name_ko: string;
   name_en: string;
-  location: string | null;
+  location_en: string | null;
+  location_ko: string | null;
   city_ko: string | null;
   city_en: string | null;
   country_ko: string | null;
@@ -44,7 +45,8 @@ const emptyForm: FormData = {
   competition_type: 'hyrox',
   name_ko: '',
   name_en: '',
-  location: '',
+  location_en: '',
+  location_ko: '',
   city_ko: '',
   city_en: '',
   country_ko: '',
@@ -59,7 +61,8 @@ const fieldLabels: Record<string, string> = {
   competition_type: '대회 종류',
   name_ko: '대회명 (한글)',
   name_en: '대회명 (영문)',
-  location: '장소',
+  location_ko: '장소 (한글)',
+  location_en: '장소 (영문)',
   city_ko: '도시 (한글)',
   city_en: '도시 (영문)',
   country_ko: '국가 (한글)',
@@ -75,7 +78,8 @@ function toFormData(event: CompetitionEvent): FormData {
     competition_type: event.competition_type,
     name_ko: event.name_ko,
     name_en: event.name_en,
-    location: event.location || '',
+    location_en: event.location_en || '',
+    location_ko: event.location_ko || '',
     city_ko: event.city_ko || '',
     city_en: event.city_en || '',
     country_ko: event.country_ko || '',
@@ -240,7 +244,10 @@ export default function ManageCompetitionsPage() {
       competition_type: record.competition_type as 'hyrox' | 'marathon',
       name_en: record.event_name_en || '',
       name_ko: record.event_name_ko || '',
-      location: record.locations.length > 0 ? record.locations[0] : '',
+      location_en: record.locations.length > 0 ? record.locations[0] : '',
+      location_ko: '',
+      start_date: record.first_recorded || '',
+      end_date: record.last_recorded || '',
     };
     setEditingEvent(null);
     setForm(prefilled);
@@ -296,7 +303,8 @@ export default function ManageCompetitionsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          location: form.location || null,
+          location_en: form.location_en || null,
+          location_ko: form.location_ko || null,
           start_date: form.start_date || null,
           end_date: form.end_date || null,
           city_ko: form.city_ko || null,
@@ -406,7 +414,7 @@ export default function ManageCompetitionsPage() {
         {mainTab === 'catalog' && (
           <button
             onClick={openAddModal}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white pl-3 pr-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-[#F5F5F0] hover:bg-[#E8E8E0] text-[#1a1a1a] pl-3 pr-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="8" y1="3" x2="8" y2="13" /><line x1="3" y1="8" x2="13" y2="8" />
@@ -428,7 +436,7 @@ export default function ManageCompetitionsPage() {
           onClick={() => setMainTab('catalog')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             mainTab === 'catalog'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-[#F5F5F0] text-[#1a1a1a] dark:bg-[#E8E8E0] dark:text-[#1a1a1a]'
               : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
           }`}
         >
@@ -438,7 +446,7 @@ export default function ManageCompetitionsPage() {
           onClick={() => setMainTab('user-recorded')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             mainTab === 'user-recorded'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-[#F5F5F0] text-[#1a1a1a] dark:bg-[#E8E8E0] dark:text-[#1a1a1a]'
               : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
           }`}
         >
@@ -508,8 +516,8 @@ export default function ManageCompetitionsPage() {
                     <td className="px-5 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-md ${
                         event.competition_type === 'hyrox'
-                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-800'
-                          : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800'
+                          ? 'bg-[#FFF200] text-black'
+                          : 'bg-[#5AFF82] text-[#1a1a1a]'
                       }`}>
                         {competitionTypeLabel(event.competition_type)}
                       </span>
@@ -519,7 +527,7 @@ export default function ManageCompetitionsPage() {
                       <div className="text-gray-400 dark:text-gray-500 text-xs mt-0.5">{event.name_en}</div>
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300">
-                      {[event.location, event.city_ko, event.country_ko].filter(Boolean).join(', ') || <span className="text-gray-300 dark:text-gray-600">-</span>}
+                      {[event.location_ko || event.location_en, event.city_ko, event.country_ko].filter(Boolean).join(', ') || <span className="text-gray-300 dark:text-gray-600">-</span>}
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
                       {event.start_date && event.end_date
@@ -580,8 +588,8 @@ export default function ManageCompetitionsPage() {
                     <td className="px-5 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-md ${
                         record.competition_type === 'hyrox'
-                          ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-800'
-                          : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800'
+                          ? 'bg-[#FFF200] text-black'
+                          : 'bg-[#5AFF82] text-[#1a1a1a]'
                       }`}>
                         {competitionTypeLabel(record.competition_type)}
                       </span>
@@ -710,8 +718,8 @@ export default function ManageCompetitionsPage() {
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl px-4 py-3.5 mb-6 flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
                     editingEvent?.competition_type === 'hyrox'
-                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
-                      : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                      ? 'bg-[#FFF200] text-black'
+                      : 'bg-[#5AFF82] text-[#1a1a1a]'
                   }`}>
                     {editingEvent?.competition_type === 'hyrox' ? 'H' : 'M'}
                   </div>
@@ -754,7 +762,7 @@ export default function ManageCompetitionsPage() {
                       {isEditMode ? '대회 수정' : '새 대회 등록'}
                     </h2>
                     <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
-                      {isEditMode ? '대회 정보를 수정합니다.' : '사전 등록할 대회 정보를 입력해주세요.'}
+                      {isEditMode ? '대회 정보를 수정합니다.' : '등록할 대회 정보를 입력해주세요.'}
                     </p>
                   </div>
                   <button
@@ -803,15 +811,15 @@ export default function ManageCompetitionsPage() {
                                 onClick={() => setForm({ ...form, competition_type: 'hyrox' })}
                                 className={`relative px-4 py-3 rounded-xl border-2 text-left transition-all ${
                                   form.competition_type === 'hyrox'
-                                    ? 'border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                                    ? 'border-[#FFF200] bg-[#FFF200]/10 dark:bg-[#FFF200]/10'
                                     : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                                 }`}
                               >
                                 <div className="font-semibold text-sm text-gray-900 dark:text-white">HYROX</div>
                                 <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">피트니스 레이스</div>
                                 {form.competition_type === 'hyrox' && (
-                                  <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center">
-                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                  <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-[#FFF200] flex items-center justify-center">
+                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                   </div>
                                 )}
                               </button>
@@ -820,15 +828,15 @@ export default function ManageCompetitionsPage() {
                                 onClick={() => setForm({ ...form, competition_type: 'marathon' })}
                                 className={`relative px-4 py-3 rounded-xl border-2 text-left transition-all ${
                                   form.competition_type === 'marathon'
-                                    ? 'border-emerald-400 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                                    ? 'border-[#5AFF82] bg-[#5AFF82]/10 dark:bg-[#5AFF82]/10'
                                     : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                                 }`}
                               >
                                 <div className="font-semibold text-sm text-gray-900 dark:text-white">마라톤</div>
                                 <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">로드 레이스</div>
                                 {form.competition_type === 'marathon' && (
-                                  <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-emerald-400 flex items-center justify-center">
-                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                  <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-[#5AFF82] flex items-center justify-center">
+                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                   </div>
                                 )}
                               </button>
@@ -872,9 +880,15 @@ export default function ManageCompetitionsPage() {
                           <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">위치</span>
                         </div>
                         <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4 space-y-3">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">장소</label>
-                            <input type="text" value={form.location || ''} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g. COEX, KINTEX" className="w-full px-3.5 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition-all dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600" />
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">장소 (한글)</label>
+                              <input type="text" value={form.location_ko || ''} onChange={(e) => setForm({ ...form, location_ko: e.target.value })} placeholder="코엑스, 킨텍스" className="w-full px-3.5 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition-all dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">장소 (영문)</label>
+                              <input type="text" value={form.location_en || ''} onChange={(e) => setForm({ ...form, location_en: e.target.value })} placeholder="COEX, KINTEX" className="w-full px-3.5 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition-all dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-600" />
+                            </div>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
