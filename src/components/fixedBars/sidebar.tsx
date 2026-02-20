@@ -837,7 +837,7 @@ export default function Sidebar({
               {hasOperationalAccess() && (
                 <li id="admin-menu-section-mobile" className="w-full items-center justify-between text-sm font-semibold mb-2 mt-4">
                   <button
-                    className="flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all px-2 py-3 active:bg-gray-100 dark:active:bg-gray-800"
+                    className="flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all border-b border-gray-200 dark:border-gray-700 px-2 py-3 active:bg-gray-100 dark:active:bg-gray-800"
                     onClick={handleAdminDropdown}
                     aria-expanded={isAdminDropdownOpen}
                     aria-controls="admin-menu-list-mobile"
@@ -891,6 +891,21 @@ export default function Sidebar({
                           }}
                         >
                           조직 관리
+                        </div>
+                      </li>
+                      <li>
+                        <div
+                          className={`cursor-pointer text-sm py-3 px-4 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                            isActiveRoute('/admin/manage-competitions')
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                          }`}
+                          onClick={() => {
+                            router.push('/admin/manage-competitions');
+                            closeSidebarOnMobile();
+                          }}
+                        >
+                          대회 관리
                         </div>
                       </li>
                     </ul>
@@ -1080,7 +1095,7 @@ export default function Sidebar({
             <ul>
               <li id="program-menu-section" className="w-full items-center justify-between text-sm font-semibold mb-2">
                 <button
-                  className="flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all border-b border-gray-200 dark:border-gray-700 py-3 px-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600"
+                  className="flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all border-b border-gray-200 dark:border-gray-700 py-3 px-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600"
                   onClick={handleDropdown}
                   aria-expanded={isOpenDropdown}
                   aria-controls="program-menu-list"
@@ -1536,7 +1551,7 @@ export default function Sidebar({
               {hasOperationalAccess() && (
                 <li id="admin-menu-section" className="w-full items-center justify-between text-sm font-semibold mb-2 mt-4">
                   <button
-                    className="flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all border-b border-gray-200 dark:border-gray-700 py-3 px-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600"
+                    className="flex flex-row justify-between align-middle items-center cursor-pointer w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400 min-h-[52px] transition-all border-b border-gray-200 dark:border-gray-700 py-3 px-3 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600"
                     onClick={handleAdminDropdown}
                     aria-expanded={isAdminDropdownOpen}
                     aria-controls="admin-menu-list"
@@ -1591,6 +1606,21 @@ export default function Sidebar({
                           }}
                         >
                           조직 관리
+                        </div>
+                      </li>
+                      <li>
+                        <div
+                          className={`cursor-pointer text-sm py-3 px-4 rounded-lg transition-colors duration-200 min-h-[44px] flex items-center ${
+                            isActiveRoute('/admin/manage-competitions')
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                          }`}
+                          onClick={() => {
+                            router.push('/admin/manage-competitions');
+                            closeSidebarOnMobile();
+                          }}
+                        >
+                          대회 관리
                         </div>
                       </li>
                       {/* TODO: 개발 완료 후 주석 해제
