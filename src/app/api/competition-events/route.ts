@@ -103,6 +103,7 @@ export async function POST(request: Request) {
         competition_type: body.competition_type,
         name_ko: body.name_ko.trim(),
         name_en: body.name_en.trim(),
+        location: body.location || null,
         city_ko: body.city_ko || null,
         city_en: body.city_en || null,
         country_ko: body.country_ko || null,
