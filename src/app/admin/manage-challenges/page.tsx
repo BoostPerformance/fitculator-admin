@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Title from '@/components/layout/title';
 
 interface Organization {
   id: string;
@@ -32,10 +33,47 @@ interface Challenge {
   organization_id?: string;
 }
 
+type ChallengeStatus = 'active' | 'upcoming' | 'ended';
+
+function getChallengeStatus(challenge: Challenge): ChallengeStatus {
+  const startStr = challenge.challenges?.start_date || challenge.start_date;
+  const endStr = challenge.challenges?.end_date || challenge.end_date;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const start = startStr ? new Date(startStr) : null;
+  const end = endStr ? new Date(endStr) : null;
+  if (start) start.setHours(0, 0, 0, 0);
+  if (end) end.setHours(0, 0, 0, 0);
+
+  if (start && end) {
+    if (today >= start && today <= end) return 'active';
+    if (today < start) return 'upcoming';
+    return 'ended';
+  }
+  if (start && !end) {
+    return today >= start ? 'active' : 'upcoming';
+  }
+  if (!start && end) {
+    return today <= end ? 'active' : 'ended';
+  }
+  return 'ended';
+}
+
+const STATUS_ORDER: Record<ChallengeStatus, number> = {
+  active: 0,
+  upcoming: 1,
+  ended: 2,
+};
+
+type StatusFilter = 'all' | ChallengeStatus;
+
 export default function ManageChallenges() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const router = useRouter();
 
   // 챌린지 목록 가져오기
@@ -46,7 +84,6 @@ export default function ManageChallenges() {
         const response = await fetch('/api/challenges');
         if (response.ok) {
           const data = await response.json();
-          // 챌린지 데이터 구조에 따라 적절히 처리
           const challengeList = Array.isArray(data) ? data : [];
           setChallenges(challengeList);
         }
@@ -99,9 +136,89 @@ export default function ManageChallenges() {
     }
   };
 
+  // 상태 카운트 계산
+  const statusCounts = useMemo(() => {
+    const counts = { all: challenges.length, active: 0, upcoming: 0, ended: 0 };
+    for (const c of challenges) {
+      counts[getChallengeStatus(c)]++;
+    }
+    return counts;
+  }, [challenges]);
+
+  // 정렬 + 필터링
+  const sortedFilteredChallenges = useMemo(() => {
+    const filtered = statusFilter === 'all'
+      ? challenges
+      : challenges.filter((c) => getChallengeStatus(c) === statusFilter);
+
+    return [...filtered].sort((a, b) => {
+      const statusDiff = STATUS_ORDER[getChallengeStatus(a)] - STATUS_ORDER[getChallengeStatus(b)];
+      if (statusDiff !== 0) return statusDiff;
+
+      const aStart = a.challenges?.start_date || a.start_date || '';
+      const bStart = b.challenges?.start_date || b.start_date || '';
+      return bStart.localeCompare(aStart); // 내림차순
+    });
+  }, [challenges, statusFilter]);
+
+  const statusTabs: { key: StatusFilter; label: string }[] = [
+    { key: 'all', label: '전체' },
+    { key: 'active', label: '진행 중' },
+    { key: 'upcoming', label: '예정' },
+    { key: 'ended', label: '종료' },
+  ];
+
+  const statusBadge = (status: ChallengeStatus) => {
+    switch (status) {
+      case 'active':
+        return (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            진행 중
+          </span>
+        );
+      case 'upcoming':
+        return (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            예정
+          </span>
+        );
+      case 'ended':
+        return (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400 dark:text-gray-500">
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
+            종료
+          </span>
+        );
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6 dark:text-white">챌린지 관리</h1>
+      <div className="flex justify-between items-center mb-8">
+        <Title title="챌린지 관리" />
+      </div>
+
+      {/* 상태 필터 탭 */}
+      <div className="flex gap-1 mb-4">
+        {statusTabs.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => setStatusFilter(key)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              statusFilter === key
+                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+            }`}
+          >
+            {label}
+            <span className={`ml-1.5 text-xs ${statusFilter === key ? 'text-gray-400 dark:text-gray-500' : 'text-gray-400 dark:text-gray-500'}`}>
+              {statusCounts[key]}
+            </span>
+          </button>
+        ))}
+      </div>
 
       {isLoading || organizations.length === 0 ? (
         <div className="flex justify-center items-center h-64">
@@ -113,52 +230,66 @@ export default function ManageChallenges() {
             등록된 챌린지가 없습니다.
           </p>
         </div>
+      ) : sortedFilteredChallenges.length === 0 ? (
+        <div className="bg-white dark:bg-blue-4 rounded-lg shadow p-6 text-center">
+          <p className="text-gray-500 dark:text-gray-400">
+            해당 상태의 챌린지가 없습니다.
+          </p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {challenges.map((challenge) => (
-            <div
-              key={challenge.id}
-              className="bg-white dark:bg-blue-4 rounded-lg shadow overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() =>
-                router.push(`/admin/manage-challenges/${challenge.challenges?.id || challenge.id}`)
-              }
-            >
-              <div className="h-40 bg-gray-200 dark:bg-blue-3 relative">
-                {(challenge.challenges?.cover_image_url || challenge.cover_image_url) ? (
-                  <Image
-                    src={challenge.challenges?.cover_image_url || challenge.cover_image_url || ''}
-                    alt={challenge.challenges?.title || challenge.title || ''}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">
-                    이미지 없음
+          {sortedFilteredChallenges.map((challenge) => {
+            const status = getChallengeStatus(challenge);
+            return (
+              <div
+                key={challenge.id}
+                className={`bg-white dark:bg-blue-4 rounded-lg shadow overflow-hidden cursor-pointer hover:shadow-lg transition-shadow ${
+                  status === 'ended' ? 'opacity-60' : ''
+                }`}
+                onClick={() =>
+                  router.push(`/admin/manage-challenges/${challenge.challenges?.id || challenge.id}`)
+                }
+              >
+                <div className="h-40 bg-gray-200 dark:bg-blue-3 relative">
+                  {(challenge.challenges?.cover_image_url || challenge.cover_image_url) ? (
+                    <Image
+                      src={challenge.challenges?.cover_image_url || challenge.cover_image_url || ''}
+                      alt={challenge.challenges?.title || challenge.title || ''}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-400">
+                      이미지 없음
+                    </div>
+                  )}
+                </div>
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h2 className="text-lg font-semibold dark:text-white">
+                      {challenge.challenges?.title || challenge.title}
+                    </h2>
+                    {statusBadge(status)}
                   </div>
-                )}
-              </div>
-              <div className="p-4">
-                <h2 className="text-lg font-semibold mb-2 dark:text-white">
-                  {challenge.challenges?.title || challenge.title}
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                  {(challenge.challenges?.description || challenge.description)
-                    ? (challenge.challenges?.description || challenge.description || '').length > 100
-                      ? `${(challenge.challenges?.description || challenge.description || '').substring(0, 100)}...`
-                      : (challenge.challenges?.description || challenge.description)
-                    : '설명 없음'}
-                </p>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <p>조직: {getOrganizationName(challenge.challenges?.organization_id || challenge.organization_id || '')}</p>
-                  <p>유형: {getChallengeTypeText(challenge.challenges?.challenge_type || challenge.challenge_type || '')}</p>
-                  <p>
-                    기간: {new Date(challenge.challenges?.start_date || challenge.start_date || '').toLocaleDateString()}{' '}
-                    ~ {new Date(challenge.challenges?.end_date || challenge.end_date || '').toLocaleDateString()}
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                    {(challenge.challenges?.description || challenge.description)
+                      ? (challenge.challenges?.description || challenge.description || '').length > 100
+                        ? `${(challenge.challenges?.description || challenge.description || '').substring(0, 100)}...`
+                        : (challenge.challenges?.description || challenge.description)
+                      : '설명 없음'}
                   </p>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <p>조직: {getOrganizationName(challenge.challenges?.organization_id || challenge.organization_id || '')}</p>
+                    <p>유형: {getChallengeTypeText(challenge.challenges?.challenge_type || challenge.challenge_type || '')}</p>
+                    <p>
+                      기간: {new Date(challenge.challenges?.start_date || challenge.start_date || '').toLocaleDateString()}{' '}
+                      ~ {new Date(challenge.challenges?.end_date || challenge.end_date || '').toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
