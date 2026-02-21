@@ -3,9 +3,9 @@ export const fetchCache = 'force-no-store';
 export const revalidate = 0;
 
 export default function Layout({
-  children,
+ children,
 }: {
-  children: React.ReactNode;
+ children: React.ReactNode;
 }) {
-  return <>{children}</>;
+ return <>{children}</>;
 }
