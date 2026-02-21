@@ -94,6 +94,7 @@ export async function GET(
           organization_id,
           enable_benchmark,
           enable_mission,
+          use_daily_programs,
           challenge_participants (
             id,
             service_user_id
@@ -149,6 +150,7 @@ export async function GET(
         organization_id: challenge.organization_id,
         enable_benchmark: challenge.enable_benchmark,
         enable_mission: challenge.enable_mission,
+        use_daily_programs: challenge.use_daily_programs,
         challenge_participants: challenge.challenge_participants.map((p) => ({
           id: p.id,
           service_user_id: p.service_user_id,
@@ -225,6 +227,7 @@ export async function GET(
           organization_id,
           enable_benchmark,
           enable_mission,
+          use_daily_programs,
           challenge_participants (
             id,
             service_user_id

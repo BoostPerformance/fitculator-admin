@@ -15,6 +15,7 @@ interface Challenges {
     challenge_type: 'diet' | 'exercise' | 'diet_and_exercise' | 'running';
     enable_benchmark?: boolean;
     enable_mission?: boolean;
+    use_daily_programs?: boolean;
   };
 }
 
@@ -38,6 +39,7 @@ export default function SettingsLayout({
       challenge_type: challenge.challenges.challenge_type,
       enable_benchmark: challenge.challenges.enable_benchmark,
       enable_mission: challenge.challenges.enable_mission,
+      use_daily_programs: challenge.challenges.use_daily_programs,
     },
   })) || [];
 

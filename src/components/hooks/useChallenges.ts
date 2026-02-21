@@ -12,6 +12,7 @@ interface Challenges {
     challenge_type?: 'diet' | 'exercise' | 'diet_and_exercise' | 'running';
     enable_benchmark?: boolean;
     enable_mission?: boolean;
+    use_daily_programs?: boolean;
     challenge_participants: {
       daily_records: {
         feedbacks: {

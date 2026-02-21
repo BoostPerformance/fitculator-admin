@@ -13,7 +13,10 @@ interface Challenges {
     title: string;
     start_date: string;
     end_date: string;
-    challenge_type: 'diet' | 'exercise' | 'diet_and_exercise';
+    challenge_type: 'diet' | 'exercise' | 'diet_and_exercise' | 'running';
+    enable_benchmark?: boolean;
+    enable_mission?: boolean;
+    use_daily_programs?: boolean;
   };
 }
 
@@ -57,6 +60,7 @@ function ChallengeLayoutContent({
       challenge_type: (challenge.challenges as any).challenge_type || 'diet_and_exercise',
       enable_benchmark: (challenge.challenges as any).enable_benchmark,
       enable_mission: (challenge.challenges as any).enable_mission,
+      use_daily_programs: (challenge.challenges as any).use_daily_programs,
     },
   })) || [];
   
