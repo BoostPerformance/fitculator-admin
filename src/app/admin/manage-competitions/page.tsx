@@ -17,6 +17,8 @@ interface CompetitionEvent {
   end_date: string | null;
   is_active: boolean;
   sort_order: number;
+  record_count: number;
+  user_count: number;
 }
 
 interface UserRecordedGroup {
@@ -30,6 +32,15 @@ interface UserRecordedGroup {
   locations: string[];
 }
 
+interface CompetitionRecord {
+  id: string;
+  user_id: string;
+  user_name: string | null;
+  overall_time_seconds: number | null;
+  event_date: string | null;
+  created_at: string;
+}
+
 interface LinkDialogState {
   show: boolean;
   eventId: string;
@@ -39,7 +50,7 @@ interface LinkDialogState {
   recordCount: number;
 }
 
-type FormData = Omit<CompetitionEvent, 'id'>;
+type FormData = Omit<CompetitionEvent, 'id' | 'record_count' | 'user_count'>;
 
 const emptyForm: FormData = {
   competition_type: 'hyrox',
@@ -102,12 +113,39 @@ function competitionTypeLabel(type: string) {
   return type === 'hyrox' ? 'HYROX' : type === 'marathon' ? '마라톤' : type;
 }
 
+function getEventStatus(event: CompetitionEvent): 'active' | 'upcoming' | 'ended' {
+  if (!event.start_date && !event.end_date) return 'ended';
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (event.start_date) {
+    const start = new Date(event.start_date);
+    start.setHours(0, 0, 0, 0);
+    if (today < start) return 'upcoming';
+  }
+  if (event.end_date) {
+    const end = new Date(event.end_date);
+    end.setHours(0, 0, 0, 0);
+    if (today > end) return 'ended';
+  }
+  return 'active';
+}
+
+function formatTime(seconds: number | null): string {
+  if (seconds == null) return '-';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
 export default function ManageCompetitionsPage() {
   const [events, setEvents] = useState<CompetitionEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [typeFilter, setTypeFilter] = useState<'all' | 'hyrox' | 'marathon'>('all');
+  const [yearFilter, setYearFilter] = useState<string>('all');
   const [mainTab, setMainTab] = useState<'catalog' | 'user-recorded'>('catalog');
 
   // 사용자 기록 대회
@@ -125,6 +163,11 @@ export default function ManageCompetitionsPage() {
     recordCount: number;
   } | null>(null);
 
+  // 기록 팝오버
+  const [recordsPopover, setRecordsPopover] = useState<{ eventId: string; eventName: string } | null>(null);
+  const [recordsData, setRecordsData] = useState<CompetitionRecord[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState(false);
+
   // 모달 상태
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CompetitionEvent | null>(null);
@@ -135,25 +178,75 @@ export default function ManageCompetitionsPage() {
 
   const isEditMode = editingEvent !== null;
 
-  const filteredEvents = useMemo(() => {
-    if (typeFilter === 'all') return events;
-    return events.filter((e) => e.competition_type === typeFilter);
-  }, [events, typeFilter]);
+  // 년도 목록 계산
+  const availableYears = useMemo(() => {
+    const yearSet = new Set<number>();
+    if (mainTab === 'catalog') {
+      events.forEach((e) => {
+        if (e.start_date) yearSet.add(new Date(e.start_date).getFullYear());
+      });
+    } else {
+      userRecords.forEach((r) => {
+        if (r.first_recorded) yearSet.add(new Date(r.first_recorded).getFullYear());
+      });
+    }
+    return Array.from(yearSet).sort((a, b) => b - a);
+  }, [mainTab, events, userRecords]);
 
+  const getEventYear = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    return new Date(dateStr).getFullYear();
+  };
+
+  // 교차 필터: typeCounts는 yearFilter 적용 상태에서 계산
   const typeCounts = useMemo(() => {
     if (mainTab === 'catalog') {
+      const yearFiltered = yearFilter === 'all' ? events : events.filter((e) => getEventYear(e.start_date) === Number(yearFilter));
       return {
-        all: events.length,
-        hyrox: events.filter((e) => e.competition_type === 'hyrox').length,
-        marathon: events.filter((e) => e.competition_type === 'marathon').length,
+        all: yearFiltered.length,
+        hyrox: yearFiltered.filter((e) => e.competition_type === 'hyrox').length,
+        marathon: yearFiltered.filter((e) => e.competition_type === 'marathon').length,
       };
     }
+    const yearFiltered = yearFilter === 'all' ? userRecords : userRecords.filter((r) => getEventYear(r.first_recorded) === Number(yearFilter));
     return {
-      all: userRecords.length,
-      hyrox: userRecords.filter((r) => r.competition_type === 'hyrox').length,
-      marathon: userRecords.filter((r) => r.competition_type === 'marathon').length,
+      all: yearFiltered.length,
+      hyrox: yearFiltered.filter((r) => r.competition_type === 'hyrox').length,
+      marathon: yearFiltered.filter((r) => r.competition_type === 'marathon').length,
     };
-  }, [mainTab, events, userRecords]);
+  }, [mainTab, events, userRecords, yearFilter]);
+
+  // 교차 필터: yearCounts는 typeFilter 적용 상태에서 계산
+  const yearCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: 0 };
+    if (mainTab === 'catalog') {
+      const typeFiltered = typeFilter === 'all' ? events : events.filter((e) => e.competition_type === typeFilter);
+      counts.all = typeFiltered.length;
+      availableYears.forEach((y) => {
+        counts[String(y)] = typeFiltered.filter((e) => getEventYear(e.start_date) === y).length;
+      });
+    } else {
+      const typeFiltered = typeFilter === 'all' ? userRecords : userRecords.filter((r) => r.competition_type === typeFilter);
+      counts.all = typeFiltered.length;
+      availableYears.forEach((y) => {
+        counts[String(y)] = typeFiltered.filter((r) => getEventYear(r.first_recorded) === y).length;
+      });
+    }
+    return counts;
+  }, [mainTab, events, userRecords, typeFilter, availableYears]);
+
+  // 필터링 + 정렬
+  const filteredEvents = useMemo(() => {
+    let result = events;
+    if (typeFilter !== 'all') result = result.filter((e) => e.competition_type === typeFilter);
+    if (yearFilter !== 'all') result = result.filter((e) => getEventYear(e.start_date) === Number(yearFilter));
+    return [...result].sort((a, b) => {
+      if (!a.start_date && !b.start_date) return 0;
+      if (!a.start_date) return 1;
+      if (!b.start_date) return -1;
+      return b.start_date.localeCompare(a.start_date);
+    });
+  }, [events, typeFilter, yearFilter]);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -183,6 +276,21 @@ export default function ManageCompetitionsPage() {
       setUserRecordsLoading(false);
     }
   }, [typeFilter]);
+
+  const openRecordsPopover = useCallback(async (eventId: string, eventName: string) => {
+    setRecordsPopover({ eventId, eventName });
+    setRecordsLoading(true);
+    try {
+      const response = await fetch(`/api/competition-events/${eventId}/records`);
+      if (!response.ok) throw new Error('기록을 가져오는데 실패했습니다.');
+      const data = await response.json();
+      setRecordsData(data);
+    } catch {
+      setRecordsData([]);
+    } finally {
+      setRecordsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (mainTab === 'catalog') {
@@ -403,9 +511,16 @@ export default function ManageCompetitionsPage() {
   };
 
   const filteredUserRecords = useMemo(() => {
-    if (typeFilter === 'all') return userRecords;
-    return userRecords.filter((r) => r.competition_type === typeFilter);
-  }, [userRecords, typeFilter]);
+    let result = userRecords;
+    if (typeFilter !== 'all') result = result.filter((r) => r.competition_type === typeFilter);
+    if (yearFilter !== 'all') result = result.filter((r) => getEventYear(r.first_recorded) === Number(yearFilter));
+    return [...result].sort((a, b) => {
+      if (!a.first_recorded && !b.first_recorded) return 0;
+      if (!a.first_recorded) return 1;
+      if (!b.first_recorded) return -1;
+      return b.first_recorded.localeCompare(a.first_recorded);
+    });
+  }, [userRecords, typeFilter, yearFilter]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -478,6 +593,41 @@ export default function ManageCompetitionsPage() {
         ))}
       </div>
 
+      {/* 년도 필터 탭 */}
+      {availableYears.length > 0 && (
+        <div className="flex gap-1 mb-4">
+          <button
+            onClick={() => setYearFilter('all')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              yearFilter === 'all'
+                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+            }`}
+          >
+            전체
+            <span className={`ml-1.5 text-xs ${yearFilter === 'all' ? 'text-gray-400 dark:text-gray-500' : 'text-gray-400 dark:text-gray-500'}`}>
+              {yearCounts.all}
+            </span>
+          </button>
+          {availableYears.map((year) => (
+            <button
+              key={year}
+              onClick={() => setYearFilter(String(year))}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                yearFilter === String(year)
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              {year}
+              <span className={`ml-1.5 text-xs ${yearFilter === String(year) ? 'text-gray-400 dark:text-gray-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                {yearCounts[String(year)] || 0}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* 공식 대회 테이블 */}
       {mainTab === 'catalog' && (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -491,7 +641,7 @@ export default function ManageCompetitionsPage() {
               </svg>
             </div>
             <p className="text-gray-400 dark:text-gray-500 text-sm">
-              {events.length === 0 ? '등록된 대회가 없습니다' : '해당 종류의 대회가 없습니다'}
+              {events.length === 0 ? '등록된 대회가 없습니다' : '해당 조건의 대회가 없습니다'}
             </p>
           </div>
         ) : (
@@ -503,15 +653,18 @@ export default function ManageCompetitionsPage() {
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">대회명</th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">위치</th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">기간</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">기록</th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">상태</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-                {filteredEvents.map((event) => (
+                {filteredEvents.map((event) => {
+                  const status = getEventStatus(event);
+                  return (
                   <tr
                     key={event.id}
                     onClick={() => openEditModal(event)}
-                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
+                    className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors ${status === 'upcoming' ? 'opacity-60' : ''}`}
                   >
                     <td className="px-5 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-md ${
@@ -531,21 +684,59 @@ export default function ManageCompetitionsPage() {
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
                       {event.start_date && event.end_date
-                        ? `${event.start_date} ~ ${event.end_date}`
+                        ? event.start_date === event.end_date
+                          ? event.start_date
+                          : `${event.start_date} ~ ${event.end_date}`
                         : event.start_date || event.end_date || <span className="text-gray-300 dark:text-gray-600">-</span>}
                     </td>
+                    <td className="px-5 py-4 text-sm whitespace-nowrap relative">
+                      {event.record_count > 0 ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openRecordsPopover(event.id, event.name_ko);
+                          }}
+                          className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                        >
+                          <span className="font-medium">{event.user_count}명</span>
+                          <span className="text-gray-400 dark:text-gray-500 mx-1">/</span>
+                          <span className="font-medium">{event.record_count}건</span>
+                        </button>
+                      ) : (
+                        <span className="text-gray-300 dark:text-gray-600">-</span>
+                      )}
+                    </td>
                     <td className="px-5 py-4">
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${
-                        event.is_active
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-gray-400 dark:text-gray-500'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${event.is_active ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
-                        {event.is_active ? '활성' : '비활성'}
-                      </span>
+                      <div className="flex flex-col gap-1.5">
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+                          event.is_active
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-gray-400 dark:text-gray-500'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${event.is_active ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
+                          {event.is_active ? '활성' : '비활성'}
+                        </span>
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+                          status === 'active'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : status === 'upcoming'
+                              ? 'text-blue-600 dark:text-blue-400'
+                              : 'text-gray-400 dark:text-gray-500'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            status === 'active'
+                              ? 'bg-emerald-500'
+                              : status === 'upcoming'
+                                ? 'bg-blue-500'
+                                : 'bg-gray-300 dark:bg-gray-600'
+                          }`} />
+                          {status === 'active' ? '진행 중' : status === 'upcoming' ? '예정' : '종료'}
+                        </span>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -566,7 +757,9 @@ export default function ManageCompetitionsPage() {
                 <rect x="8" y="2" width="8" height="4" rx="1" />
               </svg>
             </div>
-            <p className="text-gray-400 dark:text-gray-500 text-sm">미등록 대회 기록이 없습니다</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm">
+              {userRecords.length === 0 ? '미등록 대회 기록이 없습니다' : '해당 조건의 대회가 없습니다'}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -1006,6 +1199,76 @@ export default function ManageCompetitionsPage() {
           </div>
         </div>
       )}
+      {/* 기록 상세 팝오버 */}
+      {recordsPopover && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={() => setRecordsPopover(null)}
+        >
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
+          <div
+            className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[80vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-700">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">{recordsPopover.eventName}</h2>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">참가 기록 목록</p>
+              </div>
+              <button
+                onClick={() => setRecordsPopover(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="3" y1="3" x2="13" y2="13" /><line x1="13" y1="3" x2="3" y2="13" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="overflow-y-auto flex-1">
+              {recordsLoading ? (
+                <div className="text-center py-12 text-gray-400 text-sm">로딩 중...</div>
+              ) : recordsData.length === 0 ? (
+                <div className="text-center py-12 text-gray-400 text-sm">기록이 없습니다</div>
+              ) : (
+                <table className="w-full">
+                  <thead className="sticky top-0 bg-white dark:bg-gray-800">
+                    <tr className="border-b border-gray-100 dark:border-gray-700">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">참가자</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">총 시간</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">대회 날짜</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">기록일</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
+                    {recordsData.map((record) => (
+                      <tr key={record.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                        <td className="px-6 py-3">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {record.user_name || <span className="text-gray-300 dark:text-gray-600">-</span>}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3">
+                          <span className={`text-sm font-mono ${record.overall_time_seconds != null ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-300 dark:text-gray-600'}`}>
+                            {formatTime(record.overall_time_seconds)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                          {record.event_date || <span className="text-gray-300 dark:text-gray-600">-</span>}
+                        </td>
+                        <td className="px-6 py-3 text-sm text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                          {record.created_at ? new Date(record.created_at).toLocaleDateString('ko-KR') : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 기존 기록 연결 다이얼로그 */}
       {linkDialog?.show && (
         <div

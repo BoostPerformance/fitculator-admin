@@ -51,7 +51,36 @@ export async function GET(request: Request) {
       );
     }
 
-    return NextResponse.json(events || []);
+    // event_id별 기록 수 / 참가자 수 집계
+    const { data: competitions } = await supabase
+      .from('competitions')
+      .select('event_id, user_id')
+      .not('event_id', 'is', null);
+
+    const eventStats = new Map<string, { record_count: number; user_ids: Set<string> }>();
+    for (const row of competitions || []) {
+      const stats = eventStats.get(row.event_id);
+      if (stats) {
+        stats.record_count++;
+        if (row.user_id) stats.user_ids.add(row.user_id);
+      } else {
+        eventStats.set(row.event_id, {
+          record_count: 1,
+          user_ids: row.user_id ? new Set([row.user_id]) : new Set(),
+        });
+      }
+    }
+
+    const eventsWithStats = (events || []).map((event: { id: string }) => {
+      const stats = eventStats.get(event.id);
+      return {
+        ...event,
+        record_count: stats?.record_count ?? 0,
+        user_count: stats?.user_ids.size ?? 0,
+      };
+    });
+
+    return NextResponse.json(eventsWithStats);
   } catch (error) {
     return NextResponse.json(
       {
