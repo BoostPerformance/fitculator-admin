@@ -130,6 +130,7 @@ body {
 }
 
 :root {
+  /* ===== Legacy shadcn/ui tokens (kept for backward compat) ===== */
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
   --card: 0 0% 100%;
@@ -155,9 +156,61 @@ body {
   --chart-3: 197 37% 24%;
   --chart-4: 43 74% 66%;
   --chart-5: 27 87% 67%;
+
+  /* ===== NEW M3 Semantic Tokens ===== */
+
+  /* Backgrounds */
+  --bg-app:             #F8F9FB;
+  --bg-surface:         #FFFFFF;
+  --bg-surface-raised:  #F1F2F6;
+  --bg-surface-sunken:  #ECEDF1;
+
+  /* Text */
+  --text-primary:    #1B2638;
+  --text-secondary:  #505F79;
+  --text-tertiary:   #6B778C;
+  --text-disabled:   #A5ADBA;
+
+  /* Borders */
+  --border-default:  #DFE1E6;
+  --border-strong:   #C1C7D0;
+  --border-subtle:   #ECEDF1;
+  --border-focus:    #0066FF;
+
+  /* Primary / Accent */
+  --primary-color:   #0066FF;
+  --primary-hover:   #0052CC;
+  --primary-subtle:  #EFF6FF;
+
+  /* Status: Success */
+  --status-success:        #22C55E;
+  --status-success-subtle: #F0FDF4;
+  --status-success-text:   #15803D;
+
+  /* Status: Warning */
+  --status-warning:        #F59E0B;
+  --status-warning-subtle: #FFFBEB;
+  --status-warning-text:   #B45309;
+
+  /* Status: Error */
+  --status-error:          #EF4444;
+  --status-error-subtle:   #FEF2F2;
+  --status-error-text:     #B91C1C;
+
+  /* Status: Info */
+  --status-info:           #3B82F6;
+  --status-info-subtle:    #EFF6FF;
+  --status-info-text:      #1D4ED8;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 }
 
 .dark {
+  /* ===== Legacy shadcn/ui tokens (kept for backward compat) ===== */
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
   --card: 222.2 84% 4.9%;
@@ -182,6 +235,57 @@ body {
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
   --chart-5: 340 75% 55%;
+
+  /* ===== NEW M3 Semantic Tokens (Dark) ===== */
+
+  /* Backgrounds */
+  --bg-app:             #0D1117;
+  --bg-surface:         #161B22;
+  --bg-surface-raised:  #1C2333;
+  --bg-surface-sunken:  #0A0E14;
+
+  /* Text */
+  --text-primary:    #E6EDF3;
+  --text-secondary:  #A5ADBA;
+  --text-tertiary:   #8993A4;
+  --text-disabled:   #505F79;
+
+  /* Borders */
+  --border-default:  #2D333B;
+  --border-strong:   #444C56;
+  --border-subtle:   #1C2333;
+  --border-focus:    #58A6FF;
+
+  /* Primary / Accent */
+  --primary-color:   #58A6FF;
+  --primary-hover:   #79B8FF;
+  --primary-subtle:  #0D1B2E;
+
+  /* Status: Success */
+  --status-success:        #3FB950;
+  --status-success-subtle: #0D1F12;
+  --status-success-text:   #56D364;
+
+  /* Status: Warning */
+  --status-warning:        #D29922;
+  --status-warning-subtle: #1F1A0D;
+  --status-warning-text:   #E3B341;
+
+  /* Status: Error */
+  --status-error:          #F85149;
+  --status-error-subtle:   #1F0D0D;
+  --status-error-text:     #FF7B72;
+
+  /* Status: Info */
+  --status-info:           #58A6FF;
+  --status-info-subtle:    #0D1B2E;
+  --status-info-text:      #79B8FF;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 }
 
 @layer utilities {

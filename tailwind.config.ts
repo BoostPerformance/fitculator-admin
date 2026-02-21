@@ -26,47 +26,82 @@ const config: Config = {
   			]
   		},
   		colors: {
-  			black: {
-  				'1': '#111212',
-  				DEFAULT: '#131313'
+  			brand: {
+  				'50':  '#EFF6FF',
+  				'100': '#DBEAFE',
+  				'200': '#BFDBFE',
+  				'300': '#93C5FD',
+  				'400': '#60A5FA',
+  				'500': '#3B82F6',
+  				'600': '#0066FF',
+  				'700': '#0052CC',
+  				'800': '#003D99',
+  				'900': '#002966',
+  				'950': '#001A40',
+  				DEFAULT: '#0066FF',
   			},
-  			blue: {
-  				'1': '#0066FF',
-  				'2': '#00BBF5',
-  				'3': '#EDF4F8',
-  				'4': '#181C32',
-  				'5': '#219DF6',
-  				DEFAULT: '#EBF8FF'
+  			neutral: {
+  				'50':  '#F8F9FB',
+  				'100': '#F1F2F6',
+  				'200': '#DFE1E6',
+  				'300': '#C1C7D0',
+  				'400': '#A5ADBA',
+  				'500': '#8993A4',
+  				'600': '#6B778C',
+  				'700': '#505F79',
+  				'800': '#344563',
+  				'900': '#1B2638',
+  				'950': '#0D1117',
+  				DEFAULT: '#F1F2F6',
   			},
-  			green: {
-  				DEFAULT: '#48BA5D'
+  			surface: {
+  				app:     'var(--bg-app)',
+  				DEFAULT: 'var(--bg-surface)',
+  				raised:  'var(--bg-surface-raised)',
+  				sunken:  'var(--bg-surface-sunken)',
   			},
-  			yellow: {
-  				DEFAULT: '#FDB810'
+  			content: {
+  				primary:   'var(--text-primary)',
+  				secondary: 'var(--text-secondary)',
+  				tertiary:  'var(--text-tertiary)',
+  				disabled:  'var(--text-disabled)',
   			},
-  			gray: {
-  				'1': '#625C5C',
-  				'2': '#8D8D8D',
-  				'3': '#D9D9D9',
-  				'4': '#A3AAAD',
-  				'5': '#5E5A5A',
-  				'6': '#686868',
-  				'7': '#9E9E9E',
-  				'8': '#F6F6F6',
-  				'9': '#E0E0E0',
-  				'10': '#BDBDBD',
-  				'11': '#A1A1A1',
-  				'12': '#767676',
-  				'13': '#E1E1E1',
-  				DEFAULT: '#F2F2F2'
+  			line: {
+  				DEFAULT:  'var(--border-default)',
+  				strong:   'var(--border-strong)',
+  				subtle:   'var(--border-subtle)',
+  				focus:    'var(--border-focus)',
   			},
-  			red: {
-  				DEFAULT: '#DD204E'
+  			accent: {
+  				DEFAULT:  'var(--primary-color)',
+  				hover:    'var(--primary-hover)',
+  				subtle:   'var(--primary-subtle)',
   			},
-  			white: {
-  				'1': '#F9FAFF',
-  				DEFAULT: '#FFFFFF'
-  			}
+  			status: {
+  				success:        'var(--status-success)',
+  				'success-subtle': 'var(--status-success-subtle)',
+  				'success-text': 'var(--status-success-text)',
+  				warning:        'var(--status-warning)',
+  				'warning-subtle': 'var(--status-warning-subtle)',
+  				'warning-text': 'var(--status-warning-text)',
+  				error:          'var(--status-error)',
+  				'error-subtle': 'var(--status-error-subtle)',
+  				'error-text':   'var(--status-error-text)',
+  				info:           'var(--status-info)',
+  				'info-subtle':  'var(--status-info-subtle)',
+  				'info-text':    'var(--status-info-text)',
+  			},
+  		},
+  		borderRadius: {
+  			sm:  'var(--radius-sm)',
+  			md:  'var(--radius-md)',
+  			lg:  'var(--radius-lg)',
+  			xl:  'var(--radius-xl)',
+  		},
+  		boxShadow: {
+  			'elevation-1': '0 1px 3px 0 rgba(0,0,0,0.08)',
+  			'elevation-2': '0 4px 12px 0 rgba(0,0,0,0.08)',
+  			'elevation-3': '0 8px 24px 0 rgba(0,0,0,0.12)',
   		},
   		keyframes: {
   			'accordion-down': {
@@ -123,246 +158,19 @@ const config: Config = {
   		}
   	},
   	fontSize: {
-  		'0.5-500': [
-  			' 0.5rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'0.625-500': [
-  			' 0.625rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'0.625-700': [
-  			' 0.625rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'0.65-500': [
-  			' 0.65rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'0.7-500': [
-  			'0.7rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'0.7-700': [
-  			'0.7rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'0.75-500': [
-  			'0.75rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'0.875-400': [
-  			' 0.875rem',
-  			{
-  				fontWeight: 400
-  			}
-  		],
-  		'0.875-500': [
-  			' 0.875rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'0.875-700': [
-  			' 0.875rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'1-500': [
-  			'1rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'1-600': [
-  			'1rem',
-  			{
-  				fontWeight: 600
-  			}
-  		],
-  		'1-700': [
-  			'1rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'1-900': [
-  			'1rem',
-  			{
-  				fontWeight: 900
-  			}
-  		],
-  		'1.125-500': [
-  			'1.125rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'1.125-700': [
-  			'1.125rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'1.25-500': [
-  			'1.25rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'1.25-700': [
-  			'1.25rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'1.25-900': [
-  			'1.25rem',
-  			{
-  				fontWeight: 900
-  			}
-  		],
-  		'1.375-700': [
-  			'1.375rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'1.5-400': [
-  			'1.5rem',
-  			{
-  				fontWeight: 400
-  			}
-  		],
-  		'1.5-500': [
-  			'1.5rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'1.5-700': [
-  			'1.5rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'1.5-900': [
-  			'1.5rem',
-  			{
-  				fontWeight: 900
-  			}
-  		],
-  		'1.6-700': [
-  			'1.6rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'1.75-400': [
-  			'1.75rem',
-  			{
-  				fontWeight: 400
-  			}
-  		],
-  		'1.75-500': [
-  			'1.75rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'1.75-700': [
-  			'1.75rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'1.75-900': [
-  			'1.75rem',
-  			{
-  				fontWeight: 900
-  			}
-  		],
-  		'1.875-300': [
-  			'1.87rem',
-  			{
-  				fontWeight: 300
-  			}
-  		],
-  		'1.875-400': [
-  			'1.87rem',
-  			{
-  				fontWeight: 400
-  			}
-  		],
-  		'1.875-500': [
-  			'1.875rem',
-  			{
-  				fontWeight: 500
-  			}
-  		],
-  		'2-700': [
-  			'2rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'2-900': [
-  			'2rem',
-  			{
-  				fontWeight: 900
-  			}
-  		],
-  		'2.25-700': [
-  			'2.25rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'2.5-700': [
-  			'2.5rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'2.5-900': [
-  			'2.5rem',
-  			{
-  				fontWeight: 900
-  			}
-  		],
-  		'3-700': [
-  			'3rem',
-  			{
-  				fontWeight: 700
-  			}
-  		],
-  		'3.7-900': [
-  			'3.7rem',
-  			{
-  				fontWeight: 900
-  			}
-  		],
-  		'4.25-500': [
-  			'4.25rem',
-  			{
-  				fontWeight: 500
-  			}
-  		]
+  		'display-lg': ['2.25rem',  { lineHeight: '1.2', letterSpacing: '-0.02em' }],
+  		'display':    ['1.875rem', { lineHeight: '1.2', letterSpacing: '-0.01em' }],
+  		'headline-lg':['1.5rem',   { lineHeight: '1.3' }],
+  		'headline':   ['1.25rem',  { lineHeight: '1.3' }],
+  		'title-lg':   ['1.125rem', { lineHeight: '1.4' }],
+  		'title':      ['1rem',     { lineHeight: '1.5' }],
+  		'body-lg':    ['0.9375rem',{ lineHeight: '1.5' }],
+  		'body':       ['0.875rem', { lineHeight: '1.5' }],
+  		'body-sm':    ['0.8125rem',{ lineHeight: '1.5' }],
+  		'label-lg':   ['0.8125rem',{ lineHeight: '1.4', letterSpacing: '0.01em' }],
+  		'label':      ['0.75rem',  { lineHeight: '1.4', letterSpacing: '0.02em' }],
+  		'label-sm':   ['0.6875rem',{ lineHeight: '1.4', letterSpacing: '0.02em' }],
+  		'label-xs':   ['0.625rem', { lineHeight: '1.4', letterSpacing: '0.03em' }],
   	},
   	screens: {
   		lg: {
