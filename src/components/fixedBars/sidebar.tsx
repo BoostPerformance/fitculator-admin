@@ -24,6 +24,7 @@ interface Challenges {
     challenge_type: 'diet' | 'exercise' | 'diet_and_exercise' | 'running';
     enable_benchmark?: boolean;
     enable_mission?: boolean;
+    use_daily_programs?: boolean;
   };
 }
 
@@ -635,6 +636,23 @@ export default function Sidebar({
                                     </div>
                                   </li>
                                 )}
+                                {challenge.challenges.use_daily_programs && (
+                                  <li>
+                                    <div
+                                      className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
+                                        isActiveRoute(`/${challenge.challenges.id}/daily-program`)
+                                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                                          : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                                      }`}
+                                      onClick={() => {
+                                        router.push(`/${challenge.challenges.id}/daily-program`);
+                                        closeSidebarOnMobile();
+                                      }}
+                                    >
+                                      데일리 프로그램
+                                    </div>
+                                  </li>
+                                )}
                                 <li>
                                   <div
                                     className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-all min-h-[44px] flex items-center active:scale-[0.98] ${
@@ -802,6 +820,23 @@ export default function Sidebar({
                                             }}
                                           >
                                             미션
+                                          </div>
+                                        </li>
+                                      )}
+                                      {challenge.challenges.use_daily_programs && (
+                                        <li>
+                                          <div
+                                            className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
+                                              isActiveRoute(`/${challenge.challenges.id}/daily-program`)
+                                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                                : 'text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                            onClick={() => {
+                                              router.push(`/${challenge.challenges.id}/daily-program`);
+                                              closeSidebarOnMobile();
+                                            }}
+                                          >
+                                            데일리 프로그램
                                           </div>
                                         </li>
                                       )}
@@ -1312,6 +1347,25 @@ export default function Sidebar({
                                       </div>
                                     </li>
                                   )}
+                                  {challenge.challenges.use_daily_programs && (
+                                    <li>
+                                      <div
+                                        className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-colors duration-200 min-h-[44px] flex items-center ${
+                                          isActiveRoute(`/${challenge.challenges.id}/daily-program`)
+                                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-medium'
+                                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
+                                        }`}
+                                        onClick={() => {
+                                          router.push(
+                                            `/${challenge.challenges.id}/daily-program`
+                                          );
+                                          closeSidebarOnMobile();
+                                        }}
+                                      >
+                                        데일리 프로그램
+                                      </div>
+                                    </li>
+                                  )}
                                   <li>
                                     <div
                                       className={`cursor-pointer text-sm py-3 px-4 ml-2 rounded-lg transition-colors duration-200 min-h-[44px] flex items-center ${
@@ -1515,6 +1569,25 @@ export default function Sidebar({
                                           }}
                                         >
                                           미션
+                                        </div>
+                                      </li>
+                                    )}
+                                    {challenge.challenges.use_daily_programs && (
+                                      <li>
+                                        <div
+                                          className={`cursor-pointer text-0.875-500 py-2 px-8 rounded transition-colors duration-300 ${
+                                            isActiveRoute(`/${challenge.challenges.id}/daily-program`)
+                                              ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                              : 'text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                                          }`}
+                                          onClick={() => {
+                                            router.push(
+                                              `/${challenge.challenges.id}/daily-program`
+                                            );
+                                            closeSidebarOnMobile();
+                                          }}
+                                        >
+                                          데일리 프로그램
                                         </div>
                                       </li>
                                     )}
