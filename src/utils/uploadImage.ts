@@ -4,19 +4,19 @@
  * @returns 업로드된 이미지의 공개 URL
  */
 export async function uploadImage(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.append('file', file);
+ const formData = new FormData();
+ formData.append('file', file);
 
-  const response = await fetch('/api/upload', {
-    method: 'POST',
-    body: formData,
-  });
+ const response = await fetch('/api/upload', {
+ method: 'POST',
+ body: formData,
+ });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to upload image');
-  }
+ if (!response.ok) {
+ const error = await response.json();
+ throw new Error(error.error || 'Failed to upload image');
+ }
 
-  const data = await response.json();
-  return data.url;
+ const data = await response.json();
+ return data.url;
 }

@@ -8,1911 +8,1911 @@ import Title from '@/components/layout/title';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface UserWithCompletions {
-  id: string;
-  name: string;
-  username: string;
-  completions: { [missionId: string]: MissionCompletion };
-  group?: {
-    id: string;
-    name: string;
-    color_code: string;
-    sort_order: number;
-  };
+ id: string;
+ name: string;
+ username: string;
+ completions: { [missionId: string]: MissionCompletion };
+ group?: {
+ id: string;
+ name: string;
+ color_code: string;
+ sort_order: number;
+ };
 }
 
 interface User {
-  id: string;
-  name: string;
-  username: string;
-  group?: {
-    id: string;
-    name: string;
-    color_code: string;
-    sort_order: number;
-  };
+ id: string;
+ name: string;
+ username: string;
+ group?: {
+ id: string;
+ name: string;
+ color_code: string;
+ sort_order: number;
+ };
 }
 
 interface Workout {
-  id: string;
-  user_id: string;
-  start_time: string;
-  title: string;
-  note?: string;
-  duration_minutes?: number;
-  points?: number;
-  type?: string;
-  distance?: number;
-  calories?: number;
-  avg_heart_rate?: number;
-  max_heart_rate?: number;
-  rpe?: number;
-  workout_category?: {
-    name_ko?: string;
-    name_en?: string;
-  };
+ id: string;
+ user_id: string;
+ start_time: string;
+ title: string;
+ note?: string;
+ duration_minutes?: number;
+ points?: number;
+ type?: string;
+ distance?: number;
+ calories?: number;
+ avg_heart_rate?: number;
+ max_heart_rate?: number;
+ rpe?: number;
+ workout_category?: {
+ name_ko?: string;
+ name_en?: string;
+ };
 }
 
 export default function MissionsPage() {
-  const params = useParams();
-  const challengeId = params.challengeId as string;
-  const { challenges } = useChallenge();
-  const currentChallenge = challenges?.find((c) => c.challenges.id === challengeId);
-  
-  // 미션 관리 상태
-  const [missions, setMissions] = useState<ChallengeMission[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingMission, setEditingMission] = useState<ChallengeMission | null>(null);
-  const [viewingMission, setViewingMission] = useState<ChallengeMission | null>(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    mission_type: 'workout' as 'workout' | 'diet' | 'custom',
-    start_date: '',
-    end_date: '',
-    requires_verification: false,
-    sort_order: 0
-  });
-  const [challengeGroups, setChallengeGroups] = useState<ChallengeGroup[]>([]);
-  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+ const params = useParams();
+ const challengeId = params.challengeId as string;
+ const { challenges } = useChallenge();
+ const currentChallenge = challenges?.find((c) => c.challenges.id === challengeId);
+ 
+ // 미션 관리 상태
+ const [missions, setMissions] = useState<ChallengeMission[]>([]);
+ const [loading, setLoading] = useState(true);
+ const [showAddModal, setShowAddModal] = useState(false);
+ const [editingMission, setEditingMission] = useState<ChallengeMission | null>(null);
+ const [viewingMission, setViewingMission] = useState<ChallengeMission | null>(null);
+ const [showDetailModal, setShowDetailModal] = useState(false);
+ const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+ const [formData, setFormData] = useState({
+ title: '',
+ description: '',
+ mission_type: 'workout' as 'workout' | 'diet' | 'custom',
+ start_date: '',
+ end_date: '',
+ requires_verification: false,
+ sort_order: 0
+ });
+ const [challengeGroups, setChallengeGroups] = useState<ChallengeGroup[]>([]);
+ const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
 
-  // 달성 현황 상태
-  const [users, setUsers] = useState<UserWithCompletions[]>([]);
-  const [memberSortField, setMemberSortField] = useState<'name' | 'completion_rate'>('name');
-  const [memberSortOrder, setMemberSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [selectedMissionIds, setSelectedMissionIds] = useState<Set<string>>(new Set());
-  const [showMissionFilter, setShowMissionFilter] = useState(false);
-  const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>(''); // group_id
-  const [selectedWeek, setSelectedWeek] = useState<number | 'all'>(1); // 주차 선택 (1~16 또는 'all')
+ // 달성 현황 상태
+ const [users, setUsers] = useState<UserWithCompletions[]>([]);
+ const [memberSortField, setMemberSortField] = useState<'name' | 'completion_rate'>('name');
+ const [memberSortOrder, setMemberSortOrder] = useState<'asc' | 'desc'>('asc');
+ const [selectedMissionIds, setSelectedMissionIds] = useState<Set<string>>(new Set());
+ const [showMissionFilter, setShowMissionFilter] = useState(false);
+ const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>(''); // group_id
+ const [selectedWeek, setSelectedWeek] = useState<number | 'all'>(1); // 주차 선택 (1~16 또는 'all')
 
-  // 매핑 모달 상태
-  const [showMappingModal, setShowMappingModal] = useState(false);
-  const [mappingUsers, setMappingUsers] = useState<User[]>([]);
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [selectedMission, setSelectedMission] = useState<string>('');
-  const [selectedUser, setSelectedUser] = useState<string>('');
-  const [selectedWorkouts, setSelectedWorkouts] = useState<Set<string>>(new Set());
-  const [showWorkouts, setShowWorkouts] = useState(false);
-  const [existingCompletions, setExistingCompletions] = useState<any[]>([]);
-  
-  // 완료된 미션 운동 보기 모달 상태
-  const [showCompletedWorkoutsModal, setShowCompletedWorkoutsModal] = useState(false);
-  const [completedWorkouts, setCompletedWorkouts] = useState<Workout[]>([]);
-  const [viewingCompletionUser, setViewingCompletionUser] = useState<string>('');
-  const [viewingCompletionMission, setViewingCompletionMission] = useState<string>('');
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  const [isMounted, setIsMounted] = useState(false);
+ // 매핑 모달 상태
+ const [showMappingModal, setShowMappingModal] = useState(false);
+ const [mappingUsers, setMappingUsers] = useState<User[]>([]);
+ const [workouts, setWorkouts] = useState<Workout[]>([]);
+ const [selectedMission, setSelectedMission] = useState<string>('');
+ const [selectedUser, setSelectedUser] = useState<string>('');
+ const [selectedWorkouts, setSelectedWorkouts] = useState<Set<string>>(new Set());
+ const [showWorkouts, setShowWorkouts] = useState(false);
+ const [existingCompletions, setExistingCompletions] = useState<any[]>([]);
+ 
+ // 완료된 미션 운동 보기 모달 상태
+ const [showCompletedWorkoutsModal, setShowCompletedWorkoutsModal] = useState(false);
+ const [completedWorkouts, setCompletedWorkouts] = useState<Workout[]>([]);
+ const [viewingCompletionUser, setViewingCompletionUser] = useState<string>('');
+ const [viewingCompletionMission, setViewingCompletionMission] = useState<string>('');
+ const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+ const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+ useEffect(() => {
+ setIsMounted(true);
+ }, []);
 
-  useEffect(() => {
-    fetchData();
-    fetchChallengeGroups();
-  }, [challengeId]);
+ useEffect(() => {
+ fetchData();
+ fetchChallengeGroups();
+ }, [challengeId]);
 
-  const fetchChallengeGroups = async () => {
-    try {
-      const response = await fetch(`/api/challenge-groups?challenge_id=${challengeId}`);
-      const result = await response.json();
-      const groups = result.data || result;
-      if (Array.isArray(groups)) {
-        const sortedGroups = groups.sort((a: ChallengeGroup, b: ChallengeGroup) => a.sort_order - b.sort_order);
-        setChallengeGroups(sortedGroups);
-        // 첫 번째 그룹을 기본 선택
-        if (sortedGroups.length > 0 && !selectedGroupFilter) {
-          setSelectedGroupFilter(sortedGroups[0].id);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching challenge groups:', error);
-    }
-  };
+ const fetchChallengeGroups = async () => {
+ try {
+ const response = await fetch(`/api/challenge-groups?challenge_id=${challengeId}`);
+ const result = await response.json();
+ const groups = result.data || result;
+ if (Array.isArray(groups)) {
+ const sortedGroups = groups.sort((a: ChallengeGroup, b: ChallengeGroup) => a.sort_order - b.sort_order);
+ setChallengeGroups(sortedGroups);
+ // 첫 번째 그룹을 기본 선택
+ if (sortedGroups.length > 0 && !selectedGroupFilter) {
+ setSelectedGroupFilter(sortedGroups[0].id);
+ }
+ }
+ } catch (error) {
+ console.error('Error fetching challenge groups:', error);
+ }
+ };
 
-  const toggleGroupSelection = (groupId: string) => {
-    setSelectedGroupIds(prev => {
-      if (prev.includes(groupId)) {
-        if (prev.length === 1) {
-          return prev;
-        }
-        return prev.filter(id => id !== groupId);
-      } else {
-        return [...prev, groupId];
-      }
-    });
-  };
+ const toggleGroupSelection = (groupId: string) => {
+ setSelectedGroupIds(prev => {
+ if (prev.includes(groupId)) {
+ if (prev.length === 1) {
+ return prev;
+ }
+ return prev.filter(id => id !== groupId);
+ } else {
+ return [...prev, groupId];
+ }
+ });
+ };
 
-  // 활성 미션만 기본 선택
-  useEffect(() => {
-    const activeMissions = missions.filter(m => m.is_active);
-    setSelectedMissionIds(new Set(activeMissions.map(m => m.id)));
-  }, [missions]);
+ // 활성 미션만 기본 선택
+ useEffect(() => {
+ const activeMissions = missions.filter(m => m.is_active);
+ setSelectedMissionIds(new Set(activeMissions.map(m => m.id)));
+ }, [missions]);
 
-  useEffect(() => {
-    if (selectedMission && selectedUser) {
-      fetchWorkoutsForMapping();
-    }
-  }, [selectedMission, selectedUser]);
+ useEffect(() => {
+ if (selectedMission && selectedUser) {
+ fetchWorkoutsForMapping();
+ }
+ }, [selectedMission, selectedUser]);
 
-  // 정렬된 미션 목록
-  const sortedMissions = [...missions].sort((a, b) => {
-    const dateA = new Date(a.start_date).getTime();
-    const dateB = new Date(b.start_date).getTime();
-    return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-  });
+ // 정렬된 미션 목록
+ const sortedMissions = [...missions].sort((a, b) => {
+ const dateA = new Date(a.start_date).getTime();
+ const dateB = new Date(b.start_date).getTime();
+ return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+ });
 
-  const handleSortToggle = () => {
-    setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
-  };
+ const handleSortToggle = () => {
+ setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
+ };
 
-  // 챌린지 시작일 기준 주차 계산
-  const getWeekRange = (weekNumber: number) => {
-    if (!currentChallenge) return null;
+ // 챌린지 시작일 기준 주차 계산
+ const getWeekRange = (weekNumber: number) => {
+ if (!currentChallenge) return null;
 
-    const challengeStart = new Date(currentChallenge.challenges.start_date);
-    challengeStart.setHours(0, 0, 0, 0);
+ const challengeStart = new Date(currentChallenge.challenges.start_date);
+ challengeStart.setHours(0, 0, 0, 0);
 
-    const weekStart = new Date(challengeStart);
-    weekStart.setDate(challengeStart.getDate() + (weekNumber - 1) * 7);
+ const weekStart = new Date(challengeStart);
+ weekStart.setDate(challengeStart.getDate() + (weekNumber - 1) * 7);
 
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
+ const weekEnd = new Date(weekStart);
+ weekEnd.setDate(weekStart.getDate() + 6);
+ weekEnd.setHours(23, 59, 59, 999);
 
-    return { start: weekStart, end: weekEnd };
-  };
+ return { start: weekStart, end: weekEnd };
+ };
 
-  // 현재 주차 계산 (오늘 날짜 기준)
-  const getCurrentWeekNumber = () => {
-    if (!currentChallenge) return 1;
+ // 현재 주차 계산 (오늘 날짜 기준)
+ const getCurrentWeekNumber = () => {
+ if (!currentChallenge) return 1;
 
-    const challengeStart = new Date(currentChallenge.challenges.start_date);
-    challengeStart.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+ const challengeStart = new Date(currentChallenge.challenges.start_date);
+ challengeStart.setHours(0, 0, 0, 0);
+ const today = new Date();
+ today.setHours(0, 0, 0, 0);
 
-    const diffDays = Math.floor((today.getTime() - challengeStart.getTime()) / (1000 * 60 * 60 * 24));
-    const weekNumber = Math.floor(diffDays / 7) + 1;
+ const diffDays = Math.floor((today.getTime() - challengeStart.getTime()) / (1000 * 60 * 60 * 24));
+ const weekNumber = Math.floor(diffDays / 7) + 1;
 
-    // 1 ~ 총 주차 범위 내로 제한
-    return Math.max(1, Math.min(weekNumber, getTotalWeeks()));
-  };
+ // 1 ~ 총 주차 범위 내로 제한
+ return Math.max(1, Math.min(weekNumber, getTotalWeeks()));
+ };
 
-  // 총 주차 계산
-  const getTotalWeeks = () => {
-    if (!currentChallenge) return 16;
+ // 총 주차 계산
+ const getTotalWeeks = () => {
+ if (!currentChallenge) return 16;
 
-    const start = new Date(currentChallenge.challenges.start_date);
-    const end = new Date(currentChallenge.challenges.end_date);
-    const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+ const start = new Date(currentChallenge.challenges.start_date);
+ const end = new Date(currentChallenge.challenges.end_date);
+ const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-    return Math.ceil(diffDays / 7);
-  };
+ return Math.ceil(diffDays / 7);
+ };
 
-  // 미션이 선택된 주차에 해당하는지 확인
-  const isInSelectedWeek = (mission: ChallengeMission) => {
-    if (selectedWeek === 'all') return true;
+ // 미션이 선택된 주차에 해당하는지 확인
+ const isInSelectedWeek = (mission: ChallengeMission) => {
+ if (selectedWeek === 'all') return true;
 
-    const weekRange = getWeekRange(selectedWeek);
-    if (!weekRange) return true;
+ const weekRange = getWeekRange(selectedWeek);
+ if (!weekRange) return true;
 
-    const missionStart = new Date(mission.start_date);
-    const missionEnd = new Date(mission.end_date);
+ const missionStart = new Date(mission.start_date);
+ const missionEnd = new Date(mission.end_date);
 
-    // 미션 기간이 선택된 주차와 겹치는지 확인
-    return missionStart <= weekRange.end && missionEnd >= weekRange.start;
-  };
+ // 미션 기간이 선택된 주차와 겹치는지 확인
+ return missionStart <= weekRange.end && missionEnd >= weekRange.start;
+ };
 
-  // 컴포넌트 마운트 시 현재 주차로 설정
-  useEffect(() => {
-    if (currentChallenge && selectedWeek === 1) {
-      const currentWeek = getCurrentWeekNumber();
-      setSelectedWeek(currentWeek);
-    }
-  }, [currentChallenge]);
+ // 컴포넌트 마운트 시 현재 주차로 설정
+ useEffect(() => {
+ if (currentChallenge && selectedWeek === 1) {
+ const currentWeek = getCurrentWeekNumber();
+ setSelectedWeek(currentWeek);
+ }
+ }, [currentChallenge]);
 
-  // 선택된 미션들 (컬럼 순서: start_date 빠른순서, sort_order 작은 순서)
-  // 그룹 필터가 적용된 경우, 해당 그룹에 매핑된 미션만 표시
-  const filteredMissions = missions
-    .filter(m => {
-      // 미션 필터에서 선택된 미션인지 확인
-      if (!selectedMissionIds.has(m.id)) return false;
+ // 선택된 미션들 (컬럼 순서: start_date 빠른순서, sort_order 작은 순서)
+ // 그룹 필터가 적용된 경우, 해당 그룹에 매핑된 미션만 표시
+ const filteredMissions = missions
+ .filter(m => {
+ // 미션 필터에서 선택된 미션인지 확인
+ if (!selectedMissionIds.has(m.id)) return false;
 
-      // 주차 필터 적용
-      if (!isInSelectedWeek(m)) return false;
+ // 주차 필터 적용
+ if (!isInSelectedWeek(m)) return false;
 
-      // 그룹 필터가 없으면 모든 미션 표시
-      if (!selectedGroupFilter) return true;
+ // 그룹 필터가 없으면 모든 미션 표시
+ if (!selectedGroupFilter) return true;
 
-      // '그룹 미지정' 선택 시 타겟 그룹이 없는 미션(전체 대상)만 표시
-      if (selectedGroupFilter === 'none') {
-        return !m.challenge_mission_target_groups || m.challenge_mission_target_groups.length === 0;
-      }
+ // '그룹 미지정' 선택 시 타겟 그룹이 없는 미션(전체 대상)만 표시
+ if (selectedGroupFilter === 'none') {
+ return !m.challenge_mission_target_groups || m.challenge_mission_target_groups.length === 0;
+ }
 
-      // 미션에 타겟 그룹이 지정되지 않은 경우 (전체 그룹 대상) 표시
-      if (!m.challenge_mission_target_groups || m.challenge_mission_target_groups.length === 0) {
-        return true;
-      }
+ // 미션에 타겟 그룹이 지정되지 않은 경우 (전체 그룹 대상) 표시
+ if (!m.challenge_mission_target_groups || m.challenge_mission_target_groups.length === 0) {
+ return true;
+ }
 
-      // 선택된 그룹이 미션의 타겟 그룹에 포함되어 있는지 확인
-      return m.challenge_mission_target_groups.some(tg => tg.group_id === selectedGroupFilter);
-    })
-    .sort((a, b) => {
-      // start_date 빠른 순서 (asc)
-      const dateCompare = new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
-      if (dateCompare !== 0) {
-        return dateCompare;
-      }
-      // sort_order 작은 순서 (asc)
-      return a.sort_order - b.sort_order;
-    });
+ // 선택된 그룹이 미션의 타겟 그룹에 포함되어 있는지 확인
+ return m.challenge_mission_target_groups.some(tg => tg.group_id === selectedGroupFilter);
+ })
+ .sort((a, b) => {
+ // start_date 빠른 순서 (asc)
+ const dateCompare = new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+ if (dateCompare !== 0) {
+ return dateCompare;
+ }
+ // sort_order 작은 순서 (asc)
+ return a.sort_order - b.sort_order;
+ });
 
-  // 달성률 계산 함수 (선택된 미션 기준)
-  const calculateCompletionRate = (user: UserWithCompletions) => {
-    const totalMissions = filteredMissions.length;
-    if (totalMissions === 0) return 0;
-    
-    const completedMissions = filteredMissions.filter(mission => {
-      const completion = user.completions[mission.id];
-      return completion && (completion.verification_status === 'approved' || completion.verification_status === 'auto_approved');
-    }).length;
-    
-    return Math.round((completedMissions / totalMissions) * 100);
-  };
+ // 달성률 계산 함수 (선택된 미션 기준)
+ const calculateCompletionRate = (user: UserWithCompletions) => {
+ const totalMissions = filteredMissions.length;
+ if (totalMissions === 0) return 0;
+ 
+ const completedMissions = filteredMissions.filter(mission => {
+ const completion = user.completions[mission.id];
+ return completion && (completion.verification_status === 'approved' || completion.verification_status === 'auto_approved');
+ }).length;
+ 
+ return Math.round((completedMissions / totalMissions) * 100);
+ };
 
-  // 그룹 필터링된 사용자 목록
-  const filteredUsers = selectedGroupFilter === 'none'
-    ? users.filter(u => !u.group)
-    : selectedGroupFilter
-      ? users.filter(u => u.group?.id === selectedGroupFilter)
-      : users;
+ // 그룹 필터링된 사용자 목록
+ const filteredUsers = selectedGroupFilter === 'none'
+ ? users.filter(u => !u.group)
+ : selectedGroupFilter
+ ? users.filter(u => u.group?.id === selectedGroupFilter)
+ : users;
 
-  // 정렬된 사용자 목록
-  const sortedUsers = [...filteredUsers].sort((a, b) => {
-    if (memberSortField === 'name') {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
-      return memberSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
-    } else {
-      const rateA = calculateCompletionRate(a);
-      const rateB = calculateCompletionRate(b);
-      return memberSortOrder === 'asc' ? rateA - rateB : rateB - rateA;
-    }
-  });
+ // 정렬된 사용자 목록
+ const sortedUsers = [...filteredUsers].sort((a, b) => {
+ if (memberSortField === 'name') {
+ const nameA = a.name.toLowerCase();
+ const nameB = b.name.toLowerCase();
+ return memberSortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+ } else {
+ const rateA = calculateCompletionRate(a);
+ const rateB = calculateCompletionRate(b);
+ return memberSortOrder === 'asc' ? rateA - rateB : rateB - rateA;
+ }
+ });
 
-  const truncateDescription = (description: string, lines: number = 2) => {
-    if (!description) return '';
-    
-    // 줄바꿈을 기준으로 분할
-    const textLines = description.split('\n');
-    
-    // 지정된 줄 수보다 적거나 같으면 그대로 반환
-    if (textLines.length <= lines) {
-      return description;
-    }
-    
-    // 지정된 줄 수만큼 잘라내고 '...' 추가
-    return textLines.slice(0, lines).join('\n') + '...';
-  };
+ const truncateDescription = (description: string, lines: number = 2) => {
+ if (!description) return '';
+ 
+ // 줄바꿈을 기준으로 분할
+ const textLines = description.split('\n');
+ 
+ // 지정된 줄 수보다 적거나 같으면 그대로 반환
+ if (textLines.length <= lines) {
+ return description;
+ }
+ 
+ // 지정된 줄 수만큼 잘라내고 '...' 추가
+ return textLines.slice(0, lines).join('\n') + '...';
+ };
 
-  const toggleRowExpansion = (workoutId: string) => {
-    const newExpanded = new Set(expandedRows);
-    if (newExpanded.has(workoutId)) {
-      newExpanded.delete(workoutId);
-    } else {
-      newExpanded.add(workoutId);
-    }
-    setExpandedRows(newExpanded);
-  };
+ const toggleRowExpansion = (workoutId: string) => {
+ const newExpanded = new Set(expandedRows);
+ if (newExpanded.has(workoutId)) {
+ newExpanded.delete(workoutId);
+ } else {
+ newExpanded.add(workoutId);
+ }
+ setExpandedRows(newExpanded);
+ };
 
-  const handleMemberSortToggle = (field: 'name' | 'completion_rate') => {
-    if (memberSortField === field) {
-      setMemberSortOrder(memberSortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setMemberSortField(field);
-      setMemberSortOrder('asc');
-    }
-  };
+ const handleMemberSortToggle = (field: 'name' | 'completion_rate') => {
+ if (memberSortField === field) {
+ setMemberSortOrder(memberSortOrder === 'asc' ? 'desc' : 'asc');
+ } else {
+ setMemberSortField(field);
+ setMemberSortOrder('asc');
+ }
+ };
 
-  const fetchData = async () => {
-    try {
-      // 미션 가져오기
-      const missionsResponse = await fetch(`/api/missions?challengeId=${challengeId}`);
-      const missionsData = await missionsResponse.json();
-      setMissions(Array.isArray(missionsData) ? missionsData : []);
+ const fetchData = async () => {
+ try {
+ // 미션 가져오기
+ const missionsResponse = await fetch(`/api/missions?challengeId=${challengeId}`);
+ const missionsData = await missionsResponse.json();
+ setMissions(Array.isArray(missionsData) ? missionsData : []);
 
-      // 챌린지 참가자 가져오기 (페이지네이션 없이 전체 가져오기)
-      const participantsResponse = await fetch(`/api/challenge-participants?challenge_id=${challengeId}&limit=1000`);
-      const participantsResult = await participantsResponse.json();
+ // 챌린지 참가자 가져오기 (페이지네이션 없이 전체 가져오기)
+ const participantsResponse = await fetch(`/api/challenge-participants?challenge_id=${challengeId}&limit=1000`);
+ const participantsResult = await participantsResponse.json();
 // console.log('Participants response status:', participantsResponse.status);
 // console.log('Participants result:', participantsResult);
-      
-      // API 응답 구조에 따라 data 추출
-      const participantsData = participantsResult.data || [];
+ 
+ // API 응답 구조에 따라 data 추출
+ const participantsData = participantsResult.data || [];
 // console.log('Extracted participants data:', participantsData);
 // console.log('Is array?', Array.isArray(participantsData));
-      
-      if (participantsData.length > 0) {
+ 
+ if (participantsData.length > 0) {
 // console.log('First participant structure:', participantsData[0]);
 // console.log('Users data:', participantsData[0].users);
 // console.log('Group data:', participantsData[0].challenge_group_participants);
 // console.log('Current group:', participantsData[0].current_group);
-      }
+ }
 
-      // 미션 완료 정보 가져오기
-      const completionsResponse = await fetch(`/api/mission-completions?challengeId=${challengeId}`);
-      const completionsData = await completionsResponse.json();
+ // 미션 완료 정보 가져오기
+ const completionsResponse = await fetch(`/api/mission-completions?challengeId=${challengeId}`);
+ const completionsData = await completionsResponse.json();
 // console.log('Completions data:', completionsData);
 
-      // 유저별로 완료 정보 매핑
-      const usersWithCompletions = (Array.isArray(participantsData) ? participantsData : []).map((participant: any) => {
-        const userCompletions: { [missionId: string]: MissionCompletion } = {};
-        (Array.isArray(completionsData) ? completionsData : []).forEach((completion: MissionCompletion) => {
-          if (completion.user_id === participant.service_user_id) {
-            userCompletions[completion.mission_id] = completion;
-          }
-        });
+ // 유저별로 완료 정보 매핑
+ const usersWithCompletions = (Array.isArray(participantsData) ? participantsData : []).map((participant: any) => {
+ const userCompletions: { [missionId: string]: MissionCompletion } = {};
+ (Array.isArray(completionsData) ? completionsData : []).forEach((completion: MissionCompletion) => {
+ if (completion.user_id === participant.service_user_id) {
+ userCompletions[completion.mission_id] = completion;
+ }
+ });
 
-        // 그룹 정보 추출
-        let group = participant.current_group || null;
-        if (!group && participant.challenge_group_participants) {
-          const activeGroup = participant.challenge_group_participants.find(
-            (gp: any) => gp.is_active === true
-          );
-          group = activeGroup?.challenge_groups || null;
-        }
+ // 그룹 정보 추출
+ let group = participant.current_group || null;
+ if (!group && participant.challenge_group_participants) {
+ const activeGroup = participant.challenge_group_participants.find(
+ (gp: any) => gp.is_active === true
+ );
+ group = activeGroup?.challenge_groups || null;
+ }
 
-        return {
-          id: participant.service_user_id,
-          name: participant.users?.name || '이름 없음',
-          username: participant.users?.username || '-',
-          completions: userCompletions,
-          group: group
-        };
-      });
+ return {
+ id: participant.service_user_id,
+ name: participant.users?.name || '이름 없음',
+ username: participant.users?.username || '-',
+ completions: userCompletions,
+ group: group
+ };
+ });
 
-      setUsers(usersWithCompletions);
+ setUsers(usersWithCompletions);
 
-      // 매핑용 유저 목록도 설정 (그룹 정보 포함)
-      const mappingUsersData = (Array.isArray(participantsData) ? participantsData : []).map((p: any) => {
-        // current_group이 이미 있으면 사용, 없으면 직접 찾기
-        let group = p.current_group || null;
-        
-        if (!group && p.challenge_group_participants) {
-          const activeGroup = p.challenge_group_participants.find(
-            (gp: any) => gp.is_active === true
-          );
-          group = activeGroup?.challenge_groups || null;
-        }
-        
+ // 매핑용 유저 목록도 설정 (그룹 정보 포함)
+ const mappingUsersData = (Array.isArray(participantsData) ? participantsData : []).map((p: any) => {
+ // current_group이 이미 있으면 사용, 없으면 직접 찾기
+ let group = p.current_group || null;
+ 
+ if (!group && p.challenge_group_participants) {
+ const activeGroup = p.challenge_group_participants.find(
+ (gp: any) => gp.is_active === true
+ );
+ group = activeGroup?.challenge_groups || null;
+ }
+ 
 // console.log(`User ${p.users?.name}: group =`, group);
-        
-        return {
-          id: p.service_user_id,
-          name: p.users?.name || '이름 없음',
-          username: p.users?.username || '-',
-          group: group
-        };
-      });
-      
-      // 그룹별로 정렬 (그룹 없음은 마지막)
-      const sortedMappingUsers = mappingUsersData.sort((a: User, b: User) => {
-        // 둘 다 그룹이 있는 경우
-        if (a.group && b.group) {
-          // sort_order로 정렬
-          if (a.group.sort_order !== b.group.sort_order) {
-            return a.group.sort_order - b.group.sort_order;
-          }
-          // 같은 그룹이면 이름으로 정렬
-          return a.name.localeCompare(b.name);
-        }
-        // a만 그룹이 있는 경우
-        if (a.group && !b.group) return -1;
-        // b만 그룹이 있는 경우
-        if (!a.group && b.group) return 1;
-        // 둘 다 그룹이 없는 경우 이름으로 정렬
-        return a.name.localeCompare(b.name);
-      });
-      
-      setMappingUsers(sortedMappingUsers);
+ 
+ return {
+ id: p.service_user_id,
+ name: p.users?.name || '이름 없음',
+ username: p.users?.username || '-',
+ group: group
+ };
+ });
+ 
+ // 그룹별로 정렬 (그룹 없음은 마지막)
+ const sortedMappingUsers = mappingUsersData.sort((a: User, b: User) => {
+ // 둘 다 그룹이 있는 경우
+ if (a.group && b.group) {
+ // sort_order로 정렬
+ if (a.group.sort_order !== b.group.sort_order) {
+ return a.group.sort_order - b.group.sort_order;
+ }
+ // 같은 그룹이면 이름으로 정렬
+ return a.name.localeCompare(b.name);
+ }
+ // a만 그룹이 있는 경우
+ if (a.group && !b.group) return -1;
+ // b만 그룹이 있는 경우
+ if (!a.group && b.group) return 1;
+ // 둘 다 그룹이 없는 경우 이름으로 정렬
+ return a.name.localeCompare(b.name);
+ });
+ 
+ setMappingUsers(sortedMappingUsers);
 
-    } catch (error) {
+ } catch (error) {
 // console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+ } finally {
+ setLoading(false);
+ }
+ };
 
-  const fetchCompletedWorkouts = async (userId: string, missionId: string) => {
+ const fetchCompletedWorkouts = async (userId: string, missionId: string) => {
 // console.log('fetchCompletedWorkouts called with:', { userId, missionId });
-    try {
-      const mission = missions.find(m => m.id === missionId);
-      const user = users.find(u => u.id === userId);
-      
+ try {
+ const mission = missions.find(m => m.id === missionId);
+ const user = users.find(u => u.id === userId);
+ 
 // console.log('Found mission:', mission);
 // console.log('Found user:', user);
-      
-      if (!mission || !user) {
+ 
+ if (!mission || !user) {
 // console.log('Mission or user not found, returning');
-        return;
-      }
-      
-      setViewingCompletionUser(user.name);
-      setViewingCompletionMission(mission.title);
-      
-      // 해당 미션의 완료 정보 가져오기
-      const completionResponse = await fetch(
-        `/api/mission-completions?missionId=${missionId}&userId=${userId}`
-      );
-      const completionData = await completionResponse.json();
-      
-      // workout_id가 있는 완료 정보들의 운동 데이터 가져오기
-      const workoutIds = completionData
-        ?.map((c: any) => c.workout_id)
-        .filter(Boolean) || [];
-      
-      if (workoutIds.length > 0) {
-        // 해당 기간의 운동 목록 가져오기
-        const workoutsResponse = await fetch(
-          `/api/workouts/user-workouts?userId=${userId}&startDate=${mission.start_date}&endDate=${mission.end_date}`
-        );
-        
+ return;
+ }
+ 
+ setViewingCompletionUser(user.name);
+ setViewingCompletionMission(mission.title);
+ 
+ // 해당 미션의 완료 정보 가져오기
+ const completionResponse = await fetch(
+ `/api/mission-completions?missionId=${missionId}&userId=${userId}`
+ );
+ const completionData = await completionResponse.json();
+ 
+ // workout_id가 있는 완료 정보들의 운동 데이터 가져오기
+ const workoutIds = completionData
+ ?.map((c: any) => c.workout_id)
+ .filter(Boolean) || [];
+ 
+ if (workoutIds.length > 0) {
+ // 해당 기간의 운동 목록 가져오기
+ const workoutsResponse = await fetch(
+ `/api/workouts/user-workouts?userId=${userId}&startDate=${mission.start_date}&endDate=${mission.end_date}`
+ );
+ 
 // console.log('Workouts response status:', workoutsResponse.status);
-        
-        if (!workoutsResponse.ok) {
+ 
+ if (!workoutsResponse.ok) {
 // console.error('Failed to fetch workouts:', workoutsResponse.statusText);
-          setCompletedWorkouts([]);
-          return;
-        }
-        
-        const allWorkouts = await workoutsResponse.json();
+ setCompletedWorkouts([]);
+ return;
+ }
+ 
+ const allWorkouts = await workoutsResponse.json();
 // console.log('All workouts received:', allWorkouts);
-        
-        // 응답이 배열인지 확인
-        if (!Array.isArray(allWorkouts)) {
+ 
+ // 응답이 배열인지 확인
+ if (!Array.isArray(allWorkouts)) {
 // console.error('Workouts response is not an array:', allWorkouts);
-          setCompletedWorkouts([]);
-          return;
-        }
-        
-        // workout_id와 매칭되는 운동만 필터링
-        const mappedWorkouts = allWorkouts.filter((w: Workout) => 
-          workoutIds.includes(w.id)
-        );
-        
+ setCompletedWorkouts([]);
+ return;
+ }
+ 
+ // workout_id와 매칭되는 운동만 필터링
+ const mappedWorkouts = allWorkouts.filter((w: Workout) => 
+ workoutIds.includes(w.id)
+ );
+ 
 // console.log('Mapped workouts:', mappedWorkouts);
-        setCompletedWorkouts(mappedWorkouts);
-      } else {
-        setCompletedWorkouts([]);
-      }
-      
-      setShowCompletedWorkoutsModal(true);
-    } catch (error) {
+ setCompletedWorkouts(mappedWorkouts);
+ } else {
+ setCompletedWorkouts([]);
+ }
+ 
+ setShowCompletedWorkoutsModal(true);
+ } catch (error) {
 // console.error('Error fetching completed workouts:', error);
-      setCompletedWorkouts([]);
-    }
-  };
+ setCompletedWorkouts([]);
+ }
+ };
 
-  const fetchWorkoutsForMapping = async () => {
-    if (!selectedMission || !selectedUser) {
-      setWorkouts([]);
-      setShowWorkouts(false);
-      setExistingCompletions([]);
-      return;
-    }
+ const fetchWorkoutsForMapping = async () => {
+ if (!selectedMission || !selectedUser) {
+ setWorkouts([]);
+ setShowWorkouts(false);
+ setExistingCompletions([]);
+ return;
+ }
 
-    try {
-      const mission = missions.find(m => m.id === selectedMission);
-      if (!mission) {
-        setWorkouts([]);
-        setShowWorkouts(false);
-        setExistingCompletions([]);
-        return;
-      }
+ try {
+ const mission = missions.find(m => m.id === selectedMission);
+ if (!mission) {
+ setWorkouts([]);
+ setShowWorkouts(false);
+ setExistingCompletions([]);
+ return;
+ }
 
-      // 운동 데이터 가져오기
-      const workoutsResponse = await fetch(
-        `/api/workouts/user-workouts?userId=${selectedUser}&startDate=${mission.start_date}&endDate=${mission.end_date}`
-      );
-      const workoutsData = await workoutsResponse.json();
-      
-      // 기존 완료 데이터 가져오기
-      const completionsResponse = await fetch(
-        `/api/mission-completions?missionId=${selectedMission}&userId=${selectedUser}`
-      );
-      const completionsData = await completionsResponse.json();
-      
-      setWorkouts(workoutsData || []);
-      setExistingCompletions(completionsData || []);
-      setShowWorkouts(true);
-      
-      // 이미 매핑된 운동은 자동으로 선택 상태로 설정
-      const mappedWorkoutIds = new Set(
-        completionsData?.map((c: any) => c.workout_id).filter(Boolean) || []
-      );
-      setSelectedWorkouts(mappedWorkoutIds);
-    } catch (error) {
+ // 운동 데이터 가져오기
+ const workoutsResponse = await fetch(
+ `/api/workouts/user-workouts?userId=${selectedUser}&startDate=${mission.start_date}&endDate=${mission.end_date}`
+ );
+ const workoutsData = await workoutsResponse.json();
+ 
+ // 기존 완료 데이터 가져오기
+ const completionsResponse = await fetch(
+ `/api/mission-completions?missionId=${selectedMission}&userId=${selectedUser}`
+ );
+ const completionsData = await completionsResponse.json();
+ 
+ setWorkouts(workoutsData || []);
+ setExistingCompletions(completionsData || []);
+ setShowWorkouts(true);
+ 
+ // 이미 매핑된 운동은 자동으로 선택 상태로 설정
+ const mappedWorkoutIds = new Set(
+ completionsData?.map((c: any) => c.workout_id).filter(Boolean) || []
+ );
+ setSelectedWorkouts(mappedWorkoutIds);
+ } catch (error) {
 // console.error('Error fetching workouts:', error);
-      setWorkouts([]);
-      setExistingCompletions([]);
-      setShowWorkouts(true);
-    }
-  };
+ setWorkouts([]);
+ setExistingCompletions([]);
+ setShowWorkouts(true);
+ }
+ };
 
-  // 미션 관리 함수들
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ // 미션 관리 함수들
+ const handleSubmit = async (e: React.FormEvent) => {
+ e.preventDefault();
 
-    try {
-      const url = '/api/missions';
-      const method = editingMission ? 'PUT' : 'POST';
-      const body = editingMission
-        ? { id: editingMission.id, ...formData, target_group_ids: selectedGroupIds.length > 0 ? selectedGroupIds : null }
-        : { challenge_id: challengeId, ...formData, target_group_ids: selectedGroupIds.length > 0 ? selectedGroupIds : null };
+ try {
+ const url = '/api/missions';
+ const method = editingMission ? 'PUT' : 'POST';
+ const body = editingMission
+ ? { id: editingMission.id, ...formData, target_group_ids: selectedGroupIds.length > 0 ? selectedGroupIds : null }
+ : { challenge_id: challengeId, ...formData, target_group_ids: selectedGroupIds.length > 0 ? selectedGroupIds : null };
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
+ const response = await fetch(url, {
+ method,
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify(body)
+ });
 
-      if (response.ok) {
-        fetchData();
-        resetForm();
-      }
-    } catch (error) {
+ if (response.ok) {
+ fetchData();
+ resetForm();
+ }
+ } catch (error) {
 // console.error('Error saving mission:', error);
-    }
-  };
+ }
+ };
 
-  const handleDelete = async (missionId: string) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
+ const handleDelete = async (missionId: string) => {
+ if (!confirm('정말 삭제하시겠습니까?')) return;
 
-    try {
-      const response = await fetch(`/api/missions?missionId=${missionId}`, {
-        method: 'DELETE'
-      });
+ try {
+ const response = await fetch(`/api/missions?missionId=${missionId}`, {
+ method: 'DELETE'
+ });
 
-      if (response.ok) {
-        fetchData();
-      }
-    } catch (error) {
+ if (response.ok) {
+ fetchData();
+ }
+ } catch (error) {
 // console.error('Error deleting mission:', error);
-    }
-  };
+ }
+ };
 
-  const handleEdit = (mission: ChallengeMission) => {
-    setEditingMission(mission);
-    setFormData({
-      title: mission.title,
-      description: mission.description || '',
-      mission_type: mission.mission_type,
-      start_date: mission.start_date,
-      end_date: mission.end_date,
-      requires_verification: mission.requires_verification,
-      sort_order: mission.sort_order
-    });
-    // 기존 타겟 그룹 설정
-    if (mission.challenge_mission_target_groups && mission.challenge_mission_target_groups.length > 0) {
-      setSelectedGroupIds(mission.challenge_mission_target_groups.map(tg => tg.group_id));
-    } else {
-      setSelectedGroupIds([]);
-    }
-    setShowAddModal(true);
-  };
+ const handleEdit = (mission: ChallengeMission) => {
+ setEditingMission(mission);
+ setFormData({
+ title: mission.title,
+ description: mission.description || '',
+ mission_type: mission.mission_type,
+ start_date: mission.start_date,
+ end_date: mission.end_date,
+ requires_verification: mission.requires_verification,
+ sort_order: mission.sort_order
+ });
+ // 기존 타겟 그룹 설정
+ if (mission.challenge_mission_target_groups && mission.challenge_mission_target_groups.length > 0) {
+ setSelectedGroupIds(mission.challenge_mission_target_groups.map(tg => tg.group_id));
+ } else {
+ setSelectedGroupIds([]);
+ }
+ setShowAddModal(true);
+ };
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      mission_type: 'workout',
-      start_date: '',
-      end_date: '',
-      requires_verification: false,
-      sort_order: 0
-    });
-    setEditingMission(null);
-    setSelectedGroupIds([]);
-    setShowAddModal(false);
-  };
+ const resetForm = () => {
+ setFormData({
+ title: '',
+ description: '',
+ mission_type: 'workout',
+ start_date: '',
+ end_date: '',
+ requires_verification: false,
+ sort_order: 0
+ });
+ setEditingMission(null);
+ setSelectedGroupIds([]);
+ setShowAddModal(false);
+ };
 
 
-  // 상태 배지
-  const getStatusBadge = (completion?: MissionCompletion) => {
-    if (!completion) {
-      return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 sm:px-1.5 sm:py-0.5 sm:text-[9px]">미완료</span>;
-    }
+ // 상태 배지
+ const getStatusBadge = (completion?: MissionCompletion) => {
+ if (!completion) {
+ return <span className="px-2 py-1 text-xs rounded-full bg-surface-raised text-content-primary sm:px-1.5 sm:py-0.5 sm:text-[9px]">미완료</span>;
+ }
 
-    switch (completion.verification_status) {
-      case 'approved':
-      case 'auto_approved':
-        return <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 sm:px-1.5 sm:py-0.5 sm:text-[9px]">완료</span>;
-      case 'pending':
-        return <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 sm:px-1.5 sm:py-0.5 sm:text-[9px]"><span className="sm:hidden">검증 대기</span><span className="hidden sm:inline">대기중</span></span>;
-      case 'rejected':
-        return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 sm:px-1.5 sm:py-0.5 sm:text-[9px]"><span className="sm:hidden">거부됨</span><span className="hidden sm:inline">거부</span></span>;
-      default:
-        return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 sm:px-1.5 sm:py-0.5 sm:text-[9px]">미완료</span>;
-    }
-  };
+ switch (completion.verification_status) {
+ case 'approved':
+ case 'auto_approved':
+ return <span className="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 sm:px-1.5 sm:py-0.5 sm:text-[9px]">완료</span>;
+ case 'pending':
+ return <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 sm:px-1.5 sm:py-0.5 sm:text-[9px]"><span className="sm:hidden">검증 대기</span><span className="hidden sm:inline">대기중</span></span>;
+ case 'rejected':
+ return <span className="px-2 py-1 text-xs rounded-full bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300 sm:px-1.5 sm:py-0.5 sm:text-[9px]"><span className="sm:hidden">거부됨</span><span className="hidden sm:inline">거부</span></span>;
+ default:
+ return <span className="px-2 py-1 text-xs rounded-full bg-surface-raised text-content-primary sm:px-1.5 sm:py-0.5 sm:text-[9px]">미완료</span>;
+ }
+ };
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-screen dark:text-white">로딩 중...</div>;
-  }
+ if (loading) {
+ return <div className="flex justify-center items-center h-screen">로딩 중...</div>;
+ }
 
-  return (
-    <div className="flex-1 p-4 sm:p-2">
-      <div className="px-8 pt-4 sm:px-2 sm:pt-2">
-        {currentChallenge && isMounted && (
-          <div className="text-0.875-400 text-gray-6 dark:text-gray-400 mb-2 sm:text-xs">
-            {new Date(currentChallenge.challenges.start_date).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })} - {new Date(currentChallenge.challenges.end_date).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
-          </div>
-        )}
-        <div className="text-gray-2 dark:text-white text-1.25-700 mb-2 sm:text-lg">
-          {currentChallenge?.challenges.title || ''}
-        </div>
-        <Title title="미션" />
-      </div>
+ return (
+ <div className="flex-1 p-4 sm:p-2">
+ <div className="px-8 pt-4 sm:px-2 sm:pt-2">
+ {currentChallenge && isMounted && (
+ <div className="text-body text-content-tertiary mb-2 sm:text-xs">
+ {new Date(currentChallenge.challenges.start_date).toLocaleDateString('ko-KR', {
+ year: 'numeric',
+ month: 'long',
+ day: 'numeric'
+ })} - {new Date(currentChallenge.challenges.end_date).toLocaleDateString('ko-KR', {
+ year: 'numeric',
+ month: 'long',
+ day: 'numeric'
+ })}
+ </div>
+ )}
+ <div className="text-content-tertiary dark:text-white text-headline font-bold mb-2 sm:text-lg">
+ {currentChallenge?.challenges.title || ''}
+ </div>
+ <Title title="미션" />
+ </div>
 
-      <div className="mt-6 px-8 sm:px-2 sm:mt-4 space-y-8 sm:space-y-4">
-        {/* 미션 관리 섹션 */}
-        <div>
-          <div className="flex justify-between items-center mb-6 sm:mb-4 sm:flex-col sm:items-start sm:gap-3">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">총 {missions.length}개의 미션</p>
-            </div>
-          <div className="flex gap-2 sm:w-full">
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors text-sm font-medium sm:flex-1 sm:py-2.5"
-            >
-              + 미션 추가
-            </button>
-            <button
-              onClick={() => setShowMappingModal(true)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium sm:flex-1 sm:py-2.5"
-            >
-              운동 매핑
-            </button>
-          </div>
-        </div>
+ <div className="mt-6 px-8 sm:px-2 sm:mt-4 space-y-8 sm:space-y-4">
+ {/* 미션 관리 섹션 */}
+ <div>
+ <div className="flex justify-between items-center mb-6 sm:mb-4 sm:flex-col sm:items-start sm:gap-3">
+ <div>
+ <p className="text-sm text-content-tertiary">총 {missions.length}개의 미션</p>
+ </div>
+ <div className="flex gap-2 sm:w-full">
+ <button
+ onClick={() => setShowAddModal(true)}
+ className="px-4 py-2 bg-neutral-900 dark:bg-surface text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium sm:flex-1 sm:py-2.5"
+ >
+ + 미션 추가
+ </button>
+ <button
+ onClick={() => setShowMappingModal(true)}
+ className="px-4 py-2 border border-line text-content-secondary rounded-lg hover:bg-surface-raised transition-colors text-sm font-medium sm:flex-1 sm:py-2.5"
+ >
+ 운동 매핑
+ </button>
+ </div>
+ </div>
 
-        {/* 미션 테이블 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden mb-8">
-          {missions.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 dark:text-gray-400 text-lg mb-4 sm:text-base">등록된 미션이 없습니다.</p>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors text-sm font-medium sm:w-full sm:py-3"
-              >
-                + 첫 미션 추가하기
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* 모바일 카드 뷰 */}
-              <div className="hidden sm:block divide-y divide-slate-100 dark:divide-gray-700">
-                <div className="p-3 flex justify-end">
-                  <button
-                    onClick={handleSortToggle}
-                    className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400"
-                  >
-                    기간순
-                    <svg className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                  </button>
-                </div>
-                {sortedMissions.map((mission, index) => (
-                  <div
-                    key={mission.id}
-                    className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer active:bg-gray-100 dark:active:bg-gray-600"
-                    onClick={() => {
-                      setViewingMission(mission);
-                      setShowDetailModal(true);
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs text-gray-400 dark:text-gray-500">#{index + 1}</span>
-                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                            mission.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {mission.is_active ? '활성' : '비활성'}
-                          </span>
-                        </div>
-                        <h3 className="font-medium text-gray-900 dark:text-white text-sm mb-2 line-clamp-2">
-                          {mission.title}
-                        </h3>
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {mission.challenge_mission_target_groups && mission.challenge_mission_target_groups.length > 0 ? (
-                            mission.challenge_mission_target_groups.map((tg) => {
-                              const group = challengeGroups.find(g => g.id === tg.group_id);
-                              return group ? (
-                                <span
-                                  key={tg.group_id}
-                                  className="px-2 py-0.5 text-xs rounded-full"
-                                  style={{
-                                    backgroundColor: group.color_code ? `${group.color_code}20` : '#e5e7eb',
-                                    color: group.color_code || '#374151',
-                                    border: group.color_code ? `1px solid ${group.color_code}` : '1px solid #d1d5db'
-                                  }}
-                                >
-                                  {group.name}
-                                </span>
-                              ) : null;
-                            })
-                          ) : (
-                            <span className="text-xs text-gray-400 dark:text-gray-500">전체 대상</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {isMounted && `${new Date(mission.start_date).toLocaleDateString('ko-KR')} ~ ${new Date(mission.end_date).toLocaleDateString('ko-KR')}`}
-                        </p>
-                      </div>
-                      <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                ))}
-              </div>
+ {/* 미션 테이블 */}
+ <div className="bg-surface rounded-lg shadow overflow-hidden mb-8">
+ {missions.length === 0 ? (
+ <div className="text-center py-12">
+ <p className="text-content-tertiary text-lg mb-4 sm:text-base">등록된 미션이 없습니다.</p>
+ <button
+ onClick={() => setShowAddModal(true)}
+ className="px-4 py-2 bg-neutral-900 dark:bg-surface text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium sm:w-full sm:py-3"
+ >
+ + 첫 미션 추가하기
+ </button>
+ </div>
+ ) : (
+ <>
+ {/* 모바일 카드 뷰 */}
+ <div className="hidden sm:block divide-y divide-slate-100 dark:divide-gray-700">
+ <div className="p-3 flex justify-end">
+ <button
+ onClick={handleSortToggle}
+ className="flex items-center gap-1 text-sm text-content-tertiary"
+ >
+ 기간순
+ <svg className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+ </svg>
+ </button>
+ </div>
+ {sortedMissions.map((mission, index) => (
+ <div
+ key={mission.id}
+ className="p-4 hover:bg-surface-raised cursor-pointer active:bg-surface-raised"
+ onClick={() => {
+ setViewingMission(mission);
+ setShowDetailModal(true);
+ }}
+ >
+ <div className="flex items-start justify-between gap-3">
+ <div className="flex-1 min-w-0">
+ <div className="flex items-center gap-2 mb-2">
+ <span className="text-xs text-content-disabled">#{index + 1}</span>
+ <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+ mission.is_active ? 'bg-green-100 dark:bg-green-900/20 text-green-800' : 'bg-red-100 dark:bg-red-900/20 text-red-800'
+ }`}>
+ {mission.is_active ? '활성' : '비활성'}
+ </span>
+ </div>
+ <h3 className="font-medium text-content-primary dark:text-white text-sm mb-2 line-clamp-2">
+ {mission.title}
+ </h3>
+ <div className="flex flex-wrap gap-1 mb-2">
+ {mission.challenge_mission_target_groups && mission.challenge_mission_target_groups.length > 0 ? (
+ mission.challenge_mission_target_groups.map((tg) => {
+ const group = challengeGroups.find(g => g.id === tg.group_id);
+ return group ? (
+ <span
+ key={tg.group_id}
+ className="px-2 py-0.5 text-xs rounded-full"
+ style={{
+ backgroundColor: group.color_code ? `${group.color_code}20` : '#e5e7eb',
+ color: group.color_code || '#374151',
+ border: group.color_code ? `1px solid ${group.color_code}` : '1px solid #d1d5db'
+ }}
+ >
+ {group.name}
+ </span>
+ ) : null;
+ })
+ ) : (
+ <span className="text-xs text-content-disabled">전체 대상</span>
+ )}
+ </div>
+ <p className="text-xs text-content-tertiary">
+ {isMounted && `${new Date(mission.start_date).toLocaleDateString('ko-KR')} ~ ${new Date(mission.end_date).toLocaleDateString('ko-KR')}`}
+ </p>
+ </div>
+ <svg className="w-5 h-5 text-content-disabled flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+ </svg>
+ </div>
+ </div>
+ ))}
+ </div>
 
-              {/* 데스크톱 테이블 뷰 */}
-              <div className="overflow-x-auto sm:hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
-                <table className="w-full" style={{ tableLayout: 'fixed', width: '100%' }}>
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    <th className="w-10 px-2 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      #
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style={{ width: '30%' }}>
-                      제목
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style={{ width: '20%' }}>
-                      그룹
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style={{ width: '30%' }}>
-                      <button
-                        onClick={handleSortToggle}
-                        className="flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-200"
-                      >
-                        기간
-                        <svg className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                        </svg>
-                      </button>
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style={{ width: '10%' }}>
-                      상태
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {sortedMissions.map((mission, index) => (
-                  <tr key={mission.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" onClick={() => {
-                    setViewingMission(mission);
-                    setShowDetailModal(true);
-                  }}>
-                    <td className="px-2 py-4 text-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-300">{index + 1}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {mission.title}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {mission.challenge_mission_target_groups && mission.challenge_mission_target_groups.length > 0 ? (
-                          mission.challenge_mission_target_groups.map((tg) => {
-                            const group = challengeGroups.find(g => g.id === tg.group_id);
-                            return group ? (
-                              <span
-                                key={tg.group_id}
-                                className="px-2 py-0.5 text-xs rounded-full"
-                                style={{
-                                  backgroundColor: group.color_code ? `${group.color_code}20` : '#e5e7eb',
-                                  color: group.color_code || '#374151',
-                                  border: group.color_code ? `1px solid ${group.color_code}` : '1px solid #d1d5db'
-                                }}
-                              >
-                                {group.name}
-                              </span>
-                            ) : null;
-                          })
-                        ) : (
-                          <span className="text-xs text-gray-400 dark:text-gray-500">전체</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      <div className="text-xs">
-                        {isMounted && `${new Date(mission.start_date).toLocaleDateString()} ~ ${new Date(mission.end_date).toLocaleDateString()}`}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        mission.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {mission.is_active ? '활성' : '비활성'}
-                      </span>
-                    </td>
-                  </tr>
-                  ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-        </div>
+ {/* 데스크톱 테이블 뷰 */}
+ <div className="overflow-x-auto sm:hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
+ <table className="w-full" style={{ tableLayout: 'fixed', width: '100%' }}>
+ <thead className="bg-surface-raised">
+ <tr>
+ <th className="w-10 px-2 py-3 text-center text-xs font-medium text-content-tertiary uppercase tracking-wider">
+ #
+ </th>
+ <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider" style={{ width: '30%' }}>
+ 제목
+ </th>
+ <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider" style={{ width: '20%' }}>
+ 그룹
+ </th>
+ <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider" style={{ width: '30%' }}>
+ <button
+ onClick={handleSortToggle}
+ className="flex items-center gap-1 hover:text-content-secondary"
+ >
+ 기간
+ <svg className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+ </svg>
+ </button>
+ </th>
+ <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider" style={{ width: '10%' }}>
+ 상태
+ </th>
+ </tr>
+ </thead>
+ <tbody className="bg-surface divide-y divide-gray-200 dark:divide-gray-700">
+ {sortedMissions.map((mission, index) => (
+ <tr key={mission.id} className="hover:bg-surface-raised cursor-pointer" onClick={() => {
+ setViewingMission(mission);
+ setShowDetailModal(true);
+ }}>
+ <td className="px-2 py-4 text-center">
+ <span className="text-sm text-content-secondary">{index + 1}</span>
+ </td>
+ <td className="px-6 py-4">
+ <div className="text-sm font-medium text-content-primary">
+ {mission.title}
+ </div>
+ </td>
+ <td className="px-6 py-4">
+ <div className="flex flex-wrap gap-1">
+ {mission.challenge_mission_target_groups && mission.challenge_mission_target_groups.length > 0 ? (
+ mission.challenge_mission_target_groups.map((tg) => {
+ const group = challengeGroups.find(g => g.id === tg.group_id);
+ return group ? (
+ <span
+ key={tg.group_id}
+ className="px-2 py-0.5 text-xs rounded-full"
+ style={{
+ backgroundColor: group.color_code ? `${group.color_code}20` : '#e5e7eb',
+ color: group.color_code || '#374151',
+ border: group.color_code ? `1px solid ${group.color_code}` : '1px solid #d1d5db'
+ }}
+ >
+ {group.name}
+ </span>
+ ) : null;
+ })
+ ) : (
+ <span className="text-xs text-content-disabled">전체</span>
+ )}
+ </div>
+ </td>
+ <td className="px-6 py-4 text-sm text-content-tertiary">
+ <div className="text-xs">
+ {isMounted && `${new Date(mission.start_date).toLocaleDateString()} ~ ${new Date(mission.end_date).toLocaleDateString()}`}
+ </div>
+ </td>
+ <td className="px-6 py-4">
+ <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+ mission.is_active ? 'bg-green-100 dark:bg-green-900/20 text-green-800' : 'bg-red-100 dark:bg-red-900/20 text-red-800'
+ }`}>
+ {mission.is_active ? '활성' : '비활성'}
+ </span>
+ </td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ </>
+ )}
+ </div>
 
-        {/* 달성 현황 섹션 */}
-        <div>
-        <div className="mb-4">
-          <h2 className="text-2xl lg:text-3xl font-bold mb-4 dark:text-white sm:text-xl sm:mb-3">미션 달성 현황</h2>
+ {/* 달성 현황 섹션 */}
+ <div>
+ <div className="mb-4">
+ <h2 className="text-2xl lg:text-3xl font-bold mb-4 dark:text-white sm:text-xl sm:mb-3">미션 달성 현황</h2>
 
-          <div className="flex justify-between items-center mb-4 sm:flex-col sm:items-stretch sm:gap-3">
-            <div className="flex items-center gap-4 sm:flex-col sm:items-stretch sm:gap-2">
-              {/* 주차 선택 */}
-              <div className="flex items-center gap-2 sm:flex-col sm:items-stretch">
-                <select
-                  value={selectedWeek}
-                  onChange={(e) => setSelectedWeek(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                  className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white sm:py-2.5 sm:w-full"
-                >
-                  {Array.from({ length: getCurrentWeekNumber() }, (_, i) => i + 1).map((week) => (
-                    <option key={week} value={week}>
-                      {week}주차
-                      {week === getCurrentWeekNumber() && ' (현재)'}
-                    </option>
-                  ))}
-                  <option value="all">전체</option>
-                </select>
-                {selectedWeek !== 'all' && getWeekRange(selectedWeek) && (
-                  <span className="text-xs text-gray-500 dark:text-gray-400 sm:text-center">
-                    {isMounted && `${getWeekRange(selectedWeek)!.start.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} ~ ${getWeekRange(selectedWeek)!.end.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}`}
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 sm:text-center">
-                {filteredUsers.length}명
-              </p>
-              {/* 그룹 필터 */}
-              {challengeGroups.length > 0 && (
-                <div className="flex items-center gap-2 sm:w-full">
-                  <select
-                    value={selectedGroupFilter}
-                    onChange={(e) => setSelectedGroupFilter(e.target.value)}
-                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white sm:py-2.5 sm:w-full"
-                  >
-                    {challengeGroups.map((group) => (
-                      <option key={group.id} value={group.id}>
-                        {group.name}
-                      </option>
-                    ))}
-                    <option value="none">그룹 미지정</option>
-                  </select>
-                </div>
-              )}
-            </div>
-            <div className="relative sm:w-full">
-              <button
-                onClick={() => setShowMissionFilter(!showMissionFilter)}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2 sm:w-full sm:justify-center sm:py-2.5"
-              >
-                미션 필터 ({selectedMissionIds.size}/{missions.length})
-                <svg className={`w-4 h-4 transition-transform ${showMissionFilter ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+ <div className="flex justify-between items-center mb-4 sm:flex-col sm:items-stretch sm:gap-3">
+ <div className="flex items-center gap-4 sm:flex-col sm:items-stretch sm:gap-2">
+ {/* 주차 선택 */}
+ <div className="flex items-center gap-2 sm:flex-col sm:items-stretch">
+ <select
+ value={selectedWeek}
+ onChange={(e) => setSelectedWeek(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+ className="px-3 py-1.5 text-sm border border-line rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-surface dark:text-white sm:py-2.5 sm:w-full"
+ >
+ {Array.from({ length: getCurrentWeekNumber() }, (_, i) => i + 1).map((week) => (
+ <option key={week} value={week}>
+ {week}주차
+ {week === getCurrentWeekNumber() && ' (현재)'}
+ </option>
+ ))}
+ <option value="all">전체</option>
+ </select>
+ {selectedWeek !== 'all' && getWeekRange(selectedWeek) && (
+ <span className="text-xs text-content-tertiary sm:text-center">
+ {isMounted && `${getWeekRange(selectedWeek)!.start.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} ~ ${getWeekRange(selectedWeek)!.end.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}`}
+ </span>
+ )}
+ </div>
+ <p className="text-sm text-content-tertiary sm:text-center">
+ {filteredUsers.length}명
+ </p>
+ {/* 그룹 필터 */}
+ {challengeGroups.length > 0 && (
+ <div className="flex items-center gap-2 sm:w-full">
+ <select
+ value={selectedGroupFilter}
+ onChange={(e) => setSelectedGroupFilter(e.target.value)}
+ className="px-3 py-1.5 text-sm border border-line rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-surface dark:text-white sm:py-2.5 sm:w-full"
+ >
+ {challengeGroups.map((group) => (
+ <option key={group.id} value={group.id}>
+ {group.name}
+ </option>
+ ))}
+ <option value="none">그룹 미지정</option>
+ </select>
+ </div>
+ )}
+ </div>
+ <div className="relative sm:w-full">
+ <button
+ onClick={() => setShowMissionFilter(!showMissionFilter)}
+ className="px-4 py-2 bg-surface-raised text-content-secondary rounded-md hover:bg-surface-sunken flex items-center gap-2 sm:w-full sm:justify-center sm:py-2.5"
+ >
+ 미션 필터 ({selectedMissionIds.size}/{missions.length})
+ <svg className={`w-4 h-4 transition-transform ${showMissionFilter ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+ </svg>
+ </button>
 
-              {showMissionFilter && (
-                <div className="absolute right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 min-w-[300px]">
-                  <div className="p-3">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-200">미션 선택</span>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => {
-                            const activeMissions = missions.filter(m => m.is_active);
-                            setSelectedMissionIds(new Set(activeMissions.map(m => m.id)));
-                          }}
-                          className="text-xs text-blue-600 hover:text-blue-800"
-                        >
-                          활성만
-                        </button>
-                        <span className="text-xs text-gray-400">|</span>
-                        <button
-                          onClick={() => setSelectedMissionIds(new Set(missions.map(m => m.id)))}
-                          className="text-xs text-blue-600 hover:text-blue-800"
-                        >
-                          전체
-                        </button>
-                        <span className="text-xs text-gray-400">|</span>
-                        <button
-                          onClick={() => setSelectedMissionIds(new Set())}
-                          className="text-xs text-red-600 hover:text-red-800"
-                        >
-                          초기화
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {[...missions]
-                        .sort((a, b) => {
-                          // start_date 늦은 순서 (desc)
-                          const dateCompare = new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
-                          if (dateCompare !== 0) {
-                            return dateCompare;
-                          }
-                          // sort_order 큰 순서 (desc)
-                          return b.sort_order - a.sort_order;
-                        })
-                        .map((mission) => (
-                        <label key={mission.id} className="flex items-center space-x-2 text-sm">
-                          <input
-                            type="checkbox"
-                            checked={selectedMissionIds.has(mission.id)}
-                            onChange={(e) => {
-                              const newSelected = new Set(selectedMissionIds);
-                              if (e.target.checked) {
-                                newSelected.add(mission.id);
-                              } else {
-                                newSelected.delete(mission.id);
-                              }
-                              setSelectedMissionIds(newSelected);
-                            }}
-                            className="rounded border-gray-300 dark:border-gray-600"
-                          />
-                          <span className={`${mission.is_active ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
-                            {mission.title}
-                            {!mission.is_active && <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">(비활성)</span>}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+ {showMissionFilter && (
+ <div className="absolute right-0 mt-2 bg-surface border border-line rounded-lg shadow-lg z-10 min-w-[300px]">
+ <div className="p-3">
+ <div className="flex justify-between items-center mb-2">
+ <span className="text-sm font-medium text-content-secondary">미션 선택</span>
+ <div className="flex gap-1">
+ <button
+ onClick={() => {
+ const activeMissions = missions.filter(m => m.is_active);
+ setSelectedMissionIds(new Set(activeMissions.map(m => m.id)));
+ }}
+ className="text-xs text-blue-600 hover:text-blue-800"
+ >
+ 활성만
+ </button>
+ <span className="text-xs text-content-disabled">|</span>
+ <button
+ onClick={() => setSelectedMissionIds(new Set(missions.map(m => m.id)))}
+ className="text-xs text-blue-600 hover:text-blue-800"
+ >
+ 전체
+ </button>
+ <span className="text-xs text-content-disabled">|</span>
+ <button
+ onClick={() => setSelectedMissionIds(new Set())}
+ className="text-xs text-red-600 hover:text-red-800"
+ >
+ 초기화
+ </button>
+ </div>
+ </div>
+ <div className="space-y-2 max-h-64 overflow-y-auto">
+ {[...missions]
+ .sort((a, b) => {
+ // start_date 늦은 순서 (desc)
+ const dateCompare = new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+ if (dateCompare !== 0) {
+ return dateCompare;
+ }
+ // sort_order 큰 순서 (desc)
+ return b.sort_order - a.sort_order;
+ })
+ .map((mission) => (
+ <label key={mission.id} className="flex items-center space-x-2 text-sm">
+ <input
+ type="checkbox"
+ checked={selectedMissionIds.has(mission.id)}
+ onChange={(e) => {
+ const newSelected = new Set(selectedMissionIds);
+ if (e.target.checked) {
+ newSelected.add(mission.id);
+ } else {
+ newSelected.delete(mission.id);
+ }
+ setSelectedMissionIds(newSelected);
+ }}
+ className="rounded border-line"
+ />
+ <span className={`${mission.is_active ? 'text-content-primary' : 'text-content-tertiary'}`}>
+ {mission.title}
+ {!mission.is_active && <span className="text-xs text-content-disabled ml-1">(비활성)</span>}
+ </span>
+ </label>
+ ))}
+ </div>
+ </div>
+ </div>
+ )}
+ </div>
+ </div>
+ </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-            <table className="min-w-full border-collapse">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="w-12 px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sm:sticky sm:left-0 sm:z-40 sm:bg-gray-50 dark:sm:bg-gray-700 sm:w-[28px] sm:px-2 sm:py-2 sm:text-[10px]">
-                    #
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[140px] sm:sticky sm:left-[26px] sm:z-40 sm:bg-gray-50 dark:sm:bg-gray-700 sm:px-3 sm:py-2 sm:text-[10px] sm:min-w-[100px] sm:border-l-4 sm:border-l-gray-50 dark:sm:border-l-gray-700 sm:border-r-2 sm:border-gray-300 dark:sm:border-gray-600 sm:shadow-[2px_0_4px_rgba(0,0,0,0.05)]">
-                    <button
-                      onClick={() => handleMemberSortToggle('name')}
-                      className="flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-200"
-                    >
-                      멤버
-                      <svg className={`w-4 h-4 transition-transform sm:w-3 sm:h-3 ${
-                        memberSortField === 'name' ? (memberSortOrder === 'desc' ? 'rotate-180' : '') : 'opacity-50'
-                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                      </svg>
-                    </button>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[120px] sm:px-3 sm:py-2 sm:text-[10px] sm:min-w-[90px]">
-                    <button
-                      onClick={() => handleMemberSortToggle('completion_rate')}
-                      className="flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-200"
-                    >
-                      달성률
-                      <svg className={`w-4 h-4 transition-transform sm:w-3 sm:h-3 ${
-                        memberSortField === 'completion_rate' ? (memberSortOrder === 'desc' ? 'rotate-180' : '') : 'opacity-50'
-                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                      </svg>
-                    </button>
-                  </th>
-                  {filteredMissions.map((mission) => (
-                    <th
-                      key={mission.id}
-                      className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[100px] whitespace-nowrap sm:px-2 sm:py-2 sm:text-[10px] sm:min-w-[80px]"
-                    >
-                      <div className="text-xs sm:text-[10px]">
-                        {mission.title}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {sortedUsers.map((user, index) => {
-                  const completionRate = calculateCompletionRate(user);
+ <div className="bg-surface rounded-lg shadow overflow-hidden">
+ <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+ <table className="min-w-full border-collapse">
+ <thead className="bg-surface-raised">
+ <tr>
+ <th className="w-12 px-3 py-3 text-center text-xs font-medium text-content-tertiary uppercase tracking-wider sm:sticky sm:left-0 sm:z-40 sm:bg-surface-raised dark:sm:bg-neutral-700 sm:w-[28px] sm:px-2 sm:py-2 sm:text-[10px]">
+ #
+ </th>
+ <th className="px-4 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider min-w-[140px] sm:sticky sm:left-[26px] sm:z-40 sm:bg-surface-raised dark:sm:bg-neutral-700 sm:px-3 sm:py-2 sm:text-[10px] sm:min-w-[100px] sm:border-l-4 sm:border-l-gray-50 dark:sm:border-l-gray-700 sm:border-r-2 sm:border-line dark:sm:border-line-strong sm:shadow-[2px_0_4px_rgba(0,0,0,0.05)]">
+ <button
+ onClick={() => handleMemberSortToggle('name')}
+ className="flex items-center gap-1 hover:text-content-secondary"
+ >
+ 멤버
+ <svg className={`w-4 h-4 transition-transform sm:w-3 sm:h-3 ${
+ memberSortField === 'name' ? (memberSortOrder === 'desc' ? 'rotate-180' : '') : 'opacity-50'
+ }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+ </svg>
+ </button>
+ </th>
+ <th className="px-4 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider min-w-[120px] sm:px-3 sm:py-2 sm:text-[10px] sm:min-w-[90px]">
+ <button
+ onClick={() => handleMemberSortToggle('completion_rate')}
+ className="flex items-center gap-1 hover:text-content-secondary"
+ >
+ 달성률
+ <svg className={`w-4 h-4 transition-transform sm:w-3 sm:h-3 ${
+ memberSortField === 'completion_rate' ? (memberSortOrder === 'desc' ? 'rotate-180' : '') : 'opacity-50'
+ }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+ </svg>
+ </button>
+ </th>
+ {filteredMissions.map((mission) => (
+ <th
+ key={mission.id}
+ className="px-3 py-3 text-center text-xs font-medium text-content-tertiary uppercase tracking-wider min-w-[100px] whitespace-nowrap sm:px-2 sm:py-2 sm:text-[10px] sm:min-w-[80px]"
+ >
+ <div className="text-xs sm:text-[10px]">
+ {mission.title}
+ </div>
+ </th>
+ ))}
+ </tr>
+ </thead>
+ <tbody className="bg-surface divide-y divide-gray-200 dark:divide-gray-700">
+ {sortedUsers.map((user, index) => {
+ const completionRate = calculateCompletionRate(user);
 
-                  return (
-                    <tr key={user.id} className="group hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="w-12 px-3 py-3 text-center sm:sticky sm:left-0 sm:z-10 sm:bg-white dark:sm:bg-gray-800 sm:w-[28px] sm:px-2 sm:py-2 sm:group-hover:bg-gray-50 dark:sm:group-hover:bg-gray-700">
-                        <span className="text-xs font-medium text-gray-900 dark:text-white sm:text-[10px]">{index + 1}</span>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap sm:sticky sm:left-[26px] sm:z-10 sm:bg-white dark:sm:bg-gray-800 sm:px-3 sm:py-2 sm:border-l-4 sm:border-l-white dark:sm:border-l-gray-800 sm:group-hover:border-l-gray-50 dark:sm:group-hover:border-l-gray-700 sm:border-r-2 sm:border-gray-300 dark:sm:border-gray-600 sm:shadow-[2px_0_4px_rgba(0,0,0,0.05)] sm:group-hover:bg-gray-50 dark:sm:group-hover:bg-gray-700">
-                        <div>
-                          <div className="text-xs font-medium text-gray-900 dark:text-white sm:text-[10px]">{user.name}</div>
-                          <div className="text-[11px] text-gray-400 dark:text-gray-500 sm:text-[9px]">@{user.username}</div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap sm:px-3 sm:py-2">
-                        <div className="flex items-center gap-2 sm:gap-1.5">
-                          <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 min-w-[50px] sm:h-1 sm:min-w-[40px]">
-                            <div
-                              className="bg-blue-600 h-1.5 rounded-full transition-all sm:h-1"
-                              style={{ width: `${completionRate}%` }}
-                            />
-                          </div>
-                          <span className="text-xs font-medium text-gray-900 dark:text-white min-w-[35px] sm:text-[10px] sm:min-w-[30px]">{completionRate}%</span>
-                        </div>
-                      </td>
-                      {filteredMissions.map((mission) => {
-                        const completion = user.completions[mission.id];
-                        const isCompleted = completion &&
-                          (completion.verification_status === 'approved' ||
-                           completion.verification_status === 'auto_approved');
+ return (
+ <tr key={user.id} className="group hover:bg-surface-raised">
+ <td className="w-12 px-3 py-3 text-center sm:sticky sm:left-0 sm:z-10 sm:bg-surface dark:sm:bg-neutral-800 sm:w-[28px] sm:px-2 sm:py-2 sm:group-hover:bg-surface-raised dark:sm:group-hover:bg-neutral-700">
+ <span className="text-xs font-medium text-content-primary dark:text-white sm:text-[10px]">{index + 1}</span>
+ </td>
+ <td className="px-4 py-3 whitespace-nowrap sm:sticky sm:left-[26px] sm:z-10 sm:bg-surface dark:sm:bg-neutral-800 sm:px-3 sm:py-2 sm:border-l-4 sm:border-l-white dark:sm:border-l-gray-800 sm:group-hover:border-l-gray-50 dark:sm:group-hover:border-l-gray-700 sm:border-r-2 sm:border-line dark:sm:border-line-strong sm:shadow-[2px_0_4px_rgba(0,0,0,0.05)] sm:group-hover:bg-surface-raised dark:sm:group-hover:bg-neutral-700">
+ <div>
+ <div className="text-xs font-medium text-content-primary dark:text-white sm:text-[10px]">{user.name}</div>
+ <div className="text-[11px] text-content-disabled sm:text-[9px]">@{user.username}</div>
+ </div>
+ </td>
+ <td className="px-4 py-3 whitespace-nowrap sm:px-3 sm:py-2">
+ <div className="flex items-center gap-2 sm:gap-1.5">
+ <div className="flex-1 bg-surface-sunken rounded-full h-1.5 min-w-[50px] sm:h-1 sm:min-w-[40px]">
+ <div
+ className="bg-blue-600 h-1.5 rounded-full transition-all sm:h-1"
+ style={{ width: `${completionRate}%` }}
+ />
+ </div>
+ <span className="text-xs font-medium text-content-primary dark:text-white min-w-[35px] sm:text-[10px] sm:min-w-[30px]">{completionRate}%</span>
+ </div>
+ </td>
+ {filteredMissions.map((mission) => {
+ const completion = user.completions[mission.id];
+ const isCompleted = completion &&
+ (completion.verification_status === 'approved' ||
+ completion.verification_status === 'auto_approved');
 
-                        return (
-                          <td key={mission.id} className="px-3 py-3 whitespace-nowrap text-center sm:px-2 sm:py-2">
-                            {isCompleted ? (
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  fetchCompletedWorkouts(user.id, mission.id);
-                                }}
-                                className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-colors cursor-pointer border-none sm:px-1.5 sm:py-0.5 sm:text-[9px]"
-                                title="클릭하여 등록된 운동 보기"
-                              >
-                                완료
-                              </button>
-                            ) : (
-                              getStatusBadge(completion)
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+ return (
+ <td key={mission.id} className="px-3 py-3 whitespace-nowrap text-center sm:px-2 sm:py-2">
+ {isCompleted ? (
+ <button
+ onClick={(e) => {
+ e.preventDefault();
+ e.stopPropagation();
+ fetchCompletedWorkouts(user.id, mission.id);
+ }}
+ className="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/40 transition-colors cursor-pointer border-none sm:px-1.5 sm:py-0.5 sm:text-[9px]"
+ title="클릭하여 등록된 운동 보기"
+ >
+ 완료
+ </button>
+ ) : (
+ getStatusBadge(completion)
+ )}
+ </td>
+ );
+ })}
+ </tr>
+ );
+ })}
+ </tbody>
+ </table>
+ </div>
 
-          {users.length === 0 && (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-              참가자가 없습니다.
-            </div>
-          )}
-        </div>
-        </div>
-      </div>
+ {users.length === 0 && (
+ <div className="text-center py-12 text-content-tertiary">
+ 참가자가 없습니다.
+ </div>
+ )}
+ </div>
+ </div>
+ </div>
 
-      {/* 미션 상세/수정/삭제 모달 */}
-        {showDetailModal && viewingMission && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 sm:p-2">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 sm:p-4 sm:mx-2 sm:max-h-[90vh] sm:overflow-y-auto">
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="text-xl font-bold dark:text-white sm:text-lg">미션 상세</h2>
-                <button
-                  onClick={() => {
-                    setShowDetailModal(false);
-                    setViewingMission(null);
-                  }}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+ {/* 미션 상세/수정/삭제 모달 */}
+ {showDetailModal && viewingMission && (
+ <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 sm:p-2">
+ <div className="bg-surface rounded-lg p-6 max-w-4xl w-full mx-4 sm:p-4 sm:mx-2 sm:max-h-[90vh] sm:overflow-y-auto">
+ <div className="flex justify-between items-start mb-4">
+ <h2 className="text-xl font-bold dark:text-white sm:text-lg">미션 상세</h2>
+ <button
+ onClick={() => {
+ setShowDetailModal(false);
+ setViewingMission(null);
+ }}
+ className="text-content-disabled hover:text-content-secondary"
+ >
+ <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+ </svg>
+ </button>
+ </div>
 
-              <div className="grid grid-cols-2 gap-6 sm:grid-cols-1 sm:gap-4">
-                {/* 왼쪽 컬럼 - 제목과 설명 */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">제목</label>
-                    <p className="text-lg font-semibold dark:text-white">{viewingMission.title}</p>
-                  </div>
+ <div className="grid grid-cols-2 gap-6 sm:grid-cols-1 sm:gap-4">
+ {/* 왼쪽 컬럼 - 제목과 설명 */}
+ <div className="space-y-4">
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-2">제목</label>
+ <p className="text-lg font-semibold">{viewingMission.title}</p>
+ </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">설명</label>
-                    <p className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-words">
-                      {viewingMission.description || '설명 없음'}
-                    </p>
-                  </div>
-                </div>
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-2">설명</label>
+ <p className="text-content-secondary whitespace-pre-wrap break-words">
+ {viewingMission.description || '설명 없음'}
+ </p>
+ </div>
+ </div>
 
-                {/* 오른쪽 컬럼 - 나머지 정보 */}
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">미션 타입</label>
-                      <p className="text-sm dark:text-gray-400">
-                        {viewingMission.mission_type === 'workout' ? '운동' :
-                         viewingMission.mission_type === 'diet' ? '식단' : '커스텀'}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">상태</label>
-                      <p className="text-sm">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          viewingMission.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {viewingMission.is_active ? '활성' : '비활성'}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
+ {/* 오른쪽 컬럼 - 나머지 정보 */}
+ <div className="space-y-4">
+ <div className="grid grid-cols-2 gap-4">
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">미션 타입</label>
+ <p className="text-sm">
+ {viewingMission.mission_type === 'workout' ? '운동' :
+ viewingMission.mission_type === 'diet' ? '식단' : '커스텀'}
+ </p>
+ </div>
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">상태</label>
+ <p className="text-sm">
+ <span className={`px-2 py-1 text-xs rounded-full ${
+ viewingMission.is_active ? 'bg-green-100 dark:bg-green-900/20 text-green-800' : 'bg-red-100 dark:bg-red-900/20 text-red-800'
+ }`}>
+ {viewingMission.is_active ? '활성' : '비활성'}
+ </span>
+ </p>
+ </div>
+ </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">시작일</label>
-                      <p className="text-sm dark:text-gray-400">{isMounted && new Date(viewingMission.start_date).toLocaleDateString('ko-KR')}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">종료일</label>
-                      <p className="text-sm dark:text-gray-400">{isMounted && new Date(viewingMission.end_date).toLocaleDateString('ko-KR')}</p>
-                    </div>
-                  </div>
+ <div className="grid grid-cols-2 gap-4">
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">시작일</label>
+ <p className="text-sm">{isMounted && new Date(viewingMission.start_date).toLocaleDateString('ko-KR')}</p>
+ </div>
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">종료일</label>
+ <p className="text-sm">{isMounted && new Date(viewingMission.end_date).toLocaleDateString('ko-KR')}</p>
+ </div>
+ </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">검증 필요</label>
-                      <p className="text-sm dark:text-gray-400">{viewingMission.requires_verification ? '필요' : '불필요'}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">정렬 순서</label>
-                      <p className="text-sm dark:text-gray-400">{viewingMission.sort_order}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+ <div className="grid grid-cols-2 gap-4">
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">검증 필요</label>
+ <p className="text-sm">{viewingMission.requires_verification ? '필요' : '불필요'}</p>
+ </div>
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">정렬 순서</label>
+ <p className="text-sm">{viewingMission.sort_order}</p>
+ </div>
+ </div>
+ </div>
+ </div>
 
-              <div className="mt-6 flex justify-end gap-2 sm:flex-col sm:gap-3">
-                <button
-                  onClick={() => {
-                    setShowDetailModal(false);
-                    setViewingMission(null);
-                    // setTimeout을 사용하여 모달이 완전히 닫힌 후 편집 모달을 열도록 함
-                    setTimeout(() => {
-                      handleEdit(viewingMission);
-                    }, 100);
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 sm:w-full sm:py-3"
-                >
-                  수정
-                </button>
-                <button
-                  onClick={() => {
-                    if (confirm('정말 삭제하시겠습니까?')) {
-                      handleDelete(viewingMission.id);
-                      setShowDetailModal(false);
-                      setViewingMission(null);
-                    }
-                  }}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 sm:w-full sm:py-3"
-                >
-                  삭제
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDetailModal(false);
-                    setViewingMission(null);
-                  }}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 sm:w-full sm:py-3"
-                >
-                  닫기
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+ <div className="mt-6 flex justify-end gap-2 sm:flex-col sm:gap-3">
+ <button
+ onClick={() => {
+ setShowDetailModal(false);
+ setViewingMission(null);
+ // setTimeout을 사용하여 모달이 완전히 닫힌 후 편집 모달을 열도록 함
+ setTimeout(() => {
+ handleEdit(viewingMission);
+ }, 100);
+ }}
+ className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 sm:w-full sm:py-3"
+ >
+ 수정
+ </button>
+ <button
+ onClick={() => {
+ if (confirm('정말 삭제하시겠습니까?')) {
+ handleDelete(viewingMission.id);
+ setShowDetailModal(false);
+ setViewingMission(null);
+ }
+ }}
+ className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 sm:w-full sm:py-3"
+ >
+ 삭제
+ </button>
+ <button
+ onClick={() => {
+ setShowDetailModal(false);
+ setViewingMission(null);
+ }}
+ className="px-4 py-2 bg-neutral-300 text-content-secondary rounded hover:bg-neutral-400 sm:w-full sm:py-3"
+ >
+ 닫기
+ </button>
+ </div>
+ </div>
+ </div>
+ )}
 
-        {/* 미션 추가/수정 모달 */}
-        {showAddModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 sm:p-2">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col sm:p-4 sm:mx-2">
-              <div className="flex justify-between items-start mb-4 flex-shrink-0">
-                <h2 className="text-xl font-bold dark:text-white sm:text-lg">
-                  {editingMission ? '미션 수정' : '미션 추가'}
-                </h2>
-                <button
-                  onClick={resetForm}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+ {/* 미션 추가/수정 모달 */}
+ {showAddModal && (
+ <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 sm:p-2">
+ <div className="bg-surface rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col sm:p-4 sm:mx-2">
+ <div className="flex justify-between items-start mb-4 flex-shrink-0">
+ <h2 className="text-xl font-bold dark:text-white sm:text-lg">
+ {editingMission ? '미션 수정' : '미션 추가'}
+ </h2>
+ <button
+ onClick={resetForm}
+ className="text-content-disabled hover:text-content-secondary"
+ >
+ <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+ </svg>
+ </button>
+ </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-1">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    제목 *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                    required
-                  />
-                </div>
+ <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-1">
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">
+ 제목 *
+ </label>
+ <input
+ type="text"
+ value={formData.title}
+ onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+ className="w-full px-3 py-2 border border-line rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-surface"
+ required
+ />
+ </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    설명
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                    rows={3}
-                  />
-                </div>
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">
+ 설명
+ </label>
+ <textarea
+ value={formData.description}
+ onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+ className="w-full px-3 py-2 border border-line rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-surface"
+ rows={3}
+ />
+ </div>
 
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-1">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      미션 타입 *
-                    </label>
-                    <select
-                      value={formData.mission_type}
-                      onChange={(e) => setFormData({ ...formData, mission_type: e.target.value as 'workout' | 'diet' | 'custom' })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white sm:py-3"
-                    >
-                      <option value="workout">운동</option>
-                      {/* <option value="diet">식단</option> */}
-                      {/* <option value="custom">커스텀</option> */}
-                    </select>
-                  </div>
+ <div className="grid grid-cols-2 gap-4 sm:grid-cols-1">
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">
+ 미션 타입 *
+ </label>
+ <select
+ value={formData.mission_type}
+ onChange={(e) => setFormData({ ...formData, mission_type: e.target.value as 'workout' | 'diet' | 'custom' })}
+ className="w-full px-3 py-2 border border-line rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-surface dark:text-white sm:py-3"
+ >
+ <option value="workout">운동</option>
+ {/* <option value="diet">식단</option> */}
+ {/* <option value="custom">커스텀</option> */}
+ </select>
+ </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      정렬 순서
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.sort_order}
-                      onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white sm:py-3"
-                    />
-                  </div>
-                </div>
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">
+ 정렬 순서
+ </label>
+ <input
+ type="number"
+ value={formData.sort_order}
+ onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+ className="w-full px-3 py-2 border border-line rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-surface dark:text-white sm:py-3"
+ />
+ </div>
+ </div>
 
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-1">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      시작일 *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.start_date}
-                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white sm:py-3"
-                      required
-                    />
-                  </div>
+ <div className="grid grid-cols-2 gap-4 sm:grid-cols-1">
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">
+ 시작일 *
+ </label>
+ <input
+ type="date"
+ value={formData.start_date}
+ onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+ className="w-full px-3 py-2 border border-line rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-surface dark:text-white sm:py-3"
+ required
+ />
+ </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      종료일 *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.end_date}
-                      onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:text-white sm:py-3"
-                      required
-                    />
-                  </div>
-                </div>
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">
+ 종료일 *
+ </label>
+ <input
+ type="date"
+ value={formData.end_date}
+ onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+ className="w-full px-3 py-2 border border-line rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-surface dark:text-white sm:py-3"
+ required
+ />
+ </div>
+ </div>
 
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="requires_verification"
-                    checked={formData.requires_verification}
-                    onChange={(e) => setFormData({ ...formData, requires_verification: e.target.checked })}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
-                  />
-                  <label htmlFor="requires_verification" className="ml-2 block text-sm text-gray-900 dark:text-white">
-                    검증 필요
-                  </label>
-                </div>
+ <div className="flex items-center">
+ <input
+ type="checkbox"
+ id="requires_verification"
+ checked={formData.requires_verification}
+ onChange={(e) => setFormData({ ...formData, requires_verification: e.target.checked })}
+ className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
+ />
+ <label htmlFor="requires_verification" className="ml-2 block text-sm text-content-primary">
+ 검증 필요
+ </label>
+ </div>
 
-                {/* 타겟 그룹 선택 */}
-                {challengeGroups.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      대상 그룹
-                    </label>
-                    <div className="space-y-2">
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          checked={selectedGroupIds.length === 0}
-                          onChange={() => setSelectedGroupIds([])}
-                          className="mr-2"
-                        />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">전체 (모든 그룹)</span>
-                      </label>
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          checked={selectedGroupIds.length > 0}
-                          onChange={() => {
-                            if (selectedGroupIds.length === 0 && challengeGroups.length > 0) {
-                              setSelectedGroupIds([challengeGroups[0].id]);
-                            }
-                          }}
-                          className="mr-2"
-                        />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">특정 그룹 선택</span>
-                      </label>
-                      {selectedGroupIds.length > 0 && (
-                        <div className="ml-6 mt-2 space-y-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-md p-2">
-                          {challengeGroups.map((group) => (
-                            <label key={group.id} className="flex items-center">
-                              <input
-                                type="checkbox"
-                                checked={selectedGroupIds.includes(group.id)}
-                                onChange={() => toggleGroupSelection(group.id)}
-                                className="mr-2"
-                              />
-                              <span
-                                className="text-sm dark:text-gray-300"
-                                style={{
-                                  borderLeft: group.color_code ? `3px solid ${group.color_code}` : undefined,
-                                  paddingLeft: group.color_code ? '8px' : undefined
-                                }}
-                              >
-                                {group.name}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      )}
-                      {selectedGroupIds.length > 0 && (
-                        <p className="text-xs text-blue-600 ml-6">
-                          {selectedGroupIds.length}개 그룹에만 미션이 적용됩니다
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
+ {/* 타겟 그룹 선택 */}
+ {challengeGroups.length > 0 && (
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-2">
+ 대상 그룹
+ </label>
+ <div className="space-y-2">
+ <label className="flex items-center">
+ <input
+ type="radio"
+ checked={selectedGroupIds.length === 0}
+ onChange={() => setSelectedGroupIds([])}
+ className="mr-2"
+ />
+ <span className="text-sm text-content-secondary">전체 (모든 그룹)</span>
+ </label>
+ <label className="flex items-center">
+ <input
+ type="radio"
+ checked={selectedGroupIds.length > 0}
+ onChange={() => {
+ if (selectedGroupIds.length === 0 && challengeGroups.length > 0) {
+ setSelectedGroupIds([challengeGroups[0].id]);
+ }
+ }}
+ className="mr-2"
+ />
+ <span className="text-sm text-content-secondary">특정 그룹 선택</span>
+ </label>
+ {selectedGroupIds.length > 0 && (
+ <div className="ml-6 mt-2 space-y-2 max-h-40 overflow-y-auto border border-line rounded-md p-2">
+ {challengeGroups.map((group) => (
+ <label key={group.id} className="flex items-center">
+ <input
+ type="checkbox"
+ checked={selectedGroupIds.includes(group.id)}
+ onChange={() => toggleGroupSelection(group.id)}
+ className="mr-2"
+ />
+ <span
+ className="text-sm"
+ style={{
+ borderLeft: group.color_code ? `3px solid ${group.color_code}` : undefined,
+ paddingLeft: group.color_code ? '8px' : undefined
+ }}
+ >
+ {group.name}
+ </span>
+ </label>
+ ))}
+ </div>
+ )}
+ {selectedGroupIds.length > 0 && (
+ <p className="text-xs text-blue-600 ml-6">
+ {selectedGroupIds.length}개 그룹에만 미션이 적용됩니다
+ </p>
+ )}
+ </div>
+ </div>
+ )}
 
-              </form>
+ </form>
 
-              <div className="flex justify-end gap-2 pt-4 border-t dark:border-gray-700 mt-4 flex-shrink-0 sm:flex-col sm:gap-3">
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 sm:w-full sm:py-3 sm:order-2"
-                >
-                  취소
-                </button>
-                <button
-                  type="submit"
-                  form="mission-form"
-                  onClick={handleSubmit as any}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 sm:w-full sm:py-3 sm:order-1"
-                >
-                  {editingMission ? '수정' : '추가'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+ <div className="flex justify-end gap-2 pt-4 border-t mt-4 flex-shrink-0 sm:flex-col sm:gap-3">
+ <button
+ type="button"
+ onClick={resetForm}
+ className="px-4 py-2 bg-neutral-300 text-content-secondary rounded hover:bg-neutral-400 sm:w-full sm:py-3 sm:order-2"
+ >
+ 취소
+ </button>
+ <button
+ type="submit"
+ form="mission-form"
+ onClick={handleSubmit as any}
+ className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 sm:w-full sm:py-3 sm:order-1"
+ >
+ {editingMission ? '수정' : '추가'}
+ </button>
+ </div>
+ </div>
+ </div>
+ )}
 
-        {/* 완료된 미션 운동 보기 모달 */}
-        {showCompletedWorkoutsModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 sm:p-2">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto sm:p-4 sm:mx-2">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="text-xl font-bold dark:text-white sm:text-lg">등록된 운동 목록</h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 sm:text-xs">
-                    {viewingCompletionUser} - {viewingCompletionMission}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowCompletedWorkoutsModal(false);
-                    setCompletedWorkouts([]);
-                    setViewingCompletionUser('');
-                    setViewingCompletionMission('');
-                    setExpandedRows(new Set());
-                  }}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+ {/* 완료된 미션 운동 보기 모달 */}
+ {showCompletedWorkoutsModal && (
+ <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 sm:p-2">
+ <div className="bg-surface rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto sm:p-4 sm:mx-2">
+ <div className="flex justify-between items-start mb-4">
+ <div>
+ <h2 className="text-xl font-bold dark:text-white sm:text-lg">등록된 운동 목록</h2>
+ <p className="text-sm text-content-secondary mt-1 sm:text-xs">
+ {viewingCompletionUser} - {viewingCompletionMission}
+ </p>
+ </div>
+ <button
+ onClick={() => {
+ setShowCompletedWorkoutsModal(false);
+ setCompletedWorkouts([]);
+ setViewingCompletionUser('');
+ setViewingCompletionMission('');
+ setExpandedRows(new Set());
+ }}
+ className="text-content-disabled hover:text-content-secondary"
+ >
+ <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+ </svg>
+ </button>
+ </div>
 
-              {completedWorkouts.length > 0 ? (
-                <div className="border rounded-lg overflow-hidden">
-                  <table className="min-w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="w-8 px-2 py-2 text-xs font-medium text-gray-500"></th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          운동명
-                        </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          날짜/시간
-                        </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">
-                          카테고리
-                        </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[70px]">
-                          운동시간
-                        </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          심박
-                        </th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[60px]">
-                          포인트
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {completedWorkouts.map((workout) => {
-                        const isExpanded = expandedRows.has(workout.id);
-                        const hasDescription = workout.note;
-                        
-                        return (
-                          <React.Fragment key={workout.id}>
-                            <tr className="hover:bg-gray-50">
-                              <td className="px-2 py-3 text-center">
-                                {hasDescription && (
-                                  <button
-                                    onClick={() => toggleRowExpansion(workout.id)}
-                                    className="text-gray-400 hover:text-gray-600 transition-transform duration-200"
-                                    style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
-                                  >
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
-                                  </button>
-                                )}
-                              </td>
-                              <td className="px-4 py-3">
-                                <div>
-                                  <div className="text-xs font-medium text-gray-900">{workout.title}</div>
-                                  {hasDescription && !isExpanded && (
-                                    <div className="text-xs text-gray-500 mt-1">
-                                      {truncateDescription(workout.note || '', 2)}
-                                    </div>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
-                                <div>
-                                  <div>{isMounted && new Date(workout.start_time).toLocaleDateString('ko-KR')}</div>
-                                  <div className="text-xs text-gray-400">
-                                    {isMounted && new Date(workout.start_time).toLocaleTimeString('ko-KR', {
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap">
-                                <div className="flex flex-col gap-1">
-                                  {workout.type && (
-                                    <span className={`text-xs px-2 py-1 rounded w-fit ${
-                                      workout.type === 'STRENGTH' ? 'bg-blue-100 text-blue-800' : 
-                                      workout.type === 'CARDIO' ? 'bg-green-100 text-green-800' : 
-                                      'bg-gray-100 text-gray-800'
-                                    }`}>
-                                      {workout.type === 'STRENGTH' ? '근력' : 
-                                       workout.type === 'CARDIO' ? '유산소' : workout.type}
-                                    </span>
-                                  )}
-                                  {workout.workout_category?.name_ko && (
-                                    <span className="text-xs text-gray-500">{workout.workout_category.name_ko}</span>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
-                                {workout.duration_minutes ? `${workout.duration_minutes}분` : '-'}
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
-                                <div className="flex flex-col gap-1">
-                                  {workout.distance && (
-                                    <div>🏃 {workout.distance}km</div>
-                                  )}
-                                  {workout.avg_heart_rate && (
-                                    <div>평균: {workout.avg_heart_rate}bpm</div>
-                                  )}
-                                  {workout.max_heart_rate && (
-                                    <div>최대: {workout.max_heart_rate}bpm</div>
-                                  )}
-                                  {workout.rpe && (
-                                    <div>🔥 RPE: {workout.rpe}/10</div>
-                                  )}
-                                  {!workout.distance && !workout.avg_heart_rate && !workout.max_heart_rate && !workout.rpe && '-'}
-                                </div>
-                              </td>
-                              <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
-                                {workout.points || '-'}
-                              </td>
-                            </tr>
-                            {isExpanded && hasDescription && (
-                              <tr>
-                                <td colSpan={7} className="px-6 py-4 bg-gray-50">
-                                  <div className="text-sm text-gray-700">
-                                    <div className="font-medium mb-2">운동 노트:</div>
-                                    <div className="whitespace-pre-wrap">
-                                      {workout.note}
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  등록된 운동이 없습니다.
-                </div>
-              )}
+ {completedWorkouts.length > 0 ? (
+ <div className="border rounded-lg overflow-hidden">
+ <table className="min-w-full">
+ <thead className="bg-surface-raised">
+ <tr>
+ <th className="w-8 px-2 py-2 text-xs font-medium text-content-tertiary"></th>
+ <th className="px-4 py-2 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
+ 운동명
+ </th>
+ <th className="px-4 py-2 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
+ 날짜/시간
+ </th>
+ <th className="px-4 py-2 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider min-w-[80px]">
+ 카테고리
+ </th>
+ <th className="px-4 py-2 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider min-w-[70px]">
+ 운동시간
+ </th>
+ <th className="px-4 py-2 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
+ 심박
+ </th>
+ <th className="px-4 py-2 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider min-w-[60px]">
+ 포인트
+ </th>
+ </tr>
+ </thead>
+ <tbody className="bg-surface divide-y divide-gray-200">
+ {completedWorkouts.map((workout) => {
+ const isExpanded = expandedRows.has(workout.id);
+ const hasDescription = workout.note;
+ 
+ return (
+ <React.Fragment key={workout.id}>
+ <tr className="hover:bg-surface-raised">
+ <td className="px-2 py-3 text-center">
+ {hasDescription && (
+ <button
+ onClick={() => toggleRowExpansion(workout.id)}
+ className="text-content-disabled hover:text-content-secondary transition-transform duration-200"
+ style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+ >
+ <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+ </svg>
+ </button>
+ )}
+ </td>
+ <td className="px-4 py-3">
+ <div>
+ <div className="text-xs font-medium text-content-primary">{workout.title}</div>
+ {hasDescription && !isExpanded && (
+ <div className="text-xs text-content-tertiary mt-1">
+ {truncateDescription(workout.note || '', 2)}
+ </div>
+ )}
+ </div>
+ </td>
+ <td className="px-4 py-3 whitespace-nowrap text-xs text-content-tertiary">
+ <div>
+ <div>{isMounted && new Date(workout.start_time).toLocaleDateString('ko-KR')}</div>
+ <div className="text-xs text-content-disabled">
+ {isMounted && new Date(workout.start_time).toLocaleTimeString('ko-KR', {
+ hour: '2-digit',
+ minute: '2-digit'
+ })}
+ </div>
+ </div>
+ </td>
+ <td className="px-4 py-3 whitespace-nowrap">
+ <div className="flex flex-col gap-1">
+ {workout.type && (
+ <span className={`text-xs px-2 py-1 rounded w-fit ${
+ workout.type === 'STRENGTH' ? 'bg-blue-100 text-blue-800' : 
+ workout.type === 'CARDIO' ? 'bg-green-100 dark:bg-green-900/20 text-green-800' : 
+ 'bg-surface-raised text-content-primary'
+ }`}>
+ {workout.type === 'STRENGTH' ? '근력' : 
+ workout.type === 'CARDIO' ? '유산소' : workout.type}
+ </span>
+ )}
+ {workout.workout_category?.name_ko && (
+ <span className="text-xs text-content-tertiary">{workout.workout_category.name_ko}</span>
+ )}
+ </div>
+ </td>
+ <td className="px-4 py-3 whitespace-nowrap text-xs text-content-tertiary">
+ {workout.duration_minutes ? `${workout.duration_minutes}분` : '-'}
+ </td>
+ <td className="px-4 py-3 whitespace-nowrap text-xs text-content-tertiary">
+ <div className="flex flex-col gap-1">
+ {workout.distance && (
+ <div>🏃 {workout.distance}km</div>
+ )}
+ {workout.avg_heart_rate && (
+ <div>평균: {workout.avg_heart_rate}bpm</div>
+ )}
+ {workout.max_heart_rate && (
+ <div>최대: {workout.max_heart_rate}bpm</div>
+ )}
+ {workout.rpe && (
+ <div>🔥 RPE: {workout.rpe}/10</div>
+ )}
+ {!workout.distance && !workout.avg_heart_rate && !workout.max_heart_rate && !workout.rpe && '-'}
+ </div>
+ </td>
+ <td className="px-4 py-3 whitespace-nowrap text-xs text-content-tertiary">
+ {workout.points || '-'}
+ </td>
+ </tr>
+ {isExpanded && hasDescription && (
+ <tr>
+ <td colSpan={7} className="px-6 py-4 bg-surface-raised">
+ <div className="text-sm text-content-secondary">
+ <div className="font-medium mb-2">운동 노트:</div>
+ <div className="whitespace-pre-wrap">
+ {workout.note}
+ </div>
+ </div>
+ </td>
+ </tr>
+ )}
+ </React.Fragment>
+ );
+ })}
+ </tbody>
+ </table>
+ </div>
+ ) : (
+ <div className="text-center py-8 text-content-tertiary">
+ 등록된 운동이 없습니다.
+ </div>
+ )}
 
-              <div className="mt-4 flex justify-end sm:flex-col">
-                <button
-                  onClick={() => {
-                    setShowCompletedWorkoutsModal(false);
-                    setCompletedWorkouts([]);
-                    setViewingCompletionUser('');
-                    setViewingCompletionMission('');
-                    setExpandedRows(new Set());
-                  }}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 sm:w-full sm:py-3"
-                >
-                  닫기
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+ <div className="mt-4 flex justify-end sm:flex-col">
+ <button
+ onClick={() => {
+ setShowCompletedWorkoutsModal(false);
+ setCompletedWorkouts([]);
+ setViewingCompletionUser('');
+ setViewingCompletionMission('');
+ setExpandedRows(new Set());
+ }}
+ className="px-4 py-2 bg-neutral-300 text-content-secondary rounded hover:bg-neutral-400 sm:w-full sm:py-3"
+ >
+ 닫기
+ </button>
+ </div>
+ </div>
+ </div>
+ )}
 
-        {/* 운동 매핑 모달 */}
-        {showMappingModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 sm:p-2">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto sm:p-4 sm:mx-2">
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="text-xl font-bold dark:text-white sm:text-lg">운동 매핑</h2>
-                <button
-                  onClick={() => {
-                    setShowMappingModal(false);
-                    setSelectedMission('');
-                    setSelectedUser('');
-                    setSelectedWorkouts(new Set());
-                    setShowWorkouts(false);
-                    setExistingCompletions([]);
-                  }}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+ {/* 운동 매핑 모달 */}
+ {showMappingModal && (
+ <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 sm:p-2">
+ <div className="bg-surface rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto sm:p-4 sm:mx-2">
+ <div className="flex justify-between items-start mb-4">
+ <h2 className="text-xl font-bold dark:text-white sm:text-lg">운동 매핑</h2>
+ <button
+ onClick={() => {
+ setShowMappingModal(false);
+ setSelectedMission('');
+ setSelectedUser('');
+ setSelectedWorkouts(new Set());
+ setShowWorkouts(false);
+ setExistingCompletions([]);
+ }}
+ className="text-content-disabled hover:text-content-secondary"
+ >
+ <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+ </svg>
+ </button>
+ </div>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-1">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      미션 선택
-                    </label>
-                    <select
-                      value={selectedMission}
-                      onChange={(e) => setSelectedMission(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white sm:py-3"
-                    >
-                      <option value="">미션을 선택하세요</option>
-                      {missions
-                        .filter(m => m.mission_type === 'workout')
-                        .sort((a, b) => {
-                          // start_date 오름차순
-                          const dateCompare = new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
-                          if (dateCompare !== 0) return dateCompare;
-                          // sort_order 오름차순
-                          return a.sort_order - b.sort_order;
-                        })
-                        .map(mission => (
-                          <option key={mission.id} value={mission.id}>
-                            {mission.title} ({isMounted ? `${new Date(mission.start_date).toLocaleDateString()} ~ ${new Date(mission.end_date).toLocaleDateString()}` : ''})
-                          </option>
-                        ))}
-                    </select>
-                  </div>
+ <div className="space-y-4">
+ <div className="grid grid-cols-2 gap-4 sm:grid-cols-1">
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">
+ 미션 선택
+ </label>
+ <select
+ value={selectedMission}
+ onChange={(e) => setSelectedMission(e.target.value)}
+ className="w-full px-3 py-2 border border-line rounded-md bg-surface dark:text-white sm:py-3"
+ >
+ <option value="">미션을 선택하세요</option>
+ {missions
+ .filter(m => m.mission_type === 'workout')
+ .sort((a, b) => {
+ // start_date 오름차순
+ const dateCompare = new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+ if (dateCompare !== 0) return dateCompare;
+ // sort_order 오름차순
+ return a.sort_order - b.sort_order;
+ })
+ .map(mission => (
+ <option key={mission.id} value={mission.id}>
+ {mission.title} ({isMounted ? `${new Date(mission.start_date).toLocaleDateString()} ~ ${new Date(mission.end_date).toLocaleDateString()}` : ''})
+ </option>
+ ))}
+ </select>
+ </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      사용자 선택
-                    </label>
-                    <select
-                      value={selectedUser}
-                      onChange={(e) => setSelectedUser(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white sm:py-3"
-                    >
-                      <option value="">사용자를 선택하세요</option>
-                      {(() => {
-                        // 그룹별로 사용자 구성
-                        const groupedUsers: { [key: string]: User[] } = {};
-                        const noGroupUsers: User[] = [];
-                        
-                        mappingUsers.forEach(user => {
-                          if (user.group) {
-                            const groupKey = user.group.name;
-                            if (!groupedUsers[groupKey]) {
-                              groupedUsers[groupKey] = [];
-                            }
-                            groupedUsers[groupKey].push(user);
-                          } else {
-                            noGroupUsers.push(user);
-                          }
-                        });
-                        
-                        // 그룹 순서대로 정렬
-                        const sortedGroups = Object.keys(groupedUsers).sort((a, b) => {
-                          const groupA = mappingUsers.find(u => u.group?.name === a)?.group;
-                          const groupB = mappingUsers.find(u => u.group?.name === b)?.group;
-                          return (groupA?.sort_order || 0) - (groupB?.sort_order || 0);
-                        });
-                        
-                        return (
-                          <>
-                            {sortedGroups.map(groupName => {
-                              const group = mappingUsers.find(u => u.group?.name === groupName)?.group;
-                              return (
-                                <optgroup 
-                                  key={groupName} 
-                                  label={groupName}
-                                >
-                                  {groupedUsers[groupName].map(user => {
-                                    const userCompletions = users.find(u => u.id === user.id)?.completions || {};
-                                    const missionCompletion = selectedMission ? userCompletions[selectedMission] : null;
-                                    const hasCompleted = missionCompletion && 
-                                      (missionCompletion.verification_status === 'approved' || 
-                                       missionCompletion.verification_status === 'auto_approved');
-                                    
-                                    return (
-                                      <option key={user.id} value={user.id}>
-                                        {user.name} (@{user.username}) {hasCompleted ? '✅' : '⭕'}
-                                      </option>
-                                    );
-                                  })}
-                                </optgroup>
-                              );
-                            })}
-                            {noGroupUsers.length > 0 && (
-                              <optgroup label="그룹 미지정">
-                                {noGroupUsers.map(user => {
-                                  const userCompletions = users.find(u => u.id === user.id)?.completions || {};
-                                  const missionCompletion = selectedMission ? userCompletions[selectedMission] : null;
-                                  const hasCompleted = missionCompletion && 
-                                    (missionCompletion.verification_status === 'approved' || 
-                                     missionCompletion.verification_status === 'auto_approved');
-                                  
-                                  return (
-                                    <option key={user.id} value={user.id}>
-                                      {user.name} (@{user.username}) {hasCompleted ? '✅' : '⭕'}
-                                    </option>
-                                  );
-                                })}
-                              </optgroup>
-                            )}
-                          </>
-                        );
-                      })()}
-                    </select>
-                  </div>
-                </div>
+ <div>
+ <label className="block text-sm font-medium text-content-secondary mb-1">
+ 사용자 선택
+ </label>
+ <select
+ value={selectedUser}
+ onChange={(e) => setSelectedUser(e.target.value)}
+ className="w-full px-3 py-2 border border-line rounded-md bg-surface dark:text-white sm:py-3"
+ >
+ <option value="">사용자를 선택하세요</option>
+ {(() => {
+ // 그룹별로 사용자 구성
+ const groupedUsers: { [key: string]: User[] } = {};
+ const noGroupUsers: User[] = [];
+ 
+ mappingUsers.forEach(user => {
+ if (user.group) {
+ const groupKey = user.group.name;
+ if (!groupedUsers[groupKey]) {
+ groupedUsers[groupKey] = [];
+ }
+ groupedUsers[groupKey].push(user);
+ } else {
+ noGroupUsers.push(user);
+ }
+ });
+ 
+ // 그룹 순서대로 정렬
+ const sortedGroups = Object.keys(groupedUsers).sort((a, b) => {
+ const groupA = mappingUsers.find(u => u.group?.name === a)?.group;
+ const groupB = mappingUsers.find(u => u.group?.name === b)?.group;
+ return (groupA?.sort_order || 0) - (groupB?.sort_order || 0);
+ });
+ 
+ return (
+ <>
+ {sortedGroups.map(groupName => {
+ const group = mappingUsers.find(u => u.group?.name === groupName)?.group;
+ return (
+ <optgroup 
+ key={groupName} 
+ label={groupName}
+ >
+ {groupedUsers[groupName].map(user => {
+ const userCompletions = users.find(u => u.id === user.id)?.completions || {};
+ const missionCompletion = selectedMission ? userCompletions[selectedMission] : null;
+ const hasCompleted = missionCompletion && 
+ (missionCompletion.verification_status === 'approved' || 
+ missionCompletion.verification_status === 'auto_approved');
+ 
+ return (
+ <option key={user.id} value={user.id}>
+ {user.name} (@{user.username}) {hasCompleted ? '✅' : '⭕'}
+ </option>
+ );
+ })}
+ </optgroup>
+ );
+ })}
+ {noGroupUsers.length > 0 && (
+ <optgroup label="그룹 미지정">
+ {noGroupUsers.map(user => {
+ const userCompletions = users.find(u => u.id === user.id)?.completions || {};
+ const missionCompletion = selectedMission ? userCompletions[selectedMission] : null;
+ const hasCompleted = missionCompletion && 
+ (missionCompletion.verification_status === 'approved' || 
+ missionCompletion.verification_status === 'auto_approved');
+ 
+ return (
+ <option key={user.id} value={user.id}>
+ {user.name} (@{user.username}) {hasCompleted ? '✅' : '⭕'}
+ </option>
+ );
+ })}
+ </optgroup>
+ )}
+ </>
+ );
+ })()}
+ </select>
+ </div>
+ </div>
 
-                {showWorkouts && workouts.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">
-                      운동 목록 ({workouts.length}개)
-                    </h3>
-                    <div className="mb-2 text-sm text-gray-600">
-                      선택된 미션 기간: {
-                        isMounted && missions.find(m => m.id === selectedMission) &&
-                        `${new Date(missions.find(m => m.id === selectedMission)!.start_date).toLocaleDateString('ko-KR')} ~ ${new Date(missions.find(m => m.id === selectedMission)!.end_date).toLocaleDateString('ko-KR')}`
-                      }
-                    </div>
-                    <div className="border rounded-lg max-h-96 overflow-y-auto">
-                      {workouts.map(workout => {
-                        const isAlreadyMapped = existingCompletions.some((c: any) => c.workout_id === workout.id);
-                        
-                        return (
-                          <label 
-                            key={workout.id} 
-                            className={`flex items-center p-3 cursor-pointer border-b ${
-                              isAlreadyMapped ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-gray-50'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedWorkouts.has(workout.id)}
-                              onChange={(e) => {
-                                const newSelected = new Set(selectedWorkouts);
-                                if (e.target.checked) {
-                                  newSelected.add(workout.id);
-                                } else {
-                                  newSelected.delete(workout.id);
-                                }
-                                setSelectedWorkouts(newSelected);
-                              }}
-                              className="mr-3"
-                              disabled={isAlreadyMapped}
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">{workout.title}</span>
-                                  {isAlreadyMapped && (
-                                    <span className="text-xs px-2 py-0.5 bg-green-600 text-white rounded">
-                                      이미 등록됨
-                                    </span>
-                                  )}
-                                </div>
-                                {workout.type && (
-                                  <span className={`text-xs px-2 py-1 rounded ${
-                                    workout.type === 'STRENGTH' ? 'bg-blue-100 text-blue-800' : 
-                                    workout.type === 'CARDIO' ? 'bg-green-100 text-green-800' : 
-                                    'bg-gray-100 text-gray-800'
-                                  }`}>
-                                    {workout.type === 'STRENGTH' ? '근력' : 
-                                     workout.type === 'CARDIO' ? '유산소' : workout.type}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-sm text-gray-500 mt-1">
-                                {isMounted && new Date(workout.start_time).toLocaleString('ko-KR')}
-                                {workout.duration_minutes && ` • ${workout.duration_minutes}분`}
-                                {workout.points && ` • ${workout.points}점`}
-                              </div>
-                              {workout.note && (
-                                <div className="text-sm text-gray-600 mt-1">{workout.note}</div>
-                              )}
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+ {showWorkouts && workouts.length > 0 && (
+ <div>
+ <h3 className="text-lg font-semibold mb-2">
+ 운동 목록 ({workouts.length}개)
+ </h3>
+ <div className="mb-2 text-sm text-content-secondary">
+ 선택된 미션 기간: {
+ isMounted && missions.find(m => m.id === selectedMission) &&
+ `${new Date(missions.find(m => m.id === selectedMission)!.start_date).toLocaleDateString('ko-KR')} ~ ${new Date(missions.find(m => m.id === selectedMission)!.end_date).toLocaleDateString('ko-KR')}`
+ }
+ </div>
+ <div className="border rounded-lg max-h-96 overflow-y-auto">
+ {workouts.map(workout => {
+ const isAlreadyMapped = existingCompletions.some((c: any) => c.workout_id === workout.id);
+ 
+ return (
+ <label 
+ key={workout.id} 
+ className={`flex items-center p-3 cursor-pointer border-b ${
+ isAlreadyMapped ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-surface-raised'
+ }`}
+ >
+ <input
+ type="checkbox"
+ checked={selectedWorkouts.has(workout.id)}
+ onChange={(e) => {
+ const newSelected = new Set(selectedWorkouts);
+ if (e.target.checked) {
+ newSelected.add(workout.id);
+ } else {
+ newSelected.delete(workout.id);
+ }
+ setSelectedWorkouts(newSelected);
+ }}
+ className="mr-3"
+ disabled={isAlreadyMapped}
+ />
+ <div className="flex-1">
+ <div className="flex items-center justify-between">
+ <div className="flex items-center gap-2">
+ <span className="font-medium">{workout.title}</span>
+ {isAlreadyMapped && (
+ <span className="text-xs px-2 py-0.5 bg-green-600 text-white rounded">
+ 이미 등록됨
+ </span>
+ )}
+ </div>
+ {workout.type && (
+ <span className={`text-xs px-2 py-1 rounded ${
+ workout.type === 'STRENGTH' ? 'bg-blue-100 text-blue-800' : 
+ workout.type === 'CARDIO' ? 'bg-green-100 dark:bg-green-900/20 text-green-800' : 
+ 'bg-surface-raised text-content-primary'
+ }`}>
+ {workout.type === 'STRENGTH' ? '근력' : 
+ workout.type === 'CARDIO' ? '유산소' : workout.type}
+ </span>
+ )}
+ </div>
+ <div className="text-sm text-content-tertiary mt-1">
+ {isMounted && new Date(workout.start_time).toLocaleString('ko-KR')}
+ {workout.duration_minutes && ` • ${workout.duration_minutes}분`}
+ {workout.points && ` • ${workout.points}점`}
+ </div>
+ {workout.note && (
+ <div className="text-sm text-content-secondary mt-1">{workout.note}</div>
+ )}
+ </div>
+ </label>
+ );
+ })}
+ </div>
+ </div>
+ )}
 
-                {showWorkouts && workouts.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    해당 기간에 운동 기록이 없습니다.
-                  </div>
-                )}
+ {showWorkouts && workouts.length === 0 && (
+ <div className="text-center py-8 text-content-tertiary">
+ 해당 기간에 운동 기록이 없습니다.
+ </div>
+ )}
 
-                <div className="flex justify-end gap-2 sm:flex-col sm:gap-3">
-                  <button
-                    onClick={() => {
-                      setShowMappingModal(false);
-                      setSelectedMission('');
-                      setSelectedUser('');
-                      setSelectedWorkouts(new Set());
-                      setShowWorkouts(false);
-                      setExistingCompletions([]);
-                    }}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 sm:w-full sm:py-3 sm:order-2"
-                  >
-                    닫기
-                  </button>
-                  {selectedWorkouts.size > 0 && (
-                    <button
-                      onClick={async () => {
-                        try {
-                          // 이미 매핑되지 않은 운동들만 필터링
-                          const newWorkoutIds = Array.from(selectedWorkouts).filter(
-                            workoutId => !existingCompletions.some((c: any) => c.workout_id === workoutId)
-                          );
+ <div className="flex justify-end gap-2 sm:flex-col sm:gap-3">
+ <button
+ onClick={() => {
+ setShowMappingModal(false);
+ setSelectedMission('');
+ setSelectedUser('');
+ setSelectedWorkouts(new Set());
+ setShowWorkouts(false);
+ setExistingCompletions([]);
+ }}
+ className="px-4 py-2 bg-neutral-300 text-content-secondary rounded hover:bg-neutral-400 sm:w-full sm:py-3 sm:order-2"
+ >
+ 닫기
+ </button>
+ {selectedWorkouts.size > 0 && (
+ <button
+ onClick={async () => {
+ try {
+ // 이미 매핑되지 않은 운동들만 필터링
+ const newWorkoutIds = Array.from(selectedWorkouts).filter(
+ workoutId => !existingCompletions.some((c: any) => c.workout_id === workoutId)
+ );
 
-                          if (newWorkoutIds.length === 0) {
-                            alert('새로 매핑할 운동이 없습니다.');
-                            return;
-                          }
+ if (newWorkoutIds.length === 0) {
+ alert('새로 매핑할 운동이 없습니다.');
+ return;
+ }
 
-                          // 각 운동에 대해 개별적으로 POST 요청
-                          const promises = newWorkoutIds.map(workoutId =>
-                            fetch('/api/mission-completions', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({
-                                mission_id: selectedMission,
-                                user_id: selectedUser,
-                                workout_id: workoutId,
-                                verification_status: 'auto_approved'
-                              })
-                            })
-                          );
+ // 각 운동에 대해 개별적으로 POST 요청
+ const promises = newWorkoutIds.map(workoutId =>
+ fetch('/api/mission-completions', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({
+ mission_id: selectedMission,
+ user_id: selectedUser,
+ workout_id: workoutId,
+ verification_status: 'auto_approved'
+ })
+ })
+ );
 
-                          const results = await Promise.all(promises);
-                          const successCount = results.filter(r => r.ok).length;
+ const results = await Promise.all(promises);
+ const successCount = results.filter(r => r.ok).length;
 
-                          if (successCount > 0) {
-                            alert(`${successCount}개의 운동이 성공적으로 매핑되었습니다.`);
-                            fetchData();
-                            setShowMappingModal(false);
-                            setSelectedMission('');
-                            setSelectedUser('');
-                            setSelectedWorkouts(new Set());
-                            setShowWorkouts(false);
-                            setExistingCompletions([]);
-                          } else {
-                            alert('운동 매핑에 실패했습니다.');
-                          }
-                        } catch (error) {
+ if (successCount > 0) {
+ alert(`${successCount}개의 운동이 성공적으로 매핑되었습니다.`);
+ fetchData();
+ setShowMappingModal(false);
+ setSelectedMission('');
+ setSelectedUser('');
+ setSelectedWorkouts(new Set());
+ setShowWorkouts(false);
+ setExistingCompletions([]);
+ } else {
+ alert('운동 매핑에 실패했습니다.');
+ }
+ } catch (error) {
 // console.error('Error mapping workouts:', error);
-                          alert('운동 매핑 중 오류가 발생했습니다.');
-                        }
-                      }}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 sm:w-full sm:py-3 sm:order-1"
-                    >
-                      매핑하기 ({Array.from(selectedWorkouts).filter(
-                        workoutId => !existingCompletions.some((c: any) => c.workout_id === workoutId)
-                      ).length}개 신규)
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+ alert('운동 매핑 중 오류가 발생했습니다.');
+ }
+ }}
+ className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 sm:w-full sm:py-3 sm:order-1"
+ >
+ 매핑하기 ({Array.from(selectedWorkouts).filter(
+ workoutId => !existingCompletions.some((c: any) => c.workout_id === workoutId)
+ ).length}개 신규)
+ </button>
+ )}
+ </div>
+ </div>
+ </div>
+ </div>
+ )}
+ </div>
+ </div>
+ );
 }

@@ -4,14 +4,14 @@ import DashboardHeader from './dashboardHeader';
 import { useState } from 'react';
 
 export default function FixedBars() {
-  const [isOpen, setIsOpen] = useState(true);
+ const [isOpen, setIsOpen] = useState(true);
 
-  const handleSidebarOpen = () => {
-    setIsOpen(!isOpen);
-  };
-  return (
-    <>
-      <DashboardHeader isOpen={isOpen} />
-    </>
-  );
+ const handleSidebarOpen = () => {
+ setIsOpen(!isOpen);
+ };
+ return (
+ <>
+ <DashboardHeader isOpen={isOpen} />
+ </>
+ );
 }
