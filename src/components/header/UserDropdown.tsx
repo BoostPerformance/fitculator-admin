@@ -94,16 +94,19 @@ export function UserDropdown({ showEditUsername = false }: UserDropdownProps) {
         {isOpen && (
           <div className="absolute right-0 top-full mt-2 bg-surface border border-line rounded-md shadow-elevation-2 overflow-hidden z-50 min-w-[120px] animate-in fade-in-0 zoom-in-95">
             {showEditUsername && (
-              <button
-                onClick={() => {
-                  setEditUsernameModal(true);
-                  setIsOpen(false);
-                }}
-                disabled={isLoading || !hasData}
-                className="relative flex w-full cursor-pointer select-none items-center px-3 py-2 text-body outline-none transition-colors hover:bg-surface-raised text-content-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                이름 수정
-              </button>
+              <>
+                <button
+                  onClick={() => {
+                    setEditUsernameModal(true);
+                    setIsOpen(false);
+                  }}
+                  disabled={isLoading || !hasData}
+                  className="relative flex w-full cursor-pointer select-none items-center px-3 py-2 text-body outline-none transition-colors hover:bg-surface-raised text-content-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  이름 수정
+                </button>
+                <div className="border-t border-line" />
+              </>
             )}
             <LogoutButton />
           </div>

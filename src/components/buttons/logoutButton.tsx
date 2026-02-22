@@ -7,7 +7,7 @@ const LogoutButton = memo(() => {
  return (
  <button
  type="button"
- className="relative flex w-full cursor-pointer select-none items-center px-3 py-2 text-sm outline-none transition-colors hover:bg-surface-raised focus:bg-surface-raised dark:focus:bg-neutral-700 text-content-primary"
+ className="relative flex w-full cursor-pointer select-none items-center px-3 py-2 text-body outline-none transition-colors hover:bg-surface-raised focus:bg-surface-raised dark:focus:bg-neutral-700 text-content-primary"
  onClick={() => {
  signOut({ callbackUrl: '/' });
  }}
