@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 
 import NoticeModal from '../input/noticeModal';
@@ -70,6 +71,17 @@ export default function Sidebar({
  const { data: session } = useSession();
  const { adminData, displayUsername: hookDisplayUsername, isLoading: adminDataLoading, fetchAdminData, hasData } = useAdminData();
  const { recentChallenges, addRecentChallenge, removeRecentChallenge } = useRecentChallenges();
+
+ const { data: coachIdentity } = useQuery({
+ queryKey: ['coach-identity'],
+ queryFn: async () => {
+ const res = await fetch('/api/coach-identity');
+ if (!res.ok) return null;
+ const json = await res.json();
+ return json.data as { userId: string; coachId: string; name: string; profileImageUrl: string | null } | null;
+ },
+ staleTime: Infinity,
+ });
 
  // ─── Computed ─────────────────────────────────────────────
  const activeChallenges = useMemo(() => {
@@ -319,6 +331,7 @@ export default function Sidebar({
  email={session?.user?.email || ''}
  isLoading={adminDataLoading}
  hasData={hasData}
+ profileImageUrl={coachIdentity?.profileImageUrl}
  />
  )}
 

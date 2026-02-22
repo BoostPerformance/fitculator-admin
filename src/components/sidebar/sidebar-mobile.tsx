@@ -23,6 +23,7 @@ interface MobileHeaderBarProps {
  email?: string;
  isLoading: boolean;
  hasData: boolean;
+ profileImageUrl?: string | null;
 }
 
 export function MobileHeaderBar({
@@ -34,6 +35,7 @@ export function MobileHeaderBar({
  email,
  isLoading,
  hasData,
+ profileImageUrl,
 }: MobileHeaderBarProps) {
  return (
  <div className="flex items-center justify-between h-14 px-4 bg-surface border-b border-line">
@@ -53,9 +55,13 @@ export function MobileHeaderBar({
  aria-label="사용자 메뉴"
  aria-expanded={userDropdown}
  >
+ {profileImageUrl ? (
+ <img src={profileImageUrl} alt="" className="w-8 h-8 rounded-full object-cover shadow-sm" />
+ ) : (
  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white text-body font-semibold shadow-sm">
- {(username || 'U').charAt(0).toUpperCase()}
+  {(username || 'U').charAt(0).toUpperCase()}
  </div>
+ )}
  <svg
  width="16"
  height="16"

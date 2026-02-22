@@ -1,12 +1,11 @@
 'use client';
 import React, { useState } from 'react';
 import { FaBell, FaFlag } from 'react-icons/fa';
-import Image from 'next/image';
 import LogoutButton from './buttons/logoutButton';
 
 interface AccountInfoProps {
  username: string;
- avatarUrl: string;
+ avatarUrl: string | null;
 }
 
 const AccountInfo: React.FC<AccountInfoProps> = ({ username, avatarUrl }) => {
@@ -27,13 +26,19 @@ const AccountInfo: React.FC<AccountInfoProps> = ({ username, avatarUrl }) => {
  className="flex items-center space-x-[0.5rem]"
  onClick={() => setDropdownOpen(!dropdownOpen)}
  >
- <Image
+ {avatarUrl ? (
+ <img
  src={avatarUrl}
  alt="User Avatar"
- className="w-[2rem] h-[2rem] rounded-full sm:size-[1rem]"
- width={20}
- height={20}
+ className="w-[2rem] h-[2rem] rounded-full object-cover sm:size-[1rem]"
  />
+ ) : (
+ <div className="w-[2rem] h-[2rem] sm:size-[1rem] rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+ <span className="text-[12px] sm:text-[8px] font-medium text-blue-600 dark:text-blue-300">
+  {username?.charAt(0) || '?'}
+ </span>
+ </div>
+ )}
  <span className="text-content-secondary sm:text-label-xs font-medium">{username}</span>
  </button>
 

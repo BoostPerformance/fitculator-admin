@@ -5,10 +5,22 @@ import AccountInfo from '../accountInfo';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAdminData } from '../hooks/useAdminData';
+import { useQuery } from '@tanstack/react-query';
 
 const DashboardHeader = ({ isOpen }: { isOpen: boolean }) => {
  const router = useRouter();
  const { displayUsername } = useAdminData();
+
+ const { data: coachIdentity } = useQuery({
+ queryKey: ['coach-identity'],
+ queryFn: async () => {
+ const res = await fetch('/api/coach-identity');
+ if (!res.ok) return null;
+ const json = await res.json();
+ return json.data as { userId: string; coachId: string; name: string; profileImageUrl: string | null } | null;
+ },
+ staleTime: Infinity,
+ });
 
  return (
  <header
@@ -26,7 +38,7 @@ const DashboardHeader = ({ isOpen }: { isOpen: boolean }) => {
  />
  </button>
  <SearchBar />
- <AccountInfo username={displayUsername} avatarUrl="/image/logo-icon.png" />
+ <AccountInfo username={displayUsername} avatarUrl={coachIdentity?.profileImageUrl || null} />
  </header>
  );
 };
