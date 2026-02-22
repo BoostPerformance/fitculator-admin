@@ -39,7 +39,7 @@ export default function UserLayout({
 
  return (
  <div className="flex flex-col min-h-screen">
- <DesktopHeader />
+ <DesktopHeader isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(prev => !prev)} />
  <div className="flex md:flex-col sm:flex-col flex-1">
  <Sidebar
  data={formattedChallenges}

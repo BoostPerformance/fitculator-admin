@@ -39,7 +39,7 @@ export default function AdminLayout({
 
  return (
  <div className="flex flex-col min-h-screen">
- <DesktopHeader />
+ <DesktopHeader isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(prev => !prev)} />
  <div className="flex lg:flex-row md:flex-col sm:flex-col flex-1">
  <Sidebar
  data={formattedChallenges as any}

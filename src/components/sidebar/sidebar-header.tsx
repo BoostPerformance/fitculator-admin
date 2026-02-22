@@ -40,20 +40,14 @@ export function SidebarHeader({ isSidebarOpen, isScrolled, onToggle }: SidebarHe
  className="flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg hover:bg-surface-raised active:bg-neutral-200 dark:active:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent transition-colors"
  aria-label={isSidebarOpen ? '메뉴 접기' : '메뉴 펼치기'}
  >
- <div className="w-5 h-5 flex flex-col justify-center items-center gap-[0.25rem]">
- <span className={cn(
- 'block w-full h-[2px] bg-content-primary transition-all duration-300 ease-in-out',
- isSidebarOpen && 'rotate-45 translate-y-[6px]'
- )} />
- <span className={cn(
- 'block w-full h-[2px] bg-content-primary transition-all duration-300 ease-in-out',
- isSidebarOpen && 'opacity-0'
- )} />
- <span className={cn(
- 'block w-full h-[2px] bg-content-primary transition-all duration-300 ease-in-out',
- isSidebarOpen && '-rotate-45 -translate-y-[6px]'
- )} />
- </div>
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-content-secondary">
+ <rect width="18" height="18" x="3" y="3" rx="2" />
+ <path d="M9 3v18" />
+ {isSidebarOpen
+ ? <path d="m16 15-3-3 3-3" />
+ : <path d="m14 9 3 3-3 3" />
+ }
+ </svg>
  </button>
  </div>
  </div>

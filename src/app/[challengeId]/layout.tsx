@@ -62,6 +62,8 @@ function ChallengeLayoutContent({
  showEditUsername
  challengeTitle={challengeTitle}
  challengeFlags={challengeFlags}
+ isSidebarOpen={isSidebarOpen}
+ onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
  />
  <div className="flex md:flex-col sm:flex-col flex-1">
  <Sidebar

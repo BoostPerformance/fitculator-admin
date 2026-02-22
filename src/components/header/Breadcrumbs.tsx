@@ -46,6 +46,7 @@ interface SiblingRoute {
 function getChallengeChildren(flags?: ChallengeFlags): SiblingRoute[] {
   if (!flags) return [];
   const items: (SiblingRoute & { show: boolean })[] = [
+    { segment: '', label: '대시보드', show: true },
     { segment: 'diet', label: '식단', show: flags.challenge_type === 'diet' || flags.challenge_type === 'diet_and_exercise' },
     { segment: 'workout', label: '운동', show: flags.challenge_type === 'exercise' || flags.challenge_type === 'diet_and_exercise' },
     { segment: 'running', label: '운동', show: flags.challenge_type === 'running' },
@@ -126,7 +127,7 @@ function BreadcrumbItem({ label, href, isLast, siblings, parentPath, currentSegm
 
   const handleSelect = (segment: string) => {
     setIsOpen(false);
-    router.push(`${parentPath}/${segment}`);
+    router.push(segment ? `${parentPath}/${segment}` : parentPath);
   };
 
   const hasSiblings = siblings && siblings.length > 1;
@@ -221,6 +222,17 @@ export function Breadcrumbs({ challengeTitle, challengeFlags }: BreadcrumbsProps
         parentPath,
         currentSegment: segment,
       });
+      // Challenge root page (/{challengeId}) → append "대시보드"
+      if (segments.length === 1) {
+        const dashboardSiblings = getSiblings(segments.concat(''), 1, challengeFlags);
+        breadcrumbs.push({
+          label: '대시보드',
+          href: currentPath,
+          siblings: dashboardSiblings,
+          parentPath: currentPath,
+          currentSegment: '',
+        });
+      }
     } else {
       const label = ROUTE_LABELS[segment];
       if (label) {

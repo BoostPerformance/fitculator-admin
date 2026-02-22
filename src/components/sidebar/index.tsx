@@ -317,6 +317,8 @@ export default function Sidebar({
  onChallengeClick={handleChallengeClick}
  onRemoveRecent={removeRecentChallenge}
  closeSidebarOnMobile={closeSidebarOnMobile}
+ onSelectChallenge={onSelectChallenge}
+ onAddRecent={addRecentChallenge}
  />,
  document.body
  )}
@@ -359,24 +361,6 @@ export default function Sidebar({
  />
  )}
 
- {/* Desktop toggle (controlled: logo is in DesktopHeader) */}
- {!isMobile && isControlled && (
- <div className={cn(
- 'flex items-center py-3',
- isSidebarOpen ? 'justify-end px-0' : 'justify-center px-0',
- )}>
- <button
- onClick={handleSidebarOpen}
- className="flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg hover:bg-surface-raised active:bg-neutral-200 dark:active:bg-neutral-800 transition-colors"
- aria-label={isSidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
- >
- <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-content-secondary">
- <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
- </svg>
- </button>
- </div>
- )}
-
  {/* Desktop nav */}
  {!isMobile && isSidebarOpen && (
  <div
@@ -407,9 +391,10 @@ export default function Sidebar({
  challenges={activeChallenges}
  selectedChallengeId={selectedChallengeId}
  isOpenChallengeDropdown={isOpenChallengeDropdown}
- onSelect={handleChallengeClick}
  onToggleDropdown={toggleChallengeDropdown}
  onNavigate={closeSidebarOnMobile}
+ onSelectChallenge={onSelectChallenge}
+ onAddRecent={addRecentChallenge}
  />
  <EndedChallengesSection
  challenges={endedChallenges}
@@ -417,9 +402,10 @@ export default function Sidebar({
  isOpen={isOpenEndedDropdown}
  onToggle={handleEndedDropdown}
  isOpenChallengeDropdown={isOpenChallengeDropdown}
- onSelect={handleChallengeClick}
  onToggleDropdown={toggleChallengeDropdown}
  onNavigate={closeSidebarOnMobile}
+ onSelectChallenge={onSelectChallenge}
+ onAddRecent={addRecentChallenge}
  />
  </SidebarNavGroup>
 
