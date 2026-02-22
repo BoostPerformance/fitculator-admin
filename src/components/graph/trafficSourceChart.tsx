@@ -87,7 +87,7 @@ export default function TrafficSourceChart({
  if (endDate) chartUrl += `&endDate=${endDate}`;
  const response = await fetch(chartUrl);
  const data = await response.json();
- 
+
  if (Array.isArray(data)) {
  setChartData(data);
  } else {
@@ -108,6 +108,8 @@ export default function TrafficSourceChart({
  setActiveIndex(index);
  };
 
+ const isEmpty = chartData.length === 0 || (chartData.length === 1 && chartData[0].category === '데이터 없음');
+
  const exerciseList = chartData.map((item: ChartDataPoint, index: number) => ({
  name: item.category,
  percentage: `${item.percentage.toFixed(2)}%`,
@@ -127,6 +129,46 @@ export default function TrafficSourceChart({
  <div className="flex items-center justify-center h-64">
  <p className="text-red-500">데이터를 불러오는 중 오류가 발생했습니다</p>
  </div>
+ ) : isEmpty ? (
+ <div>
+ <div className="w-full h-[16rem] sm:py-[0.5rem] pb-[1rem] flex items-center justify-center relative">
+ <ResponsiveContainer width="100%" height="100%">
+ <PieChart>
+ <Pie
+ data={[{ name: 'empty', value: 1 }]}
+ cx="50%"
+ cy="50%"
+ innerRadius={50}
+ outerRadius={105}
+ startAngle={90}
+ endAngle={-270}
+ dataKey="value"
+ isAnimationActive={false}
+ >
+ <Cell fill="var(--border-default, #e5e7eb)" stroke="none" />
+ </Pie>
+ </PieChart>
+ </ResponsiveContainer>
+ <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+ <p className="text-[14px] font-medium text-content-tertiary">아직 기록된</p>
+ <p className="text-[14px] font-medium text-content-tertiary">운동이 없어요</p>
+ </div>
+ </div>
+ <div className="w-full gap-[2rem]">
+ <div className="lg:px-[2rem] border-t border-line pt-4 sm:px-[3rem]">
+ <div className="flex justify-between text-content-tertiary sm:py-[1.5rem] mb-4">
+ <div className="flex">
+ <span className="w-6"></span>
+ <span className="flex-1 font-medium text-[14px]">운동종목</span>
+ </div>
+ <div className="font-medium text-[14px]">비율</div>
+ </div>
+ <div className="flex flex-col items-center justify-center py-8">
+ <p className="text-[13px] text-content-tertiary/60">운동이 기록되면 비율 순서대로 표시됩니다</p>
+ </div>
+ </div>
+ </div>
+ </div>
  ) : (
  <div>
  <div className="w-full h-[16rem] sm:py-[0.5rem] pb-[1rem] flex items-center justify-center relative">
@@ -138,8 +180,10 @@ export default function TrafficSourceChart({
  data={chartData}
  cx="50%"
  cy="50%"
- innerRadius={35}
+ innerRadius={50}
  outerRadius={105}
+ startAngle={90}
+ endAngle={-270}
  dataKey="percentage"
  onMouseEnter={onPieEnter}
  >
