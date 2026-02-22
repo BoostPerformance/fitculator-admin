@@ -5,11 +5,13 @@ import { useParams } from 'next/navigation';
 import type { DailyProgramCompletion, VerificationStatus } from '@/types/daily-program';
 import { SubmissionTable } from '@/components/daily-program/submission-table';
 import { SubmissionReviewDialog } from '@/components/daily-program/submission-review-dialog';
+import { useResponsive } from '@/components/hooks/useResponsive';
 import Title from '@/components/layout/title';
 
 export default function SubmissionsPage() {
  const params = useParams();
  const challengeId = params.challengeId as string;
+ const { isMobile } = useResponsive();
 
  const [completions, setCompletions] = useState<DailyProgramCompletion[]>([]);
  const [loading, setLoading] = useState(true);
@@ -71,7 +73,7 @@ export default function SubmissionsPage() {
  <Title title="제출 관리" subtitle="데일리 프로그램" />
 
  {/* Filters */}
- <div className="px-4 py-3 border-b border-line flex items-center gap-2">
+ <div className="px-4 py-3 border-b border-line flex items-center gap-2 overflow-x-auto">
  {STATUS_OPTIONS.map((opt) => (
  <button
  key={opt.value}
@@ -97,6 +99,7 @@ export default function SubmissionsPage() {
  <SubmissionTable
  completions={completions}
  onReview={setReviewTarget}
+ mobile={isMobile}
  />
  )}
  </div>

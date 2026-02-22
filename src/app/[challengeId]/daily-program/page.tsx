@@ -15,16 +15,19 @@ import { CalendarToolbar } from '@/components/daily-program/calendar-toolbar';
 import { CalendarMonthView } from '@/components/daily-program/calendar-month-view';
 import { CalendarWeekView } from '@/components/daily-program/calendar-week-view';
 import { CalendarProgramChip } from '@/components/daily-program/calendar-program-chip';
+import { MobileCalendarView } from '@/components/daily-program/mobile-calendar-view';
 import { ProgramDetailSheet } from '@/components/daily-program/program-detail-sheet';
 import { CardEditDialog } from '@/components/daily-program/card-edit-dialog';
-import Title from '@/components/layout/title';
+import { useResponsive } from '@/components/hooks/useResponsive';
 
 export default function DailyProgramPage() {
  const params = useParams();
  const challengeId = params.challengeId as string;
+ const { isMobile } = useResponsive();
 
  const [viewMode, setViewMode] = useState<CalendarViewMode>('month');
  const [currentDate, setCurrentDate] = useState(new Date());
+ const [mobileSelectedDay, setMobileSelectedDay] = useState(new Date());
  const [programs, setPrograms] = useState<DailyProgram[]>([]);
  const [groups, setGroups] = useState<ChallengeGroup[]>([]);
  const [loading, setLoading] = useState(true);
@@ -105,7 +108,7 @@ export default function DailyProgramPage() {
  }, [fetchGroups]);
 
  const handlePrev = () => {
- if (viewMode === 'month') {
+ if (isMobile || viewMode === 'month') {
  setCurrentDate((d) => subMonths(d, 1));
  } else {
  setCurrentDate((d) => subWeeks(d, 1));
@@ -113,7 +116,7 @@ export default function DailyProgramPage() {
  };
 
  const handleNext = () => {
- if (viewMode === 'month') {
+ if (isMobile || viewMode === 'month') {
  setCurrentDate((d) => addMonths(d, 1));
  } else {
  setCurrentDate((d) => addWeeks(d, 1));
@@ -229,8 +232,6 @@ export default function DailyProgramPage() {
 
  return (
  <div className="h-full flex flex-col">
- <Title title="데일리 프로그램" />
-
  <CalendarToolbar
  viewMode={viewMode}
  onViewModeChange={setViewMode}
@@ -238,13 +239,25 @@ export default function DailyProgramPage() {
  onPrev={handlePrev}
  onNext={handleNext}
  onToday={handleToday}
+ onAdd={() => handleAddCard(format(isMobile ? mobileSelectedDay : new Date(), 'yyyy-MM-dd'))}
  />
 
- <div className="flex-1 overflow-auto px-4 pb-4">
+ <div className="flex-1 overflow-auto px-4 pb-4 sm:px-2 sm:pb-2">
  {loading ? (
  <div className="flex items-center justify-center h-64">
  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
  </div>
+ ) : isMobile ? (
+ <MobileCalendarView
+ currentDate={currentDate}
+ programs={programs}
+ selectedDay={mobileSelectedDay}
+ onSelectedDayChange={setMobileSelectedDay}
+ onProgramClick={handleProgramClick}
+ onDayCellClick={handleDayCellClick}
+ onAddCard={handleAddCard}
+ onCardClick={handleCardClick}
+ />
  ) : (
  <DndContext
  collisionDetection={pointerWithin}

@@ -12,6 +12,7 @@ interface CalendarToolbarProps {
  onPrev: () => void;
  onNext: () => void;
  onToday: () => void;
+ onAdd?: () => void;
 }
 
 export function CalendarToolbar({
@@ -21,18 +22,62 @@ export function CalendarToolbar({
  onPrev,
  onNext,
  onToday,
+ onAdd,
 }: CalendarToolbarProps) {
- const title =
+ const dateLabel =
  viewMode === 'month'
  ? format(currentDate, 'yyyy년 M월', { locale: ko })
  : format(currentDate, 'yyyy년 M월 d일 주', { locale: ko });
 
  return (
- <div className="flex items-center justify-between px-4 py-3 border-b border-line">
- <div className="flex items-center gap-3">
- <h2 className="text-lg font-semibold text-content-primary dark:text-white min-w-[160px]">
- {title}
- </h2>
+ <div className="px-6 py-4 sm:px-4 sm:py-3 border-b border-line space-y-2">
+ {/* Row 1: Page title + view mode switcher */}
+ <div className="flex items-center justify-between">
+ <h1 className="text-headline font-semibold text-content-primary dark:text-white sm:text-title-lg">
+ 데일리 프로그램
+ </h1>
+ <div className="flex items-center gap-2">
+ <div className="flex items-center gap-1 bg-surface-raised rounded-lg p-0.5 sm:hidden">
+ <button
+ onClick={() => onViewModeChange('month')}
+ className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+ viewMode === 'month'
+ ? 'bg-surface text-content-primary dark:text-white shadow-sm'
+ : 'text-content-tertiary hover:text-content-secondary'
+ }`}
+ >
+ 월간
+ </button>
+ <button
+ onClick={() => onViewModeChange('week')}
+ className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+ viewMode === 'week'
+ ? 'bg-surface text-content-primary dark:text-white shadow-sm'
+ : 'text-content-tertiary hover:text-content-secondary'
+ }`}
+ >
+ 주간
+ </button>
+ </div>
+ {onAdd && (
+ <button
+ onClick={onAdd}
+ className="p-1 rounded-md hover:bg-surface-raised text-content-tertiary hover:text-content-primary transition-colors"
+ title="프로그램 추가"
+ >
+ <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+ <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+ </svg>
+ </button>
+ )}
+ </div>
+ </div>
+
+ {/* Row 2: Date label + navigation */}
+ <div className="flex items-center justify-between">
+ <span className="text-body-lg font-medium text-content-secondary sm:text-body">
+ {dateLabel}
+ </span>
  <div className="flex items-center gap-1">
  <button
  onClick={onPrev}
@@ -45,7 +90,7 @@ export function CalendarToolbar({
  </button>
  <button
  onClick={onToday}
- className="px-3 py-1 text-sm font-medium rounded-md border border-line hover:bg-surface-raised text-content-secondary transition-colors"
+ className="px-3 py-1 text-sm font-medium rounded-md hover:bg-surface-raised text-content-secondary transition-colors"
  >
  오늘
  </button>
@@ -59,29 +104,6 @@ export function CalendarToolbar({
  </svg>
  </button>
  </div>
- </div>
-
- <div className="flex items-center gap-1 bg-surface-raised rounded-lg p-0.5">
- <button
- onClick={() => onViewModeChange('month')}
- className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
- viewMode === 'month'
- ? 'bg-surface text-content-primary dark:text-white shadow-sm'
- : 'text-content-tertiary hover:text-content-secondary'
- }`}
- >
- 월
- </button>
- <button
- onClick={() => onViewModeChange('week')}
- className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
- viewMode === 'week'
- ? 'bg-surface text-content-primary dark:text-white shadow-sm'
- : 'text-content-tertiary hover:text-content-secondary'
- }`}
- >
- 주
- </button>
  </div>
  </div>
  );

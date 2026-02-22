@@ -24,9 +24,10 @@ interface CardFormProps {
  onCancel: () => void;
  hideCheckHint?: boolean;
  onDismissCheckHint?: () => void;
+ onDirtyChange?: (dirty: boolean) => void;
 }
 
-export function CardForm({ card, programId, programTitle, programStatus, challengeId, date, onSave, onCancel, hideCheckHint, onDismissCheckHint }: CardFormProps) {
+export function CardForm({ card, programId, programTitle, programStatus, challengeId, date, onSave, onCancel, hideCheckHint, onDismissCheckHint, onDirtyChange }: CardFormProps) {
  const [title, setTitle] = useState('');
  const [cardType, setCardType] = useState<CardType>('workout');
  const [body, setBody] = useState<TiptapDocument | null>(null);
@@ -91,6 +92,10 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  (programStatus ?? 'draft') !== iv.programStatus
  );
  }, [card, title, cardType, body, coachingTips, hasCheck, requiresApproval, scoreValue, programTitle, programStatus]);
+
+ useEffect(() => {
+ onDirtyChange?.(hasChanges);
+ }, [hasChanges, onDirtyChange]);
 
  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
@@ -162,7 +167,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  };
 
  return (
- <form onSubmit={handleSubmit} className="space-y-3 bg-surface-raised/50 rounded-lg p-4 border border-line">
+ <form onSubmit={handleSubmit} className="space-y-3 bg-surface-raised/50 rounded-lg p-4 sm:p-3 border border-line">
  <div>
  <label className="block text-xs font-medium text-content-secondary mb-1">
  카드 타이틀
@@ -174,12 +179,12 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  onChange={(e) => setTitle(e.target.value)}
  placeholder="카드 타이틀 *"
  required
- className="flex-1 px-3 py-1.5 text-sm border border-line rounded-md bg-surface text-content-primary dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+ className="flex-1 px-3 py-1.5 sm:py-2 text-sm border border-line rounded-md bg-surface text-content-primary dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
  />
  <select
  value={cardType}
  onChange={(e) => setCardType(e.target.value as CardType)}
- className="px-2 py-1.5 text-sm border border-line rounded-md bg-surface text-content-primary"
+ className="px-2 py-1.5 sm:py-2 text-sm border border-line rounded-md bg-surface text-content-primary"
  >
  {CARD_TYPES.map((t) => (
  <option key={t.value} value={t.value}>
@@ -213,13 +218,13 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  </div>
 
  {/* Options row */}
- <div className="flex flex-wrap items-center gap-4">
+ <div className="flex flex-wrap items-center gap-4 sm:flex-col sm:items-start sm:gap-2.5">
  <label className="flex items-center gap-1.5 text-sm text-content-secondary">
  <input
  type="checkbox"
  checked={hasCheck}
  onChange={(e) => setHasCheck(e.target.checked)}
- className="h-3.5 w-3.5 rounded border-line text-blue-600"
+ className="h-4 w-4 sm:h-[18px] sm:w-[18px] rounded border-line text-blue-600"
  />
  멤버가 완료시 직접 체크
  </label>
@@ -229,7 +234,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  checked={requiresApproval}
  onChange={(e) => setRequiresApproval(e.target.checked)}
  disabled={!hasCheck}
- className="h-3.5 w-3.5 rounded border-line text-blue-600 disabled:opacity-50"
+ className="h-4 w-4 sm:h-[18px] sm:w-[18px] rounded border-line text-blue-600 disabled:opacity-50"
  />
  승인 필요
  </label>
@@ -241,7 +246,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  onChange={(e) => setScoreValue(parseInt(e.target.value) || 0)}
  min={0}
  disabled={!hasCheck}
- className="w-16 px-2 py-1 text-sm border border-line rounded-md bg-surface text-content-primary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+ className="w-16 px-2 py-1 sm:py-1.5 text-sm border border-line rounded-md bg-surface text-content-primary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
  />
  </div>
  </div>
@@ -259,18 +264,18 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  )}
 
  {/* Buttons */}
- <div className="flex items-center justify-end gap-2 pt-1">
+ <div className="flex items-center justify-end gap-2 pt-1 sm:sticky sm:bottom-0 sm:bg-surface-raised/50 sm:pb-1 sm:-mx-3 sm:px-3 sm:pt-3 sm:border-t sm:border-line">
  <button
  type="button"
  onClick={onCancel}
- className="px-3 py-1.5 text-sm border border-line text-content-secondary rounded-md hover:bg-surface-raised transition-colors"
+ className="px-3 py-1.5 sm:py-2 sm:px-4 text-sm border border-line text-content-secondary rounded-md hover:bg-surface-raised transition-colors"
  >
  취소
  </button>
  <button
  type="submit"
  disabled={saving || !hasChanges}
- className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+ className="px-3 py-1.5 sm:py-2 sm:px-4 sm:flex-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
  >
  {saving ? '저장 중...' : '저장'}
  </button>

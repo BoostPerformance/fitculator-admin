@@ -41,7 +41,7 @@ export function CalendarDayCell({
  ref={setNodeRef}
  onClick={() => onCellClick(dateStr)}
  className={`group border border-line-subtle cursor-pointer transition-colors ${
- expanded ? 'min-h-[200px]' : 'min-h-[120px]'
+ expanded ? 'min-h-[200px] md:min-h-[150px]' : 'min-h-[120px] md:min-h-[100px]'
  } ${!isCurrentMonth ? 'bg-surface-raised/50/30' : ''} ${
  isOver
  ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
@@ -68,7 +68,7 @@ export function CalendarDayCell({
  onAddCard(dateStr);
  }}
  className={`w-5 h-5 flex items-center justify-center rounded text-content-disabled hover:text-blue-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all ${
- expanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+ expanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 md:opacity-100'
  }`}
  title="카드 추가"
  >

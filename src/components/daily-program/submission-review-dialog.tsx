@@ -23,16 +23,21 @@ export function SubmissionReviewDialog({
  const program = card?.challenge_daily_programs;
 
  return (
- <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
- <div className="bg-surface rounded-lg shadow-xl max-w-md w-full">
+ <div className="fixed inset-0 bg-black/50 z-[120] flex items-center justify-center p-4 sm:items-end sm:p-0">
+ <div className="bg-surface rounded-lg shadow-xl max-w-md w-full sm:rounded-b-none sm:rounded-t-2xl sm:max-w-none sm:animate-slide-up">
+ {/* Mobile drag handle */}
+ <div className="hidden sm:flex justify-center pt-2 pb-1">
+ <div className="w-10 h-1 rounded-full bg-content-disabled/30" />
+ </div>
+
  {/* Header */}
- <div className="flex items-center justify-between px-6 py-4 border-b border-line">
- <h3 className="text-lg font-semibold text-content-primary">
+ <div className="flex items-center justify-between px-6 sm:px-4 py-4 sm:py-3 border-b border-line">
+ <h3 className="text-lg sm:text-base font-semibold text-content-primary">
  제출 검토
  </h3>
  <button
  onClick={onClose}
- className="p-1 rounded hover:bg-surface-raised transition-colors"
+ className="p-1.5 rounded-md hover:bg-surface-raised transition-colors"
  >
  <svg className="w-5 h-5 text-content-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -41,7 +46,7 @@ export function SubmissionReviewDialog({
  </div>
 
  {/* Body */}
- <div className="px-6 py-4 space-y-4">
+ <div className="px-6 sm:px-4 py-4 space-y-4">
  <div className="space-y-2">
  <div className="flex items-center gap-2">
  <span className="text-sm text-content-tertiary w-16">유저</span>
@@ -77,16 +82,16 @@ export function SubmissionReviewDialog({
  </div>
 
  {/* Footer */}
- <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-line">
+ <div className="flex items-center justify-end gap-2 px-6 sm:px-4 py-4 sm:pb-6 border-t border-line sm:gap-3">
  <button
  onClick={() => onReject(completion.id)}
- className="px-4 py-2 text-sm border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:bg-red-900/20 dark:hover:bg-red-900/20 transition-colors"
+ className="px-4 py-2 sm:py-2.5 sm:flex-1 text-sm border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:bg-red-900/20 dark:hover:bg-red-900/20 transition-colors"
  >
  거부
  </button>
  <button
  onClick={() => onApprove(completion.id)}
- className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+ className="px-4 py-2 sm:py-2.5 sm:flex-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
  >
  승인
  </button>

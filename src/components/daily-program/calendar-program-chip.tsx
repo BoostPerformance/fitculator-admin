@@ -22,13 +22,15 @@ interface CalendarProgramChipProps {
  onClick: (program: DailyProgram) => void;
  onCardClick?: (card: DailyProgramCard, program: DailyProgram) => void;
  compact?: boolean;
+ disableDrag?: boolean;
 }
 
-export function CalendarProgramChip({ program, onClick, onCardClick, compact = false }: CalendarProgramChipProps) {
+export function CalendarProgramChip({ program, onClick, onCardClick, compact = false, disableDrag = false }: CalendarProgramChipProps) {
  const cards = program.daily_program_cards ?? [];
 
  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
  id: program.id,
+ disabled: disableDrag,
  });
 
  return (

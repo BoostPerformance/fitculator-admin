@@ -165,15 +165,20 @@ export function ProgramDetailSheet({
  <>
  {/* Backdrop */}
  <div
- className="fixed inset-0 bg-black/30 z-40"
+ className="fixed inset-0 bg-black/30 z-[110]"
  onClick={onClose}
  />
 
  {/* Sheet */}
- <div className="fixed inset-y-0 right-0 z-50 w-full max-w-2xl bg-surface shadow-xl overflow-y-auto animate-in slide-in-from-right duration-300">
+ <div className="fixed inset-y-0 right-0 z-[111] w-full max-w-2xl bg-surface shadow-xl overflow-y-auto overscroll-contain animate-in slide-in-from-right duration-300 sm:inset-x-0 sm:top-auto sm:bottom-0 sm:max-w-none sm:max-h-[95dvh] sm:rounded-t-2xl sm:slide-in-from-bottom">
+ {/* Mobile drag handle */}
+ <div className="hidden sm:flex justify-center pt-2 pb-1">
+ <div className="w-10 h-1 rounded-full bg-content-disabled/30" />
+ </div>
+
  {/* Header */}
- <div className="sticky top-0 bg-surface border-b border-line px-6 py-4 flex items-center justify-between z-10">
- <h2 className="text-lg font-semibold text-content-primary">
+ <div className="sticky top-0 bg-surface border-b border-line px-6 sm:px-4 py-4 sm:py-3 flex items-center justify-between z-10">
+ <h2 className="text-lg sm:text-base font-semibold text-content-primary">
  {isNew && !currentProgram ? '새 프로그램' : '프로그램 편집'}
  </h2>
  <button
@@ -186,7 +191,7 @@ export function ProgramDetailSheet({
  </button>
  </div>
 
- <div className="px-6 py-4 space-y-6">
+ <div className="px-6 sm:px-4 py-4 space-y-6">
  {/* Program Form */}
  <ProgramForm
  program={currentProgram}
