@@ -61,7 +61,10 @@ export async function GET(request: Request) {
  { status: 400 }
  );
  }
- return await getLeaderboardData(userId, challengeId);
+ const period = url.searchParams.get('period') || 'all';
+ const weekStart = url.searchParams.get('weekStart') || undefined;
+ const weekEnd = url.searchParams.get('weekEnd') || undefined;
+ return await getLeaderboardData(userId, challengeId, period, weekStart, weekEnd);
  } else if (type === 'today-count') {
  // 챌린지 ID 필수 확인
  if (!challengeId) {
@@ -346,7 +349,10 @@ async function getWeeklyChartData(
 // 리더보드 데이터 조회 (챌린지 ID로 필터링)
 async function getLeaderboardData(
  userId: string | null,
- challengeId: string
+ challengeId: string,
+ period: string = 'all',
+ weekStart?: string,
+ weekEnd?: string
 ): Promise<NextResponse> {
  try {
 
@@ -358,21 +364,11 @@ async function getLeaderboardData(
  .eq('status', 'active');
 
  if (participantsError) {
-// console.error(
- // 'Error fetching challenge participants:',
- // participantsError
- // );
  return NextResponse.json(
  { error: 'Failed to fetch challenge participants' },
  { status: 500 }
  );
  }
-
- // console.log(
- // `Found ${
- // participants?.length || 0
- // } participants for challenge ${challengeId}`
- // );
 
  // 참가자 ID 목록 생성
  const participantIds = participants?.map((p) => p.service_user_id) || [];
@@ -395,21 +391,27 @@ async function getLeaderboardData(
  .in('id', participantIds);
 
  if (usersError) {
-// console.error('Error fetching users:', usersError);
  return NextResponse.json(
  { error: 'Failed to fetch users' },
  { status: 500 }
  );
  }
 
- // 3. 주간 운동 기록 조회 (챌린지 참가자만)
- const { data: weeklyRecords, error: weeklyError } = await supabase
+ // 3. 주간 운동 기록 조회 (챌린지 참가자만, 기간 필터 적용)
+ let weeklyQuery = supabase
  .from('workout_weekly_records')
  .select('*')
  .in('user_id', participantIds);
 
+ if (weekStart && weekEnd) {
+ weeklyQuery = weeklyQuery
+ .gte('start_date', weekStart)
+ .lte('end_date', weekEnd);
+ }
+
+ const { data: weeklyRecords, error: weeklyError } = await weeklyQuery;
+
  if (weeklyError) {
-// console.error('Error fetching weekly records:', weeklyError);
  return NextResponse.json(
  { error: 'Failed to fetch weekly workout records' },
  { status: 500 }
@@ -1158,8 +1160,8 @@ async function getDistanceLeaderboardData(
  let startDate = challenge.start_date;
  let endDate = challenge.end_date;
 
- if (period === 'weekly' && weekStart && weekEnd) {
- // 선택된 주차 사용
+ if (weekStart && weekEnd) {
+ // 클라이언트에서 전달된 날짜 범위 사용 (주간/월간/전체 공통)
  startDate = weekStart;
  endDate = weekEnd;
  } else if (period === 'weekly') {
@@ -1175,22 +1177,37 @@ async function getDistanceLeaderboardData(
  endDate = sunday.toISOString().split('T')[0];
  }
 
- // 4. 운동 기록에서 거리 합계 계산
- const { data: workouts, error: workoutsError } = await supabase
+ // 4. 운동 기록에서 거리 합계 계산 (페이지네이션으로 전체 조회)
+ let allWorkouts: { user_id: string; distance: number | null; points: number | null }[] = [];
+ const pageSize = 1000;
+ let page = 0;
+ let hasMore = true;
+
+ while (hasMore) {
+ const { data, error: workoutsError } = await supabase
  .from('workouts')
- .select('user_id, distance, points, title, category_id')
+ .select('user_id, distance, points')
  .in('user_id', participantIds)
  .gte('timestamp', `${startDate}T00:00:00`)
- .lte('timestamp', `${endDate}T23:59:59`);
+ .lte('timestamp', `${endDate}T23:59:59`)
+ .range(page * pageSize, (page + 1) * pageSize - 1);
 
  if (workoutsError) {
  console.error('Workouts query error:', workoutsError);
+ hasMore = false;
+ } else if (!data || data.length === 0) {
+ hasMore = false;
+ } else {
+ allWorkouts = allWorkouts.concat(data);
+ hasMore = data.length === pageSize;
+ page++;
+ }
  }
 
  // 5. 사용자별 거리/포인트 집계
  const userStats = new Map<string, { distance: number; points: number }>();
 
- workouts?.forEach((workout) => {
+ allWorkouts.forEach((workout) => {
  const current = userStats.get(workout.user_id) || { distance: 0, points: 0 };
  userStats.set(workout.user_id, {
  distance: current.distance + (workout.distance || 0),

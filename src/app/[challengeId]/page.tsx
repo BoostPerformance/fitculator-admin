@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import TrafficSourceChart from '@/components/graph/trafficSourceChart';
 import DailyDietRecord from '@/components/graph/dailyDietRecord';
-import WorkoutLeaderboard from '@/components/graph/workoutLeaderboard';
+import Leaderboard from '@/components/graph/Leaderboard';
 import DietTable from '@/components/dietDashboard/dietTable';
 import TotalFeedbackCounts from '@/components/totalCounts/totalFeedbackCount';
 import Title from '@/components/layout/title';
@@ -14,7 +14,7 @@ import DailyWorkoutRecord from '@/components/graph/dailyWorkoutRecord';
 import { useAdminData } from '@/components/hooks/useAdminData';
 import { useChallenge } from '@/components/hooks/useChallenges';
 import { useWorkoutDataQuery } from '@/components/hooks/useWorkoutDataQuery';
-import RunningLeaderboard from '@/components/runningDashboard/RunningLeaderboard';
+// RunningLeaderboard replaced by unified Leaderboard
 import WorkoutNotesFeed from '@/components/runningDashboard/WorkoutNotesFeed';
 // import { cachedAPI } from '@/utils/api';
 //import DailyWorkoutRecordMobile from '@/components/graph/dailyWorkoutRecordMobile';
@@ -52,6 +52,9 @@ interface Challenges {
  start_date: string;
  end_date: string;
  challenge_type: 'diet' | 'exercise' | 'diet_and_exercise' | 'running';
+ leaderboard_config?: {
+ metrics: Array<{ metric: 'points' | 'distance'; period: 'weekly' | 'monthly' | 'total' }>;
+ } | null;
  };
 }
 
@@ -144,6 +147,7 @@ export default function User() {
  start_date: challenge.challenges.start_date,
  end_date: challenge.challenges.end_date,
  challenge_type: (challenge.challenges as any).challenge_type || 'diet_and_exercise',
+ leaderboard_config: (challenge.challenges as any).leaderboard_config || null,
  },
  })) || [];
 
@@ -420,6 +424,56 @@ export default function User() {
  )
  : { progressDays: '0', totalDays: '0' };
 
+ // 리더보드 config 계산 (DB config 우선, 빠진 period 자동 보완)
+ const currentChallenge = formattedChallenges.find((c) => c.challenges.id === selectedChallengeId);
+ const leaderboardConfig = (() => {
+ if (!currentChallenge) return null;
+ const config = currentChallenge.challenges.leaderboard_config;
+ const type = currentChallenge.challenges.challenge_type;
+ const allPeriods: Array<'weekly' | 'monthly' | 'total'> = ['weekly', 'monthly', 'total'];
+
+ // DB config가 있으면 우선 사용 + 빠진 period 보완
+ if (config && config.metrics && config.metrics.length > 0) {
+ const metricTypes = new Set(config.metrics.map((m) => m.metric));
+ const supplemented: typeof config.metrics = [];
+ metricTypes.forEach((metric) => {
+ const existingPeriods = new Set(
+ config.metrics.filter((m) => m.metric === metric).map((m) => m.period)
+ );
+ allPeriods.forEach((period) => {
+ supplemented.push({
+ metric: metric as 'points' | 'distance',
+ period,
+ });
+ });
+ });
+ return { metrics: supplemented };
+ }
+
+ // DB config 없으면 challenge_type 기반 fallback
+ if (type === 'running') {
+ return {
+ metrics: [
+ { metric: 'points' as const, period: 'weekly' as const },
+ { metric: 'points' as const, period: 'monthly' as const },
+ { metric: 'points' as const, period: 'total' as const },
+ { metric: 'distance' as const, period: 'weekly' as const },
+ { metric: 'distance' as const, period: 'monthly' as const },
+ { metric: 'distance' as const, period: 'total' as const },
+ ],
+ };
+ } else if (type === 'exercise' || type === 'diet_and_exercise') {
+ return {
+ metrics: [
+ { metric: 'points' as const, period: 'weekly' as const },
+ { metric: 'points' as const, period: 'monthly' as const },
+ { metric: 'points' as const, period: 'total' as const },
+ ],
+ };
+ }
+ return null;
+ })();
+
  // 로딩 중일 때 스켈레톤 UI 표시
  if (loading) {
  return <MainPageSkeleton />;
@@ -513,7 +567,14 @@ export default function User() {
  <TrafficSourceChart challengeId={selectedChallengeId} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
  <DailyDietRecord activities={filteredDailyRecordsbyId} />
  <DailyWorkoutRecord activities={filteredDailyRecordsbyId} />
- <WorkoutLeaderboard challengeId={selectedChallengeId} />
+ {leaderboardConfig && (
+ <Leaderboard
+ challengeId={selectedChallengeId}
+ startDate={challengeDates?.startDate}
+ endDate={challengeDates?.endDate}
+ leaderboardConfig={leaderboardConfig}
+ />
+ )}
  <WeeklyWorkoutChart
  data={weeklyChart}
  isLoading={workoutDataLoading}
@@ -529,7 +590,14 @@ export default function User() {
  ?.challenges.challenge_type === 'exercise' && (
  <>
  <TrafficSourceChart challengeId={selectedChallengeId} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
- <WorkoutLeaderboard challengeId={selectedChallengeId} />
+ {leaderboardConfig && (
+ <Leaderboard
+ challengeId={selectedChallengeId}
+ startDate={challengeDates?.startDate}
+ endDate={challengeDates?.endDate}
+ leaderboardConfig={leaderboardConfig}
+ />
+ )}
  <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
  <WeeklyWorkoutChart
  data={weeklyChart}
@@ -542,11 +610,14 @@ export default function User() {
  ?.challenges.challenge_type === 'running' && (
  <>
  <TrafficSourceChart challengeId={selectedChallengeId} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
- <RunningLeaderboard
+ {leaderboardConfig && (
+ <Leaderboard
  challengeId={selectedChallengeId}
  startDate={challengeDates?.startDate}
  endDate={challengeDates?.endDate}
+ leaderboardConfig={leaderboardConfig}
  />
+ )}
  <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
  </>
  )}

@@ -13,6 +13,9 @@ interface Challenges {
  enable_benchmark?: boolean;
  enable_mission?: boolean;
  use_daily_programs?: boolean;
+ leaderboard_config?: {
+ metrics: Array<{ metric: 'points' | 'distance'; period: 'weekly' | 'monthly' | 'total' }>;
+ } | null;
  challenge_participants: {
  daily_records: {
  feedbacks: {
