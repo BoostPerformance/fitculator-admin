@@ -2,6 +2,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Title from '@/components/layout/title';
 
+interface RaceTypeInfo {
+ id: string;
+ key: string;
+ label_ko: string;
+ label_en: string;
+ distance_km: number | null;
+}
+
 interface CompetitionEvent {
  id: string;
  competition_type: 'hyrox' | 'marathon';
@@ -19,6 +27,7 @@ interface CompetitionEvent {
  sort_order: number;
  record_count: number;
  user_count: number;
+ race_types: RaceTypeInfo[];
 }
 
 interface UserRecordedGroup {
@@ -48,6 +57,16 @@ interface LinkDialogState {
  eventNameKo: string | null;
  competitionType: string;
  recordCount: number;
+}
+
+interface MarathonRaceType {
+ id: string;
+ key: string;
+ distance_km: number | null;
+ label_en: string;
+ label_ko: string;
+ sort_order: number;
+ is_active: boolean;
 }
 
 type FormData = Omit<CompetitionEvent, 'id' | 'record_count' | 'user_count'>;
@@ -176,6 +195,12 @@ export default function ManageCompetitionsPage() {
  const [showConfirm, setShowConfirm] = useState(false);
  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+ // 마라톤 종목 관리
+ const [allRaceTypes, setAllRaceTypes] = useState<MarathonRaceType[]>([]);
+ const [selectedRaceTypeIds, setSelectedRaceTypeIds] = useState<Set<string>>(new Set());
+ const [showAddRaceType, setShowAddRaceType] = useState(false);
+ const [newRaceTypeForm, setNewRaceTypeForm] = useState({ key: '', label_ko: '', label_en: '', distance_km: '' });
+
  const isEditMode = editingEvent !== null;
 
  // 년도 목록 계산
@@ -277,6 +302,69 @@ export default function ManageCompetitionsPage() {
  }
  }, [typeFilter]);
 
+ const fetchRaceTypes = useCallback(async () => {
+ try {
+ const response = await fetch('/api/marathon-race-types');
+ if (!response.ok) return;
+ const data = await response.json();
+ setAllRaceTypes(data);
+ } catch {
+ // silent fail
+ }
+ }, []);
+
+ const fetchEventRaceTypes = useCallback(async (eventId: string) => {
+ try {
+ const response = await fetch(`/api/competition-events/${eventId}/race-types`);
+ if (!response.ok) return;
+ const data = await response.json();
+ setSelectedRaceTypeIds(new Set(data.map((m: { race_type_id: string }) => m.race_type_id)));
+ } catch {
+ setSelectedRaceTypeIds(new Set());
+ }
+ }, []);
+
+ const saveEventRaceTypes = useCallback(async (eventId: string) => {
+ if (selectedRaceTypeIds.size === 0) return;
+ try {
+ await fetch(`/api/competition-events/${eventId}/race-types`, {
+ method: 'PUT',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({ race_type_ids: Array.from(selectedRaceTypeIds) }),
+ });
+ } catch {
+ // silent fail
+ }
+ }, [selectedRaceTypeIds]);
+
+ const handleAddRaceType = useCallback(async () => {
+ if (!newRaceTypeForm.key || !newRaceTypeForm.label_ko || !newRaceTypeForm.label_en) return;
+ try {
+ const response = await fetch('/api/marathon-race-types', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({
+ key: newRaceTypeForm.key,
+ label_ko: newRaceTypeForm.label_ko,
+ label_en: newRaceTypeForm.label_en,
+ distance_km: newRaceTypeForm.distance_km ? parseFloat(newRaceTypeForm.distance_km) : null,
+ sort_order: allRaceTypes.length,
+ }),
+ });
+ if (!response.ok) {
+ const data = await response.json();
+ throw new Error(data.error || '종목 추가에 실패했습니다.');
+ }
+ const created = await response.json();
+ setAllRaceTypes((prev) => [...prev, created]);
+ setSelectedRaceTypeIds((prev) => { const next = new Set(prev); next.add(created.id); return next; });
+ setNewRaceTypeForm({ key: '', label_ko: '', label_en: '', distance_km: '' });
+ setShowAddRaceType(false);
+ } catch (err) {
+ alert(err instanceof Error ? err.message : '종목 추가에 실패했습니다.');
+ }
+ }, [newRaceTypeForm, allRaceTypes.length]);
+
  const openRecordsPopover = useCallback(async (eventId: string, eventName: string) => {
  setRecordsPopover({ eventId, eventName });
  setRecordsLoading(true);
@@ -300,6 +388,10 @@ export default function ManageCompetitionsPage() {
  }
  }, [mainTab, fetchEvents, fetchUserRecords]);
 
+ useEffect(() => {
+ fetchRaceTypes();
+ }, [fetchRaceTypes]);
+
  // 변경된 필드 계산
  const changedFields = useMemo(() => {
  if (!isEditMode) return [];
@@ -318,7 +410,7 @@ export default function ManageCompetitionsPage() {
  return changes;
  }, [form, originalForm, isEditMode]);
 
- const hasChanges = isEditMode ? changedFields.length > 0 : true;
+ const hasChanges = isEditMode ? (changedFields.length > 0 || selectedRaceTypeIds.size > 0) : true;
 
  const isFormValid = form.name_ko.trim() !== '' && form.name_en.trim() !== '';
 
@@ -329,6 +421,8 @@ export default function ManageCompetitionsPage() {
  setOriginalForm(emptyForm);
  setShowConfirm(false);
  setShowDeleteConfirm(false);
+ setSelectedRaceTypeIds(new Set());
+ setShowAddRaceType(false);
  setError(null);
  setModalOpen(true);
  };
@@ -341,8 +435,16 @@ export default function ManageCompetitionsPage() {
  setOriginalForm(data);
  setShowConfirm(false);
  setShowDeleteConfirm(false);
+ setShowAddRaceType(false);
  setError(null);
  setModalOpen(true);
+ if (event.competition_type === 'marathon' && event.race_types.length > 0) {
+ setSelectedRaceTypeIds(new Set(event.race_types.map((rt) => rt.id)));
+ } else if (event.competition_type === 'marathon') {
+ fetchEventRaceTypes(event.id);
+ } else {
+ setSelectedRaceTypeIds(new Set());
+ }
  };
 
  // 모달 열기: 사용자 기록 대회 → 공식 등록
@@ -379,6 +481,8 @@ export default function ManageCompetitionsPage() {
  setOriginalForm(emptyForm);
  setShowConfirm(false);
  setShowDeleteConfirm(false);
+ setSelectedRaceTypeIds(new Set());
+ setShowAddRaceType(false);
  setError(null);
  setPendingLinkInfo(null);
  };
@@ -427,16 +531,23 @@ export default function ManageCompetitionsPage() {
  throw new Error(data.error || '저장에 실패했습니다.');
  }
 
+ const responseData = await response.json();
+ const savedEventId = editingEvent ? editingEvent.id : responseData?.id;
+
+ // Save race type mappings for marathon events
+ if (form.competition_type === 'marathon' && savedEventId) {
+ await saveEventRaceTypes(savedEventId);
+ }
+
  // 공식 등록 플로우에서 온 경우: 연결 다이얼로그 표시
- if (!editingEvent && pendingLinkInfo) {
- const created = await response.json();
+ if (!editingEvent && pendingLinkInfo && savedEventId) {
  setModalOpen(false);
  setForm(emptyForm);
  setOriginalForm(emptyForm);
  setError(null);
  setLinkDialog({
  show: true,
- eventId: created.id,
+ eventId: savedEventId,
  eventNameEn: pendingLinkInfo.eventNameEn,
  eventNameKo: pendingLinkInfo.eventNameKo,
  competitionType: pendingLinkInfo.competitionType,
@@ -551,7 +662,7 @@ export default function ManageCompetitionsPage() {
  onClick={() => setMainTab('catalog')}
  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
  mainTab === 'catalog'
- ? 'bg-[#F5F5F0] text-[#1a1a1a] dark:bg-[#E8E8E0] dark:text-[#1a1a1a]'
+ ? 'bg-neutral-900 dark:bg-surface text-white'
  : 'bg-surface-raised text-content-secondary hover:bg-surface-sunken'
  }`}
  >
@@ -561,7 +672,7 @@ export default function ManageCompetitionsPage() {
  onClick={() => setMainTab('user-recorded')}
  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
  mainTab === 'user-recorded'
- ? 'bg-[#F5F5F0] text-[#1a1a1a] dark:bg-[#E8E8E0] dark:text-[#1a1a1a]'
+ ? 'bg-neutral-900 dark:bg-surface text-white'
  : 'bg-surface-raised text-content-secondary hover:bg-surface-sunken'
  }`}
  >
@@ -651,6 +762,7 @@ export default function ManageCompetitionsPage() {
  <tr className="border-b border-line-subtle">
  <th className="px-5 py-3.5 text-left text-xs font-semibold text-content-tertiary uppercase tracking-wider">종류</th>
  <th className="px-5 py-3.5 text-left text-xs font-semibold text-content-tertiary uppercase tracking-wider">대회명</th>
+ <th className="px-5 py-3.5 text-left text-xs font-semibold text-content-tertiary uppercase tracking-wider">종목</th>
  <th className="px-5 py-3.5 text-left text-xs font-semibold text-content-tertiary uppercase tracking-wider">위치</th>
  <th className="px-5 py-3.5 text-left text-xs font-semibold text-content-tertiary uppercase tracking-wider">기간</th>
  <th className="px-5 py-3.5 text-left text-xs font-semibold text-content-tertiary uppercase tracking-wider">기록</th>
@@ -667,10 +779,10 @@ export default function ManageCompetitionsPage() {
  className={`cursor-pointer hover:bg-surface-raised/40 transition-colors ${status === 'upcoming' ? 'opacity-60' : ''}`}
  >
  <td className="px-5 py-4">
- <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-md ${
+ <span className={`text-xs font-semibold ${
  event.competition_type === 'hyrox'
- ? 'bg-[#FFF200] text-content-primary'
- : 'bg-[#5AFF82] text-[#1a1a1a]'
+ ? 'text-[#FFD700] dark:text-[#FFF200]'
+ : 'text-[#2CBCE0] dark:text-[#73DDFF]'
  }`}>
  {competitionTypeLabel(event.competition_type)}
  </span>
@@ -679,15 +791,39 @@ export default function ManageCompetitionsPage() {
  <div className="font-medium text-content-primary dark:text-white text-sm">{event.name_ko}</div>
  <div className="text-content-disabled text-xs mt-0.5">{event.name_en}</div>
  </td>
+ <td className="px-5 py-4">
+ {event.competition_type === 'marathon' && event.race_types.length > 0 ? (
+ <span className="text-sm text-content-secondary">
+ {event.race_types.map((rt) => rt.key.toUpperCase()).join(' / ')}
+ </span>
+ ) : event.competition_type === 'marathon' ? (
+ <span className="text-content-disabled text-xs">미설정</span>
+ ) : (
+ <span className="text-content-disabled">-</span>
+ )}
+ </td>
  <td className="px-5 py-4 text-sm text-content-secondary">
- {[event.location_ko || event.location_en, event.city_ko, event.country_ko].filter(Boolean).join(', ') || <span className="text-content-disabled">-</span>}
+ {(() => {
+ const cityCountry = [event.city_ko, event.country_ko].filter(Boolean).join(', ');
+ const location = event.location_ko || event.location_en;
+ if (!cityCountry && !location) return <span className="text-content-disabled">-</span>;
+ return (
+ <>
+ <div className="text-sm text-content-secondary">{cityCountry || '-'}</div>
+ {location && <div className="text-xs text-content-disabled mt-0.5">{location}</div>}
+ </>
+ );
+ })()}
  </td>
  <td className="px-5 py-4 text-sm text-content-secondary whitespace-nowrap">
- {event.start_date && event.end_date
- ? event.start_date === event.end_date
- ? event.start_date
- : `${event.start_date} ~ ${event.end_date}`
- : event.start_date || event.end_date || <span className="text-content-disabled">-</span>}
+ {(() => {
+ const fmt = (d: string) => d.replace(/-/g, '.');
+ if (!event.start_date && !event.end_date) return <span className="text-content-disabled">-</span>;
+ if (event.start_date && event.end_date && event.start_date !== event.end_date) {
+ return (<><div>{fmt(event.start_date)}</div><div className="text-content-disabled">-{fmt(event.end_date)}</div></>);
+ }
+ return fmt(event.start_date || event.end_date || '');
+ })()}
  </td>
  <td className="px-5 py-4 text-sm whitespace-nowrap relative">
  {event.record_count > 0 ? (
@@ -779,10 +915,10 @@ export default function ManageCompetitionsPage() {
  {filteredUserRecords.map((record, i) => (
  <tr key={`${record.event_name_en}-${record.event_name_ko}-${i}`} className="hover:bg-surface-raised/40 transition-colors">
  <td className="px-5 py-4">
- <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-md ${
+ <span className={`text-xs font-semibold ${
  record.competition_type === 'hyrox'
- ? 'bg-[#FFF200] text-content-primary'
- : 'bg-[#5AFF82] text-[#1a1a1a]'
+ ? 'text-[#FFD700] dark:text-[#FFF200]'
+ : 'text-[#2CBCE0] dark:text-[#73DDFF]'
  }`}>
  {competitionTypeLabel(record.competition_type)}
  </span>
@@ -1057,6 +1193,123 @@ export default function ManageCompetitionsPage() {
  </div>
  </div>
  </div>
+
+ {/* 마라톤 종목 선택 */}
+ {form.competition_type === 'marathon' && (
+ <div>
+ <div className="flex items-center gap-2 mb-3">
+ <div className="w-5 h-5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+ <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-emerald-600 dark:text-emerald-400">
+ <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+ </svg>
+ </div>
+ <span className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">종목 선택</span>
+ </div>
+ <div className="bg-surface-raised/30 rounded-xl p-4">
+ <div className="grid grid-cols-2 gap-2">
+ {allRaceTypes.filter((rt) => rt.is_active).map((rt) => (
+ <label
+ key={rt.id}
+ className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
+ selectedRaceTypeIds.has(rt.id)
+ ? 'bg-emerald-50 dark:bg-emerald-900/20 ring-1 ring-emerald-200 dark:ring-emerald-800'
+ : 'hover:bg-surface-raised'
+ }`}
+ >
+ <input
+ type="checkbox"
+ checked={selectedRaceTypeIds.has(rt.id)}
+ onChange={(e) => {
+ const next = new Set(selectedRaceTypeIds);
+ if (e.target.checked) {
+ next.add(rt.id);
+ } else {
+ next.delete(rt.id);
+ }
+ setSelectedRaceTypeIds(next);
+ }}
+ className="w-4 h-4 rounded border-line text-emerald-600 focus:ring-emerald-500/40"
+ />
+ <div className="min-w-0">
+ <div className="text-sm font-medium text-content-primary">{rt.label_ko}</div>
+ <div className="text-xs text-content-disabled">
+ {rt.label_en}
+ {rt.distance_km != null && ` · ${rt.distance_km}km`}
+ </div>
+ </div>
+ </label>
+ ))}
+ </div>
+
+ {/* 새 종목 추가 */}
+ {!showAddRaceType ? (
+ <button
+ type="button"
+ onClick={() => setShowAddRaceType(true)}
+ className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors"
+ >
+ <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+ <line x1="6" y1="2" x2="6" y2="10" /><line x1="2" y1="6" x2="10" y2="6" />
+ </svg>
+ 새 종목 추가
+ </button>
+ ) : (
+ <div className="mt-3 border border-line rounded-xl p-3 space-y-2.5">
+ <div className="text-xs font-semibold text-content-tertiary mb-2">새 종목</div>
+ <div className="grid grid-cols-2 gap-2">
+ <input
+ type="text"
+ value={newRaceTypeForm.key}
+ onChange={(e) => setNewRaceTypeForm({ ...newRaceTypeForm, key: e.target.value })}
+ placeholder="key (예: 32k)"
+ className="px-2.5 py-1.5 bg-surface border border-line rounded-lg text-xs focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none"
+ />
+ <input
+ type="text"
+ value={newRaceTypeForm.distance_km}
+ onChange={(e) => setNewRaceTypeForm({ ...newRaceTypeForm, distance_km: e.target.value })}
+ placeholder="거리 km (예: 32)"
+ className="px-2.5 py-1.5 bg-surface border border-line rounded-lg text-xs focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none"
+ />
+ </div>
+ <div className="grid grid-cols-2 gap-2">
+ <input
+ type="text"
+ value={newRaceTypeForm.label_ko}
+ onChange={(e) => setNewRaceTypeForm({ ...newRaceTypeForm, label_ko: e.target.value })}
+ placeholder="한글명 (예: 32K)"
+ className="px-2.5 py-1.5 bg-surface border border-line rounded-lg text-xs focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none"
+ />
+ <input
+ type="text"
+ value={newRaceTypeForm.label_en}
+ onChange={(e) => setNewRaceTypeForm({ ...newRaceTypeForm, label_en: e.target.value })}
+ placeholder="영문명 (예: 32K)"
+ className="px-2.5 py-1.5 bg-surface border border-line rounded-lg text-xs focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none"
+ />
+ </div>
+ <div className="flex gap-2 pt-1">
+ <button
+ type="button"
+ onClick={() => { setShowAddRaceType(false); setNewRaceTypeForm({ key: '', label_ko: '', label_en: '', distance_km: '' }); }}
+ className="px-3 py-1.5 text-xs font-medium text-content-secondary border border-line rounded-lg hover:bg-surface-raised transition-colors"
+ >
+ 취소
+ </button>
+ <button
+ type="button"
+ onClick={handleAddRaceType}
+ disabled={!newRaceTypeForm.key || !newRaceTypeForm.label_ko || !newRaceTypeForm.label_en}
+ className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-40"
+ >
+ 추가
+ </button>
+ </div>
+ </div>
+ )}
+ </div>
+ </div>
+ )}
  </div>
 
  {/* 오른쪽: 위치 + 일정 */}

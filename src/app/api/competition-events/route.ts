@@ -71,12 +71,32 @@ export async function GET(request: Request) {
  }
  }
 
- const eventsWithStats = (events || []).map((event: { id: string }) => {
+ // 마라톤 대회별 종목 매핑 조회
+ const { data: raceTypeMappings } = await supabase
+ .from('competition_event_race_types')
+ .select('event_id, marathon_race_types(id, key, label_ko, label_en, distance_km)')
+ .order('sort_order');
+
+ const eventRaceTypes = new Map<string, { id: string; key: string; label_ko: string; label_en: string; distance_km: number | null }[]>();
+ for (const row of raceTypeMappings || []) {
+ const rt = row.marathon_race_types as { id: string; key: string; label_ko: string; label_en: string; distance_km: number | null } | null;
+ if (!rt) continue;
+ const list = eventRaceTypes.get(row.event_id) || [];
+ list.push(rt);
+ eventRaceTypes.set(row.event_id, list);
+ }
+ // 거리 내림차순 정렬 (NULL은 마지막)
+ for (const [, list] of eventRaceTypes) {
+ list.sort((a, b) => (b.distance_km ?? -1) - (a.distance_km ?? -1));
+ }
+
+ const eventsWithStats = (events || []).map((event: { id: string; competition_type: string }) => {
  const stats = eventStats.get(event.id);
  return {
  ...event,
  record_count: stats?.record_count ?? 0,
  user_count: stats?.user_ids.size ?? 0,
+ race_types: event.competition_type === 'marathon' ? (eventRaceTypes.get(event.id) || []) : [],
  };
  });
 
