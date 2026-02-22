@@ -41,7 +41,7 @@ export function SidebarHeader({ isSidebarOpen, isScrolled, onToggle }: SidebarHe
  <div className="w-5 h-5 flex flex-col justify-center items-center gap-[0.25rem]">
  <span className={cn(
  'block w-full h-[2px] bg-content-primary transition-all duration-300 ease-in-out',
- isSidebarOpen && 'rotate-45 translate-y-[7px]'
+ isSidebarOpen && 'rotate-45 translate-y-[6px]'
  )} />
  <span className={cn(
  'block w-full h-[2px] bg-content-primary transition-all duration-300 ease-in-out',
@@ -49,7 +49,7 @@ export function SidebarHeader({ isSidebarOpen, isScrolled, onToggle }: SidebarHe
  )} />
  <span className={cn(
  'block w-full h-[2px] bg-content-primary transition-all duration-300 ease-in-out',
- isSidebarOpen && '-rotate-45 -translate-y-[7px]'
+ isSidebarOpen && '-rotate-45 -translate-y-[6px]'
  )} />
  </div>
  </button>
