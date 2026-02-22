@@ -46,6 +46,7 @@ export default function Sidebar({
  const [isResizing, setIsResizing] = useState(false);
  const [isScrolled, setIsScrolled] = useState(false);
  const [mounted, setMounted] = useState(false);
+ const [mobileSidebarAnimating, setMobileSidebarAnimating] = useState(false);
 
  useEffect(() => { setMounted(true); }, []);
 
@@ -72,6 +73,8 @@ export default function Sidebar({
   setInternalSidebarOpen(value);
  }
  }, [isMobile, isControlled, controlledSidebarOpen, onSidebarOpenChange, setInternalSidebarOpen]);
+
+ const showMobileOverlay = isMobile && (isSidebarOpen || mobileSidebarAnimating);
 
  const [modalOpen, setModalOpen] = useState(false);
  const [selectedNoticeId, setSelectedNoticeId] = useState<string | null>(null);
@@ -145,6 +148,10 @@ export default function Sidebar({
  const closeSidebarOnMobile = useCallback(() => {
  if (isMobile) setIsSidebarOpen(false);
  }, [isMobile, setIsSidebarOpen]);
+
+ const handleMobileSidebarExited = useCallback(() => {
+ setMobileSidebarAnimating(false);
+ }, []);
 
  const handleChallengeClick = useCallback((challenge: ChallengeData) => {
  setSelectedTitle(challenge.challenges.title);
@@ -250,6 +257,12 @@ export default function Sidebar({
  return () => window.removeEventListener('resize', handleResize);
  }, [setInternalSidebarOpen, setIsOpenDropdown]);
 
+ // Mobile sidebar animation lifecycle
+ useEffect(() => {
+ if (isMobile && isSidebarOpen) setMobileSidebarAnimating(true);
+ if (!isMobile) setMobileSidebarAnimating(false);
+ }, [isMobile, isSidebarOpen]);
+
  // Resize handle
  const handleMouseDown = useCallback((e: React.MouseEvent) => {
  if (!isMobile) { setIsResizing(true); e.preventDefault(); }
@@ -300,8 +313,10 @@ export default function Sidebar({
  </a>
 
  {/* Mobile overlay (Portal) */}
- {mounted && isMobile && isSidebarOpen && createPortal(
+ {mounted && showMobileOverlay && createPortal(
  <MobileSidebarOverlay
+ isOpen={isSidebarOpen}
+ onExited={handleMobileSidebarExited}
  data={data}
  selectedChallengeId={selectedChallengeId}
  isOpenDropdown={isOpenDropdown}
