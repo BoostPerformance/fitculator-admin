@@ -18,4 +18,8 @@ export interface SidebarProps {
  coach?: string;
  selectedChallengeId?: string;
  username?: string;
+ /** Controlled sidebar open state (desktop). When provided, Sidebar uses this instead of internal state. */
+ isSidebarOpen?: boolean;
+ /** Callback when sidebar open state changes (desktop controlled mode). */
+ onSidebarOpenChange?: (open: boolean) => void;
 }

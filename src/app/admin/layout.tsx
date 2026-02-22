@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Sidebar from '@/components/sidebar';
 import type { ChallengeData } from '@/components/sidebar';
-import LogoutButton from '@/components/buttons/logoutButton';
+import { DesktopHeader } from '@/components/header/DesktopHeader';
 import { useAdminData } from '@/components/hooks/useAdminData';
 import { useChallenge } from '@/components/hooks/useChallenges';
 
@@ -12,7 +12,7 @@ export default function AdminLayout({
  children: React.ReactNode;
 }) {
  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
- const [userDropdown, setUserDropdown] = useState(false);
+ const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
  const { adminData } = useAdminData();
  const { challenges } = useChallenge();
@@ -38,32 +38,17 @@ export default function AdminLayout({
  };
 
  return (
- <div className="relative min-h-screen">
- <div className="absolute right-8 top-4 z-50 hidden lg:flex md:hidden items-center gap-2">
- <div className="text-content-secondary text-body whitespace-nowrap">
- 안녕하세요, {adminData?.username} !
- </div>
- <button
- onClick={() => setUserDropdown(!userDropdown)}
- className="flex items-center p-2 rounded-lg hover:bg-surface-raised transition-colors"
- >
- <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-content-secondary">
- <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
- </svg>
- </button>
- {userDropdown && (
- <div className="absolute right-0 top-full mt-2 bg-surface rounded-lg shadow-elevation-2 border border-line px-4 py-2 z-50 min-w-[100px]">
- <LogoutButton />
- </div>
- )}
- </div>
- <div className="flex lg:flex-row md:flex-col sm:flex-col min-h-screen">
+ <div className="flex flex-col min-h-screen">
+ <DesktopHeader />
+ <div className="flex lg:flex-row md:flex-col sm:flex-col flex-1">
  <Sidebar
  data={formattedChallenges as any}
  onSelectChallenge={handleChallengeSelect}
  coach={adminData?.username}
  selectedChallengeId={selectedChallengeId}
  username={adminData?.username}
+ isSidebarOpen={isSidebarOpen}
+ onSidebarOpenChange={setIsSidebarOpen}
  />
  <main className="flex-1 bg-surface-app lg:px-4 lg:py-5 md:px-4 md:py-4 sm:px-0 sm:py-0">
  {children}

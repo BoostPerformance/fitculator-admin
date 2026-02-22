@@ -34,7 +34,11 @@ export default function Sidebar({
  selectedChallengeId,
  coach,
  username,
+ isSidebarOpen: controlledSidebarOpen,
+ onSidebarOpenChange,
 }: SidebarProps) {
+ const isControlled = controlledSidebarOpen !== undefined;
+
  const [selectedTitle, setSelectedTitle] = useState('');
  const [userDropdown, setUserDropdown] = useState(false);
  const [isMobile, setIsMobile] = useState(false);
@@ -46,17 +50,28 @@ export default function Sidebar({
  useEffect(() => { setMounted(true); }, []);
 
  const {
- isSidebarOpen,
+ isSidebarOpen: internalSidebarOpen,
  isOpenDropdown,
  isAdminDropdownOpen,
  isOpenEndedDropdown,
  isOpenChallengeDropdown,
- setIsSidebarOpen,
+ setIsSidebarOpen: setInternalSidebarOpen,
  setIsOpenDropdown,
  setIsAdminDropdownOpen,
  setIsOpenEndedDropdown,
  setIsOpenChallengeDropdown,
  } = useSidebarState(isMobile);
+
+ // Use controlled state for desktop when props are provided, otherwise internal state
+ const isSidebarOpen = (!isMobile && isControlled) ? controlledSidebarOpen : internalSidebarOpen;
+ const setIsSidebarOpen = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
+ if (!isMobile && isControlled && onSidebarOpenChange) {
+  const newValue = typeof value === 'function' ? value(controlledSidebarOpen) : value;
+  onSidebarOpenChange(newValue);
+ } else {
+  setInternalSidebarOpen(value);
+ }
+ }, [isMobile, isControlled, controlledSidebarOpen, onSidebarOpenChange, setInternalSidebarOpen]);
 
  const [modalOpen, setModalOpen] = useState(false);
  const [selectedNoticeId, setSelectedNoticeId] = useState<string | null>(null);
@@ -223,14 +238,14 @@ export default function Sidebar({
  const mobile = window.innerWidth < 1025;
  setIsMobile(mobile);
  if (mobile) {
- setIsSidebarOpen(false);
+ setInternalSidebarOpen(false);
  setIsOpenDropdown(true);
  }
  };
  handleResize();
  window.addEventListener('resize', handleResize);
  return () => window.removeEventListener('resize', handleResize);
- }, []);
+ }, [setInternalSidebarOpen, setIsOpenDropdown]);
 
  // Resize handle
  const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -335,13 +350,31 @@ export default function Sidebar({
  />
  )}
 
- {/* Desktop header */}
- {!isMobile && (
+ {/* Desktop header (uncontrolled: logo + toggle) */}
+ {!isMobile && !isControlled && (
  <SidebarHeader
  isSidebarOpen={isSidebarOpen}
  isScrolled={isScrolled}
  onToggle={handleSidebarOpen}
  />
+ )}
+
+ {/* Desktop toggle (controlled: logo is in DesktopHeader) */}
+ {!isMobile && isControlled && (
+ <div className={cn(
+ 'flex items-center py-3',
+ isSidebarOpen ? 'justify-end px-0' : 'justify-center px-0',
+ )}>
+ <button
+ onClick={handleSidebarOpen}
+ className="flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-lg hover:bg-surface-raised active:bg-neutral-200 dark:active:bg-neutral-800 transition-colors"
+ aria-label={isSidebarOpen ? '사이드바 접기' : '사이드바 펼치기'}
+ >
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-content-secondary">
+ <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+ </svg>
+ </button>
+ </div>
  )}
 
  {/* Desktop nav */}
