@@ -6,7 +6,7 @@ import {
   eachDayOfInterval, format, isToday, isSameMonth, isSameDay,
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import type { DailyProgram, DailyProgramCard } from '@/types/daily-program';
+import type { DailyProgram } from '@/types/daily-program';
 import { CalendarProgramChip } from './calendar-program-chip';
 
 const WEEKDAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -17,9 +17,7 @@ interface MobileCalendarViewProps {
   selectedDay: Date;
   onSelectedDayChange: (day: Date) => void;
   onProgramClick: (program: DailyProgram) => void;
-  onDayCellClick: (date: string) => void;
-  onAddCard?: (date: string) => void;
-  onCardClick?: (card: DailyProgramCard, program: DailyProgram) => void;
+  onAddProgram: (date: string) => void;
 }
 
 export function MobileCalendarView({
@@ -28,9 +26,7 @@ export function MobileCalendarView({
   selectedDay,
   onSelectedDayChange,
   onProgramClick,
-  onDayCellClick,
-  onAddCard,
-  onCardClick,
+  onAddProgram,
 }: MobileCalendarViewProps) {
 
   const monthStart = startOfMonth(currentDate);
@@ -117,17 +113,15 @@ export function MobileCalendarView({
           <h3 className="text-sm font-semibold text-content-primary dark:text-white">
             {format(selectedDay, 'M월 d일 (EEEEE)', { locale: ko })}
           </h3>
-          {onAddCard && (
-            <button
-              onClick={() => onAddCard(selectedDateStr)}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              추가
-            </button>
-          )}
+          <button
+            onClick={() => onAddProgram(selectedDateStr)}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            추가
+          </button>
         </div>
 
         {/* Program cards */}
@@ -141,7 +135,6 @@ export function MobileCalendarView({
                 <CalendarProgramChip
                   program={program}
                   onClick={onProgramClick}
-                  onCardClick={onCardClick}
                   compact={false}
                   disableDrag
                 />

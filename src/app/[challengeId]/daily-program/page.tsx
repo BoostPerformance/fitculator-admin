@@ -10,14 +10,13 @@ import {
  DndContext, DragOverlay, pointerWithin,
  type DragStartEvent, type DragEndEvent,
 } from '@dnd-kit/core';
-import type { DailyProgram, DailyProgramCard, CalendarViewMode, ChallengeGroup, ProgramStatus } from '@/types/daily-program';
+import type { DailyProgram, CalendarViewMode, ChallengeGroup } from '@/types/daily-program';
 import { CalendarToolbar } from '@/components/daily-program/calendar-toolbar';
 import { CalendarMonthView } from '@/components/daily-program/calendar-month-view';
 import { CalendarWeekView } from '@/components/daily-program/calendar-week-view';
 import { CalendarProgramChip } from '@/components/daily-program/calendar-program-chip';
 import { MobileCalendarView } from '@/components/daily-program/mobile-calendar-view';
 import { ProgramDetailSheet } from '@/components/daily-program/program-detail-sheet';
-import { CardEditDialog } from '@/components/daily-program/card-edit-dialog';
 import { useResponsive } from '@/components/hooks/useResponsive';
 
 export default function DailyProgramPage() {
@@ -36,15 +35,6 @@ export default function DailyProgramPage() {
  const [sheetOpen, setSheetOpen] = useState(false);
  const [selectedProgram, setSelectedProgram] = useState<DailyProgram | null>(null);
  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-
- // Card edit dialog state
- const [cardDialogOpen, setCardDialogOpen] = useState(false);
- const [editingCard, setEditingCard] = useState<DailyProgramCard | null>(null);
- const [cardDialogProgramId, setCardDialogProgramId] = useState('');
- const [cardDialogProgramTitle, setCardDialogProgramTitle] = useState('');
- const [cardDialogProgramStatus, setCardDialogProgramStatus] = useState<ProgramStatus>('draft');
- const [cardDialogDateLabel, setCardDialogDateLabel] = useState('');
- const [hideCheckHint, setHideCheckHint] = useState(false);
 
  // DnD state
  const [activeDragProgram, setActiveDragProgram] = useState<DailyProgram | null>(null);
@@ -157,37 +147,6 @@ export default function DailyProgramPage() {
  fetchPrograms();
  };
 
- const handleAddCard = (date: string) => {
- const existingProgram = programs.find((p) => p.date === date);
-
- setEditingCard(null);
- setCardDialogProgramId(existingProgram?.id ?? '');
- setCardDialogProgramTitle(existingProgram?.title ?? '');
- setCardDialogProgramStatus(existingProgram?.status ?? 'draft');
- setCardDialogDateLabel(date);
- setCardDialogOpen(true);
- };
-
- const handleCardClick = (card: DailyProgramCard, program: DailyProgram) => {
- setEditingCard(card);
- setCardDialogProgramId(program.id);
- setCardDialogProgramTitle(program.title ?? '');
- setCardDialogProgramStatus(program.status);
- setCardDialogDateLabel(program.date);
- setCardDialogOpen(true);
- };
-
- const handleCardDialogClose = () => {
- setCardDialogOpen(false);
- setEditingCard(null);
- setCardDialogProgramId('');
- setCardDialogDateLabel('');
- };
-
- const handleCardSaved = () => {
- fetchPrograms();
- };
-
  const handleDateChange = async (programId: string, newDate: string) => {
  // Optimistic update
  setPrograms((prev) =>
@@ -231,7 +190,7 @@ export default function DailyProgramPage() {
  };
 
  return (
- <div className="h-full flex flex-col">
+ <div>
  <CalendarToolbar
  viewMode={viewMode}
  onViewModeChange={setViewMode}
@@ -239,10 +198,10 @@ export default function DailyProgramPage() {
  onPrev={handlePrev}
  onNext={handleNext}
  onToday={handleToday}
- onAdd={() => handleAddCard(format(isMobile ? mobileSelectedDay : new Date(), 'yyyy-MM-dd'))}
+ onAdd={() => handleDayCellClick(format(isMobile ? mobileSelectedDay : new Date(), 'yyyy-MM-dd'))}
  />
 
- <div className="flex-1 overflow-auto px-4 pb-4 sm:px-2 sm:pb-2">
+ <div className="px-4 pb-4 sm:px-2 sm:pb-2">
  {loading ? (
  <div className="flex items-center justify-center h-64">
  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
@@ -254,9 +213,7 @@ export default function DailyProgramPage() {
  selectedDay={mobileSelectedDay}
  onSelectedDayChange={setMobileSelectedDay}
  onProgramClick={handleProgramClick}
- onDayCellClick={handleDayCellClick}
- onAddCard={handleAddCard}
- onCardClick={handleCardClick}
+ onAddProgram={handleDayCellClick}
  />
  ) : (
  <DndContext
@@ -269,20 +226,16 @@ export default function DailyProgramPage() {
  currentDate={currentDate}
  programs={programs}
  onProgramClick={handleProgramClick}
- onDayCellClick={handleDayCellClick}
+ onAddProgram={handleDayCellClick}
  onDateChange={handleDateChange}
- onAddCard={handleAddCard}
- onCardClick={handleCardClick}
  />
  ) : (
  <CalendarWeekView
  currentDate={currentDate}
  programs={programs}
  onProgramClick={handleProgramClick}
- onDayCellClick={handleDayCellClick}
+ onAddProgram={handleDayCellClick}
  onDateChange={handleDateChange}
- onAddCard={handleAddCard}
- onCardClick={handleCardClick}
  />
  )}
 
@@ -309,20 +262,6 @@ export default function DailyProgramPage() {
  initialDate={selectedDate}
  groups={groups}
  onSaved={handleProgramSaved}
- />
-
- <CardEditDialog
- open={cardDialogOpen}
- onClose={handleCardDialogClose}
- card={editingCard}
- programId={cardDialogProgramId}
- programTitle={cardDialogProgramTitle}
- programStatus={cardDialogProgramStatus}
- challengeId={challengeId}
- dateLabel={cardDialogDateLabel}
- onSaved={handleCardSaved}
- hideCheckHint={hideCheckHint}
- onDismissCheckHint={() => setHideCheckHint(true)}
  />
  </div>
  );

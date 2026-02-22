@@ -345,7 +345,7 @@ export default function Sidebar({
  {(!isMobile || !isSidebarOpen) && (
  <aside
  className={cn(
- 'min-h-fit lg:min-h-screen lg:px-4 bg-surface relative transition-all duration-300 ease-in-out safe-area-inset-bottom',
+ 'min-h-fit lg:h-full lg:flex lg:flex-col lg:px-4 bg-surface relative transition-all duration-300 ease-in-out safe-area-inset-bottom',
  isMobile && !isSidebarOpen && 'w-full sticky top-0 z-[100]',
  !isMobile && !isSidebarOpen && 'lg:w-16 min-w-16',
  !isMobile && isSidebarOpen && 'sm:min-w-48 md:min-w-56',
@@ -383,7 +383,7 @@ export default function Sidebar({
  {!isMobile && isSidebarOpen && (
  <div
  id="sidebar-menu-container"
- className="w-full flex flex-col z-50 flex-1"
+ className="w-full flex flex-col z-50 flex-1 min-h-0 overflow-y-auto scrollbar-on-hover"
  role="region"
  aria-label="메뉴 목록"
  onClick={(e) => e.stopPropagation()}
@@ -399,12 +399,12 @@ export default function Sidebar({
  ariaLabel="프로그램 메뉴"
  ariaControls="program-menu-list"
  >
- <RecentChallengesSection
+ {/* <RecentChallengesSection
  challenges={recentChallengesData}
  selectedChallengeId={selectedChallengeId}
  onSelect={handleChallengeClick}
  onRemove={removeRecentChallenge}
- />
+ /> */}
  <ActiveChallengesSection
  challenges={activeChallenges}
  selectedChallengeId={selectedChallengeId}

@@ -33,29 +33,17 @@ function extractText(nodes: TiptapNode[] | undefined): string {
 interface CalendarCardPreviewProps {
  card: DailyProgramCard;
  expanded?: boolean;
- onClick?: (card: DailyProgramCard) => void;
 }
 
-export function CalendarCardPreview({ card, expanded = false, onClick }: CalendarCardPreviewProps) {
+export function CalendarCardPreview({ card, expanded = false }: CalendarCardPreviewProps) {
  const [tipsOpen, setTipsOpen] = useState(false);
  const bodyText = card.body ? extractText(card.body.content) : '';
  const hasBody = bodyText.length > 0;
  const hasCoachingTips = !!card.coaching_tips;
 
- const handleClick = (e: React.MouseEvent) => {
- if (onClick) {
- e.stopPropagation();
- onClick(card);
- }
- };
-
  return (
  <div
- onClick={handleClick}
- onPointerDown={onClick ? (e) => e.stopPropagation() : undefined}
- className={`rounded-xl bg-neutral-900 border border-line-strong/50 overflow-hidden ${
- onClick ? 'cursor-pointer hover:ring-1 hover:ring-blue-500/50 transition-all' : ''
- }`}
+ className="rounded-xl bg-neutral-900 border border-line-strong/50 overflow-hidden"
  >
  {/* Header: type badge + score + title */}
  <div className={expanded ? 'px-3 pt-2.5 pb-1.5' : 'px-2 pt-1.5 pb-1'}>

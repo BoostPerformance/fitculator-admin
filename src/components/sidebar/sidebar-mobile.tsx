@@ -243,13 +243,13 @@ export function MobileSidebarOverlay({
          ariaControls="program-menu-list-mobile"
          mobile
         >
-         <RecentChallengesSection
+         {/* <RecentChallengesSection
           challenges={recentChallengesData}
           selectedChallengeId={selectedChallengeId}
           onSelect={onChallengeClick}
           onRemove={onRemoveRecent}
           mobile
-         />
+         /> */}
          <ActiveChallengesSection
           challenges={activeChallenges}
           selectedChallengeId={selectedChallengeId}

@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import type { DailyProgram, DailyProgramCard, ProgramStatus } from '@/types/daily-program';
+import { Pencil } from 'lucide-react';
+import type { DailyProgram, ProgramStatus } from '@/types/daily-program';
 import { CalendarCardPreview } from './calendar-card-preview';
 
 const statusIndicator: Record<ProgramStatus, string> = {
@@ -20,69 +21,65 @@ const statusLabel: Record<ProgramStatus, string> = {
 interface CalendarProgramChipProps {
  program: DailyProgram;
  onClick: (program: DailyProgram) => void;
- onCardClick?: (card: DailyProgramCard, program: DailyProgram) => void;
  compact?: boolean;
  disableDrag?: boolean;
 }
 
-export function CalendarProgramChip({ program, onClick, onCardClick, compact = false, disableDrag = false }: CalendarProgramChipProps) {
+export function CalendarProgramChip({ program, onClick, compact = false, disableDrag = false }: CalendarProgramChipProps) {
  const cards = program.daily_program_cards ?? [];
 
  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
- id: program.id,
- disabled: disableDrag,
+  id: program.id,
+  disabled: disableDrag,
  });
 
  return (
- <div
- ref={setNodeRef}
- {...listeners}
- {...attributes}
- onClick={(e) => {
- e.stopPropagation();
- onClick(program);
- }}
- className={`w-full cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] ${
- isDragging ? 'opacity-40' : ''
- }`}
- title={program.title || '제목 없음'}
- >
- {/* Program header */}
- <div className="flex items-center gap-1.5 mb-1">
- <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusIndicator[program.status]}`} />
- <span className="text-[11px] font-medium text-content-secondary truncate">
- {program.title || '제목 없음'}
- </span>
- <span className="text-[9px] text-content-disabled flex-shrink-0">
- {statusLabel[program.status]}
- </span>
- </div>
+  <div
+   ref={setNodeRef}
+   className={`w-full transition-all hover:scale-[1.01] active:scale-[0.99] ${
+    isDragging ? 'opacity-40' : ''
+   }`}
+   title={program.title || '제목 없음'}
+  >
+   {/* Program header — also serves as drag handle */}
+   <div
+    {...listeners}
+    {...attributes}
+    className="group/header flex items-center gap-1.5 mb-1 cursor-pointer rounded hover:bg-black/5 dark:hover:bg-white/5 -mx-1 px-1 py-0.5 transition-colors"
+    onClick={(e) => {
+     e.stopPropagation();
+     onClick(program);
+    }}
+   >
+    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusIndicator[program.status]}`} />
+    <span className="text-[11px] font-medium text-content-secondary truncate">
+     {program.title || '제목 없음'}
+    </span>
+    <span className="text-[9px] text-content-disabled flex-shrink-0">
+     {statusLabel[program.status]}
+    </span>
+    <Pencil className="ml-auto flex-shrink-0 w-3 h-3 text-content-disabled opacity-0 group-hover/header:opacity-100 transition-opacity" />
+   </div>
 
- {/* Cards list - app style */}
- {cards.length > 0 && (
- <div className={`space-y-1 ${compact ? 'max-h-[120px] overflow-hidden' : ''}`}>
- {cards.map((card) => (
- <CalendarCardPreview
- key={card.id}
- card={card}
- expanded={!compact}
- onClick={onCardClick ? (c) => onCardClick(c, program) : undefined}
- />
- ))}
- {compact && cards.length > 2 && (
- <div className="text-[9px] text-content-disabled text-center py-0.5">
- +{cards.length - 2}개 카드
- </div>
- )}
- </div>
- )}
+   {/* Cards list — read-only preview */}
+   {cards.length > 0 && (
+    <div className="space-y-1">
+     {cards.map((card) => (
+      <CalendarCardPreview
+       key={card.id}
+       card={card}
+       expanded={!compact}
+      />
+     ))}
+    </div>
+   )}
 
- {/* Empty state */}
- {cards.length === 0 && (
- <div className="rounded-lg border border-dashed border-line px-2 py-1.5">
- <span className="text-[10px] text-content-disabled">카드 없음</span>
- </div>
- )}
- </div>
+   {/* Empty state */}
+   {cards.length === 0 && (
+    <div className="rounded-lg border border-dashed border-line px-2 py-1.5">
+     <span className="text-[10px] text-content-disabled">카드 없음</span>
+    </div>
+   )}
+  </div>
  );
 }

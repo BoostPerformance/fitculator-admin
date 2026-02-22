@@ -13,6 +13,16 @@ const CARD_TYPES: { value: CardType; label: string }[] = [
  { value: 'custom', label: 'Custom' },
 ];
 
+export interface PendingCardData {
+ title: string;
+ card_type: CardType;
+ body: TiptapDocument | null;
+ coaching_tips: string | null;
+ has_check: boolean;
+ requires_approval: boolean;
+ score_value: number;
+}
+
 interface CardFormProps {
  card?: DailyProgramCard | null;
  programId: string;
@@ -25,9 +35,10 @@ interface CardFormProps {
  hideCheckHint?: boolean;
  onDismissCheckHint?: () => void;
  onDirtyChange?: (dirty: boolean) => void;
+ onLocalSave?: (data: PendingCardData) => void;
 }
 
-export function CardForm({ card, programId, programTitle, programStatus, challengeId, date, onSave, onCancel, hideCheckHint, onDismissCheckHint, onDirtyChange }: CardFormProps) {
+export function CardForm({ card, programId, programTitle, programStatus, challengeId, date, onSave, onCancel, hideCheckHint, onDismissCheckHint, onDirtyChange, onLocalSave }: CardFormProps) {
  const [title, setTitle] = useState('');
  const [cardType, setCardType] = useState<CardType>('workout');
  const [body, setBody] = useState<TiptapDocument | null>(null);
@@ -100,6 +111,20 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
  if (!title.trim()) return;
+
+ if (onLocalSave) {
+ onLocalSave({
+ title: title.trim(),
+ card_type: cardType,
+ body,
+ coaching_tips: coachingTips || null,
+ has_check: hasCheck,
+ requires_approval: requiresApproval,
+ score_value: scoreValue,
+ });
+ onSave();
+ return;
+ }
 
  setSaving(true);
  try {

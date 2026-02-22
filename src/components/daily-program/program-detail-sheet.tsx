@@ -5,7 +5,8 @@ import type { DailyProgram, DailyProgramCard, ChallengeGroup } from '@/types/dai
 import { ProgramForm } from './program-form';
 import { ProgramStatusActions } from './program-status-actions';
 import { CardList } from './card-list';
-import { GroupSelector } from './group-selector';
+import { CardForm, type PendingCardData } from './card-form';
+import { CardTypeBadge } from './card-type-badge';
 import { ProgramCopyDialog } from './program-copy-dialog';
 
 interface ProgramDetailSheetProps {
@@ -31,6 +32,8 @@ export function ProgramDetailSheet({
  const [cards, setCards] = useState<DailyProgramCard[]>([]);
  const [saving, setSaving] = useState(false);
  const [copyDialogOpen, setCopyDialogOpen] = useState(false);
+ const [pendingCards, setPendingCards] = useState<PendingCardData[]>([]);
+ const [addingPendingCard, setAddingPendingCard] = useState(false);
 
  const isNew = !program;
 
@@ -42,6 +45,8 @@ export function ProgramDetailSheet({
  setCurrentProgram(null);
  setCards([]);
  }
+ setPendingCards([]);
+ setAddingPendingCard(false);
  }, [program]);
 
  const refreshProgram = useCallback(async (programId: string) => {
@@ -77,6 +82,23 @@ export function ProgramDetailSheet({
 
  if (res.ok) {
  const newProgram = await res.json();
+
+ // Create pending cards
+ for (let i = 0; i < pendingCards.length; i++) {
+ const cardData = pendingCards[i];
+ await fetch('/api/daily-program-cards', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({
+ program_id: newProgram.id,
+ sort_order: i,
+ ...cardData,
+ }),
+ });
+ }
+
+ setPendingCards([]);
+ setAddingPendingCard(false);
  await refreshProgram(newProgram.id);
  onSaved();
  }
@@ -198,16 +220,8 @@ export function ProgramDetailSheet({
  initialDate={initialDate}
  onSubmit={currentProgram ? handleUpdate : handleCreate}
  saving={saving}
- />
-
- {/* Group Selector */}
- {groups.length > 0 && (
- <GroupSelector
  groups={groups}
- selectedGroupIds={
- currentProgram?.daily_program_target_groups?.map((g) => g.group_id) || []
- }
- onSave={async (groupIds) => {
+ onGroupsChange={async (groupIds) => {
  if (currentProgram) {
  await fetch('/api/daily-programs', {
  method: 'PUT',
@@ -221,15 +235,71 @@ export function ProgramDetailSheet({
  }
  }}
  />
- )}
 
- {/* Cards Section (only for existing programs) */}
- {currentProgram && (
+ {/* Cards Section */}
+ {currentProgram ? (
  <CardList
  programId={currentProgram.id}
  cards={cards}
  onCardsChanged={handleCardsChanged}
  />
+ ) : (
+ <div className="space-y-3">
+ <div className="flex items-center justify-between">
+ <h3 className="text-sm font-semibold text-content-secondary">
+ 카드 ({pendingCards.length})
+ </h3>
+ {!addingPendingCard && (
+ <button
+ type="button"
+ onClick={() => setAddingPendingCard(true)}
+ className="px-2.5 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+ >
+ + 카드 추가
+ </button>
+ )}
+ </div>
+
+ {/* Pending card items */}
+ {pendingCards.map((pc, index) => (
+ <div key={index} className="flex items-center gap-2 px-3 py-2 border border-line rounded-lg bg-surface/50">
+ <CardTypeBadge type={pc.card_type} />
+ <span className="flex-1 text-sm font-medium text-content-primary dark:text-white truncate">
+ {pc.title}
+ </span>
+ {pc.score_value > 0 && (
+ <span className="text-[10px] text-blue-600 dark:text-blue-400">{pc.score_value}점</span>
+ )}
+ <button
+ type="button"
+ onClick={() => setPendingCards((prev) => prev.filter((_, i) => i !== index))}
+ className="p-1 rounded hover:bg-surface-raised text-content-disabled hover:text-red-500 transition-colors"
+ >
+ <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+ <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+ </svg>
+ </button>
+ </div>
+ ))}
+
+ {/* Add card form (local mode) */}
+ {addingPendingCard && (
+ <CardForm
+ programId=""
+ onLocalSave={(data) => {
+ setPendingCards((prev) => [...prev, data]);
+ }}
+ onSave={() => setAddingPendingCard(false)}
+ onCancel={() => setAddingPendingCard(false)}
+ />
+ )}
+
+ {pendingCards.length === 0 && !addingPendingCard && (
+ <div className="text-center py-6 text-sm text-content-disabled">
+ 카드가 없습니다. 카드를 추가해보세요.
+ </div>
+ )}
+ </div>
  )}
 
  {/* Status Actions & Delete */}

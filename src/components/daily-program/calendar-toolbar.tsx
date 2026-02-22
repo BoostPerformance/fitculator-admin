@@ -30,7 +30,7 @@ export function CalendarToolbar({
  : format(currentDate, 'yyyy년 M월 d일 주', { locale: ko });
 
  return (
- <div className="px-6 py-4 sm:px-4 sm:py-3 border-b border-line space-y-2">
+ <div className="px-6 py-4 sm:px-4 sm:py-3 space-y-2">
  {/* Row 1: Page title + view mode switcher */}
  <div className="flex items-center justify-between">
  <h1 className="text-headline font-semibold text-content-primary dark:text-white sm:text-title-lg">

@@ -58,7 +58,7 @@ function ChallengeLayoutContent({
  };
 
  return (
- <div className="flex flex-col min-h-screen">
+ <div className="flex flex-col h-dvh overflow-hidden">
  <DesktopHeader
  showEditUsername
  challengeTitle={challengeTitle}
@@ -66,7 +66,7 @@ function ChallengeLayoutContent({
  isSidebarOpen={isSidebarOpen}
  onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
  />
- <div className="flex md:flex-col sm:flex-col flex-1">
+ <div className="flex md:flex-col sm:flex-col flex-1 min-h-0">
  <Sidebar
  data={formattedChallenges}
  onSelectChallenge={handleChallengeSelect}
@@ -76,7 +76,7 @@ function ChallengeLayoutContent({
  isSidebarOpen={isSidebarOpen}
  onSidebarOpenChange={setIsSidebarOpen}
  />
- <main id="main-content" className="flex-1 min-w-0 overflow-x-auto px-4 py-5 sm:px-0 sm:py-0 bg-surface-app" tabIndex={-1}>
+ <main id="main-content" className="flex-1 min-w-0 min-h-0 overflow-auto px-4 py-5 sm:px-0 sm:py-0 bg-surface-app" tabIndex={-1}>
  {children}
  </main>
  </div>

@@ -9,10 +9,11 @@ interface CardListProps {
  programId: string;
  cards: DailyProgramCard[];
  onCardsChanged: () => void;
+ defaultAddingCard?: boolean;
 }
 
-export function CardList({ programId, cards, onCardsChanged }: CardListProps) {
- const [addingCard, setAddingCard] = useState(false);
+export function CardList({ programId, cards, onCardsChanged, defaultAddingCard = false }: CardListProps) {
+ const [addingCard, setAddingCard] = useState(defaultAddingCard);
 
  const handleReorder = async (fromIndex: number, toIndex: number) => {
  if (fromIndex === toIndex) return;
