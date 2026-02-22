@@ -209,6 +209,8 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  fetchNextPage,
  hasNextPage,
  isFetchingNextPage,
+ refetch,
+ isRefetching,
  } = useInfiniteQuery({
  queryKey: ['running', 'recent-notes', challengeId, startDate, endDate],
  queryFn: ({ pageParam = 0 }) => fetchRecentNotes(challengeId, pageParam, ITEMS_PER_PAGE, startDate, endDate),
@@ -282,6 +284,16 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  <h2 className="text-lg font-semibold text-content-tertiary pt-1 pl-1">
  운동 노트
  </h2>
+ <button
+ onClick={() => refetch()}
+ disabled={isRefetching}
+ title="새로고침"
+ className="p-1.5 rounded-md text-content-disabled hover:text-content-tertiary hover:bg-surface-raised transition-colors disabled:opacity-50"
+ >
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`}>
+  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.992 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182M20.015 4.356v4.992" />
+ </svg>
+ </button>
  </div>
 
  {/* 노트 목록 */}
