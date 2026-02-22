@@ -349,7 +349,7 @@ export default function DailyProgramPage() {
  return (
  <div className="w-full max-w-full overflow-hidden">
  {/* Page title + tab toggle */}
- <div className="px-6 pt-4 sm:px-4 sm:pt-3 flex items-center justify-between">
+ <div className="px-6 pt-4 sm:px-4 sm:pt-3 flex items-center gap-3">
  <h1 className="text-headline font-semibold text-content-primary dark:text-white sm:text-title-lg">
  데일리 프로그램
  </h1>
