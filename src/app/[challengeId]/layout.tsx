@@ -5,6 +5,7 @@ import Sidebar from '@/components/sidebar';
 import type { ChallengeData } from '@/components/sidebar';
 import { DesktopHeader } from '@/components/header/DesktopHeader';
 import { useAdminData } from '@/components/hooks/useAdminData';
+import { usePersistedSidebarOpen } from '@/components/hooks/useSidebarState';
 import { ChallengeProvider, useChallengeContext } from '@/contexts/ChallengeContext';
 
 function ChallengeLayoutContent({
@@ -13,7 +14,7 @@ function ChallengeLayoutContent({
  children: React.ReactNode;
 }) {
  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
- const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+ const [isSidebarOpen, setIsSidebarOpen] = usePersistedSidebarOpen();
 
  const params = useParams();
  const { displayUsername } = useAdminData();

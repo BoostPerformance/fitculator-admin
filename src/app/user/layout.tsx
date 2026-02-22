@@ -4,6 +4,7 @@ import Sidebar from '@/components/sidebar';
 import type { ChallengeData } from '@/components/sidebar';
 import { DesktopHeader } from '@/components/header/DesktopHeader';
 import { useAdminData } from '@/components/hooks/useAdminData';
+import { usePersistedSidebarOpen } from '@/components/hooks/useSidebarState';
 import { useChallenge } from '@/components/hooks/useChallenges';
 
 export default function UserLayout({
@@ -12,7 +13,7 @@ export default function UserLayout({
  children: React.ReactNode;
 }) {
  const [selectedChallengeId, setSelectedChallengeId] = useState<string>('');
- const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+ const [isSidebarOpen, setIsSidebarOpen] = usePersistedSidebarOpen();
 
  const { adminData } = useAdminData();
  const { challenges } = useChallenge();

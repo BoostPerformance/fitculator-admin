@@ -42,6 +42,32 @@ const getInitialState = (isMobile: boolean): SidebarState => {
  };
 };
 
+export const usePersistedSidebarOpen = () => {
+ const [isOpen, setIsOpenState] = useState(() => {
+  if (typeof window === 'undefined') return true;
+  try {
+   const saved = localStorage.getItem(STORAGE_KEY);
+   if (saved) return JSON.parse(saved).isSidebarOpen ?? true;
+  } catch {}
+  return true;
+ });
+
+ const setIsOpen = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
+  setIsOpenState((prev: boolean) => {
+   const next = typeof value === 'function' ? value(prev) : value;
+   try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const state = saved ? JSON.parse(saved) : {};
+    state.isSidebarOpen = next;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+   } catch {}
+   return next;
+  });
+ }, []);
+
+ return [isOpen, setIsOpen] as const;
+};
+
 export const useSidebarState = (isMobile: boolean) => {
  const [state, setState] = useState<SidebarState>(() => getInitialState(isMobile));
 
