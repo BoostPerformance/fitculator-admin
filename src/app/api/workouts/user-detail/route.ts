@@ -1305,7 +1305,7 @@ async function getRecentNotesData(
  const userIds = [...new Set(workouts?.map((w) => w.user_id) || [])];
  const { data: users } = userIds.length > 0 ? await supabase
  .from('users')
- .select('id, name, username')
+ .select('id, name, username, profile_image_url')
  .in('id', userIds) : { data: [] };
 
  const userMap = new Map(users?.map((u) => [u.id, u]) || []);
@@ -1354,6 +1354,56 @@ async function getRecentNotesData(
  missionCompletions?.map((mc: any) => [mc.workout_id, mc.challenge_missions?.title]) || []
  );
 
+ // 5.5. 코멘트 조회 (미리보기 + 카운트용)
+ const { data: commentsData } = workoutIds.length > 0 ? await supabase
+ .from('challenge_workout_comments')
+ .select(`
+ id, workout_id, author_id, content, created_at,
+ author:users!challenge_workout_comments_author_id_users_fkey(id, name, profile_image_url),
+ replies:challenge_comment_replies(id)
+ `)
+ .in('workout_id', workoutIds)
+ .eq('challenge_id', challengeId)
+ .order('created_at', { ascending: false }) : { data: [] };
+
+ // workout_id -> { count, preview_comments } 맵
+ const workoutCommentCountMap = new Map<string, number>();
+ const workoutCommentPreviewMap = new Map<string, any[]>();
+ for (const c of commentsData || []) {
+ const replyCount = Array.isArray(c.replies) ? c.replies.length : 0;
+ const current = workoutCommentCountMap.get(c.workout_id) || 0;
+ workoutCommentCountMap.set(c.workout_id, current + 1 + replyCount);
+
+ // 최근 코멘트 2개만 미리보기용으로 저장
+ const previews = workoutCommentPreviewMap.get(c.workout_id) || [];
+ if (previews.length < 2) {
+ previews.push({
+ id: c.id,
+ author_id: c.author_id,
+ author_name: (c.author as any)?.name || '코치',
+ author_profile_image: (c.author as any)?.profile_image_url || null,
+ content: c.content,
+ created_at: c.created_at,
+ });
+ workoutCommentPreviewMap.set(c.workout_id, previews);
+ }
+ }
+
+ // 5.6. 운동 사진 조회
+ const { data: photosData } = workoutIds.length > 0 ? await supabase
+ .from('workout_photos')
+ .select('workout_id, photo_url')
+ .in('workout_id', workoutIds)
+ .order('created_at', { ascending: true }) : { data: [] };
+
+ // workout_id -> photo_urls 맵
+ const workoutPhotosMap = new Map<string, string[]>();
+ for (const p of photosData || []) {
+ const urls = workoutPhotosMap.get(p.workout_id) || [];
+ urls.push(p.photo_url);
+ workoutPhotosMap.set(p.workout_id, urls);
+ }
+
  // 6. 결과 포맷팅
  const notesData = workouts?.map((workout) => {
  const user = userMap.get(workout.user_id);
@@ -1380,6 +1430,7 @@ async function getRecentNotesData(
  id: workout.id,
  user_id: workout.user_id,
  user_name: user?.name || user?.username || '알 수 없음',
+ user_profile_image: user?.profile_image_url || null,
  title: workout.title,
  category: (workout.workout_categories as any)?.name_ko || workout.title,
  timestamp: workout.timestamp,
@@ -1392,6 +1443,9 @@ async function getRecentNotesData(
  group_name: groupInfo?.name || null,
  group_color: groupInfo?.color || null,
  mission_title: missionTitle || null,
+ comment_count: workoutCommentCountMap.get(workout.id) || 0,
+ comment_previews: workoutCommentPreviewMap.get(workout.id) || [],
+ photos: workoutPhotosMap.get(workout.id) || [],
  };
  }) || [];
 

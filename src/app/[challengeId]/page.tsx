@@ -506,7 +506,7 @@ export default function User() {
  })()}
  </div>
 
- <div className="dark:bg-surface grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4 ">
+ <div className="grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4 ">
  {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
  ?.challenges.challenge_type === 'diet_and_exercise' && (
  <>

@@ -1,9 +1,10 @@
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { useRef, useCallback, useState } from 'react';
+import WorkoutCommentSection from './WorkoutCommentSection';
 
 // 노트 내용 컴포넌트 (펼치기/접기 기능)
 function NoteContent({ note }: { note: string }) {
@@ -31,10 +32,104 @@ function NoteContent({ note }: { note: string }) {
  );
 }
 
+// 사진 갤러리 컴포넌트 (인스타 스타일)
+function PhotoGallery({ photos }: { photos: string[] }) {
+ const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+
+ if (photos.length === 0) return null;
+
+ return (
+ <>
+ <div className="mb-3 overflow-hidden">
+  {photos.length === 1 ? (
+  <img
+   src={photos[0]}
+   alt=""
+   className="w-full max-h-[280px] object-cover cursor-pointer hover:opacity-95 transition-opacity"
+   onClick={() => setSelectedPhoto(photos[0])}
+  />
+  ) : (
+  <div className="grid grid-cols-2 gap-0.5">
+   <img
+   src={photos[0]}
+   alt=""
+   className="w-full h-[180px] object-cover cursor-pointer hover:opacity-95 transition-opacity"
+   onClick={() => setSelectedPhoto(photos[0])}
+   />
+   <div className="relative">
+   <img
+    src={photos[1]}
+    alt=""
+    className="w-full h-[180px] object-cover cursor-pointer hover:opacity-95 transition-opacity"
+    onClick={() => setSelectedPhoto(photos[1])}
+   />
+   {photos.length > 2 && (
+    <div
+    className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer"
+    onClick={() => setSelectedPhoto(photos[1])}
+    >
+    <span className="text-white font-semibold text-lg">+{photos.length - 2}</span>
+    </div>
+   )}
+   </div>
+  </div>
+  )}
+ </div>
+
+ {/* 풀스크린 모달 */}
+ {selectedPhoto && (
+  <div
+  className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
+  onClick={() => setSelectedPhoto(null)}
+  >
+  <img
+   src={selectedPhoto}
+   alt=""
+   className="max-w-[90vw] max-h-[90vh] object-contain"
+   onClick={(e) => e.stopPropagation()}
+  />
+  <button
+   onClick={() => setSelectedPhoto(null)}
+   className="absolute top-4 right-4 text-white text-2xl hover:text-gray-300"
+  >
+   ✕
+  </button>
+  {/* 썸네일 네비게이션 */}
+  {photos.length > 1 && (
+   <div className="absolute bottom-6 flex gap-2">
+   {photos.map((url, i) => (
+    <button
+    key={i}
+    onClick={(e) => { e.stopPropagation(); setSelectedPhoto(url); }}
+    className={`w-12 h-12 overflow-hidden border-2 transition-all ${
+     selectedPhoto === url ? 'border-white scale-110' : 'border-transparent opacity-60 hover:opacity-100'
+    }`}
+    >
+    <img src={url} alt="" className="w-full h-full object-cover" />
+    </button>
+   ))}
+   </div>
+  )}
+  </div>
+ )}
+ </>
+ );
+}
+
+interface CommentPreview {
+ id: string;
+ author_id: string;
+ author_name: string;
+ author_profile_image: string | null;
+ content: string;
+ created_at: string;
+}
+
 interface WorkoutNote {
  id: string;
  user_id: string;
  user_name: string;
+ user_profile_image: string | null;
  title: string;
  category: string;
  timestamp: string;
@@ -47,6 +142,9 @@ interface WorkoutNote {
  group_name: string | null;
  group_color: string | null;
  mission_title: string | null;
+ comment_count: number;
+ comment_previews: CommentPreview[];
+ photos: string[];
 }
 
 interface WorkoutNotesFeedProps {
@@ -62,6 +160,15 @@ interface NotesResponse {
 }
 
 const ITEMS_PER_PAGE = 10;
+
+const formatTimestamp = (timestamp: string) => {
+ try {
+ const result = formatDistanceToNow(new Date(timestamp), { addSuffix: true, locale: ko });
+ return result.replace('약 ', '');
+ } catch {
+ return '';
+ }
+};
 
 const fetchRecentNotes = async (
  challengeId: string,
@@ -80,6 +187,20 @@ const fetchRecentNotes = async (
 
 export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: WorkoutNotesFeedProps) {
  const observerRef = useRef<IntersectionObserver | null>(null);
+ const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
+
+ // 현재 코치의 users.id 조회 (본인 코멘트 표시용)
+ const { data: coachIdentity } = useQuery({
+ queryKey: ['coach-identity'],
+ queryFn: async () => {
+ const res = await fetch('/api/coach-identity');
+ if (!res.ok) return null;
+ const json = await res.json();
+ return json.data as { userId: string; coachId: string; name: string; profileImageUrl: string | null } | null;
+ },
+ staleTime: Infinity,
+ });
+ const myUserId = coachIdentity?.userId;
 
  const {
  data,
@@ -144,15 +265,6 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  );
  }
 
- const formatTimestamp = (timestamp: string) => {
- try {
- const result = formatDistanceToNow(new Date(timestamp), { addSuffix: true, locale: ko });
- return result.replace('약 ', '');
- } catch {
- return '';
- }
- };
-
  const formatDuration = (minutes: number | null) => {
  if (!minutes) return null;
  if (minutes < 60) return `${minutes}분`;
@@ -173,44 +285,60 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  </div>
 
  {/* 노트 목록 */}
- <div className="space-y-3">
+ <div className="space-y-4">
  {allNotes.length === 0 ? (
  <div className="text-center text-content-tertiary py-4">
  아직 운동 노트가 없습니다
  </div>
  ) : (
  <>
- {allNotes.map((note, index) => (
+ {allNotes.map((note, index) => {
+ const isExpanded = expandedNoteId === note.id;
+
+ return (
  <div
  key={note.id}
  ref={index === allNotes.length - 1 ? lastElementRef : null}
- className="border border-line-subtle rounded-lg p-4 hover:bg-surface-raised/50 transition-colors"
+ className="overflow-hidden bg-white/50 dark:bg-black/20 -mx-[1.25rem]"
  >
+ <div className="px-2 pt-4 pb-2">
  {/* 1행: 사용자 이름 + 그룹 + 시간 */}
- <div className="flex items-center justify-between mb-1">
+ <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
+ {note.user_profile_image ? (
+  <img src={note.user_profile_image} alt="" className="w-7 h-7 rounded-full object-cover" />
+ ) : (
+  <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center">
+  <span className="text-[11px] font-medium text-content-tertiary">{note.user_name?.charAt(0)}</span>
+  </div>
+ )}
  <span className="font-semibold text-content-secondary text-[13px]">
- {note.user_name}
+  {note.user_name}
  </span>
  {note.group_name && (
- <span
- className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium text-white"
- style={{ backgroundColor: note.group_color || '#6366f1' }}
- >
- {note.group_name}
- </span>
+  <span
+  className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium text-white"
+  style={{ backgroundColor: note.group_color || '#6366f1' }}
+  >
+  {note.group_name}
+  </span>
  )}
  </div>
  <div className="flex items-center gap-2 text-[11px] text-content-disabled">
  <span>
- {new Date(note.timestamp).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', weekday: 'short' })}{' '}
- {new Date(note.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+  {new Date(note.timestamp).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', weekday: 'short' })}{' '}
+  {new Date(note.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
  </span>
- {/* <span className="text-content-disabled">|</span>
- <span>{formatTimestamp(note.timestamp)}</span> */}
+ </div>
  </div>
  </div>
 
+ {/* 사진 (이름 아래) */}
+ {note.photos.length > 0 && (
+ <PhotoGallery photos={note.photos} />
+ )}
+
+ <div className="px-2 pb-4">
  {/* 2행: 운동 타이틀 */}
  <div className="mb-2">
  <span className="font-medium text-[12px] text-content-tertiary">{note.title}</span>
@@ -219,42 +347,102 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  {/* 3행: 운동 정보 (Zone, 거리, 시간, 페이스) */}
  <div className="flex items-center gap-3 mb-2 text-[12px] text-content-tertiary">
  <span
- className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium text-white"
- style={{
- backgroundColor: !note.intensity || note.intensity === 0 ? '#9CA3AF' :
- note.intensity === 1 ? '#22C55E' :
- note.intensity === 2 ? '#3B82F6' :
- note.intensity === 3 ? '#F59E0B' :
- note.intensity === 4 ? '#F97316' :
- '#EF4444'
- }}
+  className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border"
+  style={{
+  borderColor: note.intensity === null || note.intensity === undefined ? '#9CA3AF' :
+  note.intensity === 0 ? '#9CA3AF' :
+  note.intensity === 1 ? '#45C771' :
+  note.intensity === 2 ? '#FFD600' :
+  note.intensity === 3 ? '#73DDFF' :
+  note.intensity === 4 ? '#A259FE' :
+  '#FF1469',
+  color: note.intensity === null || note.intensity === undefined ? '#9CA3AF' :
+  note.intensity === 0 ? '#9CA3AF' :
+  note.intensity === 1 ? '#45C771' :
+  note.intensity === 2 ? '#FFD600' :
+  note.intensity === 3 ? '#73DDFF' :
+  note.intensity === 4 ? '#A259FE' :
+  '#FF1469',
+  }}
  >
- {note.intensity && note.intensity > 0 ? `Zone ${note.intensity}` : '-'}
+  {note.intensity !== null && note.intensity !== undefined ? `Zone ${note.intensity}` : '-'}
  </span>
  {note.distance && note.distance > 0 && (
- <span>{note.distance.toFixed(2)}km</span>
+  <span>{note.distance.toFixed(2)}km</span>
  )}
  {note.duration_minutes && note.duration_minutes > 0 && (
- <span>{formatDuration(note.duration_minutes)}</span>
+  <span>{formatDuration(note.duration_minutes)}</span>
  )}
  {note.pace && (
- <span className="text-content-disabled">{note.pace}/km</span>
+  <span className="text-content-disabled">{note.pace}/km</span>
  )}
  </div>
 
- {/* 3행: 미션 (있을 경우) */}
+ {/* 미션 (있을 경우) */}
  {note.mission_title && (
  <div className="mb-2">
- <span className="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300">
- 🚩 {note.mission_title}
- </span>
+  <span className="inline-flex items-center px-2 py-1 rounded text-[11px] font-medium bg-purple-50 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300">
+  {note.mission_title}
+  </span>
  </div>
  )}
 
- {/* 4행: 노트 내용 */}
+ {/* 노트 내용 */}
  <NoteContent note={note.note} />
+
+ {/* 코멘트 영역 (인스타 스타일) */}
+ <div className="mt-3 pt-2 border-t border-line-subtle">
+ {/* 코멘트 아이콘 + 카운트 */}
+ <button
+  onClick={() => setExpandedNoteId(isExpanded ? null : note.id)}
+  className="flex items-center gap-1.5 text-[12px] text-content-disabled hover:text-content-tertiary transition-colors"
+ >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-4 h-4">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z" />
+  </svg>
+  {note.comment_count > 0 && (
+  <span className="font-semibold text-content-tertiary">{note.comment_count}</span>
+  )}
+ </button>
+
+ {/* 코멘트 미리보기 (접혀있을 때) */}
+ {!isExpanded && note.comment_previews.length > 0 && (
+  <div className="mt-1.5 space-y-0.5">
+  {note.comment_previews.map((preview) => {
+   const isMe = myUserId && preview.author_id === myUserId;
+   return (
+   <p key={preview.id} className="text-[12px] leading-relaxed truncate">
+    <span className="font-semibold text-content-secondary">{preview.author_name}</span>{' '}
+    <span className="text-content-tertiary">{preview.content}</span>
+   </p>
+   );
+  })}
+  {note.comment_count > 2 && (
+   <button
+   onClick={() => setExpandedNoteId(note.id)}
+   className="text-[12px] text-content-disabled hover:text-content-tertiary"
+   >
+   코멘트 {note.comment_count}개 모두 보기
+   </button>
+  )}
+  </div>
+ )}
+
+ {/* 코멘트 섹션 (펼침 시) */}
+ {isExpanded && (
+  <WorkoutCommentSection
+  workoutId={note.id}
+  challengeId={challengeId}
+  commentCount={note.comment_count}
+  previews={note.comment_previews}
+  coachInfo={coachIdentity ? { userId: coachIdentity.userId, name: coachIdentity.name, profileImageUrl: coachIdentity.profileImageUrl } : null}
+  />
+ )}
  </div>
- ))}
+ </div>
+ </div>
+ );
+ })}
  {isFetchingNextPage && (
  <div className="text-center py-2">
  <div className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-line border-t-blue-500"></div>
