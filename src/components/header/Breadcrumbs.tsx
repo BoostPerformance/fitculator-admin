@@ -254,7 +254,7 @@ export function Breadcrumbs({ challengeTitle, challengeFlags }: BreadcrumbsProps
       {breadcrumbs.map((crumb, index) => {
         const isLast = index === breadcrumbs.length - 1;
         return (
-          <span key={crumb.href} className="flex items-center gap-1.5">
+          <span key={`${crumb.href}-${crumb.label}`} className="flex items-center gap-1.5">
             {index > 0 && (
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-content-disabled flex-shrink-0">
                 <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
