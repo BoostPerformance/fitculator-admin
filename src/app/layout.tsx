@@ -31,7 +31,6 @@ export default function RootLayout({
  rel="stylesheet"
  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
  />
- <link rel="preload" href="/image/logo-icon.png" as="image" />
  <link rel="dns-prefetch" href="//lh3.googleusercontent.com" />
  </head>
  <body className="font-pretendard">

@@ -155,6 +155,7 @@ export function MobileSidebarOverlay({
  height={28}
  alt="Fitculator 로고"
  className="dark:hidden"
+ style={{ height: 'auto' }}
  loading="lazy"
  />
  <Image
@@ -163,6 +164,7 @@ export function MobileSidebarOverlay({
  height={28}
  alt="Fitculator 로고"
  className="hidden dark:block"
+ style={{ height: 'auto' }}
  loading="lazy"
  />
  <button

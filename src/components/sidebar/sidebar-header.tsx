@@ -23,6 +23,7 @@ export function SidebarHeader({ isSidebarOpen, isScrolled, onToggle }: SidebarHe
  height={30}
  alt="Fitculator 로고"
  className={isSidebarOpen ? 'block dark:hidden' : 'hidden'}
+ style={{ height: 'auto' }}
  loading="lazy"
  />
  <Image
@@ -31,6 +32,7 @@ export function SidebarHeader({ isSidebarOpen, isScrolled, onToggle }: SidebarHe
  height={30}
  alt="Fitculator 로고"
  className={isSidebarOpen ? 'hidden dark:block' : 'hidden'}
+ style={{ height: 'auto' }}
  loading="lazy"
  />
  <button

@@ -131,8 +131,8 @@ export default function TrafficSourceChart({
  </div>
  ) : isEmpty ? (
  <div>
- <div className="w-full h-[16rem] sm:py-[0.5rem] pb-[1rem] flex items-center justify-center relative">
- <ResponsiveContainer width="100%" height="100%">
+ <div className="w-full sm:py-[0.5rem] pb-[1rem] flex items-center justify-center relative">
+ <ResponsiveContainer width="100%" height={240}>
  <PieChart>
  <Pie
  data={[{ name: 'empty', value: 1 }]}
@@ -171,8 +171,8 @@ export default function TrafficSourceChart({
  </div>
  ) : (
  <div>
- <div className="w-full h-[16rem] sm:py-[0.5rem] pb-[1rem] flex items-center justify-center relative">
- <ResponsiveContainer width="100%" height="100%">
+ <div className="w-full sm:py-[0.5rem] pb-[1rem] flex items-center justify-center relative">
+ <ResponsiveContainer width="100%" height={240}>
  <PieChart>
  <Pie
  activeIndex={activeIndex}

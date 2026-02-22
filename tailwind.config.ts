@@ -18,7 +18,8 @@ const config: Config = {
   	extend: {
   		fontFamily: {
   			pretendard: [
-  				'var(--pretendard)'
+  				'Pretendard',
+  				'sans-serif'
   			],
   			theJamsil: [
   				'TheJamsil',

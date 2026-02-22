@@ -24,6 +24,7 @@ body {
 /* 모바일 터치 하이라이트 제거 */
 * {
   -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
 }
 
 /* 터치 친화적 요소 크기 */

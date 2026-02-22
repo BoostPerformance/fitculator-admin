@@ -26,6 +26,7 @@ export function DesktopHeader({
           height={25}
           alt="Fitculator 로고"
           className="block dark:hidden"
+          style={{ height: 'auto' }}
           loading="lazy"
         />
         <Image
@@ -34,6 +35,7 @@ export function DesktopHeader({
           height={25}
           alt="Fitculator 로고"
           className="hidden dark:block"
+          style={{ height: 'auto' }}
           loading="lazy"
         />
         <div className="mx-1 h-5 w-px bg-line" />
