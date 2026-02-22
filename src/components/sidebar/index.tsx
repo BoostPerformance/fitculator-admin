@@ -234,13 +234,16 @@ export default function Sidebar({
 
  // Responsive breakpoint
  useEffect(() => {
+ let wasMobile = window.innerWidth < 1025;
  const handleResize = () => {
  const mobile = window.innerWidth < 1025;
- setIsMobile(mobile);
- if (mobile) {
+ // Only close sidebar when transitioning from desktop to mobile
+ if (mobile && !wasMobile) {
  setInternalSidebarOpen(false);
  setIsOpenDropdown(true);
  }
+ wasMobile = mobile;
+ setIsMobile(mobile);
  };
  handleResize();
  window.addEventListener('resize', handleResize);
