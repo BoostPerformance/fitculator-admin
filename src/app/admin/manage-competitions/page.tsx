@@ -640,7 +640,7 @@ export default function ManageCompetitionsPage() {
  {mainTab === 'catalog' && (
  <button
  onClick={openAddModal}
- className="inline-flex items-center gap-2 bg-[#F5F5F0] hover:bg-[#E8E8E0] text-[#1a1a1a] pl-3 pr-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
+ className="inline-flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 dark:bg-neutral-700 dark:hover:bg-neutral-600 text-white pl-3 pr-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
  >
  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
  <line x1="8" y1="3" x2="8" y2="13" /><line x1="3" y1="8" x2="13" y2="8" />
