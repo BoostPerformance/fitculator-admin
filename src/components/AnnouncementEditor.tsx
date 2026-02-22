@@ -33,6 +33,8 @@ export function AnnouncementEditor({ content, onChange }: AnnouncementEditorProp
  const editor = useEditor({
  extensions: [
  StarterKit.configure({
+ link: false,
+ underline: false,
  heading: {
  levels: [1, 2, 3],
  },

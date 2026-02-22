@@ -19,7 +19,10 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
  const editor = useEditor({
  immediatelyRender: false,
  extensions: [
- StarterKit,
+ StarterKit.configure({
+ link: false,
+ underline: false,
+ }),
  Underline,
  Link.configure({
  openOnClick: false,
@@ -43,7 +46,7 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
  },
  editorProps: {
  attributes: {
- class: 'prose prose-sm dark:prose-invert max-w-none px-3 py-2 min-h-[200px] focus:outline-none',
+ class: 'prose prose-sm dark:prose-invert max-w-none px-3 py-2 min-h-[200px] sm:min-h-[120px] focus:outline-none',
  },
  },
  });
