@@ -86,6 +86,24 @@ export interface TiptapMark {
  attrs?: Record<string, unknown>;
 }
 
+// Submission management types
+export interface ProgramSubmissionGroup {
+ program_id: string;
+ program_date: string;
+ program_title: string | null;
+ program_status: ProgramStatus;
+ total_submissions: number;
+ pending_count: number;
+ approved_count: number;
+ rejected_count: number;
+ auto_approved_count: number;
+ unique_submitted_members: number;
+ cards_with_submissions: number;
+ total_target_members: number;
+ total_cards_with_check: number;
+ completions: DailyProgramCompletion[];
+}
+
 // Form data types
 export interface DailyProgramFormData {
  date: string;

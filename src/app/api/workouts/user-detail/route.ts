@@ -99,6 +99,16 @@ export async function GET(request: Request) {
  const startDate = url.searchParams.get('startDate') || undefined;
  const endDate = url.searchParams.get('endDate') || undefined;
  return await getRecentNotesData(challengeId, limit, offset, startDate, endDate);
+ } else if (type === 'workout') {
+ // 개별 운동 상세 조회
+ const workoutId = url.searchParams.get('workoutId');
+ if (!workoutId) {
+ return NextResponse.json(
+ { error: 'workoutId is required' },
+ { status: 400 }
+ );
+ }
+ return await getWorkoutDetail(workoutId);
  } else if (type === 'participant-list') {
  // 참가자 목록만 가져오기 (가벼운 API)
  if (!challengeId) {
@@ -1488,6 +1498,39 @@ async function getRecentNotesData(
  { error: 'Failed to process recent notes data' },
  { status: 500 }
  );
+ }
+}
+
+// 개별 운동 상세 조회
+async function getWorkoutDetail(workoutId: string): Promise<NextResponse> {
+ try {
+ const { data, error } = await supabase
+ .from('workouts')
+ .select(`
+ id, title, timestamp, duration_minutes, distance, points, note, intensity,
+ calories, avg_heart_rate, max_heart_rate,
+ workout_categories(name_ko, workout_types(name))
+ `)
+ .eq('id', workoutId)
+ .single();
+
+ if (error) {
+ return NextResponse.json({ error: error.message }, { status: 500 });
+ }
+
+ // Also fetch photos if available
+ const { data: photos } = await supabase
+ .from('workout_photos')
+ .select('photo_url')
+ .eq('workout_id', workoutId)
+ .order('created_at', { ascending: true });
+
+ return NextResponse.json({
+ ...data,
+ photos: (photos || []).map((p: any) => p.photo_url),
+ });
+ } catch (error) {
+ return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
  }
 }
 

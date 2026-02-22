@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import {
  format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
- addMonths, subMonths, addWeeks, subWeeks,
+ addMonths, subMonths, addWeeks, subWeeks, isSameMonth,
 } from 'date-fns';
 import {
  DndContext, DragOverlay, pointerWithin,
@@ -20,13 +20,17 @@ import { CalendarProgramChip } from '@/components/daily-program/calendar-program
 import { CalendarCardPreview } from '@/components/daily-program/calendar-card-preview';
 import { MobileCalendarView } from '@/components/daily-program/mobile-calendar-view';
 import { ProgramModal } from '@/components/daily-program/program-modal';
+import { SubmissionsView } from '@/components/daily-program/submissions-view';
 import { useResponsive } from '@/components/hooks/useResponsive';
+
+type ActiveTab = 'calendar' | 'submissions';
 
 export default function DailyProgramPage() {
  const params = useParams();
  const challengeId = params.challengeId as string;
  const { isMobile } = useResponsive();
 
+ const [activeTab, setActiveTab] = useState<ActiveTab>('calendar');
  const [viewMode, setViewMode] = useState<CalendarViewMode>('month');
  const [currentDate, setCurrentDate] = useState(new Date());
  const [mobileSelectedDay, setMobileSelectedDay] = useState(new Date());
@@ -97,12 +101,28 @@ export default function DailyProgramPage() {
  }, [challengeId]);
 
  useEffect(() => {
+ if (activeTab === 'calendar') {
  fetchPrograms();
- }, [fetchPrograms]);
+ }
+ }, [fetchPrograms, activeTab]);
 
  useEffect(() => {
  fetchGroups();
  }, [fetchGroups]);
+
+ const handleViewModeChange = (newMode: CalendarViewMode) => {
+ if (newMode !== viewMode) {
+ const today = new Date();
+ if (newMode === 'week') {
+ // Month→Week: snap to today if in viewed month, otherwise 1st of viewed month
+ setCurrentDate(isSameMonth(currentDate, today) ? today : startOfMonth(currentDate));
+ } else {
+ // Week→Month: show the month containing the current week
+ // currentDate already determines the month, no adjustment needed
+ }
+ setViewMode(newMode);
+ }
+ };
 
  const handlePrev = () => {
  if (isMobile || viewMode === 'month') {
@@ -328,14 +348,47 @@ export default function DailyProgramPage() {
 
  return (
  <div className="w-full max-w-full overflow-hidden">
+ {/* Page title + tab toggle */}
+ <div className="px-6 pt-4 sm:px-4 sm:pt-3 flex items-center justify-between">
+ <h1 className="text-headline font-semibold text-content-primary dark:text-white sm:text-title-lg">
+ 데일리 프로그램
+ </h1>
+ <div className="flex items-center gap-1 bg-surface-raised rounded-lg p-0.5">
+ <button
+ onClick={() => setActiveTab('calendar')}
+ className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+ activeTab === 'calendar'
+ ? 'bg-surface text-content-primary dark:text-white shadow-sm'
+ : 'text-content-tertiary hover:text-content-secondary'
+ }`}
+ >
+ 캘린더
+ </button>
+ <button
+ onClick={() => setActiveTab('submissions')}
+ className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+ activeTab === 'submissions'
+ ? 'bg-surface text-content-primary dark:text-white shadow-sm'
+ : 'text-content-tertiary hover:text-content-secondary'
+ }`}
+ >
+ 제출 관리
+ </button>
+ </div>
+ </div>
+
+ {/* Tab content */}
+ {activeTab === 'calendar' ? (
+ <>
  <CalendarToolbar
  viewMode={viewMode}
- onViewModeChange={setViewMode}
+ onViewModeChange={handleViewModeChange}
  currentDate={currentDate}
  onPrev={handlePrev}
  onNext={handleNext}
  onToday={handleToday}
  onAdd={() => handleDayCellClick(format(isMobile ? mobileSelectedDay : new Date(), 'yyyy-MM-dd'))}
+ hideTitle
  />
 
  <div className="px-4 pb-4 sm:px-2 sm:pb-2 overflow-x-hidden">
@@ -407,6 +460,10 @@ export default function DailyProgramPage() {
  groups={groups}
  onSaved={handleProgramSaved}
  />
+ </>
+ ) : (
+ <SubmissionsView challengeId={challengeId} />
+ )}
  </div>
  );
 }
