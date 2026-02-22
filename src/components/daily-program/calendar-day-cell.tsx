@@ -35,7 +35,7 @@ export function CalendarDayCell({
  return (
   <div
    ref={setNodeRef}
-   className={`group border border-line-subtle transition-colors ${
+   className={`group border border-line-subtle transition-colors overflow-hidden min-w-0 break-words ${
     expanded ? 'min-h-[200px] md:min-h-[150px]' : 'min-h-[120px] md:min-h-[100px]'
    } ${!isCurrentMonth ? 'bg-surface-raised/50/30' : ''} ${
     isOver

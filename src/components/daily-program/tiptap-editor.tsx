@@ -46,16 +46,17 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
  },
  editorProps: {
  attributes: {
- class: 'prose prose-sm dark:prose-invert max-w-none px-3 py-2 min-h-[200px] sm:min-h-[120px] focus:outline-none',
+ class: 'text-body dark:text-white max-w-none px-3 py-2 min-h-[200px] sm:min-h-[120px] focus:outline-none',
  },
  },
  });
 
  const addLink = useCallback(() => {
  if (!editor) return;
- const url = window.prompt('URL을 입력하세요:');
- if (url) {
- editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+ const input = window.prompt('URL을 입력하세요:');
+ if (input) {
+ const href = /^https?:\/\//.test(input) ? input : `https://${input}`;
+ editor.chain().focus().extendMarkRange('link').setLink({ href }).run();
  }
  }, [editor]);
 
@@ -170,7 +171,7 @@ function ToolbarButton({
  type="button"
  onClick={onClick}
  title={title}
- className={`px-1.5 py-0.5 text-xs rounded transition-colors ${
+ className={`px-1.5 py-0.5 text-label rounded transition-colors ${
  active
  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
  : 'text-content-secondary hover:bg-surface-sunken'

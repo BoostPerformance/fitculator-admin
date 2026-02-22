@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { generateHTML } from '@tiptap/html';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import Youtube from '@tiptap/extension-youtube';
+import Underline from '@tiptap/extension-underline';
 import type { DailyProgramCard } from '@/types/daily-program';
 import { CardTypeBadge } from './card-type-badge';
 import { CardForm } from './card-form';
@@ -12,9 +18,26 @@ interface CardItemProps {
  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
+const tiptapExtensions = [
+ StarterKit.configure({ link: false, underline: false }),
+ Underline,
+ Link,
+ Image,
+ Youtube,
+];
+
 export function CardItem({ card, programId, onCardsChanged, dragHandleProps }: CardItemProps) {
  const [expanded, setExpanded] = useState(false);
  const [editing, setEditing] = useState(false);
+
+ const bodyHtml = useMemo(() => {
+  if (!card.body) return '';
+  try {
+   return generateHTML(card.body, tiptapExtensions);
+  } catch {
+   return '';
+  }
+ }, [card.body]);
 
  const handleDelete = async () => {
  if (!confirm(`"${card.title}" 카드를 삭제하시겠습니까?`)) return;
@@ -57,15 +80,15 @@ export function CardItem({ card, programId, onCardsChanged, dragHandleProps }: C
 
  <CardTypeBadge type={card.card_type} />
 
- <span className="flex-1 text-sm font-medium text-content-primary dark:text-white truncate">
+ <span className="flex-1 text-body font-medium text-content-primary dark:text-white truncate">
  {card.title}
  </span>
 
  {card.has_check && (
- <span className="text-[10px] text-content-tertiary">체크</span>
+ <span className="text-label-xs text-content-tertiary">제출 필요</span>
  )}
  {card.score_value > 0 && (
- <span className="text-[10px] text-blue-600 dark:text-blue-400">{card.score_value}점</span>
+ <span className="text-label-xs text-blue-600 dark:text-blue-400">{card.score_value}점</span>
  )}
 
  {/* Expand/collapse */}
@@ -87,37 +110,28 @@ export function CardItem({ card, programId, onCardsChanged, dragHandleProps }: C
  {/* Expanded content */}
  {expanded && (
  <div className="border-t border-line-subtle px-3 py-2 space-y-2">
- {card.body && (
- <div className="text-xs text-content-secondary">
- <span className="font-medium">본문:</span>{' '}
- {card.body.content
- ?.map((node) =>
- node.content?.map((c) => c.text).join('') || ''
- )
- .join(' ')
- .slice(0, 100) || '(빈 본문)'}
- ...
- </div>
+ {bodyHtml && (
+ <div className="tiptap-content text-body text-content-secondary" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
  )}
  {card.coaching_tips && (
- <div className="text-xs text-content-secondary">
+ <div className="text-body text-content-secondary">
  <span className="font-medium">코칭 팁:</span> {card.coaching_tips}
  </div>
  )}
  {card.requires_approval && (
- <div className="text-xs text-amber-600 dark:text-amber-400">승인 필요</div>
+ <div className="text-body text-amber-600 dark:text-amber-400">승인 필요</div>
  )}
 
  <div className="flex items-center gap-2 pt-1">
  <button
  onClick={() => setEditing(true)}
- className="px-2 py-1 text-xs border border-line rounded hover:bg-surface-raised text-content-secondary transition-colors"
+ className="px-2 py-1 text-body border border-line rounded hover:bg-surface-raised text-content-secondary transition-colors"
  >
  수정
  </button>
  <button
  onClick={handleDelete}
- className="px-2 py-1 text-xs border border-red-300 dark:border-red-800 rounded hover:bg-red-50 dark:bg-red-900/20 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors"
+ className="px-2 py-1 text-body border border-red-300 dark:border-red-800 rounded hover:bg-red-50 dark:bg-red-900/20 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors"
  >
  삭제
  </button>

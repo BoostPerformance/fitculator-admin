@@ -19,7 +19,7 @@ import { CalendarWeekView } from '@/components/daily-program/calendar-week-view'
 import { CalendarProgramChip } from '@/components/daily-program/calendar-program-chip';
 import { CalendarCardPreview } from '@/components/daily-program/calendar-card-preview';
 import { MobileCalendarView } from '@/components/daily-program/mobile-calendar-view';
-import { ProgramDetailSheet } from '@/components/daily-program/program-detail-sheet';
+import { ProgramModal } from '@/components/daily-program/program-modal';
 import { useResponsive } from '@/components/hooks/useResponsive';
 
 export default function DailyProgramPage() {
@@ -327,7 +327,7 @@ export default function DailyProgramPage() {
  };
 
  return (
- <div>
+ <div className="w-full max-w-full overflow-hidden">
  <CalendarToolbar
  viewMode={viewMode}
  onViewModeChange={setViewMode}
@@ -338,7 +338,7 @@ export default function DailyProgramPage() {
  onAdd={() => handleDayCellClick(format(isMobile ? mobileSelectedDay : new Date(), 'yyyy-MM-dd'))}
  />
 
- <div className="px-4 pb-4 sm:px-2 sm:pb-2">
+ <div className="px-4 pb-4 sm:px-2 sm:pb-2 overflow-x-hidden">
  {loading ? (
  <div className="flex items-center justify-center h-64">
  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
@@ -398,7 +398,7 @@ export default function DailyProgramPage() {
  )}
  </div>
 
- <ProgramDetailSheet
+ <ProgramModal
  open={sheetOpen}
  onClose={handleSheetClose}
  program={selectedProgram}

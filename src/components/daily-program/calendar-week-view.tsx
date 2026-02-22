@@ -47,7 +47,7 @@ export function CalendarWeekView({
    </div>
 
    {/* Week row */}
-   <div className="grid grid-cols-7">
+   <div className="grid grid-cols-7 overflow-hidden">
     {days.map((day) => (
      <CalendarDayCell
       key={format(day, 'yyyy-MM-dd')}

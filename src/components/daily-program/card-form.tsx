@@ -39,13 +39,13 @@ interface CardFormProps {
 }
 
 export function CardForm({ card, programId, programTitle, programStatus, challengeId, date, onSave, onCancel, hideCheckHint, onDismissCheckHint, onDirtyChange, onLocalSave }: CardFormProps) {
- const [title, setTitle] = useState('');
- const [cardType, setCardType] = useState<CardType>('workout');
- const [body, setBody] = useState<TiptapDocument | null>(null);
- const [coachingTips, setCoachingTips] = useState('');
- const [hasCheck, setHasCheck] = useState(true);
- const [requiresApproval, setRequiresApproval] = useState(false);
- const [scoreValue, setScoreValue] = useState(0);
+ const [title, setTitle] = useState(card?.title ?? '');
+ const [cardType, setCardType] = useState<CardType>(card?.card_type ?? 'workout');
+ const [body, setBody] = useState<TiptapDocument | null>(card?.body ?? null);
+ const [coachingTips, setCoachingTips] = useState(card?.coaching_tips ?? '');
+ const [hasCheck, setHasCheck] = useState(card?.has_check ?? true);
+ const [requiresApproval, setRequiresApproval] = useState(card?.requires_approval ?? false);
+ const [scoreValue, setScoreValue] = useState(card?.score_value ?? 0);
  const [saving, setSaving] = useState(false);
 
  // Track initial values for dirty check
@@ -194,7 +194,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  return (
  <form onSubmit={handleSubmit} className="space-y-3 bg-surface-raised/50 rounded-lg p-4 sm:p-3 border border-line">
  <div>
- <label className="block text-xs font-medium text-content-secondary mb-1">
+ <label className="block text-body font-medium text-content-secondary mb-1">
  카드 타이틀
  </label>
  <div className="flex items-center gap-2">
@@ -204,12 +204,12 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  onChange={(e) => setTitle(e.target.value)}
  placeholder="카드 타이틀 *"
  required
- className="flex-1 px-3 py-1.5 sm:py-2 text-sm border border-line rounded-md bg-surface text-content-primary dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+ className="flex-1 px-3 py-1.5 sm:py-2 text-body border border-line rounded-md bg-surface text-content-primary dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
  />
  <select
  value={cardType}
  onChange={(e) => setCardType(e.target.value as CardType)}
- className="px-2 py-1.5 sm:py-2 text-sm border border-line rounded-md bg-surface text-content-primary"
+ className="px-2 py-1.5 sm:py-2 text-body border border-line rounded-md bg-surface text-content-primary"
  >
  {CARD_TYPES.map((t) => (
  <option key={t.value} value={t.value}>
@@ -222,7 +222,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
 
  {/* Tiptap Editor for body */}
  <div>
- <label className="block text-xs font-medium text-content-secondary mb-1">
+ <label className="block text-body font-medium text-content-secondary mb-1">
  본문 (리치 텍스트)
  </label>
  <TiptapEditor content={body} onChange={setBody} />
@@ -230,7 +230,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
 
  {/* Coaching Tips */}
  <div>
- <label className="block text-xs font-medium text-content-secondary mb-1">
+ <label className="block text-body font-medium text-content-secondary mb-1">
  코칭 팁
  </label>
  <textarea
@@ -238,45 +238,45 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  onChange={(e) => setCoachingTips(e.target.value)}
  placeholder="코칭 팁 (선택)"
  rows={2}
- className="w-full px-3 py-1.5 text-sm border border-line rounded-md bg-surface text-content-primary dark:text-white resize-none"
+ className="w-full px-3 py-1.5 text-body border border-line rounded-md bg-surface text-content-primary dark:text-white resize-none"
  />
  </div>
 
  {/* Options row */}
  <div className="flex flex-wrap items-center gap-4 sm:flex-col sm:items-start sm:gap-2.5">
- <label className="flex items-center gap-1.5 text-sm text-content-secondary">
+ <label className="flex items-center gap-1.5 text-body text-content-secondary">
  <input
  type="checkbox"
  checked={hasCheck}
  onChange={(e) => setHasCheck(e.target.checked)}
- className="h-4 w-4 sm:h-[18px] sm:w-[18px] rounded border-line text-blue-600"
+ className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px] rounded border-line text-blue-600"
  />
  멤버가 완료시 직접 체크
  </label>
- <label className={`flex items-center gap-1.5 text-sm ${hasCheck ? 'text-content-secondary' : 'text-content-disabled'}`}>
+ <label className={`flex items-center gap-1.5 text-body ${hasCheck ? 'text-content-secondary' : 'text-content-disabled'}`}>
  <input
  type="checkbox"
  checked={requiresApproval}
  onChange={(e) => setRequiresApproval(e.target.checked)}
  disabled={!hasCheck}
- className="h-4 w-4 sm:h-[18px] sm:w-[18px] rounded border-line text-blue-600 disabled:opacity-50"
+ className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px] rounded border-line text-blue-600 disabled:opacity-50"
  />
  승인 필요
  </label>
  <div className="flex items-center gap-1.5">
- <label className={`text-sm ${hasCheck ? 'text-content-secondary' : 'text-content-disabled'}`}>점수</label>
+ <label className={`text-body ${hasCheck ? 'text-content-secondary' : 'text-content-disabled'}`}>점수</label>
  <input
  type="number"
  value={scoreValue}
  onChange={(e) => setScoreValue(parseInt(e.target.value) || 0)}
  min={0}
  disabled={!hasCheck}
- className="w-16 px-2 py-1 sm:py-1.5 text-sm border border-line rounded-md bg-surface text-content-primary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+ className="w-16 px-2 py-1 sm:py-1.5 text-body border border-line rounded-md bg-surface text-content-primary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
  />
  </div>
  </div>
  {!hasCheck && !hideCheckHint && (
- <div className="flex items-center justify-between gap-2 text-xs text-amber-500 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md px-3 py-2">
+ <div className="flex items-center justify-between gap-2 text-body text-amber-500 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md px-3 py-2">
  <span>이 카드는 안내용으로만 표시됩니다. 멤버가 완료 체크를 할 수 없으며, 점수와 승인이 적용되지 않습니다.</span>
  {onDismissCheckHint && (
  <button type="button" onClick={onDismissCheckHint} className="flex-shrink-0 text-amber-400 hover:text-amber-300 transition-colors">
@@ -293,14 +293,14 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  <button
  type="button"
  onClick={onCancel}
- className="px-3 py-1.5 sm:py-2 sm:px-4 text-sm border border-line text-content-secondary rounded-md hover:bg-surface-raised transition-colors"
+ className="px-3 py-1.5 sm:py-2 sm:px-4 text-body border border-line text-content-secondary rounded-md hover:bg-surface-raised transition-colors"
  >
  취소
  </button>
  <button
  type="submit"
  disabled={saving || !hasChanges}
- className="px-3 py-1.5 sm:py-2 sm:px-4 sm:flex-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+ className="px-3 py-1.5 sm:py-2 sm:px-4 sm:flex-1 text-body bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
  >
  {saving ? '저장 중...' : '저장'}
  </button>

@@ -557,6 +557,95 @@ body {
   height: 0;
 }
 
+/* Daily Program Card TiptapEditor */
+.ProseMirror {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ProseMirror p {
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #aaa;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror li {
+  margin-bottom: 0.15em;
+}
+
+.ProseMirror h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.4em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0.8em;
+  margin-bottom: 0.3em;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #3E82F1;
+  padding-left: 12px;
+  margin-left: 0;
+  color: #666;
+  font-style: italic;
+}
+
+.ProseMirror iframe {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+}
+
+.ProseMirror div[data-youtube-video] {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.ProseMirror div[data-youtube-video] iframe {
+  width: 100%;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.ProseMirror a {
+  color: #3E82F1;
+  text-decoration: underline;
+}
+
+.dark .ProseMirror {
+  color: #e5e7eb;
+}
+
+.dark .ProseMirror p.is-editor-empty:first-child::before {
+  color: #6b7280;
+}
+
+.dark .ProseMirror blockquote {
+  color: #9ca3af;
+}
+
 /* Tiptap Content Preview Styles (상세 페이지) */
 .tiptap-content p {
   margin-bottom: 1em;
@@ -587,6 +676,24 @@ body {
   height: auto;
   border-radius: 8px;
   margin: 16px 0;
+}
+
+.tiptap-content iframe {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+}
+
+.tiptap-content div[data-youtube-video] {
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+.tiptap-content div[data-youtube-video] iframe {
+  width: 100%;
 }
 
 .tiptap-content .youtube-wrapper {

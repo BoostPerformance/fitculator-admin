@@ -37,7 +37,7 @@ export function CalendarProgramChip({ program, onClick, compact = false, disable
  return (
   <div
    ref={setNodeRef}
-   className={`w-full transition-all hover:scale-[1.01] active:scale-[0.99] ${
+   className={`w-full min-w-0 overflow-hidden transition-colors ${
     isDragging ? 'opacity-40' : ''
    }`}
    title={program.title || '제목 없음'}

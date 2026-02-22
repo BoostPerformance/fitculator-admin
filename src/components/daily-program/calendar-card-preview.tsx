@@ -69,7 +69,7 @@ export function CalendarCardPreview({ card, expanded = false, onClick, sortDisab
  style={style}
  {...attributes}
  {...listeners}
- className={`rounded-xl bg-neutral-900 border border-line-strong/50 overflow-hidden ${
+ className={`rounded-xl bg-neutral-900 border border-line-strong/50 overflow-hidden min-w-0 break-words transition-colors hover:bg-neutral-800 ${
   onClick ? 'cursor-pointer' : ''
  }`}
  onClick={(e) => {
