@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Pencil } from 'lucide-react';
 import type { DailyProgram, ProgramStatus } from '@/types/daily-program';
 import { CalendarCardPreview } from './calendar-card-preview';
@@ -61,17 +62,21 @@ export function CalendarProgramChip({ program, onClick, compact = false, disable
     <Pencil className="ml-auto flex-shrink-0 w-3 h-3 text-content-disabled opacity-0 group-hover/header:opacity-100 transition-opacity" />
    </div>
 
-   {/* Cards list — read-only preview */}
+   {/* Cards list — sortable preview */}
    {cards.length > 0 && (
-    <div className="space-y-1">
-     {cards.map((card) => (
-      <CalendarCardPreview
-       key={card.id}
-       card={card}
-       expanded={!compact}
-      />
-     ))}
-    </div>
+    <SortableContext items={cards.map(c => `card:${c.id}`)} strategy={verticalListSortingStrategy}>
+     <div className="space-y-1">
+      {cards.map((card) => (
+       <CalendarCardPreview
+        key={card.id}
+        card={card}
+        expanded={!compact}
+        sortDisabled={disableDrag}
+        onClick={() => onClick(program)}
+       />
+      ))}
+     </div>
+    </SortableContext>
    )}
 
    {/* Empty state */}

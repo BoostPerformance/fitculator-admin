@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { DailyProgramCard, CardType, TiptapNode } from '@/types/daily-program';
 
 const cardTypeLabels: Record<CardType, string> = {
@@ -33,17 +35,49 @@ function extractText(nodes: TiptapNode[] | undefined): string {
 interface CalendarCardPreviewProps {
  card: DailyProgramCard;
  expanded?: boolean;
+ onClick?: () => void;
+ sortDisabled?: boolean;
 }
 
-export function CalendarCardPreview({ card, expanded = false }: CalendarCardPreviewProps) {
+export function CalendarCardPreview({ card, expanded = false, onClick, sortDisabled = true }: CalendarCardPreviewProps) {
  const [tipsOpen, setTipsOpen] = useState(false);
  const bodyText = card.body ? extractText(card.body.content) : '';
  const hasBody = bodyText.length > 0;
  const hasCoachingTips = !!card.coaching_tips;
 
+ const {
+  attributes,
+  listeners,
+  setNodeRef,
+  transform,
+  transition,
+  isDragging,
+ } = useSortable({
+  id: `card:${card.id}`,
+  disabled: sortDisabled,
+ });
+
+ const style = {
+  transform: CSS.Transform.toString(transform),
+  transition,
+  opacity: isDragging ? 0.4 : undefined,
+ };
+
  return (
  <div
- className="rounded-xl bg-neutral-900 border border-line-strong/50 overflow-hidden"
+ ref={setNodeRef}
+ style={style}
+ {...attributes}
+ {...listeners}
+ className={`rounded-xl bg-neutral-900 border border-line-strong/50 overflow-hidden ${
+  onClick ? 'cursor-pointer' : ''
+ }`}
+ onClick={(e) => {
+  if (!isDragging && onClick) {
+   e.stopPropagation();
+   onClick();
+  }
+ }}
  >
  {/* Header: type badge + score + title */}
  <div className={expanded ? 'px-3 pt-2.5 pb-1.5' : 'px-2 pt-1.5 pb-1'}>

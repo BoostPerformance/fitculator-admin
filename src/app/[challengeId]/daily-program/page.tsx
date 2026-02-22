@@ -8,13 +8,16 @@ import {
 } from 'date-fns';
 import {
  DndContext, DragOverlay, pointerWithin,
+ PointerSensor, useSensor, useSensors,
  type DragStartEvent, type DragEndEvent,
 } from '@dnd-kit/core';
-import type { DailyProgram, CalendarViewMode, ChallengeGroup } from '@/types/daily-program';
+import { arrayMove } from '@dnd-kit/sortable';
+import type { DailyProgram, DailyProgramCard, CalendarViewMode, ChallengeGroup } from '@/types/daily-program';
 import { CalendarToolbar } from '@/components/daily-program/calendar-toolbar';
 import { CalendarMonthView } from '@/components/daily-program/calendar-month-view';
 import { CalendarWeekView } from '@/components/daily-program/calendar-week-view';
 import { CalendarProgramChip } from '@/components/daily-program/calendar-program-chip';
+import { CalendarCardPreview } from '@/components/daily-program/calendar-card-preview';
 import { MobileCalendarView } from '@/components/daily-program/mobile-calendar-view';
 import { ProgramDetailSheet } from '@/components/daily-program/program-detail-sheet';
 import { useResponsive } from '@/components/hooks/useResponsive';
@@ -38,6 +41,10 @@ export default function DailyProgramPage() {
 
  // DnD state
  const [activeDragProgram, setActiveDragProgram] = useState<DailyProgram | null>(null);
+ const [activeDragCard, setActiveDragCard] = useState<DailyProgramCard | null>(null);
+ const sensors = useSensors(
+  useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+ );
 
  const getDateRange = useCallback(() => {
  if (viewMode === 'month') {
@@ -167,21 +174,151 @@ export default function DailyProgramPage() {
  }
  };
 
+ // Card drag helpers
+ const handleCardDragEnd = async (activeId: string, overId: string) => {
+ const activeCardId = activeId.replace('card:', '');
+
+ if (overId.startsWith('card:')) {
+  // Card-to-card: reorder within same program or cross-program move
+  const overCardId = overId.replace('card:', '');
+  const activeProgram = programs.find((p) =>
+   p.daily_program_cards?.some((c) => c.id === activeCardId)
+  );
+  const overProgram = programs.find((p) =>
+   p.daily_program_cards?.some((c) => c.id === overCardId)
+  );
+
+  if (!activeProgram || !overProgram) return;
+
+  if (activeProgram.id === overProgram.id) {
+   // Same program — reorder
+   const cards = [...(activeProgram.daily_program_cards || [])];
+   const oldIndex = cards.findIndex((c) => c.id === activeCardId);
+   const newIndex = cards.findIndex((c) => c.id === overCardId);
+   if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
+
+   const reordered = arrayMove(cards, oldIndex, newIndex);
+
+   // Optimistic update
+   setPrograms((prev) =>
+    prev.map((p) =>
+     p.id === activeProgram.id
+      ? { ...p, daily_program_cards: reordered }
+      : p
+    )
+   );
+
+   try {
+    const res = await fetch('/api/daily-program-cards', {
+     method: 'PUT',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({
+      id: 'reorder',
+      action: 'reorder',
+      card_ids: reordered.map((c) => c.id),
+     }),
+    });
+    if (!res.ok) fetchPrograms();
+   } catch {
+    fetchPrograms();
+   }
+  } else {
+   // Different program — move card
+   try {
+    const res = await fetch('/api/daily-program-cards', {
+     method: 'PUT',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ id: activeCardId, program_id: overProgram.id }),
+    });
+    if (!res.ok) fetchPrograms();
+    else fetchPrograms();
+   } catch {
+    fetchPrograms();
+   }
+  }
+ } else {
+  // Card dropped on a date cell
+  const newDate = overId;
+  const activeProgram = programs.find((p) =>
+   p.daily_program_cards?.some((c) => c.id === activeCardId)
+  );
+  if (!activeProgram || activeProgram.date === newDate) return;
+
+  let targetProgram = programs.find((p) => p.date === newDate);
+
+  if (!targetProgram) {
+   // Auto-create program on the target date
+   try {
+    const res = await fetch('/api/daily-programs', {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({
+      challenge_id: challengeId,
+      date: newDate,
+      title: '',
+      status: 'draft',
+     }),
+    });
+    if (res.ok) targetProgram = await res.json();
+   } catch {
+    return;
+   }
+  }
+
+  if (targetProgram) {
+   try {
+    await fetch('/api/daily-program-cards', {
+     method: 'PUT',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ id: activeCardId, program_id: targetProgram.id }),
+    });
+    fetchPrograms();
+   } catch {
+    fetchPrograms();
+   }
+  }
+ }
+ };
+
  // DnD handlers
  const handleDragStart = (event: DragStartEvent) => {
- const programId = event.active.id as string;
- const program = programs.find((p) => p.id === programId);
- setActiveDragProgram(program || null);
+ const id = event.active.id.toString();
+
+ if (id.startsWith('card:')) {
+  const cardId = id.replace('card:', '');
+  for (const program of programs) {
+   const card = program.daily_program_cards?.find((c) => c.id === cardId);
+   if (card) {
+    setActiveDragCard(card);
+    setActiveDragProgram(null);
+    return;
+   }
+  }
+ } else {
+  const program = programs.find((p) => p.id === id);
+  setActiveDragProgram(program || null);
+  setActiveDragCard(null);
+ }
  };
 
  const handleDragEnd = (event: DragEndEvent) => {
  const { active, over } = event;
  setActiveDragProgram(null);
+ setActiveDragCard(null);
 
  if (!over) return;
 
- const programId = active.id as string;
- const newDate = over.id as string; // droppable id = date string
+ const activeId = active.id.toString();
+ const overId = over.id.toString();
+
+ if (activeId.startsWith('card:')) {
+  handleCardDragEnd(activeId, overId);
+  return;
+ }
+
+ // Existing program drag logic
+ const programId = activeId;
+ const newDate = overId;
 
  const program = programs.find((p) => p.id === programId);
  if (!program || program.date === newDate) return;
@@ -217,6 +354,7 @@ export default function DailyProgramPage() {
  />
  ) : (
  <DndContext
+ sensors={sensors}
  collisionDetection={pointerWithin}
  onDragStart={handleDragStart}
  onDragEnd={handleDragEnd}
@@ -246,7 +384,13 @@ export default function DailyProgramPage() {
  <CalendarProgramChip
  program={activeDragProgram}
  onClick={() => {}}
+ disableDrag
  />
+ </div>
+ )}
+ {activeDragCard && (
+ <div className="opacity-80 pointer-events-none">
+ <CalendarCardPreview card={activeDragCard} />
  </div>
  )}
  </DragOverlay>
