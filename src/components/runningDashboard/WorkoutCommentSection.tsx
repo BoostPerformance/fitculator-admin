@@ -317,19 +317,17 @@ export default function WorkoutCommentSection({
         <div key={comment.id}>
          {/* 코멘트 */}
          <div className="group flex gap-2">
-          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-           {comment.author.profile_image_url ? (
-            <img
-             src={comment.author.profile_image_url}
-             alt=""
-             className="w-6 h-6 rounded-full object-cover"
-            />
-           ) : (
-            <span className="text-[10px] text-blue-600 dark:text-blue-300 font-medium">
-             {comment.author.name?.charAt(0) || '?'}
-            </span>
-           )}
-          </div>
+          {comment.author.profile_image_url ? (
+           <img
+            src={comment.author.profile_image_url}
+            alt=""
+            className="flex-shrink-0 w-6 h-6 rounded-full object-cover"
+           />
+          ) : (
+           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="flex-shrink-0 w-6 h-6 text-neutral-300 dark:text-neutral-600">
+            <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clipRule="evenodd" />
+           </svg>
+          )}
           <div className="flex-1 min-w-0">
            <div className="flex items-center gap-1.5">
             <span className="text-[12px] font-semibold text-content-secondary">

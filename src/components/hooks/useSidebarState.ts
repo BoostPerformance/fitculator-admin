@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface SidebarState {
  isSidebarOpen: boolean;
@@ -56,35 +56,35 @@ export const useSidebarState = (isMobile: boolean) => {
  }
  }, [state, isMobile]);
 
- const setIsSidebarOpen = (value: boolean | ((prev: boolean) => boolean)) => {
+ const setIsSidebarOpen = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
  setState((prev) => ({
  ...prev,
  isSidebarOpen: typeof value === 'function' ? value(prev.isSidebarOpen) : value,
  }));
- };
+ }, []);
 
- const setIsOpenDropdown = (value: boolean | ((prev: boolean) => boolean)) => {
+ const setIsOpenDropdown = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
  setState((prev) => ({
  ...prev,
  isOpenDropdown: typeof value === 'function' ? value(prev.isOpenDropdown) : value,
  }));
- };
+ }, []);
 
- const setIsAdminDropdownOpen = (value: boolean | ((prev: boolean) => boolean)) => {
+ const setIsAdminDropdownOpen = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
  setState((prev) => ({
  ...prev,
  isAdminDropdownOpen: typeof value === 'function' ? value(prev.isAdminDropdownOpen) : value,
  }));
- };
+ }, []);
 
- const setIsOpenEndedDropdown = (value: boolean | ((prev: boolean) => boolean)) => {
+ const setIsOpenEndedDropdown = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
  setState((prev) => ({
  ...prev,
  isOpenEndedDropdown: typeof value === 'function' ? value(prev.isOpenEndedDropdown) : value,
  }));
- };
+ }, []);
 
- const setIsOpenChallengeDropdown = (
+ const setIsOpenChallengeDropdown = useCallback((
  value: { [id: string]: boolean } | ((prev: { [id: string]: boolean }) => { [id: string]: boolean })
  ) => {
  setState((prev) => ({
@@ -92,7 +92,7 @@ export const useSidebarState = (isMobile: boolean) => {
  isOpenChallengeDropdown:
  typeof value === 'function' ? value(prev.isOpenChallengeDropdown) : value,
  }));
- };
+ }, []);
 
  return {
  isSidebarOpen: state.isSidebarOpen,

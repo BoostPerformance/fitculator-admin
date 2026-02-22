@@ -188,6 +188,7 @@ const fetchRecentNotes = async (
 export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: WorkoutNotesFeedProps) {
  const observerRef = useRef<IntersectionObserver | null>(null);
  const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
+ const [isSpinning, setIsSpinning] = useState(false);
 
  // 현재 코치의 users.id 조회 (본인 코멘트 표시용)
  const { data: coachIdentity } = useQuery({
@@ -285,12 +286,15 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  운동 노트
  </h2>
  <button
- onClick={() => refetch()}
- disabled={isRefetching}
+ onClick={() => {
+  setIsSpinning(true);
+  refetch().finally(() => setTimeout(() => setIsSpinning(false), 600));
+ }}
+ disabled={isSpinning}
  title="새로고침"
  className="p-1.5 rounded-md text-content-disabled hover:text-content-tertiary hover:bg-surface-raised transition-colors disabled:opacity-50"
  >
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`}>
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={`w-4 h-4 transition-transform ${isSpinning ? 'animate-spin' : ''}`}>
   <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.992 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182M20.015 4.356v4.992" />
  </svg>
  </button>
@@ -317,13 +321,16 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  {/* 1행: 사용자 이름 + 그룹 + 시간 */}
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- {note.user_profile_image ? (
-  <img src={note.user_profile_image} alt="" className="w-7 h-7 rounded-full object-cover" />
- ) : (
-  <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center">
-  <span className="text-[11px] font-medium text-content-tertiary">{note.user_name?.charAt(0)}</span>
-  </div>
- )}
+ <img
+  src={note.user_profile_image || undefined}
+  alt=""
+  className="w-7 h-7 rounded-full object-cover"
+  style={{ display: note.user_profile_image ? undefined : 'none' }}
+  onError={(e) => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement)!.style.display = ''; }}
+ />
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 text-neutral-300 dark:text-neutral-600" style={{ display: note.user_profile_image ? 'none' : undefined }}>
+  <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clipRule="evenodd" />
+ </svg>
  <span className="font-semibold text-content-secondary text-[13px]">
   {note.user_name}
  </span>
