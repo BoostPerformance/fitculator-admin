@@ -654,7 +654,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
   </div>
 
   {/* ── Col3: Workout detail + comments ── */}
-  <div className="flex-1 min-w-0 flex flex-col">
+  <div className="flex-1 min-w-0 min-h-0 flex flex-col">
    <div className="px-4 h-10 border-b border-line flex-shrink-0 flex items-center">
    <span className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">운동 상세</span>
    </div>

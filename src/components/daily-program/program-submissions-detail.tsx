@@ -100,9 +100,9 @@ export function SubmissionDetailPanel({ completion, challengeId }: SubmissionDet
  };
 
  return (
- <div className="flex flex-col h-full">
+ <div className="flex flex-col h-full min-h-0">
   {/* User header */}
-  <div className="flex items-center gap-2.5 px-4 py-3 border-b border-line">
+  <div className="flex items-center gap-2.5 px-4 py-3 border-b border-line flex-shrink-0">
   {user?.profile_image_url ? (
    <img src={user.profile_image_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
   ) : (
@@ -128,7 +128,7 @@ export function SubmissionDetailPanel({ completion, challengeId }: SubmissionDet
   </div>
 
   {/* Content */}
-  <div className="flex-1 overflow-y-auto px-4 py-4">
+  <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4">
   {!completion.workout_id ? (
    <div className="flex items-center gap-1.5 text-sm text-content-tertiary">
    <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -207,9 +207,9 @@ export function MemberSubmissionsPanel({ completions, challengeId }: MemberSubmi
  );
 
  return (
- <div className="flex flex-col h-full">
+ <div className="flex flex-col h-full min-h-0">
   {/* Member header */}
-  <div className="flex items-center gap-2.5 px-4 py-3 border-b border-line">
+  <div className="flex items-center gap-2.5 px-4 py-3 border-b border-line flex-shrink-0">
   {user?.profile_image_url ? (
    <img src={user.profile_image_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
   ) : (
@@ -229,7 +229,7 @@ export function MemberSubmissionsPanel({ completions, challengeId }: MemberSubmi
   </div>
 
   {/* All completions */}
-  <div className="flex-1 overflow-y-auto divide-y divide-line">
+  <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-line">
   {sorted.map((completion) => {
    const card = completion.daily_program_cards;
    const vStatus = verificationStatusConfig[completion.verification_status];
@@ -331,9 +331,9 @@ export function CardSubmissionsPanel({ cardTitle, cardType, scoreValue, completi
  };
 
  return (
- <div className="flex flex-col h-full">
+ <div className="flex flex-col h-full min-h-0">
   {/* Card header */}
-  <div className="flex items-center gap-2.5 px-4 py-3 border-b border-line">
+  <div className="flex items-center gap-2.5 px-4 py-3 border-b border-line flex-shrink-0">
   <CardTypeBadge type={cardType as any} />
   <div className="flex-1 min-w-0">
    <span className="text-sm font-medium text-content-primary truncate">{cardTitle}</span>
@@ -347,7 +347,7 @@ export function CardSubmissionsPanel({ cardTitle, cardType, scoreValue, completi
   </div>
 
   {/* All member completions */}
-  <div className="flex-1 overflow-y-auto divide-y divide-line">
+  <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-line">
   {completions.map((completion) => {
    const user = completion.users;
    const vStatus = verificationStatusConfig[completion.verification_status];
