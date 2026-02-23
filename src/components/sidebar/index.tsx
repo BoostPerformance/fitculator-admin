@@ -345,9 +345,10 @@ export default function Sidebar({
  {(!isMobile || !isSidebarOpen) && (
  <aside
  className={cn(
- 'min-h-fit lg:h-full lg:flex lg:flex-col lg:px-4 bg-surface relative transition-all duration-300 ease-in-out safe-area-inset-bottom',
+ 'min-h-fit lg:h-full lg:flex lg:flex-col lg:px-4 bg-surface relative safe-area-inset-bottom',
+ mounted && 'transition-all duration-300 ease-in-out',
  isMobile && !isSidebarOpen && 'w-full sticky top-0 z-[100]',
- !isMobile && !isSidebarOpen && 'lg:w-16 min-w-16',
+ !isMobile && !isSidebarOpen && 'lg:w-0 min-w-0 lg:px-0 overflow-hidden',
  !isMobile && isSidebarOpen && 'sm:min-w-48 md:min-w-56',
  !isMobile && 'drop-shadow-sm',
  )}

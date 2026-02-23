@@ -23,6 +23,7 @@ import { ProgramModal } from '@/components/daily-program/program-modal';
 import { SubmissionsView, STATUS_OPTIONS } from '@/components/daily-program/submissions-view';
 import type { StatusFilter } from '@/components/daily-program/submissions-view';
 import { useResponsive } from '@/components/hooks/useResponsive';
+import { DailyProgramCalendarSkeleton } from '@/components/daily-program/daily-program-skeleton';
 
 type ActiveTab = 'calendar' | 'submissions';
 
@@ -406,9 +407,7 @@ export default function DailyProgramPage() {
 
  <div className="px-4 pb-4 sm:px-2 sm:pb-2 overflow-x-hidden">
  {loading ? (
- <div className="flex items-center justify-center h-64">
- <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
- </div>
+ <DailyProgramCalendarSkeleton viewMode={viewMode} isMobile={isMobile} />
  ) : isMobile ? (
  <MobileCalendarView
  currentDate={currentDate}

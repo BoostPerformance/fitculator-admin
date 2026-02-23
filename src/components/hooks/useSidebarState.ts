@@ -44,7 +44,7 @@ const getInitialState = (isMobile: boolean): SidebarState => {
 
 export const usePersistedSidebarOpen = () => {
  const [isOpen, setIsOpenState] = useState(() => {
-  if (typeof window === 'undefined') return true;
+  if (typeof window === 'undefined') return false;
   try {
    const saved = localStorage.getItem(STORAGE_KEY);
    if (saved) return JSON.parse(saved).isSidebarOpen ?? true;
