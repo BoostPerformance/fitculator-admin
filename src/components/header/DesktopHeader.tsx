@@ -9,6 +9,7 @@ interface DesktopHeaderProps {
   showEditUsername?: boolean;
   challengeTitle?: string;
   challengeFlags?: ChallengeFlags;
+  challenges?: { id: string; title: string; end_date: string; challenge_type: 'diet' | 'exercise' | 'diet_and_exercise' | 'running'; enable_benchmark?: boolean; enable_mission?: boolean; use_daily_programs?: boolean }[];
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
 }
@@ -17,6 +18,7 @@ export function DesktopHeader({
   showEditUsername,
   challengeTitle,
   challengeFlags,
+  challenges,
   isSidebarOpen,
   onToggleSidebar,
 }: DesktopHeaderProps) {
@@ -62,6 +64,7 @@ export function DesktopHeader({
         <Breadcrumbs
           challengeTitle={challengeTitle}
           challengeFlags={challengeFlags}
+          challenges={challenges}
         />
       </div>
 

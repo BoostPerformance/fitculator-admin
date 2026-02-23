@@ -147,18 +147,20 @@ function BreadcrumbItem({ label, href, isLast, siblings, parentPath, currentSegm
       {hasSiblings && (
         <button
           onClick={toggle}
-          className="flex items-center justify-center w-5 h-5 rounded hover:bg-surface-raised transition-colors"
+          className="flex items-center justify-center w-6 h-6 rounded hover:bg-surface-raised transition-colors"
           aria-label="하위 메뉴 선택"
           aria-expanded={isOpen}
         >
           <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
             fill="none"
-            className={`text-content-disabled transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-content-disabled"
           >
-            <path d="M3 5L6 8L9 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
           </svg>
         </button>
       )}
@@ -186,13 +188,150 @@ function BreadcrumbItem({ label, href, isLast, siblings, parentPath, currentSegm
   );
 }
 
+// ─── Program selector (challenge switcher) ───────────────
+interface Challenge {
+  id: string;
+  title: string;
+  end_date: string;
+  challenge_type: ChallengeFlags['challenge_type'];
+  enable_benchmark?: boolean;
+  enable_mission?: boolean;
+  use_daily_programs?: boolean;
+}
+
+function ProgramSelector({ challenges, currentTitle }: { challenges: Challenge[]; currentTitle: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const [dropdownLeft, setDropdownLeft] = useState(0);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (ref.current && !ref.current.contains(e.target as Node)) {
+      setIsOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, handleClickOutside]);
+
+  const toggle = () => {
+    if (!isOpen && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setDropdownLeft(rect.left);
+    }
+    setIsOpen(!isOpen);
+  };
+
+  const handleSelect = (target: Challenge) => {
+    setIsOpen(false);
+    // Try to stay on the same sub-page if the target challenge supports it
+    const segments = pathname.split('/').filter(Boolean);
+    const subPage = segments[1]; // e.g. 'diet', 'workout', 'daily-program', etc.
+    if (subPage) {
+      const supported = getChallengeChildren({
+        challenge_type: target.challenge_type,
+        enable_benchmark: target.enable_benchmark,
+        enable_mission: target.enable_mission,
+        use_daily_programs: target.use_daily_programs,
+      });
+      const canNavigate = supported.some(s => s.segment === subPage);
+      if (canNavigate) {
+        router.push(`/${target.id}/${subPage}`);
+        return;
+      }
+    }
+    router.push(`/${target.id}`);
+  };
+
+  return (
+    <div ref={ref} className="flex items-center gap-1">
+      <span className="text-content-tertiary">{currentTitle}</span>
+      <button
+        onClick={toggle}
+        className="flex items-center justify-center w-6 h-6 rounded hover:bg-surface-raised transition-colors"
+        aria-label="프로그램 선택"
+        aria-expanded={isOpen}
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-content-disabled"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+        </svg>
+      </button>
+      {isOpen && (() => {
+        const now = new Date();
+        const active = challenges.filter(c => new Date(c.end_date) >= now);
+        const ended = challenges.filter(c => new Date(c.end_date) < now);
+        return (
+          <div
+            className="fixed top-14 bg-surface border border-line rounded-b-lg shadow-elevation-2 overflow-hidden z-[101] min-w-[160px] py-1 max-h-[70vh] overflow-y-auto"
+            style={{ left: dropdownLeft }}
+          >
+            {active.length > 0 && (
+              <>
+                <div className="px-3 pt-1.5 pb-1 text-[11px] text-content-disabled tracking-wider">진행중</div>
+                {active.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => handleSelect(c)}
+                    className={`flex w-full items-center px-3 py-2 text-body transition-colors ${
+                      c.title === currentTitle
+                        ? 'bg-surface-raised text-content-primary font-medium'
+                        : 'text-content-secondary hover:bg-surface-raised'
+                    }`}
+                  >
+                    {c.title}
+                  </button>
+                ))}
+              </>
+            )}
+            {active.length > 0 && ended.length > 0 && (
+              <div className="my-1 border-t border-line" />
+            )}
+            {ended.length > 0 && (
+              <>
+                <div className="px-3 pt-1.5 pb-1 text-[11px] text-content-disabled tracking-wider">종료</div>
+                {ended.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => handleSelect(c)}
+                    className={`flex w-full items-center px-3 py-2 text-body transition-colors ${
+                      c.title === currentTitle
+                        ? 'bg-surface-raised text-content-disabled font-medium'
+                        : 'text-content-disabled hover:bg-surface-raised hover:text-content-tertiary'
+                    }`}
+                  >
+                    {c.title}
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
 // ─── Breadcrumbs ──────────────────────────────────────────
 interface BreadcrumbsProps {
   challengeTitle?: string;
   challengeFlags?: ChallengeFlags;
+  challenges?: Challenge[];
 }
 
-export function Breadcrumbs({ challengeTitle, challengeFlags }: BreadcrumbsProps) {
+export function Breadcrumbs({ challengeTitle, challengeFlags, challenges }: BreadcrumbsProps) {
   const pathname = usePathname();
   const segments = pathname.split('/').filter(Boolean);
 
@@ -204,6 +343,7 @@ export function Breadcrumbs({ challengeTitle, challengeFlags }: BreadcrumbsProps
     siblings: SiblingRoute[] | null;
     parentPath: string;
     currentSegment: string;
+    isProgramSelector?: boolean;
   }[] = [];
   let currentPath = '';
 
@@ -221,6 +361,7 @@ export function Breadcrumbs({ challengeTitle, challengeFlags }: BreadcrumbsProps
         siblings: null,
         parentPath,
         currentSegment: segment,
+        isProgramSelector: true,
       });
       // Challenge root page (/{challengeId}) → append "대시보드"
       if (segments.length === 1) {
@@ -260,14 +401,18 @@ export function Breadcrumbs({ challengeTitle, challengeFlags }: BreadcrumbsProps
                 <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             )}
-            <BreadcrumbItem
-              label={crumb.label}
-              href={crumb.href}
-              isLast={isLast}
-              siblings={crumb.siblings}
-              parentPath={crumb.parentPath}
-              currentSegment={crumb.currentSegment}
-            />
+            {crumb.isProgramSelector && challenges && challenges.length > 0 ? (
+              <ProgramSelector challenges={challenges} currentTitle={crumb.label} />
+            ) : (
+              <BreadcrumbItem
+                label={crumb.label}
+                href={crumb.href}
+                isLast={isLast}
+                siblings={crumb.siblings}
+                parentPath={crumb.parentPath}
+                currentSegment={crumb.currentSegment}
+              />
+            )}
           </span>
         );
       })}
