@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import type {
  ProgramSubmissionGroup,
@@ -12,6 +12,8 @@ import { ProgramStatusBadge } from './program-status-badge';
 import { CardTypeBadge } from './card-type-badge';
 import { ProgramSubmissionsDetail, SubmissionDetailPanel, MemberSubmissionsPanel, CardSubmissionsPanel, groupCompletionsByCard } from './program-submissions-detail';
 import { useResponsive } from '@/components/hooks/useResponsive';
+import { WorkoutIcon } from '@/components/icons/WorkoutIcon';
+import { formatTime } from '@/utils/formatTime';
 
 
 const verificationStatusConfig: Record<VerificationStatus, { label: string; className: string }> = {
@@ -50,7 +52,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
  const [selectedCompletion, setSelectedCompletion] = useState<DailyProgramCompletion | null>(null);
  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
- const [col2ViewMode, setCol2ViewMode] = useState<'card' | 'member'>('card');
+ const [col2ViewMode, setCol2ViewMode] = useState<'card' | 'member'>('member');
  const [col2SortDesc, setCol2SortDesc] = useState(true);
 
  const [reviewing, setReviewing] = useState<string | null>(null);
@@ -104,13 +106,6 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
  }
  };
 
- const formatTime = (timestamp: string) => {
- try {
-  return formatDistanceToNow(new Date(timestamp), { addSuffix: true, locale: ko }).replace('약 ', '');
- } catch {
-  return '';
- }
- };
 
  // ── Mobile helpers (unchanged) ──
  const toggleExpand = (programId: string) => {
@@ -367,16 +362,8 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
    </span>
    )}
    {hasWorkout && (
-   <span className="text-[10px] text-blue-500 dark:text-blue-400 flex-shrink-0" title="운동 연결됨">
-    <svg className="w-5 h-5 inline" viewBox="190 290 750 340" fill="currentColor" stroke="currentColor" strokeWidth="15">
-    <g transform="translate(0,1024) scale(0.1,-0.1)">
-     <path d="M4363 7038 c-22 -11 -28 -21 -88 -152 -49 -109 -102 -180 -255 -342 -164 -173 -242 -274 -294 -385 -38 -78 -49 -92 -133 -163 -113 -94 -183 -172 -225 -251 -104 -195 8 -495 283 -760 166 -159 323 -269 629 -439 372 -208 522 -323 875 -666 231 -225 288 -275 422 -363 236 -156 469 -245 778 -298 154 -27 532 -37 709 -19 481 48 808 193 981 435 54 76 90 155 121 270 27 102 30 152 10 180 -7 11 -19 38 -26 60 -24 75 -58 130 -112 182 -71 66 -122 91 -325 159 -349 115 -563 244 -790 475 -132 135 -183 196 -355 426 -176 234 -266 383 -420 694 -134 272 -182 352 -238 403 -67 60 -135 67 -300 30 -176 -40 -247 -132 -284 -371 l-12 -78 -100 2 c-259 5 -426 91 -470 240 -16 55 -16 66 0 198 20 160 14 222 -29 312 -34 68 -126 152 -216 197 -74 37 -99 42 -136 24z m155 -262 c46 -53 56 -95 46 -200 -5 -50 -9 -138 -8 -196 0 -89 4 -114 26 -168 48 -115 129 -197 254 -253 105 -48 225 -69 464 -83 250 -15 266 -20 345 -113 28 -32 83 -93 124 -136 57 -59 72 -80 63 -89 -22 -22 -14 -77 14 -105 l25 -25 222 6 222 6 42 -59 42 -60 -29 -6 c-16 -3 -72 -12 -125 -20 -106 -15 -139 -33 -150 -86 -7 -31 15 -83 40 -93 28 -11 96 -7 233 14 74 11 141 20 150 20 20 -1 116 -120 105 -130 -5 -4 -49 -17 -100 -30 -110 -26 -143 -52 -143 -110 0 -30 6 -44 31 -64 17 -14 39 -26 49 -26 11 0 81 16 157 35 76 19 145 35 153 35 9 0 38 -23 65 -51 114 -116 312 -257 481 -342 91 -46 323 -136 404 -157 133 -35 237 -117 259 -205 16 -65 14 -96 -15 -174 -26 -69 -27 -71 -78 -90 -149 -56 -343 -75 -685 -68 -493 10 -836 77 -1139 222 -186 89 -240 133 -597 485 -412 406 -579 554 -867 770 -79 59 -87 68 -92 105 -3 22 -12 101 -21 175 -35 301 -131 611 -266 858 l-40 73 77 87 c83 94 167 217 185 269 12 39 28 35 77 -21z m1293 -458 c17 -18 88 -150 158 -293 70 -143 149 -295 174 -338 26 -43 47 -81 47 -83 0 -2 -30 -4 -68 -4 l-67 0 -101 103 c-55 56 -132 138 -171 183 -76 86 -130 121 -225 149 -41 12 -58 21 -58 33 0 30 39 182 54 210 23 45 84 69 179 71 42 1 52 -3 78 -31z m-1739 -70 c109 -208 205 -517 233 -752 9 -71 13 -72 -136 47 -120 97 -195 175 -251 261 -69 107 -74 176 -18 288 36 73 125 198 140 198 5 0 20 -19 32 -42z m-354 -461 c33 -78 138 -212 228 -292 124 -111 164 -142 399 -310 368 -264 539 -412 964 -834 290 -288 429 -408 555 -480 302 -172 681 -269 1181 -302 185 -12 432 -7 589 11 49 6 91 8 93 6 3 -3 -46 -30 -108 -60 -128 -62 -276 -105 -465 -133 -168 -24 -575 -25 -729 0 -350 56 -620 168 -865 361 -36 28 -160 143 -275 256 -381 372 -498 459 -975 730 -436 248 -684 479 -776 725 -27 71 -26 170 2 214 22 34 143 161 153 161 3 0 16 -24 29 -53z" />
-     <path d="M2112 5235 c-47 -20 -68 -72 -48 -119 8 -19 23 -39 34 -45 13 -7 91 -11 202 -11 l182 0 29 29 c49 50 37 121 -26 147 -48 20 -327 19 -373 -1z" />
-     <path d="M2793 5236 c-61 -28 -72 -98 -24 -147 l29 -29 177 0 c200 0 226 7 244 63 13 40 4 72 -29 102 -20 18 -38 20 -194 23 -131 1 -178 -1 -203 -12z" />
-     <path d="M2539 4771 c-38 -38 -40 -91 -4 -126 l24 -25 519 0 518 0 27 28 c36 38 37 93 2 127 l-24 25 -516 0 -517 0 -29 -29z" />
-     <path d="M3073 4403 c-28 -5 -73 -58 -73 -84 0 -29 27 -77 49 -89 13 -6 204 -10 546 -10 342 0 533 4 546 10 28 16 51 67 44 99 -3 16 -17 39 -31 52 l-26 24 -516 1 c-284 1 -527 0 -539 -3z" />
-    </g>
-    </svg>
+   <span className="text-blue-500 dark:text-blue-400 flex-shrink-0" title="운동 연결됨">
+    <WorkoutIcon />
    </span>
    )}
    <span className="text-[11px] text-content-disabled flex-shrink-0">
@@ -489,16 +476,6 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
     <div className="flex items-center gap-1.5">
     <div className="inline-flex items-center gap-0.5 bg-surface-raised rounded-lg p-0.5">
      <button
-     onClick={() => setCol2ViewMode('card')}
-     className={`px-2 py-0.5 text-[14px] font-medium rounded-md transition-colors ${
-      col2ViewMode === 'card'
-      ? 'bg-surface text-content-primary shadow-sm'
-      : 'text-content-tertiary hover:text-content-secondary'
-     }`}
-     >
-     카드별
-     </button>
-     <button
      onClick={() => setCol2ViewMode('member')}
      className={`px-2 py-0.5 text-[14px] font-medium rounded-md transition-colors ${
       col2ViewMode === 'member'
@@ -507,6 +484,16 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
      }`}
      >
      멤버별
+     </button>
+     <button
+     onClick={() => setCol2ViewMode('card')}
+     className={`px-2 py-0.5 text-[14px] font-medium rounded-md transition-colors ${
+      col2ViewMode === 'card'
+      ? 'bg-surface text-content-primary shadow-sm'
+      : 'text-content-tertiary hover:text-content-secondary'
+     }`}
+     >
+     카드별
      </button>
     </div>
     <button
@@ -621,6 +608,11 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
          {vStatus.label}
         </span>
         )}
+        {!!completion.workout_id && (
+        <span className="text-blue-500 dark:text-blue-400 flex-shrink-0" title="운동 연결됨">
+         <WorkoutIcon />
+        </span>
+        )}
         {completion.verification_status === 'pending' && (
         <div className="flex items-center gap-1.5 flex-shrink-0">
          <button
@@ -645,6 +637,9 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
          </button>
         </div>
         )}
+        <span className="text-[11px] text-content-disabled flex-shrink-0">
+        {formatTime(completion.completed_at)}
+        </span>
        </div>
        );
       })}
