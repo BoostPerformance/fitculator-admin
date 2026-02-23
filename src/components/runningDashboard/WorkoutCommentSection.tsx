@@ -169,6 +169,7 @@ export default function WorkoutCommentSection({
  const invalidateAll = () => {
   queryClient.invalidateQueries({ queryKey: ['workout-comments', workoutId, challengeId] });
   queryClient.invalidateQueries({ queryKey: ['running', 'recent-notes'] });
+  queryClient.invalidateQueries({ queryKey: ['running', 'feed-counts'] });
  };
 
  const queryKey = ['workout-comments', workoutId, challengeId];

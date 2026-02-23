@@ -86,6 +86,18 @@ export async function GET(request: Request) {
  const weekStart = url.searchParams.get('weekStart') || undefined;
  const weekEnd = url.searchParams.get('weekEnd') || undefined;
  return await getDistanceLeaderboardData(challengeId, period, weekStart, weekEnd);
+ } else if (type === 'feed-counts') {
+ // 운동 피드 필터별 건수 조회
+ if (!challengeId) {
+ return NextResponse.json(
+ { error: 'Challenge ID is required for feed counts' },
+ { status: 400 }
+ );
+ }
+ const startDate = url.searchParams.get('startDate') || undefined;
+ const endDate = url.searchParams.get('endDate') || undefined;
+ const useDailyPrograms = url.searchParams.get('useDailyPrograms') === 'true';
+ return await getFeedFilterCounts(challengeId, startDate, endDate, useDailyPrograms);
  } else if (type === 'recent-notes') {
  // 최근 운동 노트 - 챌린지 ID 필수 확인
  if (!challengeId) {
@@ -98,7 +110,10 @@ export async function GET(request: Request) {
  const offset = parseInt(url.searchParams.get('offset') || '0');
  const startDate = url.searchParams.get('startDate') || undefined;
  const endDate = url.searchParams.get('endDate') || undefined;
- return await getRecentNotesData(challengeId, limit, offset, startDate, endDate);
+ const filterParam = url.searchParams.get('filter');
+ const filters = filterParam ? filterParam.split(',') : undefined;
+ const useDailyPrograms = url.searchParams.get('useDailyPrograms') === 'true';
+ return await getRecentNotesData(challengeId, limit, offset, startDate, endDate, filters, useDailyPrograms);
  } else if (type === 'workout') {
  // 개별 운동 상세 조회
  const workoutId = url.searchParams.get('workoutId');
@@ -1260,13 +1275,136 @@ async function getDistanceLeaderboardData(
  }
 }
 
+// .in() 배치 헬퍼 (URL 길이 제한 방지)
+async function queryWorkoutIdsBatched(
+ table: string,
+ workoutIds: string[],
+ extraFilter?: (q: any) => any
+): Promise<Set<string>> {
+ const BATCH = 100;
+ const result = new Set<string>();
+ const batches: Promise<any>[] = [];
+ for (let i = 0; i < workoutIds.length; i += BATCH) {
+ const chunk = workoutIds.slice(i, i + BATCH);
+ let q = supabase.from(table).select('workout_id').in('workout_id', chunk);
+ if (extraFilter) q = extraFilter(q);
+ batches.push(q);
+ }
+ const results = await Promise.all(batches);
+ for (const { data } of results) {
+ data?.forEach((d: any) => result.add(d.workout_id));
+ }
+ return result;
+}
+
+// 모든 workout ID 페이지네이션 조회 (1000개 제한 방지)
+async function fetchAllWorkoutIds(
+ participantIds: string[],
+ startDate?: string,
+ endDate?: string
+): Promise<string[]> {
+ const PAGE = 1000;
+ const all: string[] = [];
+ let offset = 0;
+ while (true) {
+ let q = supabase
+  .from('workouts')
+  .select('id')
+  .in('user_id', participantIds);
+ if (startDate) q = q.gte('timestamp', `${startDate}T00:00:00`);
+ if (endDate) q = q.lte('timestamp', `${endDate}T23:59:59`);
+ const { data } = await q.range(offset, offset + PAGE - 1);
+ if (!data || data.length === 0) break;
+ all.push(...data.map((w) => w.id));
+ if (data.length < PAGE) break;
+ offset += PAGE;
+ }
+ return all;
+}
+
 // 최근 운동 노트 데이터 조회
+async function getFeedFilterCounts(
+ challengeId: string,
+ startDate?: string,
+ endDate?: string,
+ useDailyPrograms?: boolean
+): Promise<NextResponse> {
+ try {
+ const { data: participants } = await supabase
+ .from('challenge_participants')
+ .select('service_user_id')
+ .eq('challenge_id', challengeId)
+ .eq('status', 'active');
+
+ const participantIds = participants?.map((p) => p.service_user_id) || [];
+ const empty = { notes: 0, photos: 0, daily_program: 0, has_comments: 0, no_comments: 0, competition: 0 };
+
+ if (participantIds.length === 0) {
+ return NextResponse.json(empty);
+ }
+
+ const baseIds = await fetchAllWorkoutIds(participantIds, startDate, endDate);
+
+ if (baseIds.length === 0) {
+ return NextResponse.json(empty);
+ }
+
+ // 노트 있는 운동 수 조회
+ const notesCountQuery = async (): Promise<number> => {
+ const BATCH = 100;
+ let count = 0;
+ const batches: Promise<any>[] = [];
+ for (let i = 0; i < baseIds.length; i += BATCH) {
+  const chunk = baseIds.slice(i, i + BATCH);
+  batches.push(
+  supabase.from('workouts').select('id', { count: 'exact', head: true })
+   .in('id', chunk).not('note', 'is', null).neq('note', '')
+  );
+ }
+ const results = await Promise.all(batches);
+ for (const { count: c } of results) count += (c || 0);
+ return count;
+ };
+
+ const [notesCount, photoIds, missionIds, commentIds, competitionIds] = await Promise.all([
+ notesCountQuery(),
+ queryWorkoutIdsBatched('workout_photos', baseIds),
+ useDailyPrograms
+  ? queryWorkoutIdsBatched('daily_program_completions', baseIds)
+  : queryWorkoutIdsBatched('challenge_mission_completions', baseIds),
+ queryWorkoutIdsBatched('challenge_workout_comments', baseIds, (q) => q.eq('challenge_id', challengeId)),
+ queryWorkoutIdsBatched('competitions', baseIds),
+ ]);
+
+ return NextResponse.json({
+ notes: notesCount,
+ photos: photoIds.size,
+ daily_program: missionIds.size,
+ has_comments: commentIds.size,
+ no_comments: baseIds.length - commentIds.size,
+ competition: competitionIds.size,
+ }, {
+ headers: {
+  'Cache-Control': 'no-cache, no-store, must-revalidate',
+ },
+ });
+ } catch (error) {
+ console.error('Error in feed filter counts:', error);
+ return NextResponse.json(
+ { error: 'Failed to fetch feed filter counts' },
+ { status: 500 }
+ );
+ }
+}
+
 async function getRecentNotesData(
  challengeId: string,
  limit: number = 10,
  offset: number = 0,
  startDate?: string,
- endDate?: string
+ endDate?: string,
+ filters?: string[],
+ useDailyPrograms?: boolean
 ): Promise<NextResponse> {
  try {
  // 1. 챌린지 참가자 조회 (id와 service_user_id 모두 필요)
@@ -1289,40 +1427,136 @@ async function getRecentNotesData(
  return NextResponse.json({ notes: [], hasMore: false });
  }
 
- // 2. 노트가 있는 최근 운동 기록 조회 (페이지네이션)
- let notesQuery = supabase
- .from('workouts')
- .select(`
- id,
- user_id,
- title,
- timestamp,
- duration_minutes,
- distance,
- points,
- note,
- intensity,
- pace_per_km,
- workout_categories (
- name_ko,
- name_en
- )
- `)
- .in('user_id', participantIds)
- .not('note', 'is', null)
- .neq('note', '');
+ // 필터 처리: notes는 SQL 조건으로, 나머지는 ID 기반
+ let hasNotesFilter = false;
+ let filterWorkoutIds: Set<string> | null = null;
 
- // 챌린지 기간 필터링
+ if (filters && filters.length > 0) {
+ const idBasedFilters = filters.filter((f) => f !== 'notes');
+ hasNotesFilter = filters.includes('notes');
+
+ if (idBasedFilters.length > 0) {
+  const baseIds = await fetchAllWorkoutIds(participantIds, startDate, endDate);
+  const filterSets: Set<string>[] = [];
+
+  for (const filter of idBasedFilters) {
+  if (filter === 'photos') {
+   filterSets.push(await queryWorkoutIdsBatched('workout_photos', baseIds));
+  } else if (filter === 'daily_program') {
+   filterSets.push(await queryWorkoutIdsBatched(
+    useDailyPrograms ? 'daily_program_completions' : 'challenge_mission_completions',
+    baseIds
+   ));
+  } else if (filter === 'has_comments') {
+   filterSets.push(await queryWorkoutIdsBatched('challenge_workout_comments', baseIds, (q) => q.eq('challenge_id', challengeId)));
+  } else if (filter === 'no_comments') {
+   const commentedIds = await queryWorkoutIdsBatched('challenge_workout_comments', baseIds, (q) => q.eq('challenge_id', challengeId));
+   const noCommentIds = new Set(baseIds.filter((id) => !commentedIds.has(id)));
+   filterSets.push(noCommentIds);
+  } else if (filter === 'competition') {
+   filterSets.push(await queryWorkoutIdsBatched('competitions', baseIds));
+  }
+  }
+
+  // 교집합 계산
+  if (filterSets.length > 0) {
+  filterWorkoutIds = filterSets[0];
+  for (let i = 1; i < filterSets.length; i++) {
+   filterWorkoutIds = new Set([...filterWorkoutIds].filter((id) => filterSets[i].has(id)));
+  }
+  }
+
+  // notes 필터가 함께 있으면 교집합에 노트 조건 적용
+  if (hasNotesFilter && filterWorkoutIds) {
+  const BATCH = 100;
+  const withNotes = new Set<string>();
+  const ids = [...filterWorkoutIds];
+  const batches: Promise<any>[] = [];
+  for (let i = 0; i < ids.length; i += BATCH) {
+   const chunk = ids.slice(i, i + BATCH);
+   batches.push(supabase.from('workouts').select('id').in('id', chunk).not('note', 'is', null).neq('note', ''));
+  }
+  const results = await Promise.all(batches);
+  for (const { data } of results) data?.forEach((d: any) => withNotes.add(d.id));
+  filterWorkoutIds = withNotes;
+  }
+ }
+ }
+
+ // 필터 결과가 빈 집합이면 바로 빈 응답 반환
+ if (filterWorkoutIds !== null && filterWorkoutIds.size === 0) {
+ return NextResponse.json({ notes: [], hasMore: false });
+ }
+
+ // 2. 운동 기록 조회 (페이지네이션)
+ let workouts: any[] | null = null;
+ let workoutsError: any = null;
+
+ if (filterWorkoutIds !== null && filterWorkoutIds.size > 100) {
+ // 필터된 ID가 많을 때: 배치로 timestamp 조회 → 정렬 → 페이지 슬라이스 → 풀 데이터 조회
+ const allFilterIds = [...filterWorkoutIds];
+ const BATCH = 100;
+ const timestampEntries: { id: string; timestamp: string }[] = [];
+ const batches: Promise<any>[] = [];
+ for (let i = 0; i < allFilterIds.length; i += BATCH) {
+  const chunk = allFilterIds.slice(i, i + BATCH);
+  let q = supabase.from('workouts').select('id, timestamp').in('id', chunk);
+  if (startDate) q = q.gte('timestamp', `${startDate}T00:00:00`);
+  if (endDate) q = q.lte('timestamp', `${endDate}T23:59:59`);
+  if (hasNotesFilter) q = q.not('note', 'is', null).neq('note', '');
+  batches.push(q);
+ }
+ const batchResults = await Promise.all(batches);
+ for (const { data } of batchResults) {
+  if (data) timestampEntries.push(...data);
+ }
+ // 시간순 내림차순 정렬 후 페이지 슬라이스
+ timestampEntries.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+ const pageIds = timestampEntries.slice(offset, offset + limit + 1).map((e) => e.id);
+
+ if (pageIds.length > 0) {
+  const { data, error } = await supabase
+  .from('workouts')
+  .select(`
+  id, user_id, title, timestamp, duration_minutes, distance, points, note, intensity, pace_per_km, calories, avg_heart_rate, max_heart_rate,
+  workout_categories ( name_ko, name_en )
+  `)
+  .in('id', pageIds)
+  .order('timestamp', { ascending: false });
+  workouts = data;
+  workoutsError = error;
+ } else {
+  workouts = [];
+ }
+ } else {
+ // 필터 없거나 ID가 적을 때: 기존 방식
+ let notesQuery = supabase
+  .from('workouts')
+  .select(`
+  id, user_id, title, timestamp, duration_minutes, distance, points, note, intensity, pace_per_km, calories, avg_heart_rate, max_heart_rate,
+  workout_categories ( name_ko, name_en )
+  `)
+  .in('user_id', participantIds);
+
+ if (hasNotesFilter && filterWorkoutIds === null) {
+  notesQuery = notesQuery.not('note', 'is', null).neq('note', '');
+ }
+ if (filterWorkoutIds !== null) {
+  notesQuery = notesQuery.in('id', [...filterWorkoutIds]);
+ }
  if (startDate) {
- notesQuery = notesQuery.gte('timestamp', `${startDate}T00:00:00`);
+  notesQuery = notesQuery.gte('timestamp', `${startDate}T00:00:00`);
  }
  if (endDate) {
- notesQuery = notesQuery.lte('timestamp', `${endDate}T23:59:59`);
+  notesQuery = notesQuery.lte('timestamp', `${endDate}T23:59:59`);
  }
 
- const { data: workouts, error: workoutsError } = await notesQuery
- .order('timestamp', { ascending: false })
- .range(offset, offset + limit);
+ const result = await notesQuery
+  .order('timestamp', { ascending: false })
+  .range(offset, offset + limit);
+ workouts = result.data;
+ workoutsError = result.error;
+ }
 
  if (workoutsError) {
  console.error('Workouts query error in recent-notes:', workoutsError);
@@ -1363,23 +1597,60 @@ async function getRecentNotesData(
  ]) || []
  );
 
- // 5. 미션 완료 정보 가져오기 (challenge_mission_completions 통해)
+ // 5. 미션/데일리 프로그램 완료 정보 가져오기
  const workoutIds = workouts?.map((w) => w.id) || [];
- const { data: missionCompletions } = workoutIds.length > 0 ? await supabase
- .from('challenge_mission_completions')
- .select(`
- workout_id,
- challenge_missions (
- id,
- title
- )
- `)
- .in('workout_id', workoutIds) : { data: [] };
+ const workoutMissionMap = new Map<string, string>();
 
- // workout_id -> mission_title 맵
- const workoutMissionMap = new Map(
- missionCompletions?.map((mc: any) => [mc.workout_id, mc.challenge_missions?.title]) || []
- );
+ if (workoutIds.length > 0) {
+ if (useDailyPrograms) {
+  // 데일리 프로그램: daily_program_completions → daily_program_cards → challenge_daily_programs
+  const { data: dpCompletions } = await supabase
+  .from('daily_program_completions')
+  .select(`
+  workout_id,
+  daily_program_cards:card_id (
+   title,
+   challenge_daily_programs:program_id (
+   title,
+   date
+   )
+  )
+  `)
+  .in('workout_id', workoutIds)
+  .not('workout_id', 'is', null);
+
+  for (const dc of dpCompletions || []) {
+  if (!dc.workout_id) continue;
+  const card = dc.daily_program_cards as any;
+  const program = card?.challenge_daily_programs;
+  const programTitle = program?.title;
+  const cardTitle = card?.title;
+  const label = programTitle && cardTitle
+   ? `${programTitle} - ${cardTitle}`
+   : cardTitle || programTitle || '데일리 프로그램';
+  workoutMissionMap.set(dc.workout_id, label);
+  }
+ } else {
+  // 미션: challenge_mission_completions → challenge_missions
+  const { data: missionCompletions } = await supabase
+  .from('challenge_mission_completions')
+  .select(`
+  workout_id,
+  challenge_missions (
+  id,
+  title
+  )
+  `)
+  .in('workout_id', workoutIds);
+
+  for (const mc of missionCompletions || []) {
+  const title = (mc as any).challenge_missions?.title;
+  if (mc.workout_id && title) {
+   workoutMissionMap.set(mc.workout_id, title);
+  }
+  }
+ }
+ }
 
  // 5.5. 코멘트 조회 (미리보기 + 카운트용)
  const { data: commentsData } = workoutIds.length > 0 ? await supabase
@@ -1467,6 +1738,9 @@ async function getRecentNotesData(
  note: workout.note,
  intensity: workout.intensity,
  pace: pace,
+ calories: workout.calories,
+ avg_heart_rate: workout.avg_heart_rate,
+ max_heart_rate: workout.max_heart_rate,
  group_name: groupInfo?.name || null,
  group_color: groupInfo?.color || null,
  mission_title: missionTitle || null,

@@ -598,7 +598,7 @@ export default function User() {
  leaderboardConfig={leaderboardConfig}
  />
  )}
- <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
+ <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} useDailyPrograms={challenges?.find((c) => c.challenges.id === selectedChallengeId)?.challenges.use_daily_programs} />
  <WeeklyWorkoutChart
  data={weeklyChart}
  isLoading={workoutDataLoading}
@@ -618,7 +618,7 @@ export default function User() {
  leaderboardConfig={leaderboardConfig}
  />
  )}
- <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} />
+ <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} useDailyPrograms={challenges?.find((c) => c.challenges.id === selectedChallengeId)?.challenges.use_daily_programs} />
  </>
  )}
  </div>

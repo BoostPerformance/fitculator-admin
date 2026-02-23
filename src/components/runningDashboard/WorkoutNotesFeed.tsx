@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { useRef, useCallback, useState } from 'react';
 import WorkoutCommentSection from './WorkoutCommentSection';
+import FeedFilterBar, { type FeedFilter } from './FeedFilterBar';
 
 // 노트 내용 컴포넌트 (펼치기/접기 기능)
 function NoteContent({ note }: { note: string }) {
@@ -136,9 +137,12 @@ interface WorkoutNote {
  duration_minutes: number | null;
  distance: number | null;
  points: number | null;
- note: string;
+ note: string | null;
  intensity: number | null;
  pace: string | null;
+ calories: number | null;
+ avg_heart_rate: number | null;
+ max_heart_rate: number | null;
  group_name: string | null;
  group_color: string | null;
  mission_title: string | null;
@@ -152,6 +156,7 @@ interface WorkoutNotesFeedProps {
  limit?: number;
  startDate?: string;
  endDate?: string;
+ useDailyPrograms?: boolean;
 }
 
 interface NotesResponse {
@@ -175,20 +180,57 @@ const fetchRecentNotes = async (
  offset: number,
  limit: number,
  startDate?: string,
- endDate?: string
+ endDate?: string,
+ filters?: string[],
+ useDailyPrograms?: boolean
 ): Promise<NotesResponse> => {
  let url = `/api/workouts/user-detail?type=recent-notes&challengeId=${challengeId}&limit=${limit}&offset=${offset}&t=${Date.now()}`;
  if (startDate) url += `&startDate=${startDate}`;
  if (endDate) url += `&endDate=${endDate}`;
+ if (filters && filters.length > 0) url += `&filter=${filters.join(',')}`;
+ if (useDailyPrograms) url += `&useDailyPrograms=true`;
  const response = await fetch(url);
  if (!response.ok) throw new Error('Failed to fetch notes');
  return response.json();
 };
 
-export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: WorkoutNotesFeedProps) {
+const fetchFeedCounts = async (
+ challengeId: string,
+ startDate?: string,
+ endDate?: string,
+ useDailyPrograms?: boolean
+): Promise<Record<string, number>> => {
+ let url = `/api/workouts/user-detail?type=feed-counts&challengeId=${challengeId}&t=${Date.now()}`;
+ if (startDate) url += `&startDate=${startDate}`;
+ if (endDate) url += `&endDate=${endDate}`;
+ if (useDailyPrograms) url += `&useDailyPrograms=true`;
+ const response = await fetch(url);
+ if (!response.ok) throw new Error('Failed to fetch feed counts');
+ return response.json();
+};
+
+export default function WorkoutNotesFeed({ challengeId, startDate, endDate, useDailyPrograms }: WorkoutNotesFeedProps) {
  const observerRef = useRef<IntersectionObserver | null>(null);
  const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
  const [isSpinning, setIsSpinning] = useState(false);
+ const [activeFilters, setActiveFilters] = useState<Set<FeedFilter>>(new Set());
+
+ const handleFilterToggle = (filter: FeedFilter) => {
+  setActiveFilters((prev) => {
+   const next = new Set(prev);
+   if (next.has(filter)) {
+    next.delete(filter);
+   } else {
+    // 상호 배타 처리: has_comments <-> no_comments
+    if (filter === 'has_comments') next.delete('no_comments');
+    if (filter === 'no_comments') next.delete('has_comments');
+    next.add(filter);
+   }
+   return next;
+  });
+ };
+
+ const activeFilterArray = [...activeFilters];
 
  // 현재 코치의 users.id 조회 (본인 코멘트 표시용)
  const { data: coachIdentity } = useQuery({
@@ -203,6 +245,15 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  });
  const myUserId = coachIdentity?.userId;
 
+ // 필터별 건수 조회
+ const { data: feedCounts, refetch: refetchCounts } = useQuery({
+  queryKey: ['running', 'feed-counts', challengeId, startDate, endDate],
+  queryFn: () => fetchFeedCounts(challengeId, startDate, endDate, useDailyPrograms),
+  enabled: !!challengeId,
+  staleTime: 30 * 1000,
+  refetchOnWindowFocus: false,
+ });
+
  const {
  data,
  isLoading,
@@ -213,8 +264,8 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  refetch,
  isRefetching,
  } = useInfiniteQuery({
- queryKey: ['running', 'recent-notes', challengeId, startDate, endDate],
- queryFn: ({ pageParam = 0 }) => fetchRecentNotes(challengeId, pageParam, ITEMS_PER_PAGE, startDate, endDate),
+ queryKey: ['running', 'recent-notes', challengeId, startDate, endDate, activeFilterArray],
+ queryFn: ({ pageParam = 0 }) => fetchRecentNotes(challengeId, pageParam, ITEMS_PER_PAGE, startDate, endDate, activeFilterArray.length > 0 ? activeFilterArray : undefined, useDailyPrograms),
  getNextPageParam: (lastPage, allPages) => {
  if (!lastPage.hasMore) return undefined;
  return allPages.reduce((acc, page) => acc + page.notes.length, 0);
@@ -263,7 +314,7 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  if (error) {
  return (
  <div className="col-span-2 bg-surface rounded-[0.625rem] p-[1.25rem] h-[36rem] shadow dark:shadow-neutral-900 border border-line">
- <p className="text-red-500">운동 노트를 불러오는데 실패했습니다.</p>
+ <p className="text-red-500">운동 피드를 불러오는데 실패했습니다.</p>
  </div>
  );
  }
@@ -281,14 +332,14 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  return (
  <div className="col-span-2 bg-surface rounded-[0.625rem] p-[1.25rem] h-[36rem] overflow-y-auto [&::-webkit-scrollbar]:hidden hover:[&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-neutral-300 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-600 [&::-webkit-scrollbar-track]:bg-surface-raised dark:[&::-webkit-scrollbar-track]:bg-neutral-700 shadow dark:shadow-neutral-900 border border-line">
  {/* 헤더 */}
- <div className="flex justify-between items-center mb-4">
- <h2 className="text-lg font-semibold text-content-tertiary pt-1 pl-1">
- 운동 노트
+ <div className="flex justify-between items-center mb-3">
+ <h2 className="text-lg font-semibold text-content-tertiary pt-1">
+ 운동 피드
  </h2>
  <button
  onClick={() => {
   setIsSpinning(true);
-  refetch().finally(() => setTimeout(() => setIsSpinning(false), 600));
+  Promise.all([refetch(), refetchCounts()]).finally(() => setTimeout(() => setIsSpinning(false), 600));
  }}
  disabled={isSpinning}
  title="새로고침"
@@ -300,11 +351,21 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  </button>
  </div>
 
+ {/* 필터 바 */}
+ <div className="mb-3">
+ <FeedFilterBar
+  activeFilters={activeFilters}
+  onFilterToggle={handleFilterToggle}
+  counts={feedCounts as Partial<Record<FeedFilter, number>> | undefined}
+  useDailyPrograms={useDailyPrograms}
+ />
+ </div>
+
  {/* 노트 목록 */}
  <div className="space-y-4">
  {allNotes.length === 0 ? (
  <div className="text-center text-content-tertiary py-4">
- 아직 운동 노트가 없습니다
+ {activeFilters.size > 0 ? '해당 조건의 운동이 없습니다' : '아직 운동 기록이 없습니다'}
  </div>
  ) : (
  <>
@@ -317,7 +378,7 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  ref={index === allNotes.length - 1 ? lastElementRef : null}
  className="overflow-hidden bg-white/50 dark:bg-black/20 -mx-[1.25rem]"
  >
- <div className="px-2 pt-4 pb-2">
+ <div className="px-[1.25rem] pt-4 pb-2">
  {/* 1행: 사용자 이름 + 그룹 + 시간 */}
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
@@ -357,14 +418,14 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  <PhotoGallery photos={note.photos} />
  )}
 
- <div className="px-2 pb-4">
+ <div className="px-[1.25rem] pb-4">
  {/* 2행: 운동 타이틀 */}
  <div className="mb-2">
  <span className="font-medium text-[12px] text-content-tertiary">{note.title}</span>
  </div>
 
- {/* 3행: 운동 정보 (Zone, 거리, 시간, 페이스) */}
- <div className="flex items-center gap-3 mb-2 text-[12px] text-content-tertiary">
+ {/* 3행: 운동 정보 (Zone, 거리, 시간, 페이스 등) */}
+ <div className="flex items-center gap-3 mb-2 text-[12px] text-content-tertiary flex-wrap">
  <span
   className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border"
   style={{
@@ -386,16 +447,34 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  >
   {note.intensity !== null && note.intensity !== undefined ? `Zone ${note.intensity}` : '-'}
  </span>
- {note.distance && note.distance > 0 && (
+ {note.distance != null && note.distance > 0 && (
   <span>{note.distance.toFixed(2)}km</span>
  )}
- {note.duration_minutes && note.duration_minutes > 0 && (
+ {note.duration_minutes != null && note.duration_minutes > 0 && (
   <span>{formatDuration(note.duration_minutes)}</span>
  )}
  {note.pace && (
   <span className="text-content-disabled">{note.pace}/km</span>
  )}
+ {note.calories != null && note.calories > 0 && (
+  <span>{Math.round(note.calories)}kcal</span>
+ )}
+ {note.points != null && note.points > 0 && (
+  <span>{note.points}pt</span>
+ )}
  </div>
+
+ {/* 4행: 심박수 (있을 경우) */}
+ {(note.avg_heart_rate != null && note.avg_heart_rate > 0 || note.max_heart_rate != null && note.max_heart_rate > 0) && (
+ <div className="flex items-center gap-3 mb-2 text-[11px] text-content-disabled">
+  {note.avg_heart_rate != null && note.avg_heart_rate > 0 && (
+  <span>평균 {note.avg_heart_rate}bpm</span>
+  )}
+  {note.max_heart_rate != null && note.max_heart_rate > 0 && (
+  <span>최대 {note.max_heart_rate}bpm</span>
+  )}
+ </div>
+ )}
 
  {/* 미션 (있을 경우) */}
  {note.mission_title && (
@@ -407,7 +486,7 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate }: Wo
  )}
 
  {/* 노트 내용 */}
- <NoteContent note={note.note} />
+ {note.note && <NoteContent note={note.note} />}
 
  {/* 코멘트 영역 (인스타 스타일) */}
  <div className="mt-3 pt-2 border-t border-line-subtle">
