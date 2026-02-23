@@ -816,7 +816,7 @@ function WorkoutCard({ workout }: { workout: WorkoutDetail }) {
    )}
    {workout.points != null && workout.points > 0 && (
    <div className="flex justify-between py-1.5">
-    <span className="text-[12px] text-content-tertiary">Fit Point</span>
+    <span className="text-[12px] text-content-tertiary">운동량(Fit Point)</span>
     <span className="text-content-secondary font-medium">{workout.points}<span className="text-[12px]">pt</span></span>
    </div>
    )}
