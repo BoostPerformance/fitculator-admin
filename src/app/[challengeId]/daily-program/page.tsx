@@ -20,7 +20,8 @@ import { CalendarProgramChip } from '@/components/daily-program/calendar-program
 import { CalendarCardPreview } from '@/components/daily-program/calendar-card-preview';
 import { MobileCalendarView } from '@/components/daily-program/mobile-calendar-view';
 import { ProgramModal } from '@/components/daily-program/program-modal';
-import { SubmissionsView } from '@/components/daily-program/submissions-view';
+import { SubmissionsView, STATUS_OPTIONS } from '@/components/daily-program/submissions-view';
+import type { StatusFilter } from '@/components/daily-program/submissions-view';
 import { useResponsive } from '@/components/hooks/useResponsive';
 
 type ActiveTab = 'calendar' | 'submissions';
@@ -31,6 +32,7 @@ export default function DailyProgramPage() {
  const { isMobile } = useResponsive();
 
  const [activeTab, setActiveTab] = useState<ActiveTab>('calendar');
+ const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
  const [viewMode, setViewMode] = useState<CalendarViewMode>('month');
  const [currentDate, setCurrentDate] = useState(new Date());
  const [mobileSelectedDay, setMobileSelectedDay] = useState(new Date());
@@ -349,7 +351,7 @@ export default function DailyProgramPage() {
  return (
  <div className="w-full max-w-full overflow-hidden">
  {/* Page title + tab toggle */}
- <div className="px-6 pt-4 sm:px-4 sm:pt-3 flex items-center gap-3">
+ <div className="px-6 pt-4 pb-3 sm:px-4 sm:pt-3 sm:pb-2 flex items-center gap-3">
  <h1 className="text-headline font-semibold text-content-primary dark:text-white sm:text-title-lg">
  데일리 프로그램
  </h1>
@@ -375,6 +377,17 @@ export default function DailyProgramPage() {
  제출 관리
  </button>
  </div>
+ {activeTab === 'submissions' && (
+ <select
+  value={statusFilter}
+  onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+  className="ml-auto text-sm px-3 py-1.5 rounded-lg border border-line bg-surface text-content-primary focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30"
+ >
+  {STATUS_OPTIONS.map((opt) => (
+  <option key={opt.value} value={opt.value}>{opt.label}</option>
+  ))}
+ </select>
+ )}
  </div>
 
  {/* Tab content */}
@@ -462,7 +475,7 @@ export default function DailyProgramPage() {
  />
  </>
  ) : (
- <SubmissionsView challengeId={challengeId} />
+ <SubmissionsView challengeId={challengeId} statusFilter={statusFilter} />
  )}
  </div>
  );

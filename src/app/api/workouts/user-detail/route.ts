@@ -1508,7 +1508,7 @@ async function getWorkoutDetail(workoutId: string): Promise<NextResponse> {
  .from('workouts')
  .select(`
  id, title, timestamp, duration_minutes, distance, points, note, intensity,
- calories, avg_heart_rate, max_heart_rate,
+ calories, avg_heart_rate, max_heart_rate, pace_per_km,
  workout_categories(name_ko, workout_types(name))
  `)
  .eq('id', workoutId)

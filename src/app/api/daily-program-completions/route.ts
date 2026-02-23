@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
  *,
  users:user_id(id, name, username, profile_image_url),
  daily_program_cards:card_id(
- id, title, card_type, program_id, sort_order, has_check, requires_approval,
+ id, title, card_type, program_id, sort_order, has_check, requires_approval, score_value,
  workout_date_start, workout_date_end,
  challenge_daily_programs:program_id(id, date, title, status, challenge_id)
  )
