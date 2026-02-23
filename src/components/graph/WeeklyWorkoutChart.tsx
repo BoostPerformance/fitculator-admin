@@ -9,6 +9,7 @@ import {
  Legend,
  ResponsiveContainer,
  ReferenceLine,
+ Cell,
 } from 'recharts';
 import { logger, handleApiError } from '@/utils/logger';
 
@@ -141,13 +142,14 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
  };
 
  // 커스텀 툴팁 컴포넌트
- const CustomTooltip: React.FC<any> = ({ active, payload }) => {
+ const CustomTooltip: React.FC<any> = ({ active, payload, isInteger }) => {
  if (active && payload && payload.length) {
  const data = payload[0].payload;
+ const value = isInteger ? data.y : data.y.toFixed(1);
 
  return (
  <div className="bg-surface p-2 border border-line shadow-md rounded text-xs">
- <p className="text-content-secondary">{`${data.user}: ${data.y.toFixed(1)}`}</p>
+ <p className="text-content-secondary">{`${data.user}: ${value}`}</p>
  </div>
  );
  }
@@ -223,38 +225,22 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
  }
  }, [data]);
 
- // 차트에 표시될 사용자별 산점도 생성
- const renderScatters = (data: ChartDataPoint[]) => {
+ // 차트에 표시될 산점도 생성 (단일 Scatter + Cell로 개별 색상 적용)
+ const renderScatter = (data: ChartDataPoint[]) => {
  if (!data || !Array.isArray(data) || data.length === 0) {
  return null;
  }
 
- const userGroups: Record<string, ChartDataPoint[]> = {};
-
- // 사용자별로 데이터 그룹화
- data.forEach((item) => {
- if (!item || !item.user) return;
-
- if (!userGroups[item.user]) {
- userGroups[item.user] = [];
- }
- userGroups[item.user].push(item);
- });
-
- // 각 사용자별로 Scatter 컴포넌트 생성
- return Object.entries(userGroups).map(([user, userData]) => {
- const color = userColors[user] || getUserColor(user, 0);
-
  return (
- <Scatter
- key={user}
- name={user}
- data={userData}
- fill={color}
- shape="circle"
+ <Scatter data={data} shape="circle">
+ {data.map((entry, index) => (
+ <Cell
+ key={index}
+ fill={userColors[entry.user] || getUserColor(entry.user, 0)}
  />
+ ))}
+ </Scatter>
  );
- });
  };
 
  // 로딩 중 표시
@@ -297,6 +283,10 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
  </div>
  );
  }
+
+ // 근력 Y축: 기본 1, 2 단위, 최대값이 2 넘으면 그에 맞춤
+ const strengthYMax = Math.max(2, ...weeklyStrengthData.map(d => Math.ceil(d.y)));
+ const strengthYTicks = Array.from({ length: strengthYMax }, (_, i) => i + 1);
 
  // 주차 데이터가 너무 많아 가로 스크롤이 필요한지 확인
  const needsHorizontalScroll = weekLabels.length > 3;
@@ -382,7 +372,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
  />
  ))}
 
- {renderScatters(weeklyCardioData)}
+ {renderScatter(weeklyCardioData)}
  </ScatterChart>
  </ResponsiveContainer>
  </div>
@@ -444,10 +434,12 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
  <YAxis
  dataKey="y"
  name="운동량"
- domain={[0, 'auto']}
+ domain={[0, strengthYMax]}
+ ticks={strengthYTicks}
+ allowDecimals={false}
  tick={{ fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12 }}
  />
- <Tooltip content={<CustomTooltip />} />
+ <Tooltip content={<CustomTooltip isInteger />} />
  {/* <Legend
  wrapperStyle={{
  fontSize: typeof window !== 'undefined' && window.innerWidth < 640 ? 10 : 12,
@@ -465,7 +457,7 @@ const WeeklyWorkoutChart: React.FC<WeeklyWorkoutChartProps> = ({
  />
  ))}
 
- {renderScatters(weeklyStrengthData)}
+ {renderScatter(weeklyStrengthData)}
  </ScatterChart>
  </ResponsiveContainer>
  </div>

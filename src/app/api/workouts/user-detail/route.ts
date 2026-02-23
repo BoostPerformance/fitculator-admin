@@ -293,7 +293,7 @@ async function getWeeklyChartData(
  weekLabel: matchedWeek.weekLabel,
  userId: user.id,
  user: user.name || user.username,
- points: Math.round(record.cardio_points_total || 0),
+ points: Math.round((record.cardio_points_total || 0) * 10) / 10,
  startDate: matchedWeek.startDate,
  endDate: matchedWeek.endDate
  });
@@ -327,7 +327,7 @@ async function getWeeklyChartData(
  name: user.name || user.username,
  username: user.username,
  totalStrengthSessions,
- totalCardioPoints: Math.round(totalCardioPoints),
+ totalCardioPoints: Math.round(totalCardioPoints * 10) / 10,
  };
  }) || [];
 
@@ -446,7 +446,7 @@ async function getLeaderboardData(
  );
  const strengthPoints = totalStrengthSessions * 20; // 근력 세션당 20점으로 계산
 
- const totalPoints = Math.round(totalCardioPoints + strengthPoints);
+ const totalPoints = Math.round((totalCardioPoints + strengthPoints) * 10) / 10;
 
  const strengthWorkoutCount = userRecords.reduce(
  (sum, record) => sum + (record.strength_sessions_count || 0),
