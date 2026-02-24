@@ -575,6 +575,7 @@ export default function User() {
  leaderboardConfig={leaderboardConfig}
  />
  )}
+ <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} useDailyPrograms={challenges?.find((c) => c.challenges.id === selectedChallengeId)?.challenges.use_daily_programs} />
  <WeeklyWorkoutChart
  data={weeklyChart}
  isLoading={workoutDataLoading}
@@ -584,7 +585,10 @@ export default function User() {
  )}
  {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
  ?.challenges.challenge_type === 'diet' && (
+ <>
  <DailyDietRecord activities={filteredDailyRecordsbyId} />
+ <WorkoutNotesFeed challengeId={selectedChallengeId} limit={20} startDate={challengeDates?.startDate} endDate={challengeDates?.endDate} useDailyPrograms={challenges?.find((c) => c.challenges.id === selectedChallengeId)?.challenges.use_daily_programs} />
+ </>
  )}
  {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
  ?.challenges.challenge_type === 'exercise' && (

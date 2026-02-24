@@ -133,7 +133,7 @@ interface WorkoutNote {
  user_profile_image: string | null;
  title: string;
  category: string;
- timestamp: string;
+ start_time: string;
  duration_minutes: number | null;
  distance: number | null;
  points: number | null;
@@ -166,9 +166,9 @@ interface NotesResponse {
 
 const ITEMS_PER_PAGE = 10;
 
-const formatTimestamp = (timestamp: string) => {
+const formatTimestamp = (startTime: string) => {
  try {
- const result = formatDistanceToNow(new Date(timestamp), { addSuffix: true, locale: ko });
+ const result = formatDistanceToNow(new Date(startTime), { addSuffix: true, locale: ko });
  return result.replace('약 ', '');
  } catch {
  return '';
@@ -406,8 +406,8 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate, useD
  </div>
  <div className="flex items-center gap-2 text-[11px] text-content-disabled">
  <span>
-  {new Date(note.timestamp).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', weekday: 'short' })}{' '}
-  {new Date(note.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+  {new Date(note.start_time).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', weekday: 'short' })}{' '}
+  {new Date(note.start_time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
  </span>
  </div>
  </div>

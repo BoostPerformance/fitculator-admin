@@ -1496,13 +1496,13 @@ async function getRecentNotesData(
  // 필터된 ID가 많을 때: 배치로 timestamp 조회 → 정렬 → 페이지 슬라이스 → 풀 데이터 조회
  const allFilterIds = [...filterWorkoutIds];
  const BATCH = 100;
- const timestampEntries: { id: string; timestamp: string }[] = [];
+ const timestampEntries: { id: string; start_time: string }[] = [];
  const batches: Promise<any>[] = [];
  for (let i = 0; i < allFilterIds.length; i += BATCH) {
   const chunk = allFilterIds.slice(i, i + BATCH);
-  let q = supabase.from('workouts').select('id, timestamp').in('id', chunk);
-  if (startDate) q = q.gte('timestamp', `${startDate}T00:00:00`);
-  if (endDate) q = q.lte('timestamp', `${endDate}T23:59:59`);
+  let q = supabase.from('workouts').select('id, start_time').in('id', chunk);
+  if (startDate) q = q.gte('start_time', `${startDate}T00:00:00`);
+  if (endDate) q = q.lte('start_time', `${endDate}T23:59:59`);
   if (hasNotesFilter) q = q.not('note', 'is', null).neq('note', '');
   batches.push(q);
  }
@@ -1511,18 +1511,18 @@ async function getRecentNotesData(
   if (data) timestampEntries.push(...data);
  }
  // 시간순 내림차순 정렬 후 페이지 슬라이스
- timestampEntries.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+ timestampEntries.sort((a, b) => b.start_time.localeCompare(a.start_time));
  const pageIds = timestampEntries.slice(offset, offset + limit + 1).map((e) => e.id);
 
  if (pageIds.length > 0) {
   const { data, error } = await supabase
   .from('workouts')
   .select(`
-  id, user_id, title, timestamp, duration_minutes, distance, points, note, intensity, pace_per_km, calories, avg_heart_rate, max_heart_rate,
+  id, user_id, title, start_time, duration_minutes, distance, points, note, intensity, pace_per_km, calories, avg_heart_rate, max_heart_rate,
   workout_categories ( name_ko, name_en )
   `)
   .in('id', pageIds)
-  .order('timestamp', { ascending: false });
+  .order('start_time', { ascending: false });
   workouts = data;
   workoutsError = error;
  } else {
@@ -1533,7 +1533,7 @@ async function getRecentNotesData(
  let notesQuery = supabase
   .from('workouts')
   .select(`
-  id, user_id, title, timestamp, duration_minutes, distance, points, note, intensity, pace_per_km, calories, avg_heart_rate, max_heart_rate,
+  id, user_id, title, start_time, duration_minutes, distance, points, note, intensity, pace_per_km, calories, avg_heart_rate, max_heart_rate,
   workout_categories ( name_ko, name_en )
   `)
   .in('user_id', participantIds);
@@ -1545,14 +1545,14 @@ async function getRecentNotesData(
   notesQuery = notesQuery.in('id', [...filterWorkoutIds]);
  }
  if (startDate) {
-  notesQuery = notesQuery.gte('timestamp', `${startDate}T00:00:00`);
+  notesQuery = notesQuery.gte('start_time', `${startDate}T00:00:00`);
  }
  if (endDate) {
-  notesQuery = notesQuery.lte('timestamp', `${endDate}T23:59:59`);
+  notesQuery = notesQuery.lte('start_time', `${endDate}T23:59:59`);
  }
 
  const result = await notesQuery
-  .order('timestamp', { ascending: false })
+  .order('start_time', { ascending: false })
   .range(offset, offset + limit);
  workouts = result.data;
  workoutsError = result.error;
@@ -1731,7 +1731,7 @@ async function getRecentNotesData(
  user_profile_image: user?.profile_image_url || null,
  title: workout.title,
  category: (workout.workout_categories as any)?.name_ko || workout.title,
- timestamp: workout.timestamp,
+ start_time: workout.start_time,
  duration_minutes: workout.duration_minutes,
  distance: workout.distance,
  points: workout.points,
@@ -1781,7 +1781,7 @@ async function getWorkoutDetail(workoutId: string): Promise<NextResponse> {
  const { data, error } = await supabase
  .from('workouts')
  .select(`
- id, title, timestamp, duration_minutes, distance, points, note, intensity,
+ id, title, start_time, duration_minutes, distance, points, note, intensity,
  calories, avg_heart_rate, max_heart_rate, pace_per_km,
  workout_categories(name_ko, workout_types(name))
  `)
