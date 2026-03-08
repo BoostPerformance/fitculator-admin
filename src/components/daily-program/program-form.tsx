@@ -214,7 +214,7 @@ export function ProgramForm({ program, initialDate, onSubmit, saving, groups, on
  className={`px-2.5 py-1 text-body rounded-full border transition-colors ${
  selectedGroupIds.includes(group.id)
  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
- : 'border-line text-content-secondary hover:border-line'
+ : 'border-line text-content-tertiary hover:border-line hover:text-content-secondary'
  }`}
  style={
  selectedGroupIds.includes(group.id) && group.color_code

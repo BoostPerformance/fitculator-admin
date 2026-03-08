@@ -95,8 +95,8 @@ export default function DailyProgramPage() {
  try {
  const res = await fetch(`/api/challenge-groups?challenge_id=${challengeId}`);
  if (res.ok) {
- const data = await res.json();
- setGroups(data);
+ const json = await res.json();
+ setGroups(json.data || []);
  }
  } catch {
  // Groups might not be configured for this challenge
