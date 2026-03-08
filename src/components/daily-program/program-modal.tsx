@@ -40,7 +40,7 @@ export function ProgramModal({
  const formRef = useRef<HTMLFormElement | null>(null);
 
  // Dirty tracking
- const [localStatus, setLocalStatus] = useState<ProgramStatus>('draft');
+ const [localStatus, setLocalStatus] = useState<ProgramStatus>('published');
  const [formDirty, setFormDirty] = useState(false);
  const [cardsDirty, setCardsDirty] = useState(false);
 
@@ -56,7 +56,7 @@ export function ProgramModal({
   setAddingPendingCard(false);
   setSaving(false);
   setCopyDialogOpen(false);
-  setLocalStatus(program?.status || 'draft');
+  setLocalStatus(program?.status || 'published');
   setFormDirty(false);
   setCardsDirty(false);
  }, [program, open]);
@@ -103,6 +103,7 @@ export function ProgramModal({
     body: JSON.stringify({
      challenge_id: challengeId,
      ...data,
+     status: localStatus,
     }),
    });
 
@@ -260,38 +261,26 @@ export function ProgramModal({
          formRef={formRef}
          hideHeader
          onDirtyChange={setFormDirty}
-         onGroupsChange={currentProgram ? async (groupIds) => {
-          await fetch('/api/daily-programs', {
-           method: 'PUT',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({
-            id: currentProgram.id,
-            target_group_ids: groupIds,
-           }),
-          });
-          await refreshProgram(currentProgram.id);
-         } : undefined}
+         onGroupsChange={undefined}
         />
        </div>
 
-       {/* Status dropdown (edit mode only) */}
-       {currentProgram && (
-        <div className="bg-surface-raised/50 rounded-xl p-4 space-y-2">
-         <h3 className="text-body font-semibold text-content-secondary">상태</h3>
-         <div className="flex items-center gap-2">
-          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${statusColorMap[localStatus]}`} />
-          <select
-           value={localStatus}
-           onChange={(e) => handleStatusChange(e.target.value)}
-           className="flex-1 px-2.5 py-1.5 border border-line rounded-md bg-surface text-content-primary dark:text-white text-body focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-           <option value="draft">초안</option>
-           <option value="published">발행됨</option>
-           <option value="archived">보관됨</option>
-          </select>
-         </div>
+       {/* Status dropdown */}
+       <div className="bg-surface-raised/50 rounded-xl p-4 space-y-2">
+        <h3 className="text-body font-semibold text-content-secondary">상태</h3>
+        <div className="flex items-center gap-2">
+         <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${statusColorMap[localStatus]}`} />
+         <select
+          value={localStatus}
+          onChange={(e) => handleStatusChange(e.target.value)}
+          className="flex-1 px-2.5 py-1.5 border border-line rounded-md bg-surface text-content-primary dark:text-white text-body focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+         >
+          <option value="draft">초안</option>
+          <option value="published">발행됨</option>
+          <option value="archived">보관됨</option>
+         </select>
         </div>
-       )}
+       </div>
       </div>
 
       {/* Right column: Cards + actions */}
