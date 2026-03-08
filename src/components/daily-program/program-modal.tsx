@@ -402,14 +402,21 @@ export function ProgramModal({
        >
         {currentProgram ? '닫기' : '취소'}
        </button>
-       <button
-        type="button"
-        onClick={handleSubmitClick}
-        disabled={saving || !hasChanges}
-        className="px-4 py-1.5 text-body font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-       >
-        {saving ? '저장 중...' : currentProgram ? '저장' : '프로그램 생성'}
-       </button>
+       <div className="relative group">
+        <button
+         type="button"
+         onClick={handleSubmitClick}
+         disabled={saving || !hasChanges}
+         className={`px-4 py-1.5 text-body font-semibold rounded-lg transition-colors ${saving || !hasChanges ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 pointer-events-none' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+        >
+         {saving ? '저장 중...' : currentProgram ? '저장' : '프로그램 생성'}
+        </button>
+        {!hasChanges && (
+         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 text-[11px] text-white bg-gray-800 rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          변경사항이 없습니다
+         </div>
+        )}
+       </div>
       </div>
      </div>
     </div>
