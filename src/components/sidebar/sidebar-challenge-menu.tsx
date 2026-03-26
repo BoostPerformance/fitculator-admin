@@ -52,6 +52,7 @@ export function SidebarChallengeMenu({ challenge, onNavigate, onSelectChallenge,
   { label: '미션', path: `/${id}/missions`, show: !!enable_mission },
   { label: '데일리 프로그램', path: `/${id}/daily-program`, show: !!use_daily_programs },
   { label: '공지사항', path: `/${id}/announcements`, show: true },
+  { label: '설정', path: `/${id}/settings`, show: true },
  ];
 
  // For isActiveRoute, extract the base path (without query params)
