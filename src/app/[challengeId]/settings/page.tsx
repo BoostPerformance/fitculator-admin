@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
@@ -13,6 +13,13 @@ import {
  Save,
  Upload,
  X,
+ Ticket,
+ Lock,
+ Copy,
+ Check,
+ Users,
+ Clock,
+ Loader2,
 } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -61,6 +68,25 @@ export default function ChallengeSettingsPage() {
  const [coverImage, setCoverImage] = useState<File | null>(null);
  const [uploadProgress, setUploadProgress] = useState(0);
 
+ // Invite code states
+ interface ChallengeInvite {
+  id: string;
+  invite_token: string;
+  max_participants: number | null;
+  current_participants: number;
+  expires_at: string | null;
+  is_active: boolean;
+  invite_token_changed_at: string | null;
+  updated_at: string;
+ }
+ const [invite, setInvite] = useState<ChallengeInvite | null>(null);
+ const [inviteTokenInput, setInviteTokenInput] = useState('');
+ const [isInviteLoading, setIsInviteLoading] = useState(true);
+ const [isInviteSaving, setIsInviteSaving] = useState(false);
+ const [inviteCopied, setInviteCopied] = useState(false);
+ const [tokenAvailability, setTokenAvailability] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+ const checkTimerRef = useRef<NodeJS.Timeout | null>(null);
+
  useEffect(() => {
   const fetchData = async () => {
    try {
@@ -92,7 +118,65 @@ export default function ChallengeSettingsPage() {
   };
 
   fetchData();
+
+  // Fetch invite data
+  const fetchInvite = async () => {
+   try {
+    setIsInviteLoading(true);
+    const res = await fetch(`/api/challenges/${challengeId}/invite-code`);
+    if (res.ok) {
+     const data = await res.json();
+     if (data) {
+      setInvite(data);
+      setInviteTokenInput(data.invite_token || '');
+     }
+    }
+   } catch {
+    // Error handling
+   } finally {
+    setIsInviteLoading(false);
+   }
+  };
+
+  fetchInvite();
  }, [challengeId]);
+
+ const checkTokenAvailability = useCallback((token: string) => {
+  if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
+
+  // 현재 저장된 값과 같으면 체크 불필요
+  if (invite?.invite_token === token) {
+   setTokenAvailability('idle');
+   return;
+  }
+
+  if (!token.trim()) {
+   setTokenAvailability('idle');
+   return;
+  }
+
+  setTokenAvailability('checking');
+  checkTimerRef.current = setTimeout(async () => {
+   try {
+    const res = await fetch(
+     `/api/challenges/invite-code-check?token=${encodeURIComponent(token)}&challenge_id=${challengeId}`
+    );
+    if (res.ok) {
+     const { available } = await res.json();
+     setTokenAvailability(available ? 'available' : 'taken');
+    }
+   } catch {
+    setTokenAvailability('idle');
+   }
+  }, 400);
+ }, [challengeId, invite?.invite_token]);
+
+ // cleanup timer
+ useEffect(() => {
+  return () => {
+   if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
+  };
+ }, []);
 
  const handleBannerImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   if (e.target.files && e.target.files.length > 0) {
@@ -208,6 +292,63 @@ export default function ChallengeSettingsPage() {
    month: 'long',
    day: 'numeric',
   });
+ };
+
+ const getInviteCooldownInfo = () => {
+  if (!invite?.invite_token_changed_at) return { isLocked: false, remainingDays: 0 };
+  const lastChanged = new Date(invite.invite_token_changed_at);
+  const cooldownEnd = new Date(lastChanged.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const isLocked = now < cooldownEnd;
+  const remainingDays = isLocked ? Math.ceil((cooldownEnd.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)) : 0;
+  return { isLocked, remainingDays };
+ };
+
+ const handleInviteTokenSave = async () => {
+  if (!inviteTokenInput.trim()) {
+   alert('초대 코드를 입력해주세요.');
+   return;
+  }
+  if (inviteTokenInput.length > 10) {
+   alert('초대 코드는 최대 10자까지 입력할 수 있습니다.');
+   return;
+  }
+  if (invite && inviteTokenInput === invite.invite_token) return;
+
+  setIsInviteSaving(true);
+  try {
+   const res = await fetch(`/api/challenges/${challengeId}/invite-code`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ invite_token: inviteTokenInput }),
+   });
+
+   if (!res.ok) {
+    const err = await res.json();
+    alert(err.error || '초대 코드 저장에 실패했습니다.');
+    return;
+   }
+
+   const data = await res.json();
+   setInvite(data);
+   setInviteTokenInput(data.invite_token);
+   alert('초대 코드가 저장되었습니다.');
+  } catch {
+   alert('초대 코드 저장 중 오류가 발생했습니다.');
+  } finally {
+   setIsInviteSaving(false);
+  }
+ };
+
+ const handleCopyInviteToken = async () => {
+  if (!invite?.invite_token) return;
+  try {
+   await navigator.clipboard.writeText(invite.invite_token);
+   setInviteCopied(true);
+   setTimeout(() => setInviteCopied(false), 2000);
+  } catch {
+   // Fallback
+  }
  };
 
  if (isLoading) {
@@ -485,6 +626,154 @@ export default function ChallengeSettingsPage() {
          </div>
         </div>
        )}
+      </div>
+     </div>
+
+     {/* ── Section 4: Invite Code ── */}
+     <div className="grid grid-cols-[240px_1fr] gap-12 py-8 border-t border-slate-200 dark:border-slate-800 sm:grid-cols-1 sm:gap-3 sm:py-0 sm:border-t-0 sm:mb-5">
+      <div className="sm:mb-1">
+       <h3 className="text-sm font-semibold text-slate-900 dark:text-white sm:text-xs sm:font-semibold sm:text-slate-400 sm:dark:text-slate-500 sm:uppercase sm:tracking-wider">
+        초대 코드
+       </h3>
+       <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 sm:hidden">
+        참가자 초대에 사용되는 코드를 관리합니다
+       </p>
+      </div>
+
+      <div className="space-y-4">
+       {isInviteLoading ? (
+        <div className="animate-pulse space-y-3">
+         <div className="h-12 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+         <div className="flex gap-3">
+          {[1, 2, 3].map((i) => (
+           <div key={i} className="h-16 bg-slate-200 dark:bg-slate-700 rounded-xl flex-1"></div>
+          ))}
+         </div>
+        </div>
+       ) : (() => {
+        const { isLocked, remainingDays } = getInviteCooldownInfo();
+        return (
+         <>
+          {/* Current invite info cards */}
+          {invite && (
+           <div className="flex gap-3 sm:flex-col sm:gap-2">
+            <div className="flex-1 bg-surface rounded-xl border border-slate-100 dark:border-slate-800 p-4 sm:rounded-xl sm:p-3.5 sm:flex sm:items-center sm:justify-between">
+             <span className="block text-[11px] font-medium text-slate-400 dark:text-slate-500 mb-1 sm:mb-0 sm:text-xs">참가자</span>
+             <div className="flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-slate-400 sm:hidden" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+               {invite.current_participants}{invite.max_participants ? ` / ${invite.max_participants}` : ''}
+              </span>
+             </div>
+            </div>
+
+            <div className="flex-1 bg-surface rounded-xl border border-slate-100 dark:border-slate-800 p-4 sm:rounded-xl sm:p-3.5 sm:flex sm:items-center sm:justify-between">
+             <span className="block text-[11px] font-medium text-slate-400 dark:text-slate-500 mb-1 sm:mb-0 sm:text-xs">만료일</span>
+             <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-slate-400 sm:hidden" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 sm:text-xs">
+               {invite.expires_at ? formatDate(invite.expires_at) : '-'}
+              </span>
+             </div>
+            </div>
+
+            <div className="flex-1 bg-surface rounded-xl border border-slate-100 dark:border-slate-800 p-4 sm:rounded-xl sm:p-3.5 sm:flex sm:items-center sm:justify-between">
+             <span className="block text-[11px] font-medium text-slate-400 dark:text-slate-500 mb-1 sm:mb-0 sm:text-xs">상태</span>
+             <span className={`inline-flex px-2.5 py-0.5 text-xs font-medium rounded-full ${
+              invite.is_active
+               ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+               : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+             }`}>
+              {invite.is_active ? '활성' : '비활성'}
+             </span>
+            </div>
+           </div>
+          )}
+
+          {/* Token input */}
+          <div className="flex gap-2 sm:flex-col">
+           <div className="flex-1 relative">
+            <input
+             type="text"
+             value={inviteTokenInput}
+             onChange={(e) => {
+              const val = e.target.value.slice(0, 10);
+              setInviteTokenInput(val);
+              checkTokenAvailability(val);
+             }}
+             disabled={isLocked}
+             maxLength={10}
+             className={`w-full px-4 py-3 bg-surface border rounded-xl focus:outline-none focus:ring-2 focus:border-transparent text-slate-900 dark:text-white placeholder-slate-400 transition-all text-sm sm:px-3.5 sm:py-2.5 sm:rounded-lg sm:text-base disabled:opacity-50 disabled:cursor-not-allowed pr-28 ${
+              tokenAvailability === 'taken'
+               ? 'border-red-300 dark:border-red-700 focus:ring-red-500'
+               : tokenAvailability === 'available'
+               ? 'border-emerald-300 dark:border-emerald-700 focus:ring-emerald-500'
+               : 'border-slate-200 dark:border-slate-700 focus:ring-slate-900 dark:focus:ring-white'
+             }`}
+             placeholder="초대 코드 입력 (최대 10자)"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+             {tokenAvailability === 'checking' && (
+              <Loader2 className="w-3.5 h-3.5 text-slate-400 animate-spin" />
+             )}
+             {tokenAvailability === 'available' && (
+              <Check className="w-3.5 h-3.5 text-emerald-500" />
+             )}
+             {tokenAvailability === 'taken' && (
+              <X className="w-3.5 h-3.5 text-red-500" />
+             )}
+             <span className="text-[11px] text-slate-400 tabular-nums">{inviteTokenInput.length}/10</span>
+             {invite?.invite_token && (
+              <button
+               type="button"
+               onClick={handleCopyInviteToken}
+               className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+               title="복사"
+              >
+               {inviteCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+             )}
+            </div>
+           </div>
+           <button
+            type="button"
+            onClick={handleInviteTokenSave}
+            disabled={isLocked || isInviteSaving || tokenAvailability === 'taken' || tokenAvailability === 'checking' || (invite ? inviteTokenInput === invite.invite_token : false) || !inviteTokenInput.trim()}
+            className="flex items-center justify-center gap-2 px-5 py-3 text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap sm:rounded-lg sm:min-h-[48px]"
+           >
+            <Ticket className="w-4 h-4" />
+            {isInviteSaving ? '저장 중...' : '코드 저장'}
+           </button>
+          </div>
+
+          {tokenAvailability === 'taken' && (
+           <p className="text-xs text-red-500 dark:text-red-400">
+            이미 사용 중인 초대 코드입니다.
+           </p>
+          )}
+          {tokenAvailability === 'available' && (
+           <p className="text-xs text-emerald-500 dark:text-emerald-400">
+            사용 가능한 초대 코드입니다.
+           </p>
+          )}
+
+          {isLocked && (
+           <div className="flex items-center gap-2 px-3.5 py-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl sm:rounded-lg">
+            <Lock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+            <p className="text-sm text-amber-700 dark:text-amber-400 sm:text-xs">
+             초대 코드 변경 후 7일간 수정할 수 없습니다. <span className="font-medium">{remainingDays}일 후</span> 변경 가능합니다.
+            </p>
+           </div>
+          )}
+
+          {!invite && (
+           <p className="text-xs text-slate-400 dark:text-slate-500">
+            초대 코드를 설정하면 7일간 변경할 수 없습니다.
+           </p>
+          )}
+         </>
+        );
+       })()}
       </div>
      </div>
 
