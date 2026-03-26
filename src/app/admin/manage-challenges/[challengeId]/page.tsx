@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import Image from 'next/image';
@@ -26,6 +26,7 @@ import {
  Plus,
  BarChart3,
  Shield,
+ ChevronDown as ChevronDownIcon,
 } from 'lucide-react';
 
 // Supabase 클라이언트 초기화
@@ -136,6 +137,8 @@ export default function ChallengeDetail({
  const [selectedCoachId, setSelectedCoachId] = useState('');
  const [manualCoachEmail, setManualCoachEmail] = useState('');
  const [isAddingCoach, setIsAddingCoach] = useState(false);
+ const [isCoachDropdownOpen, setIsCoachDropdownOpen] = useState(false);
+ const coachDropdownRef = useRef<HTMLDivElement>(null);
  const router = useRouter();
 
  // 챌린지 정보 가져오기
@@ -396,6 +399,17 @@ export default function ChallengeDetail({
 
  setChallengeCoaches((prev) => prev.filter((c) => c.id !== coachEntry.id));
  };
+
+ // 코치 드롭다운 외부 클릭 닫기
+ useEffect(() => {
+ const handleClickOutside = (e: MouseEvent) => {
+ if (coachDropdownRef.current && !coachDropdownRef.current.contains(e.target as Node)) {
+ setIsCoachDropdownOpen(false);
+ }
+ };
+ document.addEventListener('mousedown', handleClickOutside);
+ return () => document.removeEventListener('mousedown', handleClickOutside);
+ }, []);
 
  // ESC 키로 모달 닫기
  useEffect(() => {
@@ -896,32 +910,86 @@ export default function ChallengeDetail({
 
  {/* 코치 추가 */}
  <div className="p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50 space-y-3">
- {/* 드롭다운: 조직 소속 코치 */}
- <div className="flex gap-3">
- <select
-  value={selectedCoachId}
-  onChange={(e) => setSelectedCoachId(e.target.value)}
-  className="flex-1 px-4 py-3 bg-surface border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent text-slate-900 dark:text-white transition-all text-sm"
- >
-  <option value="">조직 소속 코치 선택</option>
-  {orgCoaches
-  .filter((oc) => !challengeCoaches.some((cc) => cc.coach_id === oc.id))
-  .map((coach) => (
-  <option key={coach.id} value={coach.id}>
-   {coach.username ? `${coach.username} (${coach.email})` : coach.email}
-  </option>
-  ))}
- </select>
+ {/* 커스텀 드롭다운: 조직 소속 코치 */}
+ <div ref={coachDropdownRef} className="relative">
  <button
   type="button"
-  onClick={handleAddCoach}
-  disabled={isAddingCoach || !selectedCoachId}
-  className="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 py-3 px-6 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+  onClick={() => setIsCoachDropdownOpen(!isCoachDropdownOpen)}
+  className="w-full flex items-center justify-between px-4 py-3 bg-surface border border-slate-200 rounded-xl text-sm text-slate-900 dark:text-white hover:border-slate-300 transition-all"
  >
-  <Plus className="w-4 h-4" />
-  추가
+  {selectedCoachId ? (
+  (() => {
+   const c = orgCoaches.find((oc) => oc.id === selectedCoachId);
+   return c ? (
+   <span className="flex items-center gap-2 truncate">
+    <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-medium text-slate-600 dark:text-slate-300 flex-shrink-0">
+    {(c.username || c.email)[0].toUpperCase()}
+    </span>
+    <span className="font-medium truncate">{c.username || c.email}</span>
+    {c.username && <span className="text-slate-400 dark:text-slate-500 truncate hidden sm:inline">{c.email}</span>}
+   </span>
+   ) : <span className="text-slate-400">코치를 선택하세요</span>;
+  })()
+  ) : (
+  <span className="text-slate-400">조직 소속 코치 선택</span>
+  )}
+  <ChevronDownIcon className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${isCoachDropdownOpen ? 'rotate-180' : ''}`} />
  </button>
+
+ {isCoachDropdownOpen && (
+  <div className="absolute z-20 mt-1.5 w-full bg-surface border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden">
+  <div className="max-h-48 overflow-y-auto py-1">
+   {orgCoaches
+   .filter((oc) => !challengeCoaches.some((cc) => cc.coach_id === oc.id))
+   .length === 0 ? (
+   <div className="px-4 py-3 text-sm text-slate-400 text-center">추가 가능한 코치가 없습니다</div>
+   ) : (
+   orgCoaches
+    .filter((oc) => !challengeCoaches.some((cc) => cc.coach_id === oc.id))
+    .map((coach) => (
+    <button
+    key={coach.id}
+    type="button"
+    onClick={() => {
+     setSelectedCoachId(coach.id);
+     setIsCoachDropdownOpen(false);
+    }}
+    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${
+     selectedCoachId === coach.id ? 'bg-slate-50 dark:bg-slate-800' : ''
+    }`}
+    >
+    <span className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-semibold text-slate-600 dark:text-slate-300 flex-shrink-0">
+     {(coach.username || coach.email)[0].toUpperCase()}
+    </span>
+    <div className="min-w-0 flex-1">
+     <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{coach.username || coach.email}</p>
+     {coach.username && <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{coach.email}</p>}
+    </div>
+    </button>
+    ))
+   )}
+  </div>
+  </div>
+ )}
  </div>
+
+ <button
+ type="button"
+ onClick={handleAddCoach}
+ disabled={isAddingCoach || !selectedCoachId}
+ className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 py-3 px-6 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+ >
+ <Plus className="w-4 h-4" />
+ {isAddingCoach ? '추가 중...' : '선택한 코치 추가'}
+ </button>
+
+ {/* 구분선 */}
+ <div className="flex items-center gap-3">
+ <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+ <span className="text-xs text-slate-400 dark:text-slate-500">또는</span>
+ <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+ </div>
+
  {/* 직접 입력: 이메일 */}
  <form onSubmit={handleAddCoachByEmail} className="flex gap-3">
  <div className="relative flex-1">
