@@ -30,6 +30,7 @@ function ChallengeLayoutContent({
  enable_benchmark: (challenge.challenges as any).enable_benchmark,
  enable_mission: (challenge.challenges as any).enable_mission,
  use_daily_programs: (challenge.challenges as any).use_daily_programs,
+ enable_race: (challenge.challenges as any).enable_race,
  },
  })) || [];
 
@@ -47,6 +48,7 @@ function ChallengeLayoutContent({
  enable_benchmark: currentChallenge.challenges.enable_benchmark,
  enable_mission: currentChallenge.challenges.enable_mission,
  use_daily_programs: currentChallenge.challenges.use_daily_programs,
+ enable_race: currentChallenge.challenges.enable_race,
  };
  }, [currentChallenge]);
 
@@ -63,7 +65,7 @@ function ChallengeLayoutContent({
  showEditUsername
  challengeTitle={challengeTitle}
  challengeFlags={challengeFlags}
- challenges={formattedChallenges.map(c => ({ id: c.challenges.id, title: c.challenges.title, end_date: c.challenges.end_date, challenge_type: c.challenges.challenge_type, enable_benchmark: c.challenges.enable_benchmark, enable_mission: c.challenges.enable_mission, use_daily_programs: c.challenges.use_daily_programs }))}
+ challenges={formattedChallenges.map(c => ({ id: c.challenges.id, title: c.challenges.title, end_date: c.challenges.end_date, challenge_type: c.challenges.challenge_type, enable_benchmark: c.challenges.enable_benchmark, enable_mission: c.challenges.enable_mission, use_daily_programs: c.challenges.use_daily_programs, enable_race: c.challenges.enable_race }))}
  isSidebarOpen={isSidebarOpen}
  onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
  />

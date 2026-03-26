@@ -36,6 +36,7 @@ interface Challenge {
  cover_image_url: string;
  challenge_type: string;
  organization_id: string;
+ enable_race?: boolean;
 }
 
 interface Organization {
@@ -67,6 +68,9 @@ export default function ChallengeSettingsPage() {
  const [bannerImage, setBannerImage] = useState<File | null>(null);
  const [coverImage, setCoverImage] = useState<File | null>(null);
  const [uploadProgress, setUploadProgress] = useState(0);
+
+ // Feature flags
+ const [enableRace, setEnableRace] = useState(false);
 
  // Invite code states
  interface ChallengeInvite {
@@ -103,6 +107,7 @@ export default function ChallengeSettingsPage() {
      setDescription(data.description || '');
      setBannerImageUrl(data.banner_image_url || '');
      setCoverImageUrl(data.cover_image_url || '');
+     setEnableRace(data.enable_race || false);
 
      if (orgRes.ok) {
       const orgs: Organization[] = await orgRes.json();
@@ -260,6 +265,7 @@ export default function ChallengeSettingsPage() {
      cover_image_url: coverUrl,
      challenge_type: challenge.challenge_type,
      organization_id: challenge.organization_id,
+     enable_race: enableRace,
     }),
    });
 
@@ -774,6 +780,41 @@ export default function ChallengeSettingsPage() {
          </>
         );
        })()}
+      </div>
+     </div>
+
+     {/* ── Section 5: Feature Flags ── */}
+     <div className="grid grid-cols-[240px_1fr] gap-12 py-8 border-t border-slate-200 dark:border-slate-800 sm:grid-cols-1 sm:gap-3 sm:py-0 sm:border-t-0 sm:mb-5">
+      <div className="sm:mb-1">
+       <h3 className="text-sm font-semibold text-slate-900 dark:text-white sm:text-xs sm:font-semibold sm:text-slate-400 sm:dark:text-slate-500 sm:uppercase sm:tracking-wider">
+        기능 설정
+       </h3>
+       <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 sm:hidden">
+        챌린지에서 사용할 기능을 선택합니다
+       </p>
+      </div>
+
+      <div className="space-y-3">
+       <label className="flex items-center justify-between bg-surface rounded-xl border border-slate-100 dark:border-slate-800 p-4 sm:p-3.5 cursor-pointer group">
+        <div className="flex-1">
+         <div className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+          대회/시뮬레이션
+         </div>
+         <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+          멤버들의 대회 기록과 시뮬레이션 데이터를 확인합니다
+         </div>
+        </div>
+        <div className="relative flex-shrink-0 ml-4">
+         <input
+          type="checkbox"
+          checked={enableRace}
+          onChange={(e) => setEnableRace(e.target.checked)}
+          className="sr-only peer"
+         />
+         <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer-checked:bg-slate-900 dark:peer-checked:bg-white transition-colors" />
+         <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white dark:bg-slate-900 rounded-full shadow-sm transition-transform peer-checked:translate-x-5" />
+        </div>
+       </label>
       </div>
      </div>
 

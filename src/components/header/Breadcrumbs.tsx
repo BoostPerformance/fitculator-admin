@@ -12,6 +12,7 @@ const ROUTE_LABELS: Record<string, string> = {
   missions: '미션',
   mapping: '매핑',
   status: '현황',
+  race: '대회/시뮬레이션',
   announcements: '공지사항',
   create: '작성',
   edit: '수정',
@@ -34,6 +35,7 @@ export interface ChallengeFlags {
   enable_benchmark?: boolean;
   enable_mission?: boolean;
   use_daily_programs?: boolean;
+  enable_race?: boolean;
 }
 
 // ─── Sibling route definitions ────────────────────────────
@@ -54,6 +56,7 @@ function getChallengeChildren(flags?: ChallengeFlags): SiblingRoute[] {
     { segment: 'benchmarks', label: '벤치마크', show: !!flags.enable_benchmark },
     { segment: 'missions', label: '미션', show: !!flags.enable_mission },
     { segment: 'daily-program', label: '데일리 프로그램', show: !!flags.use_daily_programs },
+    { segment: 'race', label: '대회/시뮬레이션', show: !!flags.enable_race },
     { segment: 'announcements', label: '공지사항', show: true },
   ];
   return items.filter((item) => item.show);
@@ -197,6 +200,7 @@ interface Challenge {
   enable_benchmark?: boolean;
   enable_mission?: boolean;
   use_daily_programs?: boolean;
+  enable_race?: boolean;
 }
 
 function ProgramSelector({ challenges, currentTitle }: { challenges: Challenge[]; currentTitle: string }) {
@@ -238,6 +242,7 @@ function ProgramSelector({ challenges, currentTitle }: { challenges: Challenge[]
         enable_benchmark: target.enable_benchmark,
         enable_mission: target.enable_mission,
         use_daily_programs: target.use_daily_programs,
+        enable_race: target.enable_race,
       });
       const canNavigate = supported.some(s => s.segment === subPage);
       if (canNavigate) {

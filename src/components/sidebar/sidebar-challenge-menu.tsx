@@ -17,7 +17,7 @@ interface SidebarChallengeMenuProps {
 export function SidebarChallengeMenu({ challenge, onNavigate, onSelectChallenge, onAddRecent, compact }: SidebarChallengeMenuProps) {
  const router = useRouter();
  const pathname = usePathname();
- const { id, challenge_type, enable_benchmark, enable_mission, use_daily_programs } = challenge.challenges;
+ const { id, challenge_type, enable_benchmark, enable_mission, use_daily_programs, enable_race } = challenge.challenges;
 
  const isActiveRoute = useCallback((route: string) => {
   return pathname === route || pathname?.startsWith(route);
@@ -51,6 +51,7 @@ export function SidebarChallengeMenu({ challenge, onNavigate, onSelectChallenge,
   { label: '벤치마크', path: `/${id}/benchmarks`, show: !!enable_benchmark },
   { label: '미션', path: `/${id}/missions`, show: !!enable_mission },
   { label: '데일리 프로그램', path: `/${id}/daily-program`, show: !!use_daily_programs },
+  { label: '대회/시뮬레이션', path: `/${id}/race`, show: !!enable_race },
   { label: '공지사항', path: `/${id}/announcements`, show: true },
   { label: '설정', path: `/${id}/settings`, show: true },
  ];

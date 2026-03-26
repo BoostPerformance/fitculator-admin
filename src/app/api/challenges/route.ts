@@ -95,6 +95,7 @@ export async function GET(
  enable_benchmark,
  enable_mission,
  use_daily_programs,
+ enable_race,
  leaderboard_config,
  challenge_participants (
  id,
@@ -152,6 +153,7 @@ export async function GET(
  enable_benchmark: challenge.enable_benchmark,
  enable_mission: challenge.enable_mission,
  use_daily_programs: challenge.use_daily_programs,
+ enable_race: challenge.enable_race,
  leaderboard_config: challenge.leaderboard_config,
  challenge_participants: challenge.challenge_participants.map((p) => ({
  id: p.id,
@@ -230,6 +232,7 @@ export async function GET(
  enable_benchmark,
  enable_mission,
  use_daily_programs,
+ enable_race,
  leaderboard_config,
  challenge_participants (
  id,

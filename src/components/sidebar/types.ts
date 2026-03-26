@@ -8,6 +8,7 @@ export interface ChallengeData {
  enable_benchmark?: boolean;
  enable_mission?: boolean;
  use_daily_programs?: boolean;
+ enable_race?: boolean;
  };
 }
 

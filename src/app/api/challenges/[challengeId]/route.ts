@@ -187,6 +187,8 @@ export async function PUT(
  cover_image_url,
  challenge_type,
  organization_id,
+ leaderboard_config,
+ enable_race,
  } = body;
 
  // 필수 필드 검증
@@ -218,9 +220,7 @@ export async function PUT(
  }
 
  // 챌린지 업데이트
- const { data: updatedChallenge, error: updateError } = await supabase
- .from('challenges')
- .update({
+ const updateData: Record<string, unknown> = {
  title,
  description,
  start_date,
@@ -230,7 +230,20 @@ export async function PUT(
  challenge_type,
  organization_id,
  updated_at: new Date().toISOString(),
- })
+ };
+
+ // leaderboard_config가 명시적으로 전달된 경우에만 업데이트
+ if (leaderboard_config !== undefined) {
+ updateData.leaderboard_config = leaderboard_config;
+ }
+
+ if (enable_race !== undefined) {
+ updateData.enable_race = enable_race;
+ }
+
+ const { data: updatedChallenge, error: updateError } = await supabase
+ .from('challenges')
+ .update(updateData)
  .eq('id', challengeId)
  .select()
  .single();
