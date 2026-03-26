@@ -23,6 +23,9 @@ import {
  User,
  Pencil,
  X,
+ Plus,
+ BarChart3,
+ Shield,
 } from 'lucide-react';
 
 // Supabase 클라이언트 초기화
@@ -35,6 +38,15 @@ interface Organization {
  name: string;
 }
 
+interface LeaderboardMetricConfig {
+ metric: string;
+ period: string;
+}
+
+interface LeaderboardConfig {
+ metrics: LeaderboardMetricConfig[];
+}
+
 interface Challenge {
  id: string;
  title: string;
@@ -45,7 +57,23 @@ interface Challenge {
  cover_image_url: string;
  challenge_type: string;
  organization_id: string;
+ leaderboard_config?: LeaderboardConfig | null;
 }
+
+const METRIC_OPTIONS: { value: string; label: string }[] = [
+ { value: 'distance', label: '거리 (km)' },
+ { value: 'points', label: '운동량 (pt)' },
+ { value: 'durationSeconds', label: '운동 시간' },
+ { value: 'workoutCount', label: '운동 횟수' },
+ { value: 'calories', label: '칼로리 (kcal)' },
+ { value: 'race', label: '레이스' },
+];
+
+const PERIOD_OPTIONS: { value: string; label: string }[] = [
+ { value: 'weekly', label: '주간' },
+ { value: 'monthly', label: '월간' },
+ { value: 'total', label: '전체' },
+];
 
 interface Participant {
  id: string;
@@ -54,6 +82,13 @@ interface Participant {
  username?: string;
  created_at: string;
  status?: string;
+}
+
+interface ChallengeCoach {
+ id: string;
+ coach_id: string;
+ username: string;
+ email: string;
 }
 
 const challengeTypeConfig: { [key: string]: { label: string; bg: string; text: string } } = {
@@ -93,6 +128,14 @@ export default function ChallengeDetail({
  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
  const [isSaving, setIsSaving] = useState(false);
  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+ const [leaderboardMetrics, setLeaderboardMetrics] = useState<LeaderboardMetricConfig[]>([]);
+ const [newMetric, setNewMetric] = useState('points');
+ const [newPeriod, setNewPeriod] = useState('total');
+ const [challengeCoaches, setChallengeCoaches] = useState<ChallengeCoach[]>([]);
+ const [orgCoaches, setOrgCoaches] = useState<{ id: string; username: string; email: string }[]>([]);
+ const [selectedCoachId, setSelectedCoachId] = useState('');
+ const [manualCoachEmail, setManualCoachEmail] = useState('');
+ const [isAddingCoach, setIsAddingCoach] = useState(false);
  const router = useRouter();
 
  // 챌린지 정보 가져오기
@@ -113,6 +156,7 @@ export default function ChallengeDetail({
  setCoverImageUrl(data.cover_image_url || '');
  setSelectedOrganization(data.organization_id);
  setChallengeType(data.challenge_type || 'diet_and_exercise');
+ setLeaderboardMetrics(data.leaderboard_config?.metrics || []);
  }
  } catch (error) {
  // Error handling
@@ -170,6 +214,188 @@ export default function ChallengeDetail({
  fetchParticipants();
  }
  }, [challengeId]);
+
+ // 담당 코치 목록 가져오기
+ useEffect(() => {
+ const fetchChallengeCoaches = async () => {
+ try {
+ const { data, error } = await supabase
+ .from('challenge_coaches')
+ .select(`
+ id,
+ coach_id,
+ coaches!coach_id (
+  admin_users!admin_user_id (
+  username,
+  email
+  )
+ )
+ `)
+ .eq('challenge_id', challengeId);
+
+ if (error) return;
+
+ setChallengeCoaches(
+ (data || []).map((item: any) => {
+  const adminUser = Array.isArray(item.coaches?.admin_users)
+  ? item.coaches.admin_users[0]
+  : item.coaches?.admin_users;
+  return {
+  id: item.id,
+  coach_id: item.coach_id,
+  username: adminUser?.username || '',
+  email: adminUser?.email || '',
+  };
+ })
+ );
+ } catch {
+ // Error handling
+ }
+ };
+
+ if (challengeId) fetchChallengeCoaches();
+ }, [challengeId]);
+
+ // 조직 소속 코치 목록 가져오기
+ useEffect(() => {
+ if (!selectedOrganization) return;
+ const fetchOrgCoaches = async () => {
+ try {
+ const res = await fetch(`/api/organizations/${selectedOrganization}/coaches`);
+ if (res.ok) {
+  const data = await res.json();
+  setOrgCoaches(data.map((c: any) => ({
+  id: c.id,
+  username: c.username || '',
+  email: c.email || '',
+  })));
+ }
+ } catch {
+ // Error handling
+ }
+ };
+ fetchOrgCoaches();
+ }, [selectedOrganization]);
+
+ // 담당 코치 추가
+ const handleAddCoach = async () => {
+ if (!selectedCoachId) return;
+
+ setIsAddingCoach(true);
+ try {
+ // 이미 등록된 코치인지 확인
+ if (challengeCoaches.some((c) => c.coach_id === selectedCoachId)) {
+ alert('이미 이 챌린지에 등록된 코치입니다.');
+ return;
+ }
+
+ const { data: newEntry, error } = await supabase
+ .from('challenge_coaches')
+ .insert({ coach_id: selectedCoachId, challenge_id: challengeId })
+ .select()
+ .single();
+
+ if (error) {
+ alert('코치 추가에 실패했습니다.');
+ return;
+ }
+
+ const selectedCoach = orgCoaches.find((c) => c.id === selectedCoachId);
+ setChallengeCoaches((prev) => [
+ ...prev,
+ {
+  id: newEntry.id,
+  coach_id: selectedCoachId,
+  username: selectedCoach?.username || '',
+  email: selectedCoach?.email || '',
+ },
+ ]);
+ setSelectedCoachId('');
+ } catch {
+ alert('코치 추가 중 오류가 발생했습니다.');
+ } finally {
+ setIsAddingCoach(false);
+ }
+ };
+
+ // 이메일로 직접 코치 추가
+ const handleAddCoachByEmail = async (e: React.FormEvent) => {
+ e.preventDefault();
+ if (!manualCoachEmail.trim()) return;
+
+ setIsAddingCoach(true);
+ try {
+ const { data: adminUser } = await supabase
+ .from('admin_users')
+ .select('id')
+ .eq('email', manualCoachEmail.trim())
+ .single();
+
+ if (!adminUser) {
+ alert('해당 이메일의 관리자를 찾을 수 없습니다.');
+ return;
+ }
+
+ const { data: coach } = await supabase
+ .from('coaches')
+ .select('id')
+ .eq('admin_user_id', adminUser.id)
+ .single();
+
+ if (!coach) {
+ alert('해당 관리자는 코치로 등록되어 있지 않습니다.');
+ return;
+ }
+
+ if (challengeCoaches.some((c) => c.coach_id === coach.id)) {
+ alert('이미 이 챌린지에 등록된 코치입니다.');
+ return;
+ }
+
+ const { data: newEntry, error } = await supabase
+ .from('challenge_coaches')
+ .insert({ coach_id: coach.id, challenge_id: challengeId })
+ .select()
+ .single();
+
+ if (error) {
+ alert('코치 추가에 실패했습니다.');
+ return;
+ }
+
+ setChallengeCoaches((prev) => [
+ ...prev,
+ {
+  id: newEntry.id,
+  coach_id: coach.id,
+  username: manualCoachEmail.split('@')[0],
+  email: manualCoachEmail.trim(),
+ },
+ ]);
+ setManualCoachEmail('');
+ } catch {
+ alert('코치 추가 중 오류가 발생했습니다.');
+ } finally {
+ setIsAddingCoach(false);
+ }
+ };
+
+ // 담당 코치 삭제
+ const handleRemoveCoach = async (coachEntry: ChallengeCoach) => {
+ if (!confirm(`${coachEntry.email} 코치를 이 챌린지에서 제거하시겠습니까?`)) return;
+
+ const { error } = await supabase
+ .from('challenge_coaches')
+ .delete()
+ .eq('id', coachEntry.id);
+
+ if (error) {
+ alert('코치 제거에 실패했습니다.');
+ return;
+ }
+
+ setChallengeCoaches((prev) => prev.filter((c) => c.id !== coachEntry.id));
+ };
 
  // ESC 키로 모달 닫기
  useEffect(() => {
@@ -277,6 +503,9 @@ export default function ChallengeDetail({
  cover_image_url: coverUrl,
  challenge_type: challengeType,
  organization_id: selectedOrganization,
+ leaderboard_config: leaderboardMetrics.length > 0
+ ? { metrics: leaderboardMetrics }
+ : null,
  }),
  });
 
@@ -656,6 +885,96 @@ export default function ChallengeDetail({
  </div>
  </div>
 
+ {/* 담당 코치 관리 */}
+ <div className="bg-surface rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden mb-6 sm:mb-8">
+ <div className="p-4 sm:p-6 border-b border-slate-100">
+ <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+ <Shield className="w-5 h-5 text-slate-400" />
+ 담당 코치
+ </h2>
+ </div>
+
+ {/* 코치 추가 */}
+ <div className="p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50 space-y-3">
+ {/* 드롭다운: 조직 소속 코치 */}
+ <div className="flex gap-3">
+ <select
+  value={selectedCoachId}
+  onChange={(e) => setSelectedCoachId(e.target.value)}
+  className="flex-1 px-4 py-3 bg-surface border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent text-slate-900 dark:text-white transition-all text-sm"
+ >
+  <option value="">조직 소속 코치 선택</option>
+  {orgCoaches
+  .filter((oc) => !challengeCoaches.some((cc) => cc.coach_id === oc.id))
+  .map((coach) => (
+  <option key={coach.id} value={coach.id}>
+   {coach.username ? `${coach.username} (${coach.email})` : coach.email}
+  </option>
+  ))}
+ </select>
+ <button
+  type="button"
+  onClick={handleAddCoach}
+  disabled={isAddingCoach || !selectedCoachId}
+  className="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 py-3 px-6 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+ >
+  <Plus className="w-4 h-4" />
+  추가
+ </button>
+ </div>
+ {/* 직접 입력: 이메일 */}
+ <form onSubmit={handleAddCoachByEmail} className="flex gap-3">
+ <div className="relative flex-1">
+  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+  <input
+  type="email"
+  value={manualCoachEmail}
+  onChange={(e) => setManualCoachEmail(e.target.value)}
+  className="w-full pl-11 pr-4 py-3 bg-surface border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent text-slate-900 dark:text-white placeholder-slate-400 transition-all text-sm"
+  placeholder="이메일로 직접 추가"
+  required
+  />
+ </div>
+ <button
+  type="submit"
+  disabled={isAddingCoach || !manualCoachEmail.trim()}
+  className="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 py-3 px-6 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+ >
+  <Plus className="w-4 h-4" />
+  추가
+ </button>
+ </form>
+ </div>
+
+ {/* 코치 목록 */}
+ <div className="divide-y divide-slate-100 dark:divide-gray-700">
+ {challengeCoaches.length === 0 ? (
+ <div className="text-center py-8">
+ <Shield className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+ <p className="text-slate-500 dark:text-slate-400 text-sm">등록된 담당 코치가 없습니다</p>
+ </div>
+ ) : (
+ challengeCoaches.map((coach) => (
+  <div key={coach.id} className="flex items-center justify-between px-4 sm:px-6 py-3">
+  <div>
+  <p className="text-sm font-medium text-slate-900 dark:text-white">{coach.email}</p>
+  {coach.username && (
+  <p className="text-xs text-slate-500 dark:text-slate-400">{coach.username}</p>
+  )}
+  </div>
+  <button
+  onClick={() => handleRemoveCoach(coach)}
+  className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
+  title="제거"
+  >
+  <Trash2 className="w-4 h-4" />
+  </button>
+  </div>
+ ))
+ )}
+ </div>
+ </div>
+
  {/* 참가자 관리 */}
  <div className="bg-surface rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
  <div className="p-4 sm:p-6 border-b border-slate-100">
@@ -923,6 +1242,80 @@ export default function ChallengeDetail({
  onChange={(e) => setEndDate(e.target.value)}
  className="w-full px-4 py-3 bg-surface border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:border-transparent text-slate-900 dark:text-white transition-all"
  />
+ </div>
+ </div>
+
+ {/* 리더보드 메트릭 설정 */}
+ <div>
+ <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+ <BarChart3 className="w-4 h-4 inline mr-1.5" />
+ 리더보드 메트릭
+ </label>
+ <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
+ 리더보드에 표시할 메트릭과 기간을 설정합니다. 비어있으면 기본값(운동량/전체)이 사용됩니다.
+ </p>
+
+ {/* 현재 설정된 메트릭 태그 */}
+ {leaderboardMetrics.length > 0 && (
+ <div className="flex flex-wrap gap-2 mb-3">
+ {leaderboardMetrics.map((m, index) => {
+ const metricLabel = METRIC_OPTIONS.find(o => o.value === m.metric)?.label || m.metric;
+ const periodLabel = PERIOD_OPTIONS.find(o => o.value === m.period)?.label || m.period;
+ return (
+ <span
+ key={`${m.metric}-${m.period}-${index}`}
+ className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+ >
+ {metricLabel} · {periodLabel}
+ <button
+ type="button"
+ onClick={() => {
+ setLeaderboardMetrics(prev => prev.filter((_, i) => i !== index));
+ }}
+ className="ml-0.5 p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors"
+ >
+ <X className="w-3 h-3" />
+ </button>
+ </span>
+ );
+ })}
+ </div>
+ )}
+
+ {/* 메트릭 추가 UI */}
+ <div className="flex items-center gap-2">
+ <select
+ value={newMetric}
+ onChange={(e) => setNewMetric(e.target.value)}
+ className="flex-1 px-3 py-2 bg-surface border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white text-sm text-slate-900 dark:text-white"
+ >
+ {METRIC_OPTIONS.map(opt => (
+ <option key={opt.value} value={opt.value}>{opt.label}</option>
+ ))}
+ </select>
+ <select
+ value={newPeriod}
+ onChange={(e) => setNewPeriod(e.target.value)}
+ className="flex-1 px-3 py-2 bg-surface border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white text-sm text-slate-900 dark:text-white"
+ >
+ {PERIOD_OPTIONS.map(opt => (
+ <option key={opt.value} value={opt.value}>{opt.label}</option>
+ ))}
+ </select>
+ <button
+ type="button"
+ onClick={() => {
+ const exists = leaderboardMetrics.some(
+ m => m.metric === newMetric && m.period === newPeriod
+ );
+ if (!exists) {
+ setLeaderboardMetrics(prev => [...prev, { metric: newMetric, period: newPeriod }]);
+ }
+ }}
+ className="flex-shrink-0 p-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-lg transition-colors"
+ >
+ <Plus className="w-4 h-4" />
+ </button>
  </div>
  </div>
 
