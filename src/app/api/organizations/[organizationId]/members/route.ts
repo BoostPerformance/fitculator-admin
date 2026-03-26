@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
  request: Request,
- { params }: { params: { organizationId: string } }
+ { params }: { params: Promise<{ organizationId: string }> }
 ) {
  try {
  const session = (await getServerSession(authOptions)) as Session;
@@ -44,7 +44,7 @@ export async function GET(
  );
  }
 
- const organizationId = params.organizationId;
+ const { organizationId } = await params;
 
  // admin_users 테이블에서 해당 조직의 멤버 가져오기
  const { data: members, error: membersError } = await supabase
