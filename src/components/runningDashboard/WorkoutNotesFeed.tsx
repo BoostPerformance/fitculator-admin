@@ -6,6 +6,7 @@ import { ko } from 'date-fns/locale';
 import { useRef, useCallback, useState } from 'react';
 import WorkoutCommentSection from './WorkoutCommentSection';
 import FeedFilterBar, { type FeedFilter } from './FeedFilterBar';
+import WorkoutReactionBar from '@/components/workout/WorkoutReactionBar';
 
 // 노트 내용 컴포넌트 (펼치기/접기 기능)
 function NoteContent({ note }: { note: string }) {
@@ -488,8 +489,12 @@ export default function WorkoutNotesFeed({ challengeId, startDate, endDate, useD
  {/* 노트 내용 */}
  {note.note && <NoteContent note={note.note} />}
 
- {/* 코멘트 영역 (인스타 스타일) */}
+ {/* 리액션 + 코멘트 영역 */}
  <div className="mt-3 pt-2 border-t border-line-subtle">
+ {/* 리액션 바 */}
+ <div className="mb-2">
+  <WorkoutReactionBar workoutId={note.id} />
+ </div>
  {/* 코멘트 아이콘 + 카운트 */}
  <button
   onClick={() => setExpandedNoteId(isExpanded ? null : note.id)}

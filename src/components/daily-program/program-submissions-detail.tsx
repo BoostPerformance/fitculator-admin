@@ -11,6 +11,7 @@ import type {
 import { ProgramStatusBadge } from './program-status-badge';
 import { CardTypeBadge } from './card-type-badge';
 import WorkoutCommentSection from '@/components/runningDashboard/WorkoutCommentSection';
+import WorkoutReactionBar from '@/components/workout/WorkoutReactionBar';
 
 const verificationStatusConfig: Record<VerificationStatus, { label: string; className: string }> = {
  pending: { label: '대기', className: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' },
@@ -143,6 +144,9 @@ export function SubmissionDetailPanel({ completion, challengeId }: SubmissionDet
   ) : (
    <>
    {workoutDetail && <WorkoutCard workout={workoutDetail} />}
+   <div className="my-2">
+    <WorkoutReactionBar workoutId={completion.workout_id} />
+   </div>
    <WorkoutCommentSection
     workoutId={completion.workout_id}
     challengeId={challengeId}
@@ -269,6 +273,9 @@ export function MemberSubmissionsPanel({ completions, challengeId }: MemberSubmi
     ) : (
     <>
      {workout && <WorkoutCard workout={workout} />}
+     <div className="my-2">
+      <WorkoutReactionBar workoutId={completion.workout_id!} />
+     </div>
      <WorkoutCommentSection
      workoutId={completion.workout_id}
      challengeId={challengeId}
@@ -393,6 +400,9 @@ export function CardSubmissionsPanel({ cardTitle, cardType, scoreValue, completi
     ) : (
     <>
      {workout && <WorkoutCard workout={workout} />}
+     <div className="my-2">
+      <WorkoutReactionBar workoutId={completion.workout_id!} />
+     </div>
      <WorkoutCommentSection
      workoutId={completion.workout_id}
      challengeId={challengeId}
@@ -683,6 +693,13 @@ export function ProgramSubmissionsDetail({
        {completion.workout_id && workout && (
        <div className="mt-3 pt-3 border-t border-line-subtle">
         <WorkoutCard workout={workout} />
+       </div>
+       )}
+
+       {/* Reactions */}
+       {completion.workout_id && (
+       <div className="my-2">
+        <WorkoutReactionBar workoutId={completion.workout_id} />
        </div>
        )}
 
