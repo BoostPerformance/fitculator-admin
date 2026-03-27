@@ -125,6 +125,7 @@ export default function WorkoutCommentSection({
 }: WorkoutCommentSectionProps) {
  const queryClient = useQueryClient();
  const [newComment, setNewComment] = useState('');
+ const [visibility, setVisibility] = useState<'public' | 'group' | 'private'>('public');
  const [editingId, setEditingId] = useState<string | null>(null);
  const [editContent, setEditContent] = useState('');
  const [hasComments, setHasComments] = useState(commentCount > 0);
@@ -175,11 +176,11 @@ export default function WorkoutCommentSection({
  const queryKey = ['workout-comments', workoutId, challengeId];
 
  const postMutation = useMutation({
-  mutationFn: async (content: string) => {
+  mutationFn: async ({ content, vis }: { content: string; vis: string }) => {
    const res = await fetch('/api/workout-comments', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ workout_id: workoutId, challenge_id: challengeId, content }),
+    body: JSON.stringify({ workout_id: workoutId, challenge_id: challengeId, content, visibility: vis }),
    });
    if (!res.ok) {
     const err = await res.json();
@@ -187,7 +188,7 @@ export default function WorkoutCommentSection({
    }
    return res.json();
   },
-  onMutate: async (content: string) => {
+  onMutate: async ({ content, vis }: { content: string; vis: string }) => {
    setNewComment('');
    setHasComments(true);
    await queryClient.cancelQueries({ queryKey });
@@ -199,7 +200,7 @@ export default function WorkoutCommentSection({
     author_id: coachInfo?.userId || '',
     target_user_id: '',
     content,
-    visibility: 'private',
+    visibility: vis,
     created_at: new Date().toISOString(),
     author: {
      id: coachInfo?.userId || '',
@@ -275,7 +276,7 @@ export default function WorkoutCommentSection({
 
  const handleSubmit = () => {
   if (!newComment.trim() || postMutation.isPending) return;
-  postMutation.mutate(newComment.trim());
+  postMutation.mutate({ content: newComment.trim(), vis: visibility });
  };
 
  const handleEditSubmit = () => {
@@ -333,6 +334,9 @@ export default function WorkoutCommentSection({
            <div className="flex items-center gap-1.5">
             <span className="text-[12px] font-semibold text-content-secondary">
              {comment.author.name}
+            </span>
+            <span className="text-[10px]" title={comment.visibility === 'public' ? '전체 공개' : comment.visibility === 'group' ? '그룹' : '비공개'}>
+             {comment.visibility === 'public' ? '🌐' : comment.visibility === 'group' ? '👥' : '🔒'}
             </span>
             <span className="text-[10px] text-content-disabled">
              {formatTimestamp(comment.created_at)}
@@ -415,6 +419,15 @@ export default function WorkoutCommentSection({
 
    {/* 코멘트 입력 (항상 표시) */}
    <div className="flex gap-2 mt-2">
+    <select
+     value={visibility}
+     onChange={(e) => setVisibility(e.target.value as 'public' | 'group' | 'private')}
+     className="text-[11px] px-1.5 py-1.5 rounded-lg border border-line bg-surface text-content-secondary focus:outline-none focus:border-blue-400 cursor-pointer"
+    >
+     <option value="public">🌐 전체</option>
+     <option value="group">👥 그룹</option>
+     <option value="private">🔒 비공개</option>
+    </select>
     <input
      type="text"
      value={newComment}

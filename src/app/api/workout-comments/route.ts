@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  const { workout_id, challenge_id, content } = body;
+  const { workout_id, challenge_id, content, visibility } = body;
   if (!workout_id || !challenge_id || !content?.trim()) {
    return NextResponse.json({ error: '필수 필드 누락' }, { status: 400 });
   }
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     author_id: coach.userId,
     target_user_id: workoutResult.data.user_id,
     content: content.trim(),
-    visibility: 'private',
+    visibility: visibility || 'public',
    })
    .select('*, author:users!challenge_workout_comments_author_id_users_fkey(id, name, profile_image_url)')
    .single();
