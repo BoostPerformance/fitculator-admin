@@ -103,7 +103,7 @@ export default function DesktopWorkout({
  value={coachFeedback}
  placeholder="피드백을 작성하세요."
  button1="남기기"
- Btn1className="bg-green text-white"
+ Btn1className="bg-green-500 text-white"
  svg1="/svg/send.svg"
  onChange={(e) => setCoachFeedback(e.target.value)}
  onSave={async (feedback) => {
