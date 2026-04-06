@@ -1404,7 +1404,7 @@ export default function MobileWorkoutDetail() {
  isFeedbackMode={true}
  copyIcon
  className="h-full"
- disabled={!hasUnsavedChanges || saving}
+ disabled={saving}
  />
  </div>
  <button
