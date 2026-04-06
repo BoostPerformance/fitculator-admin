@@ -12,7 +12,7 @@ export const CustomAlert = ({
  if (!isVisible) return null;
 
  return (
- <div className="fixed top-4 right-4 p-4 bg-surface rounded-lg shadow-lg border border-green-500 animate-in fade-in slide-in-from-top-3 z-50">
+ <div className="fixed top-16 right-4 p-4 bg-surface rounded-lg shadow-lg border border-green-500 animate-in fade-in slide-in-from-top-3 z-[110]">
  <div className="flex items-center gap-2">
  <div className="text-green-600">{message}</div>
  <button
