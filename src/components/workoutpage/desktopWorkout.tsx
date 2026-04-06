@@ -51,7 +51,7 @@ export default function DesktopWorkout({
  counts={`${totalPoints.toFixed(1)}pt`}
  title="총 운동포인트"
  borderColor="border-blue-500"
- textColor="text-blue-100"
+ textColor="text-blue-600 dark:text-blue-400"
  />
  </div>
  <div className="font-bold mb-4">주간운동 그래프</div>
@@ -78,7 +78,7 @@ export default function DesktopWorkout({
  </div>
  <div className="flex justify-between text-sm mt-4 w-full bg-surface-raised px-[1.875rem] py-[1.25rem] md:px-[0.7rem] ">
  <div className="text-content-tertiary ">근력 운동</div>
- <div className="text-blue-100 text-display-lg font-bold pt-5 md:text-headline-lg font-bold">
+ <div className="text-blue-600 dark:text-blue-400 text-display-lg font-bold pt-5 md:text-headline-lg font-bold">
  {currentWeekData.totalSessions || 0}
  <span className="text-display font-bold md:text-headline font-bold">/2회</span>
  </div>

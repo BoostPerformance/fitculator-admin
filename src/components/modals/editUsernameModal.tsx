@@ -84,7 +84,7 @@ const EditUsernameModal: React.FC<EditUsernameModalProps> = ({
  <div className="bg-surface shadow-xl sm:rounded-t-2xl sm:rounded-b-none lg:rounded-xl md:rounded-xl sm:w-full lg:w-96 md:w-96 lg:max-w-[90vw] md:max-w-[90vw] sm:max-h-[90vh] sm:animate-slide-up lg:animate-fade-in md:animate-fade-in">
  {/* 모바일 드래그 핸들 */}
  <div className="sm:flex lg:hidden md:hidden justify-center pt-3 pb-1">
- <div className="w-10 h-1 bg-neutral-300 rounded-full" />
+ <div className="w-10 h-1 bg-content-disabled rounded-full" />
  </div>
 
  <div className="p-5 sm:p-4">
@@ -134,7 +134,7 @@ const EditUsernameModal: React.FC<EditUsernameModalProps> = ({
  className={`flex-1 py-3 px-6 rounded-xl font-medium transition-colors min-h-[48px] ${
  hasChanges && username.trim() && !isLoading
  ? 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
- : 'bg-neutral-300 text-content-tertiary cursor-not-allowed'
+ : 'bg-surface-raised text-content-disabled cursor-not-allowed'
  }`}
  >
  {isLoading ? '저장 중...' : '저장'}
@@ -158,7 +158,7 @@ const EditUsernameModal: React.FC<EditUsernameModalProps> = ({
  <div className="bg-surface shadow-xl sm:rounded-t-2xl sm:rounded-b-none lg:rounded-xl md:rounded-xl sm:w-full lg:w-80 md:w-80 lg:max-w-[90vw] md:max-w-[90vw] p-5 sm:p-4 sm:animate-slide-up lg:animate-fade-in md:animate-fade-in">
  {/* 모바일 드래그 핸들 */}
  <div className="sm:flex lg:hidden md:hidden justify-center pb-2 -mt-1">
- <div className="w-10 h-1 bg-neutral-300 rounded-full" />
+ <div className="w-10 h-1 bg-content-disabled rounded-full" />
  </div>
 
  <h3 className="text-lg font-semibold text-content-primary dark:text-white mb-2">

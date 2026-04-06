@@ -27,13 +27,13 @@ export const Tooltip = ({ children, content, position = 'right' }: TooltipProps)
  {children}
  {isVisible && (
  <div
- className={`absolute z-[10000] px-3 py-2 text-sm font-medium text-white bg-neutral-900 rounded-lg shadow-lg whitespace-nowrap pointer-events-none ${positionClasses[position]} animate-in fade-in-0 zoom-in-95 duration-200`}
+ className={`absolute z-[10000] px-3 py-2 text-sm font-medium text-white bg-neutral-900 dark:bg-neutral-200 dark:text-neutral-900 rounded-lg shadow-lg whitespace-nowrap pointer-events-none ${positionClasses[position]} animate-in fade-in-0 zoom-in-95 duration-200`}
  role="tooltip"
  >
  {content}
  {/* Arrow */}
  <div
- className={`absolute w-2 h-2 bg-neutral-900 transform rotate-45 ${
+ className={`absolute w-2 h-2 bg-neutral-900 dark:bg-neutral-200 transform rotate-45 ${
  position === 'right'
  ? 'left-0 top-1/2 -translate-y-1/2 -translate-x-1/2'
  : position === 'left'

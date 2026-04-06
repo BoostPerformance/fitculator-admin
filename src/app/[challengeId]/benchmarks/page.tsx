@@ -367,7 +367,7 @@ export default function BenchmarksPage() {
  setEditingBenchmark(benchmark);
  setIsModalOpen(true);
  }}
- className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-blue-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+ className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
  >
  <FaEdit className="w-3.5 h-3.5" />
  </button>
@@ -431,7 +431,7 @@ export default function BenchmarksPage() {
  </div>
  <button
  onClick={() => setEditingRecord(record)}
- className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-blue-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+ className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
  title="기록 수정"
  >
  <FaEdit className="w-3.5 h-3.5" />
@@ -528,7 +528,7 @@ export default function BenchmarksPage() {
  <td className="py-2">
  <button
  onClick={() => setEditingRecord(record)}
- className="text-blue-100 hover:text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1 rounded"
+ className="text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-1 rounded"
  title="기록 수정"
  >
  <FaEdit />

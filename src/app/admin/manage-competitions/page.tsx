@@ -662,7 +662,7 @@ export default function ManageCompetitionsPage() {
  onClick={() => setMainTab('catalog')}
  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
  mainTab === 'catalog'
- ? 'bg-neutral-900 dark:bg-surface text-white'
+ ? 'bg-neutral-900 dark:bg-neutral-200 text-white dark:text-neutral-900'
  : 'bg-surface-raised text-content-secondary hover:bg-surface-sunken'
  }`}
  >
@@ -672,7 +672,7 @@ export default function ManageCompetitionsPage() {
  onClick={() => setMainTab('user-recorded')}
  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
  mainTab === 'user-recorded'
- ? 'bg-neutral-900 dark:bg-surface text-white'
+ ? 'bg-neutral-900 dark:bg-neutral-200 text-white dark:text-neutral-900'
  : 'bg-surface-raised text-content-secondary hover:bg-surface-sunken'
  }`}
  >
@@ -692,7 +692,7 @@ export default function ManageCompetitionsPage() {
  onClick={() => setTypeFilter(key)}
  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
  typeFilter === key
- ? 'bg-neutral-900 dark:bg-surface text-white'
+ ? 'bg-neutral-900 dark:bg-neutral-200 text-white dark:text-neutral-900'
  : 'bg-surface-raised text-content-secondary hover:bg-surface-sunken'
  }`}
  >
@@ -711,7 +711,7 @@ export default function ManageCompetitionsPage() {
  onClick={() => setYearFilter('all')}
  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
  yearFilter === 'all'
- ? 'bg-neutral-900 dark:bg-surface text-white'
+ ? 'bg-neutral-900 dark:bg-neutral-200 text-white dark:text-neutral-900'
  : 'bg-surface-raised text-content-secondary hover:bg-surface-sunken'
  }`}
  >
@@ -726,7 +726,7 @@ export default function ManageCompetitionsPage() {
  onClick={() => setYearFilter(String(year))}
  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
  yearFilter === String(year)
- ? 'bg-neutral-900 dark:bg-surface text-white'
+ ? 'bg-neutral-900 dark:bg-neutral-200 text-white dark:text-neutral-900'
  : 'bg-surface-raised text-content-secondary hover:bg-surface-sunken'
  }`}
  >
@@ -849,7 +849,7 @@ export default function ManageCompetitionsPage() {
  ? 'text-emerald-600 dark:text-emerald-400'
  : 'text-content-disabled'
  }`}>
- <span className={`w-1.5 h-1.5 rounded-full ${event.is_active ? 'bg-emerald-500' : 'bg-neutral-300'}`} />
+ <span className={`w-1.5 h-1.5 rounded-full ${event.is_active ? 'bg-emerald-500' : 'bg-content-disabled'}`} />
  {event.is_active ? '활성' : '비활성'}
  </span>
  <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${
@@ -864,7 +864,7 @@ export default function ManageCompetitionsPage() {
  ? 'bg-emerald-500'
  : status === 'upcoming'
  ? 'bg-blue-500'
- : 'bg-neutral-300'
+ : 'bg-content-disabled'
  }`} />
  {status === 'active' ? '진행 중' : status === 'upcoming' ? '예정' : '종료'}
  </span>
@@ -1395,7 +1395,7 @@ export default function ManageCompetitionsPage() {
  type="button"
  onClick={() => setForm({ ...form, is_active: !form.is_active })}
  className={`relative w-10 h-[22px] rounded-full transition-colors ${
- form.is_active ? 'bg-blue-600' : 'bg-neutral-300'
+ form.is_active ? 'bg-blue-600' : 'bg-neutral-300 dark:bg-neutral-600'
  }`}
  >
  <span className={`absolute top-[2px] left-[2px] w-[18px] h-[18px] bg-surface rounded-full shadow-sm transition-transform ${

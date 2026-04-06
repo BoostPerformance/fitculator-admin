@@ -657,7 +657,7 @@ const RunningTable: React.FC<
  </div>
  <div
  className={`text-[10px] font-normal mt-1 ${
- isCurrent ? 'text-blue-100 dark:text-blue-400' : 'text-content-tertiary'
+ isCurrent ? 'text-blue-600 dark:text-blue-400' : 'text-content-tertiary'
  }`}
  >
  {typeof week.label === 'string'
@@ -717,7 +717,7 @@ const RunningTable: React.FC<
  className={
  week.aerobicPercentage === 0
  ? 'text-content-disabled'
- : 'text-blue-100 dark:text-blue-400'
+ : 'text-blue-600 dark:text-blue-400'
  }
  >
  {week.aerobicPercentage === 0

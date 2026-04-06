@@ -152,7 +152,7 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
 }
 
 function Divider() {
- return <div className="w-px h-4 bg-neutral-300 mx-1" />;
+ return <div className="w-px h-4 bg-line mx-1" />;
 }
 
 function ToolbarButton({

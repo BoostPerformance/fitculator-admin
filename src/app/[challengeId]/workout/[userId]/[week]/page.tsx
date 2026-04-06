@@ -1147,7 +1147,7 @@ export default function MobileWorkoutDetail() {
  <div className="mb-4 bg-surface-raised px-6 py-6 rounded-lg">
  <div className="flex justify-between items-center">
  <div className="text-sm text-content-tertiary">근력 운동</div>
- <div className="text-blue-100 flex items-baseline gap-1">
+ <div className="text-blue-600 dark:text-blue-400 flex items-baseline gap-1">
  <span className="text-6xl font-bold leading-none">{currentWeekData.totalSessions || 0}</span>
  <span className="text-base font-bold">/2회</span>
  </div>

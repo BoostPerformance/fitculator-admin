@@ -64,7 +64,7 @@ export default function NoticeModal({
  />
  <div className="flex justify-end gap-2 mt-4">
  <button
- className="bg-neutral-300 text-content-primary px-4 py-2 rounded hover:bg-neutral-400"
+ className="bg-surface-raised text-content-primary px-4 py-2 rounded hover:bg-surface-sunken"
  onClick={onClose}
  >
  취소

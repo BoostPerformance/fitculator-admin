@@ -25,7 +25,7 @@ function NoteContent({ note }: { note: string }) {
  {isLong && (
  <button
  onClick={() => setIsExpanded(!isExpanded)}
- className="text-[11px] text-blue-100 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
+ className="text-[11px] text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
  >
  {isExpanded ? '접기' : '더보기'}
  </button>

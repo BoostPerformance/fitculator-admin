@@ -102,7 +102,7 @@ export default function Modal({
  <div className="bg-surface shadow-xl sm:rounded-t-2xl sm:rounded-b-none lg:rounded-xl md:rounded-xl sm:w-full lg:w-[30rem] md:w-[28rem] sm:max-h-[90vh] sm:animate-slide-up lg:animate-none md:animate-none">
  {/* 모바일 드래그 핸들 */}
  <div className="sm:flex lg:hidden md:hidden justify-center pt-3 pb-1">
- <div className="w-10 h-1 bg-neutral-300 rounded-full" />
+ <div className="w-10 h-1 bg-content-disabled rounded-full" />
  </div>
 
  <div className="p-5 sm:p-4">

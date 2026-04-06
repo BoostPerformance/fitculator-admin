@@ -75,7 +75,7 @@ export default function WeeklyWorkoutChart({
  };
  const isCurrentWeek = week.weekNumber === weekNumberParam;
  return (
- <th key={index} className="text-center" style={isCurrentWeek ? {backgroundColor: '#eff6ff'} : {}}>
+ <th key={index} className={`text-center ${isCurrentWeek ? 'bg-accent-subtle' : ''}`}>
  <span className={isCurrentWeek ? 'text-blue-600 font-semibold' : ''}>
  W{week.weekNumber}
  </span>
@@ -99,11 +99,10 @@ export default function WeeklyWorkoutChart({
  return (
  <td 
  key={index} 
- className={`py-2 text-center cursor-pointer hover:bg-surface-raised transition-colors`}
- style={isCurrentWeek ? {backgroundColor: '#eff6ff'} : {}}
+ className={`py-2 text-center cursor-pointer hover:bg-surface-raised transition-colors ${isCurrentWeek ? 'bg-accent-subtle' : ''}`}
  onClick={() => handleWeekClick(week.weekNumber, week.label)}
  >
- <div className={`text-blue-100 ${isCurrentWeek ? 'font-semibold' : ''}`}>
+ <div className={`text-blue-600 dark:text-blue-400 ${isCurrentWeek ? 'font-semibold' : ''}`}>
  {`${getDisplayPoints(week)}%`}
  </div>
  <div className="text-content-tertiary text-sm">
@@ -130,8 +129,7 @@ export default function WeeklyWorkoutChart({
  key={index}
  className={`${
  index < weeklyWorkouts.length - 1 ? 'border-b py-3' : 'py-3'
- } cursor-pointer hover:bg-surface-raised transition-colors`}
- style={isCurrentWeek ? {backgroundColor: '#eff6ff'} : {}}
+ } cursor-pointer hover:bg-surface-raised transition-colors ${isCurrentWeek ? 'bg-accent-subtle' : ''}`}
  onClick={() => handleWeekClick(week.weekNumber, week.label)}
  >
  <div className="flex justify-between items-center">
@@ -152,7 +150,7 @@ export default function WeeklyWorkoutChart({
  </span>
  </div>
  <div className="text-right">
- <div className={`text-blue-100 ${isCurrentWeek ? 'font-semibold' : ''}`}>
+ <div className={`text-blue-600 dark:text-blue-400 ${isCurrentWeek ? 'font-semibold' : ''}`}>
  {`${getDisplayPoints(week)}%`}
  </div>
  <div className="text-content-tertiary text-sm">

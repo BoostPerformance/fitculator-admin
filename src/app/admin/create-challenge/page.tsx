@@ -257,7 +257,7 @@ export default function CreateChallenge() {
  id="coverImage"
  accept="image/*"
  onChange={handleCoverImageChange}
- className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-500 file:text-white file:cursor-pointer"
+ className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-accent file:text-white file:cursor-pointer"
  />
  </div>
 
@@ -273,7 +273,7 @@ export default function CreateChallenge() {
  id="bannerImage"
  accept="image/*"
  onChange={handleBannerImageChange}
- className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-500 file:text-white file:cursor-pointer"
+ className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-accent file:text-white file:cursor-pointer"
  />
  {uploadProgress > 0 && uploadProgress < 100 && (
  <div className="w-full bg-surface-sunken rounded-full h-2.5 mt-2">

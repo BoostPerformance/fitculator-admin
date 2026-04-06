@@ -83,7 +83,7 @@ const generateBarChart = (
  </div>
  )}
  {/* 툴크 - bar 바깥으로 빼기 */}
- <div className="absolute bottom-0 mb-2 px-[0.3rem] sm:px-[0.5rem] py-[0.1rem] text-[10px] sm:text-label-xs font-medium text-white bg-black rounded opacity-0 group-hover:opacity-50 transition-opacity z-10">
+ <div className="absolute bottom-0 mb-2 px-[0.3rem] sm:px-[0.5rem] py-[0.1rem] text-[10px] sm:text-label-xs font-medium text-white bg-black dark:bg-neutral-200 dark:text-neutral-900 rounded opacity-0 group-hover:opacity-50 transition-opacity z-10">
  {typeof day.value === 'number'
  ? day.value.toFixed(1)
  : '0.0'}
