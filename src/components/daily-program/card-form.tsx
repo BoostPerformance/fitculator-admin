@@ -225,7 +225,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  <label className="block text-body font-medium text-content-secondary mb-1">
  본문 (리치 텍스트)
  </label>
- <TiptapEditor content={body} onChange={setBody} />
+ <TiptapEditor content={body} onChange={setBody} cardId={card?.id} />
  </div>
 
  {/* Coaching Tips */}
