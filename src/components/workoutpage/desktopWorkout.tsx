@@ -21,6 +21,7 @@ interface DesktopWorkoutProps {
  setShowAlert: (value: boolean) => void;
  setCopyMessage: (value: boolean) => void;
  setIsDisable: (value: boolean) => void;
+ aiFeedback: string;
 }
 
 export default function DesktopWorkout({
@@ -39,6 +40,7 @@ export default function DesktopWorkout({
  setShowAlert,
  setCopyMessage,
  setIsDisable,
+ aiFeedback,
 }: DesktopWorkoutProps) {
  return (
  <div className="flex w-full p-4 sm:hidden">
@@ -97,6 +99,16 @@ export default function DesktopWorkout({
  currentWeekData.totalSessions
  )}
  </div>
+ <div className="grid grid-cols-2 gap-4">
+ <div>
+ <TextBox
+ title="AI 분석 결과"
+ value={aiFeedback}
+ placeholder="AI 피드백이 아직 생성되지 않았습니다."
+ readOnly
+ copyIcon
+ />
+ </div>
  <div>
  <TextBox
  title="코치 피드백"
@@ -112,6 +124,7 @@ export default function DesktopWorkout({
  isFeedbackMode={true}
  copyIcon
  />
+ </div>
  </div>
  <button
  className="pt-[6rem] text-content-disabled font-bold hover:font-extrabold cursor-pointer sm:px-[2rem] sm:block lg:hidden md:hidden"

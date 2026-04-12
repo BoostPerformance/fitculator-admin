@@ -69,6 +69,7 @@ export default function MobileRunningDetail() {
  const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
  const [coachFeedback, setCoachFeedback] = useState('');
  const [originalFeedback, setOriginalFeedback] = useState('');
+ const [aiFeedback, setAiFeedback] = useState('');
  const [feedbackId, setFeedbackId] = useState<string | null>(null);
  const [feedbackDate, setFeedbackDate] = useState<string | null>(null);
  const [saving, setSaving] = useState(false);
@@ -142,12 +143,14 @@ export default function MobileRunningDetail() {
  const feedback = data.data.coach_feedback || '';
  setCoachFeedback(feedback);
  setOriginalFeedback(feedback);
+ setAiFeedback(data.data.ai_feedback || '');
  setFeedbackId(data.data.id);
  setFeedbackDate(data.data.updated_at || data.data.created_at);
  setHasUnsavedChanges(false);
  } else {
  setCoachFeedback('');
  setOriginalFeedback('');
+ setAiFeedback('');
  setFeedbackId(null);
  setFeedbackDate(null);
  setHasUnsavedChanges(false);
@@ -1178,6 +1181,23 @@ export default function MobileRunningDetail() {
  </div>
 
  <div className="sm:w-full lg:col-span-1 flex flex-col sm:min-h-[600px] lg:min-h-0">
+ <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1">
+ <div className="flex flex-col">
+ <div className="text-xs font-semibold text-content-secondary mb-2">
+ AI 분석 결과
+ </div>
+ <div className="flex-1">
+ <TextBox
+ title=""
+ value={aiFeedback}
+ placeholder="AI 피드백이 아직 생성되지 않았습니다."
+ readOnly
+ copyIcon
+ className="h-full"
+ />
+ </div>
+ </div>
+ <div className="flex flex-col">
  <div className="flex justify-between items-center mb-2">
  <div className="text-xs font-semibold text-content-secondary">
  코치 피드백
@@ -1205,6 +1225,8 @@ export default function MobileRunningDetail() {
  className="h-full"
  disabled={saving}
  />
+ </div>
+ </div>
  </div>
  <button
  className="pt-[6rem] text-content-disabled font-bold hover:font-extrabold cursor-pointer sm:px-[2rem] sm:block lg:hidden md:hidden"

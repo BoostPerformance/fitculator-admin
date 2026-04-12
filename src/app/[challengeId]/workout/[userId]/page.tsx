@@ -68,6 +68,7 @@ export default function UserWorkoutDetailPage() {
  const challengeId = params.challengeId as string;
  const router = useRouter();
  const [coachFeedback, setCoachFeedback] = useState('');
+ const [aiFeedback, setAiFeedback] = useState('');
  const [feedbackId, setFeedbackId] = useState<string | null>(null);
  const [saving, setSaving] = useState(false);
  const [copyMessage, setCopyMessage] = useState(false);
@@ -131,9 +132,11 @@ export default function UserWorkoutDetailPage() {
  const data = await res.json();
  if (res.ok && data.data) {
  setCoachFeedback(data.data.coach_feedback || '');
+ setAiFeedback(data.data.ai_feedback || '');
  setFeedbackId(data.data.id);
  } else {
  setCoachFeedback('');
+ setAiFeedback('');
  setFeedbackId(null);
  }
  };
@@ -244,6 +247,7 @@ export default function UserWorkoutDetailPage() {
  setShowAlert={setShowAlert}
  setCopyMessage={setCopyMessage}
  setIsDisable={setIsDisable}
+ aiFeedback={aiFeedback}
  />
  <MobileWorkout />
  {/* <WorkoutTable challengeId={params.challengeId as string} /> */}
