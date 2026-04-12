@@ -482,8 +482,8 @@ export default function User() {
  return (
  <div className="flex flex-col min-h-screen">
  <div className="flex-1">
- <div className="pt-[2rem] pb-[2rem] sm:pt-0">
- <div className="px-4 sm:px-4 relative lg:mb-8 md:mb-4 sm:my-4">
+ <div className="pt-6 pb-6 sm:pt-0">
+ <div className="px-6 sm:px-4 relative mb-6 sm:mb-4">
  {/* 챌린지 기간 표시 */}
  {challengeDates && (
  <div className="text-body text-content-tertiary mb-2">
@@ -508,7 +508,7 @@ export default function User() {
  />
  </div>
 
- <div className="grid grid-cols-4 gap-1 px-4 sm:px-4 sm:grid-cols-1 sm:mt-4">
+ <div className="grid grid-cols-4 gap-1 px-6 sm:px-4 sm:grid-cols-1 sm:mt-4">
  <TotalFeedbackCounts
  counts={progress.progressDays}
  total={`${progress.totalDays}일`}
@@ -560,7 +560,7 @@ export default function User() {
  })()}
  </div>
 
- <div className="grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-4 sm:px-4 ">
+ <div className="grid grid-cols-6 gap-[1rem] my-6 sm:my-4 sm:flex sm:flex-col px-6 sm:px-4">
  {formattedChallenges.find((c) => c.challenges.id === selectedChallengeId)
  ?.challenges.challenge_type === 'diet_and_exercise' && (
  <>

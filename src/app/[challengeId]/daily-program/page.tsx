@@ -24,6 +24,7 @@ import { SubmissionsView, STATUS_OPTIONS } from '@/components/daily-program/subm
 import type { StatusFilter } from '@/components/daily-program/submissions-view';
 import { useResponsive } from '@/components/hooks/useResponsive';
 import { DailyProgramCalendarSkeleton } from '@/components/daily-program/daily-program-skeleton';
+import Title from '@/components/layout/title';
 
 type ActiveTab = 'calendar' | 'submissions';
 
@@ -352,10 +353,8 @@ export default function DailyProgramPage() {
  return (
  <div className="w-full max-w-full overflow-hidden">
  {/* Page title + tab toggle */}
- <div className="px-6 pt-4 pb-3 sm:px-4 sm:pt-3 sm:pb-2 flex items-center gap-3">
- <h1 className="text-headline font-semibold text-content-primary dark:text-white sm:text-title-lg">
- 데일리 프로그램
- </h1>
+ <div className="px-6 pt-6 sm:px-4 sm:pt-4 flex items-center gap-3">
+ <Title title="데일리 프로그램" />
  <div className="flex items-center gap-1 bg-surface-raised rounded-lg p-0.5">
  <button
  onClick={() => setActiveTab('calendar')}

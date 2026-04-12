@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { FiEdit2, FiSave, FiX, FiPlus, FiTrash2, FiUsers, FiSearch, FiChevronDown, FiCheck, FiUser, FiSettings } from 'react-icons/fi';
+import Title from '@/components/layout/title';
 
 interface User {
  id: string;
@@ -241,10 +242,10 @@ export default function MembersPage() {
  <div className="flex items-center justify-center min-h-screen">
  <div className="text-center">
  <div className="relative w-16 h-16 mx-auto mb-4">
- <div className="absolute inset-0 rounded-full border-4 border-slate-200"></div>
- <div className="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+ <div className="absolute inset-0 rounded-full border-4 border-line"></div>
+ <div className="absolute inset-0 rounded-full border-4 border-accent border-t-transparent animate-spin"></div>
  </div>
- <p className="text-slate-600 dark:text-slate-400 font-medium">멤버 정보를 불러오는 중...</p>
+ <p className="text-content-secondary font-medium">멤버 정보를 불러오는 중...</p>
  </div>
  </div>
  );
@@ -252,44 +253,36 @@ export default function MembersPage() {
 
  return (
  <div className="min-h-screen">
- <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+ <div className="max-w-7xl mx-auto px-6 pt-6 sm:px-4 sm:pt-4">
  {/* Header */}
- <div className="mb-6 sm:mb-8">
- <div className="flex items-center gap-3 mb-2">
- <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex-shrink-0">
- <FiUsers className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 dark:text-indigo-400" />
- </div>
- <div className="min-w-0">
- <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white truncate">{challengeTitle}</h1>
- <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400">멤버 관리</p>
- </div>
- </div>
+ <div className="mb-6 sm:mb-4">
+ <Title title="멤버 관리" />
  </div>
 
  {/* Stats Cards */}
  <div className="grid grid-cols-4 gap-4 mb-8 sm:grid-cols-2 sm:gap-2 sm:mb-6">
- <div className="bg-surface rounded-2xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
+ <div className="bg-surface rounded-2xl px-4 py-3 shadow-sm border border-line flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
  <div className="min-w-0">
- <p className="text-xs text-slate-500 dark:text-slate-400 font-medium sm:text-[11px]">전체 멤버</p>
- <p className="text-xl font-bold text-slate-800 dark:text-white sm:text-lg">{participants.length}</p>
+ <p className="text-xs text-content-tertiary font-medium sm:text-[11px]">전체 멤버</p>
+ <p className="text-xl font-bold text-content-primary dark:text-white sm:text-lg">{participants.length}</p>
  </div>
  </div>
- <div className="bg-surface rounded-2xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
+ <div className="bg-surface rounded-2xl px-4 py-3 shadow-sm border border-line flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
  <div className="min-w-0">
- <p className="text-xs text-slate-500 dark:text-slate-400 font-medium sm:text-[11px]">그룹 수</p>
- <p className="text-xl font-bold text-slate-800 dark:text-white sm:text-lg">{groups.length}</p>
+ <p className="text-xs text-content-tertiary font-medium sm:text-[11px]">그룹 수</p>
+ <p className="text-xl font-bold text-content-primary dark:text-white sm:text-lg">{groups.length}</p>
  </div>
  </div>
- <div className="bg-surface rounded-2xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
+ <div className="bg-surface rounded-2xl px-4 py-3 shadow-sm border border-line flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
  <div className="min-w-0">
- <p className="text-xs text-slate-500 dark:text-slate-400 font-medium sm:text-[11px]">배정 완료</p>
- <p className="text-xl font-bold text-slate-800 dark:text-white sm:text-lg">{participants.filter(p => p.current_group).length}</p>
+ <p className="text-xs text-content-tertiary font-medium sm:text-[11px]">배정 완료</p>
+ <p className="text-xl font-bold text-content-primary dark:text-white sm:text-lg">{participants.filter(p => p.current_group).length}</p>
  </div>
  </div>
- <div className="bg-surface rounded-2xl px-4 py-3 shadow-sm border border-slate-100 flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
+ <div className="bg-surface rounded-2xl px-4 py-3 shadow-sm border border-line flex items-center gap-3 sm:rounded-xl sm:px-3 sm:py-2.5 sm:gap-2">
  <div className="min-w-0">
- <p className="text-xs text-slate-500 dark:text-slate-400 font-medium sm:text-[11px]">미배정</p>
- <p className="text-xl font-bold text-slate-800 dark:text-white sm:text-lg">{participants.filter(p => !p.current_group).length}</p>
+ <p className="text-xs text-content-tertiary font-medium sm:text-[11px]">미배정</p>
+ <p className="text-xl font-bold text-content-primary dark:text-white sm:text-lg">{participants.filter(p => !p.current_group).length}</p>
  </div>
  </div>
  </div>

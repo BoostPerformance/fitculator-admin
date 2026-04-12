@@ -108,7 +108,7 @@ export default function RunningPage() {
 
  return (
  <div className="flex-1 p-4 sm:p-0">
- <div className="px-8 pt-4 sm:px-4 sm:pt-4">
+ <div className="px-6 pt-6 sm:px-4 sm:pt-4">
  {/* 챌린지 기간 표시 */}
  {currentChallenge && (
  <div className="text-body text-content-tertiary mb-2">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import Title from '@/components/layout/title';
 
 // Supabase 클라이언트 초기화
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -161,8 +162,10 @@ export default function CreateChallenge() {
  };
 
  return (
- <div className="container mx-auto px-4 py-8">
- <h1 className="text-2xl font-bold mb-6">챌린지 생성</h1>
+ <div className="container mx-auto px-6 pt-6 sm:px-4 sm:pt-4">
+ <div className="mb-6 sm:mb-4">
+ <Title title="챌린지 생성" />
+ </div>
 
  <form onSubmit={handleSubmit} className="max-w-md mx-auto">
  <div className="mb-4">

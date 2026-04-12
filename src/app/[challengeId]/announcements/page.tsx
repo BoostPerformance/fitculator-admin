@@ -41,8 +41,8 @@ const statusLabels = {
 
 const statusConfig = {
  draft: {
- bg: 'bg-slate-100 dark:bg-slate-800',
- text: 'text-slate-600 dark:text-slate-300',
+ bg: 'bg-surface-raised dark:bg-slate-800',
+ text: 'text-content-secondary',
  dot: 'bg-slate-400'
  },
  published: {
@@ -175,15 +175,15 @@ export default function AnnouncementsPage() {
  <div className="min-h-screen p-8">
  <div className="max-w-6xl mx-auto">
  <div className="animate-pulse space-y-6">
- <div className="h-10 bg-slate-200 rounded-lg w-1/4"></div>
+ <div className="h-10 bg-surface-sunken rounded-lg w-1/4"></div>
  <div className="grid grid-cols-3 gap-4">
  {[1, 2, 3].map((i) => (
- <div key={i} className="h-24 bg-slate-200 rounded-xl"></div>
+ <div key={i} className="h-24 bg-surface-sunken rounded-xl"></div>
  ))}
  </div>
  <div className="space-y-4">
  {[1, 2, 3].map((i) => (
- <div key={i} className="h-32 bg-slate-200 rounded-xl"></div>
+ <div key={i} className="h-32 bg-surface-sunken rounded-xl"></div>
  ))}
  </div>
  </div>
@@ -194,13 +194,13 @@ export default function AnnouncementsPage() {
 
  return (
  <div className="min-h-screen">
- <div className="max-w-6xl mx-auto p-4 sm:p-8">
+ <div className="max-w-6xl mx-auto px-6 pt-6 sm:px-4 sm:pt-4">
  {/* Header */}
- <div className="flex flex-row sm:flex-col justify-between items-center sm:items-start gap-0 sm:gap-4 mb-8 sm:mb-6">
+ <div className="flex flex-row sm:flex-col justify-between items-center sm:items-start gap-0 sm:gap-4 mb-6 sm:mb-4">
  <Title title="공지사항" subtitle="챌린지 참여자에게 전달할 공지사항을 관리합니다" />
  <button
  onClick={() => router.push(`/${challengeId}/announcements/create`)}
- className="bg-slate-900 hover:bg-slate-800 dark:bg-surface text-white dark:text-slate-900 px-5 sm:px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium shadow-sm hover:shadow-md min-h-[44px] text-base sm:text-sm w-auto sm:w-full justify-start sm:justify-center"
+ className="bg-content-primary hover:bg-content-secondary dark:bg-surface text-white dark:text-content-primary px-5 sm:px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium shadow-sm hover:shadow-md min-h-[44px] text-base sm:text-sm w-auto sm:w-full justify-start sm:justify-center"
  >
  <Plus size={18} strokeWidth={2.5} />
  새 공지사항
@@ -209,14 +209,14 @@ export default function AnnouncementsPage() {
 
  {/* List Header with Filters */}
  <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between gap-0 sm:gap-3 mb-4">
- <p className="text-sm text-slate-500 dark:text-slate-400">총 <span className="font-medium text-slate-700 dark:text-slate-200">{stats.total}개</span>의 공지사항</p>
+ <p className="text-sm text-content-tertiary">총 <span className="font-medium text-content-primary">{stats.total}개</span>의 공지사항</p>
 
  <div className="flex gap-2 w-auto sm:w-full">
  <Select value={selectedType} onValueChange={setSelectedType}>
  <SelectTrigger className="w-[130px] sm:flex-1 bg-surface h-9 sm:h-11 text-sm dark:text-white">
  <SelectValue placeholder="모든 유형" />
  </SelectTrigger>
- <SelectContent className="bg-surface border-slate-200">
+ <SelectContent className="bg-surface border-line">
  <SelectItem value="all" className="dark:text-white dark:focus:bg-neutral-700">모든 유형</SelectItem>
  <SelectItem value="general" className="dark:text-white dark:focus:bg-neutral-700">일반</SelectItem>
  <SelectItem value="workout_schedule" className="dark:text-white dark:focus:bg-neutral-700">운동 일정</SelectItem>
@@ -227,7 +227,7 @@ export default function AnnouncementsPage() {
  <SelectTrigger className="w-[130px] sm:flex-1 bg-surface h-9 sm:h-11 text-sm dark:text-white">
  <SelectValue placeholder="모든 상태" />
  </SelectTrigger>
- <SelectContent className="bg-surface border-slate-200">
+ <SelectContent className="bg-surface border-line">
  <SelectItem value="all" className="dark:text-white dark:focus:bg-neutral-700">모든 상태</SelectItem>
  <SelectItem value="draft" className="dark:text-white dark:focus:bg-neutral-700">초안</SelectItem>
  <SelectItem value="published" className="dark:text-white dark:focus:bg-neutral-700">발행됨</SelectItem>
@@ -238,18 +238,18 @@ export default function AnnouncementsPage() {
  </div>
 
  {/* Announcements - Desktop: Table, Mobile: Cards */}
- <div className="bg-surface rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+ <div className="bg-surface rounded-xl border border-line shadow-sm overflow-hidden">
  {sortedAnnouncements.length === 0 ? (
  <div className="text-center py-12 sm:py-16">
- <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
- <FileText size={24} className="text-slate-400 sm:hidden" />
- <FileText size={28} className="text-slate-400 hidden sm:block" />
+ <div className="w-14 h-14 sm:w-16 sm:h-16 bg-surface-raised rounded-full flex items-center justify-center mx-auto mb-4">
+ <FileText size={24} className="text-content-disabled sm:hidden" />
+ <FileText size={28} className="text-content-disabled hidden sm:block" />
  </div>
- <p className="text-slate-600 dark:text-slate-300 font-medium text-sm sm:text-base">공지사항이 없습니다</p>
- <p className="text-slate-400 dark:text-slate-500 text-xs sm:text-sm mt-1">새 공지사항을 작성해보세요</p>
+ <p className="text-content-secondary font-medium text-sm sm:text-base">공지사항이 없습니다</p>
+ <p className="text-content-disabled text-xs sm:text-sm mt-1">새 공지사항을 작성해보세요</p>
  <button
  onClick={() => router.push(`/${challengeId}/announcements/create`)}
- className="mt-4 text-slate-900 dark:text-white font-medium text-sm hover:underline min-h-[44px] px-4"
+ className="mt-4 text-content-primary dark:text-white font-medium text-sm hover:underline min-h-[44px] px-4"
  >
  공지사항 작성하기 →
  </button>
@@ -265,26 +265,26 @@ export default function AnnouncementsPage() {
  onClick={() => router.push(`/${challengeId}/announcements/${announcement.id}`)}
  >
  <div className="flex items-start justify-between gap-3 mb-2">
- <h3 className="font-medium text-slate-900 dark:text-white text-sm flex-1 line-clamp-2">{announcement.title}</h3>
+ <h3 className="font-medium text-content-primary dark:text-white text-sm flex-1 line-clamp-2">{announcement.title}</h3>
  <div className="relative flex-shrink-0">
  <button
  onClick={(e) => {
  e.stopPropagation();
  setOpenMenuId(openMenuId === announcement.id ? null : announcement.id);
  }}
- className="p-2 hover:bg-slate-200 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+ className="p-2 hover:bg-surface-sunken rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
  >
- <MoreHorizontal size={18} className="text-slate-400 dark:text-slate-500" />
+ <MoreHorizontal size={18} className="text-content-disabled" />
  </button>
 
  {openMenuId === announcement.id && (
- <div className="absolute right-0 top-full mt-1 w-36 bg-surface rounded-lg shadow-lg border border-slate-200 py-1 z-10">
+ <div className="absolute right-0 top-full mt-1 w-36 bg-surface rounded-lg shadow-lg border border-line py-1 z-10">
  <button
  onClick={(e) => {
  e.stopPropagation();
  router.push(`/${challengeId}/announcements/${announcement.id}`);
  }}
- className="w-full px-3 py-2.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 flex items-center gap-2"
+ className="w-full px-3 py-2.5 text-left text-sm text-content-secondary hover:bg-slate-50 flex items-center gap-2"
  >
  <Eye size={14} />
  보기
@@ -294,12 +294,12 @@ export default function AnnouncementsPage() {
  e.stopPropagation();
  router.push(`/${challengeId}/announcements/edit/${announcement.id}`);
  }}
- className="w-full px-3 py-2.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 flex items-center gap-2"
+ className="w-full px-3 py-2.5 text-left text-sm text-content-secondary hover:bg-slate-50 flex items-center gap-2"
  >
  <Edit2 size={14} />
  수정
  </button>
- <div className="border-t border-slate-100 my-1"></div>
+ <div className="border-t border-line my-1"></div>
  <button
  onClick={(e) => handleDelete(e, announcement.id)}
  className="w-full px-3 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 flex items-center gap-2"
@@ -325,7 +325,7 @@ export default function AnnouncementsPage() {
  {statusLabels[announcement.status]}
  </span>
  </div>
- <div className="text-xs text-slate-500 dark:text-slate-400 space-y-0.5">
+ <div className="text-xs text-slate-500 dark:text-content-disabled space-y-0.5">
  <div>작성일: {formatDate(announcement.created_at)}</div>
  {announcement.start_date && announcement.end_date && (
  <div>게시기간: {formatDate(announcement.start_date)} - {formatDate(announcement.end_date)}</div>
@@ -338,28 +338,28 @@ export default function AnnouncementsPage() {
  {/* 데스크톱 테이블 뷰 */}
  <table className="w-full sm:hidden">
  <thead>
- <tr className="border-b border-slate-200 bg-slate-50/50/50">
- <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">제목</th>
- <th className="text-center py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[80px]">순서</th>
+ <tr className="border-b border-line bg-slate-50/50/50">
+ <th className="text-left py-3 px-4 text-xs font-medium text-content-tertiary uppercase tracking-wider">제목</th>
+ <th className="text-center py-3 px-4 text-xs font-medium text-content-tertiary uppercase tracking-wider w-[80px]">순서</th>
  <th
- className="text-left py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 select-none w-[150px]"
+ className="text-left py-3 px-4 text-xs font-medium text-content-tertiary uppercase tracking-wider cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 select-none w-[150px]"
  onClick={() => handleSort('created_at')}
  >
  <span className="flex items-center gap-1">
  작성일
- <ArrowUpDown size={14} className={sortField === 'created_at' ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'} />
+ <ArrowUpDown size={14} className={sortField === 'created_at' ? 'text-slate-700 dark:text-slate-300' : 'text-content-disabled'} />
  </span>
  </th>
  <th
- className="text-left py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 select-none w-[280px]"
+ className="text-left py-3 px-4 text-xs font-medium text-content-tertiary uppercase tracking-wider cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 select-none w-[280px]"
  onClick={() => handleSort('start_date')}
  >
  <span className="flex items-center gap-1">
  게시기간
- <ArrowUpDown size={14} className={sortField === 'start_date' ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'} />
+ <ArrowUpDown size={14} className={sortField === 'start_date' ? 'text-slate-700 dark:text-slate-300' : 'text-content-disabled'} />
  </span>
  </th>
- <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider w-[200px]">상태</th>
+ <th className="text-right py-3 px-4 text-xs font-medium text-content-tertiary uppercase tracking-wider w-[200px]">상태</th>
  <th className="w-12"></th>
  </tr>
  </thead>
@@ -371,15 +371,15 @@ export default function AnnouncementsPage() {
  onClick={() => router.push(`/${challengeId}/announcements/${announcement.id}`)}
  >
  <td className="py-3 px-4">
- <span className="font-medium text-slate-900 dark:text-white text-sm">{announcement.title}</span>
+ <span className="font-medium text-content-primary dark:text-white text-sm">{announcement.title}</span>
  </td>
  <td className="py-3 px-4 text-center">
- <span className="text-sm text-slate-500 dark:text-slate-400">{announcement.priority}</span>
+ <span className="text-sm text-content-tertiary">{announcement.priority}</span>
  </td>
- <td className="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">
+ <td className="py-3 px-4 text-sm text-content-tertiary">
  {formatDate(announcement.created_at)}
  </td>
- <td className="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">
+ <td className="py-3 px-4 text-sm text-content-tertiary">
  {announcement.start_date && announcement.end_date
  ? `${formatDate(announcement.start_date)} - ${formatDate(announcement.end_date)}`
  : '-'
@@ -408,19 +408,19 @@ export default function AnnouncementsPage() {
  e.stopPropagation();
  setOpenMenuId(openMenuId === announcement.id ? null : announcement.id);
  }}
- className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5 hover:bg-surface-sunken rounded-lg transition-colors opacity-0 group-hover:opacity-100"
  >
- <MoreHorizontal size={16} className="text-slate-400 dark:text-slate-500" />
+ <MoreHorizontal size={16} className="text-content-disabled" />
  </button>
 
  {openMenuId === announcement.id && (
- <div className="absolute right-0 top-full mt-1 w-36 bg-surface rounded-lg shadow-lg border border-slate-200 py-1 z-10">
+ <div className="absolute right-0 top-full mt-1 w-36 bg-surface rounded-lg shadow-lg border border-line py-1 z-10">
  <button
  onClick={(e) => {
  e.stopPropagation();
  router.push(`/${challengeId}/announcements/${announcement.id}`);
  }}
- className="w-full px-3 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 flex items-center gap-2"
+ className="w-full px-3 py-1.5 text-left text-sm text-content-secondary hover:bg-slate-50 flex items-center gap-2"
  >
  <Eye size={14} />
  보기
@@ -430,12 +430,12 @@ export default function AnnouncementsPage() {
  e.stopPropagation();
  router.push(`/${challengeId}/announcements/edit/${announcement.id}`);
  }}
- className="w-full px-3 py-1.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 flex items-center gap-2"
+ className="w-full px-3 py-1.5 text-left text-sm text-content-secondary hover:bg-slate-50 flex items-center gap-2"
  >
  <Edit2 size={14} />
  수정
  </button>
- <div className="border-t border-slate-100 my-1"></div>
+ <div className="border-t border-line my-1"></div>
  <button
  onClick={(e) => handleDelete(e, announcement.id)}
  className="w-full px-3 py-1.5 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 flex items-center gap-2"

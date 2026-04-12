@@ -195,8 +195,8 @@ export default function ManageChallenges() {
  };
 
  return (
- <div className="container mx-auto px-4 py-8">
- <div className="flex justify-between items-center mb-8">
+ <div className="container mx-auto px-6 pt-6 sm:px-4 sm:pt-4">
+ <div className="flex justify-between items-center mb-6 sm:mb-4">
  <Title title="챌린지 관리" />
  </div>
 

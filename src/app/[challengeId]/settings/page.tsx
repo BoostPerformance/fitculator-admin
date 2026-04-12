@@ -411,9 +411,9 @@ export default function ChallengeSettingsPage() {
 
  return (
   <div className="min-h-screen pb-12 sm:pb-28">
-   <div className="max-w-5xl mx-auto p-8 sm:max-w-none sm:p-4">
+   <div className="max-w-5xl mx-auto px-6 pt-6 sm:max-w-none sm:px-4 sm:pt-4">
     {/* Header */}
-    <div className="mb-10 sm:mb-5">
+    <div className="mb-6 sm:mb-4">
      <Title title="설정" subtitle="챌린지 기본 정보를 관리합니다" />
     </div>
 

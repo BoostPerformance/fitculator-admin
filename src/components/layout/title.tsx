@@ -9,7 +9,7 @@ const Title = ({
 }) => {
  return (
  <div className={`flex flex-col gap-2 ${className || ''}`}>
- <h1 className="sm:text-headline-lg font-bold lg:text-display font-bold font-bold text-content-primary dark:text-white ">
+ <h1 className="sm:text-headline-lg font-bold lg:text-display text-content-primary dark:text-white">
  {title}
  </h1>
  {subtitle && (
