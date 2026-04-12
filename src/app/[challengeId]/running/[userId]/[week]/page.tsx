@@ -1181,23 +1181,24 @@ export default function MobileRunningDetail() {
  </div>
 
  <div className="sm:w-full lg:col-span-1 flex flex-col sm:min-h-[600px] lg:min-h-0">
- <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1">
+ <div className="grid grid-cols-1 gap-4 flex-1">
+ {aiFeedback && (
  <div className="flex flex-col">
  <div className="text-xs font-semibold text-content-secondary mb-2">
  AI 분석 결과
  </div>
- <div className="flex-1">
+ <div>
  <TextBox
  title=""
  value={aiFeedback}
- placeholder="AI 피드백이 아직 생성되지 않았습니다."
+ placeholder=""
  readOnly
  copyIcon
- className="h-full"
  />
  </div>
  </div>
- <div className="flex flex-col">
+ )}
+ <div className="flex flex-col flex-1">
  <div className="flex justify-between items-center mb-2">
  <div className="text-xs font-semibold text-content-secondary">
  코치 피드백
