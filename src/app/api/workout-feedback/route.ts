@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
  coach_id: coach.id,
  coach_feedback: body.coach_feedback,
  challenge_id: body.challenge_id,
- ai_feedback: 'AI 피드백',
+ ai_feedback: '',
  created_at: new Date().toISOString(),
  updated_at: new Date().toISOString(),
  })
