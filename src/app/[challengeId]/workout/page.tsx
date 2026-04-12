@@ -9,7 +9,6 @@ import Title from '@/components/layout/title';
 import { IoRefresh } from 'react-icons/io5';
 import WorkoutTable from '@/components/workoutDashboard/workoutTable';
 import { ExcerciseStatistics } from '@/components/statistics/excerciseStatistics';
-import WorkoutUserList from '@/components/workoutDashboard/workoutUserList';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function WorkoutPage() {
@@ -179,16 +178,7 @@ export default function WorkoutPage() {
  </div>
 
  {/* API 연결 경고 메시지 제거 */}
- <WorkoutUserList 
- challengeId={params.challengeId as string}
- weeklyChart={weeklyChart}
- leaderboard={leaderboard}
- todayCount={todayCount}
- batchUserData={batchUserData}
- isLoading={workoutLoading}
- error={workoutError}
- />
- <div className="sm:hidden">
+ <div>
  <WorkoutTable 
  challengeId={params.challengeId as string}
  weeklyChart={weeklyChart}

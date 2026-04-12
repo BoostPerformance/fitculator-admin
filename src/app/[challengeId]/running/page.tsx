@@ -9,7 +9,6 @@ import Title from '@/components/layout/title';
 import { IoRefresh } from 'react-icons/io5';
 import RunningTable from '@/components/runningDashboard/runningTable';
 import { ExcerciseStatistics } from '@/components/statistics/excerciseStatistics';
-import RunningUserList from '@/components/runningDashboard/runningUserList';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function RunningPage() {
@@ -169,19 +168,7 @@ export default function RunningPage() {
  />
  </div>
 
- <RunningUserList
- challengeId={params.challengeId as string}
- weeklyChart={weeklyChart}
- leaderboard={leaderboard}
- todayCount={todayCount}
- paginatedUsers={paginatedUsers}
- pagination={pagination}
- currentPage={currentPage}
- onPageChange={handlePageChange}
- isLoading={runningLoading}
- error={runningError}
- />
- <div className="sm:hidden">
+ <div>
  <RunningTable
  challengeId={params.challengeId as string}
  weeklyChart={weeklyChart}
