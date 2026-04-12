@@ -552,7 +552,13 @@ const WorkoutTable: React.FC<
  return (
  <div
  key={weekIndex}
- className={`flex-1 min-w-[40px] ${isCurrent ? 'opacity-100' : 'opacity-70'}`}
+ className={`flex-1 min-w-[40px] cursor-pointer ${isCurrent ? 'opacity-100' : 'opacity-70'}`}
+ onClick={(e) => {
+ e.stopPropagation();
+ router.push(
+ `/${item.challenge_id}/workout/${item.userId}/${week.weekNumber}?label=${week.label}`
+ );
+ }}
  >
  <div className="text-[10px] text-center text-content-tertiary mb-1">
  W{week.weekNumber}
