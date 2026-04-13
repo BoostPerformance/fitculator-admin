@@ -10,11 +10,13 @@ interface User {
  username: string;
  name: string;
  email: string;
+ profile_image_url: string | null;
 }
 
 interface Participant {
  id: string;
  service_user_id: string;
+ nickname: string | null;
  coach_memo: string;
  memo_updated_at: string;
  status: string;
@@ -207,7 +209,8 @@ export default function MembersPage() {
  return (
  p.users.name?.toLowerCase().includes(query) ||
  p.users.username?.toLowerCase().includes(query) ||
- p.users.email?.toLowerCase().includes(query)
+ p.users.email?.toLowerCase().includes(query) ||
+ p.nickname?.toLowerCase().includes(query)
  );
  });
 
@@ -288,13 +291,13 @@ export default function MembersPage() {
  </div>
 
  {/* Group Filter */}
- <div className="bg-surface rounded-2xl shadow-sm border border-slate-100 p-6 mb-6 sm:rounded-xl sm:p-4 sm:mb-4">
+ <div className="bg-surface rounded-2xl shadow-sm border border-line p-6 mb-6 sm:rounded-xl sm:p-4 sm:mb-4">
  <div className="flex items-center justify-between gap-4 mb-6 sm:mb-4">
  <div className="flex items-center gap-2">
- <h2 className="text-base sm:text-lg font-semibold text-slate-800">그룹</h2>
+ <h2 className="text-base sm:text-lg font-semibold text-content-primary">그룹</h2>
  <button
  onClick={() => setShowGroupSettingsModal(true)}
- className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 rounded-lg transition-colors"
+ className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center text-content-tertiary hover:text-content-primary hover:bg-surface-raised rounded-lg transition-colors"
  title="그룹 설정"
  >
  <FiSettings className="w-5 h-5" />
@@ -308,8 +311,8 @@ export default function MembersPage() {
  onClick={() => setSelectedGroup('all')}
  className={`flex-shrink-0 px-4 py-2 rounded-xl text-base font-medium transition-all duration-200 min-h-[40px] whitespace-nowrap sm:px-3 sm:rounded-lg sm:text-sm ${
  selectedGroup === 'all'
- ? 'bg-slate-800 dark:bg-surface text-white dark:text-slate-800 shadow-md'
- : 'bg-slate-100 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+ ? 'bg-slate-800 text-white shadow-md'
+ : 'bg-surface-raised text-content-primary hover:bg-surface-sunken'
  }`}
  >
  전체 <span className="ml-1 opacity-70">{getGroupMemberCount('all')}</span>
@@ -319,7 +322,7 @@ export default function MembersPage() {
  className={`flex-shrink-0 px-4 py-2 rounded-xl text-base font-medium transition-all duration-200 min-h-[40px] whitespace-nowrap sm:px-3 sm:rounded-lg sm:text-sm ${
  selectedGroup === 'none'
  ? 'bg-slate-600 text-white shadow-md'
- : 'bg-slate-100 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+ : 'bg-surface-raised text-content-primary hover:bg-surface-sunken'
  }`}
  >
  미배정 <span className="ml-1 opacity-70">{getGroupMemberCount('none')}</span>
@@ -346,9 +349,9 @@ export default function MembersPage() {
 
  {/* Empty Groups State */}
  {groups.length === 0 && (
- <div className="mt-4 p-6 bg-slate-50 rounded-xl text-center">
- <FiUsers className="w-10 h-10 text-slate-300 dark:text-slate-500 mx-auto mb-3" />
- <p className="text-slate-500 dark:text-slate-400 mb-3">아직 생성된 그룹이 없습니다.</p>
+ <div className="mt-4 p-6 bg-surface-raised rounded-xl text-center">
+ <FiUsers className="w-10 h-10 text-content-tertiary mx-auto mb-3" />
+ <p className="text-content-tertiary mb-3">아직 생성된 그룹이 없습니다.</p>
  <button
  onClick={() => {
  setShowGroupModal(true);
@@ -399,27 +402,27 @@ export default function MembersPage() {
  )}
 
  {/* Search & Member List */}
- <div className="bg-surface rounded-2xl shadow-sm border border-slate-100 overflow-hidden sm:rounded-xl">
+ <div className="bg-surface rounded-2xl shadow-sm border border-line overflow-hidden sm:rounded-xl">
  {/* Search Bar */}
- <div className="p-4 border-b border-slate-100 sm:p-3">
+ <div className="p-4 border-b border-line sm:p-3">
  <div className="relative">
- <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 sm:left-3 sm:w-4 sm:h-4" />
+ <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-content-tertiary w-5 h-5 sm:left-3 sm:w-4 sm:h-4" />
  <input
  type="text"
  placeholder="이름, 이메일로 검색..."
  value={searchQuery}
  onChange={(e) => setSearchQuery(e.target.value)}
- className="w-full pl-12 pr-4 py-3 text-base bg-slate-50 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-surface dark:text-white transition-all sm:pl-10 sm:py-2.5 sm:text-sm sm:rounded-lg"
+ className="w-full pl-12 pr-4 py-3 text-base bg-surface-raised rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-surface dark:text-white transition-all sm:pl-10 sm:py-2.5 sm:text-sm sm:rounded-lg"
  />
  </div>
  </div>
 
  {/* 모바일 카드 뷰 */}
- <div className="hidden sm:block divide-y divide-slate-100 dark:divide-gray-700">
+ <div className="hidden sm:block divide-y divide-line">
  {filteredParticipants.map((participant) => (
  <div
  key={participant.id}
- className="p-4 active:bg-slate-50 dark:active:bg-neutral-700/50 transition-colors"
+ className="p-4 active:bg-surface-raised transition-colors"
  >
  <div className="flex items-start gap-3">
  {groups.length > 0 && (
@@ -433,24 +436,32 @@ export default function MembersPage() {
  setSelectedParticipants(selectedParticipants.filter(id => id !== participant.id));
  }
  }}
- className="w-5 h-5 mt-1 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20 cursor-pointer flex-shrink-0"
+ className="w-5 h-5 mt-1 rounded border-line-strong text-indigo-500 focus:ring-indigo-500/20 cursor-pointer flex-shrink-0"
  />
  )}
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-3 mb-2">
+ {participant.users.profile_image_url ? (
+ <img
+ src={participant.users.profile_image_url}
+ alt=""
+ className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+ />
+ ) : (
  <div
- className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
+ className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
  style={{
  backgroundColor: participant.current_group?.color_code || '#64748b'
  }}
  >
- {(participant.users.name || participant.users.username || '?').charAt(0).toUpperCase()}
+ {(participant.nickname || participant.users.name || participant.users.username || '?').charAt(0).toUpperCase()}
  </div>
+ )}
  <div className="min-w-0 flex-1">
- <p className="font-medium text-slate-800 dark:text-white text-sm truncate">
- {participant.users.name || participant.users.username}
+ <p className="font-medium text-content-primary text-sm truncate">
+ {participant.nickname || participant.users.name || participant.users.username}
  </p>
- <p className="text-xs text-slate-400 dark:text-slate-500 truncate">
+ <p className="text-xs text-content-tertiary truncate">
  {participant.users.username}
  </p>
  </div>
@@ -491,7 +502,7 @@ export default function MembersPage() {
  type="text"
  value={memoText}
  onChange={(e) => setMemoText(e.target.value)}
- className="flex-1 px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-surface"
+ className="flex-1 px-3 py-2 rounded-lg border border-line focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-surface"
  placeholder="메모 입력..."
  autoFocus
  />
@@ -507,14 +518,14 @@ export default function MembersPage() {
  setEditingMemo(null);
  setMemoText('');
  }}
- className="p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center bg-slate-100 text-slate-500 dark:text-slate-400 rounded-lg hover:bg-slate-200 transition-colors"
+ className="p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center bg-surface-raised text-content-secondary rounded-lg hover:bg-surface-sunken transition-colors"
  >
  <FiX className="w-4 h-4" />
  </button>
  </div>
  ) : (
  <div className="flex items-center gap-2">
- <span className={`text-sm flex-1 ${participant.coach_memo ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 italic'}`}>
+ <span className={`text-sm flex-1 ${participant.coach_memo ? 'text-content-primary' : 'text-content-tertiary italic'}`}>
  {participant.coach_memo || '메모 없음'}
  </span>
  <button
@@ -522,7 +533,7 @@ export default function MembersPage() {
  setEditingMemo(participant.id);
  setMemoText(participant.coach_memo || '');
  }}
- className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all"
+ className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-content-tertiary hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all"
  >
  <FiEdit2 className="w-4 h-4" />
  </button>
@@ -538,33 +549,33 @@ export default function MembersPage() {
  <div className="sm:hidden overflow-x-auto">
  <table className="w-full">
  <thead>
- <tr className="bg-slate-50/50/50">
+ <tr className="bg-surface-raised">
  {groups.length > 0 && (
  <th className="px-6 py-4 text-left">
  <input
  type="checkbox"
  checked={selectedParticipants.length === filteredParticipants.length && filteredParticipants.length > 0}
  onChange={toggleSelectAll}
- className="w-4 h-4 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20 cursor-pointer"
+ className="w-4 h-4 rounded border-line-strong text-indigo-500 focus:ring-indigo-500/20 cursor-pointer"
  />
  </th>
  )}
- <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+ <th className="px-6 py-4 text-left text-xs font-semibold text-content-tertiary uppercase tracking-wider">
  멤버
  </th>
- <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+ <th className="px-6 py-4 text-left text-xs font-semibold text-content-tertiary uppercase tracking-wider">
  그룹
  </th>
- <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+ <th className="px-6 py-4 text-left text-xs font-semibold text-content-tertiary uppercase tracking-wider">
  코치 메모
  </th>
  </tr>
  </thead>
- <tbody className="divide-y divide-slate-100 dark:divide-gray-700">
+ <tbody className="divide-y divide-line">
  {filteredParticipants.map((participant, index) => (
  <tr
  key={participant.id}
- className="hover:bg-slate-50/50/50 transition-colors group"
+ className="hover:bg-surface-raised transition-colors group"
  style={{ animationDelay: `${index * 20}ms` }}
  >
  {groups.length > 0 && (
@@ -579,25 +590,33 @@ export default function MembersPage() {
  setSelectedParticipants(selectedParticipants.filter(id => id !== participant.id));
  }
  }}
- className="w-4 h-4 rounded border-slate-300 text-indigo-500 focus:ring-indigo-500/20 cursor-pointer"
+ className="w-4 h-4 rounded border-line-strong text-indigo-500 focus:ring-indigo-500/20 cursor-pointer"
  />
  </td>
  )}
  <td className="px-6 py-4">
  <div className="flex items-center gap-3">
+ {participant.users.profile_image_url ? (
+ <img
+ src={participant.users.profile_image_url}
+ alt=""
+ className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+ />
+ ) : (
  <div
- className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-semibold text-sm"
+ className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
  style={{
  backgroundColor: participant.current_group?.color_code || '#64748b'
  }}
  >
- {(participant.users.name || participant.users.username || '?').charAt(0).toUpperCase()}
+ {(participant.nickname || participant.users.name || participant.users.username || '?').charAt(0).toUpperCase()}
  </div>
+ )}
  <div>
- <p className="font-medium text-slate-800">
- {participant.users.name || participant.users.username}
+ <p className="font-medium text-content-primary">
+ {participant.nickname || participant.users.name || participant.users.username}
  </p>
- <p className="text-sm text-slate-400 dark:text-slate-500">
+ <p className="text-sm text-content-tertiary">
  {participant.users.username}
  </p>
  </div>
@@ -631,7 +650,7 @@ export default function MembersPage() {
  <FiChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: participant.current_group?.color_code || '#64748b' }} />
  </div>
  ) : (
- <span className="text-sm text-slate-400 dark:text-slate-500">-</span>
+ <span className="text-sm text-content-tertiary">-</span>
  )}
  </td>
  <td className="px-6 py-4">
@@ -641,7 +660,7 @@ export default function MembersPage() {
  type="text"
  value={memoText}
  onChange={(e) => setMemoText(e.target.value)}
- className="flex-1 px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-surface"
+ className="flex-1 px-3 py-2 rounded-lg border border-line focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-surface"
  placeholder="메모 입력..."
  autoFocus
  onKeyDown={(e) => {
@@ -664,14 +683,14 @@ export default function MembersPage() {
  setEditingMemo(null);
  setMemoText('');
  }}
- className="p-2 bg-slate-100 text-slate-500 dark:text-slate-400 rounded-lg hover:bg-slate-200 transition-colors"
+ className="p-2 bg-surface-raised text-content-secondary rounded-lg hover:bg-surface-sunken transition-colors"
  >
  <FiX className="w-4 h-4" />
  </button>
  </div>
  ) : (
  <div className="flex items-center gap-2 group/memo">
- <span className={`text-sm ${participant.coach_memo ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 italic'}`}>
+ <span className={`text-sm ${participant.coach_memo ? 'text-content-primary' : 'text-content-tertiary italic'}`}>
  {participant.coach_memo || '메모 없음'}
  </span>
  <button
@@ -679,7 +698,7 @@ export default function MembersPage() {
  setEditingMemo(participant.id);
  setMemoText(participant.coach_memo || '');
  }}
- className="p-1.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all opacity-0 group-hover/memo:opacity-100"
+ className="p-1.5 text-content-tertiary hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all opacity-0 group-hover/memo:opacity-100"
  >
  <FiEdit2 className="w-4 h-4" />
  </button>
@@ -695,11 +714,11 @@ export default function MembersPage() {
  {/* Empty State */}
  {filteredParticipants.length === 0 && (
  <div className="py-12 sm:py-16 text-center">
- <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4">
- <FiUsers className="w-7 h-7 sm:w-8 sm:h-8 text-slate-400 dark:text-slate-500" />
+ <div className="w-14 h-14 sm:w-16 sm:h-16 bg-surface-raised rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4">
+ <FiUsers className="w-7 h-7 sm:w-8 sm:h-8 text-content-tertiary" />
  </div>
- <p className="text-slate-600 dark:text-slate-300 font-medium mb-1 text-sm sm:text-base">멤버를 찾을 수 없습니다</p>
- <p className="text-slate-400 dark:text-slate-500 text-xs sm:text-sm">
+ <p className="text-content-secondary font-medium mb-1 text-sm sm:text-base">멤버를 찾을 수 없습니다</p>
+ <p className="text-content-tertiary text-xs sm:text-sm">
  {searchQuery ? '다른 검색어를 입력해보세요.' : '이 필터에 해당하는 멤버가 없습니다.'}
  </p>
  </div>
@@ -725,14 +744,14 @@ export default function MembersPage() {
  <div className="sm:hidden flex justify-center pt-3 pb-1">
  <div className="w-10 h-1 bg-neutral-300 rounded-full" />
  </div>
- <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between">
+ <div className="p-4 sm:p-6 border-b border-line flex items-center justify-between">
  <div>
- <h3 className="text-lg sm:text-xl font-bold text-slate-800">그룹 설정</h3>
- <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">그룹을 추가, 수정, 삭제합니다.</p>
+ <h3 className="text-lg sm:text-xl font-bold text-content-primary">그룹 설정</h3>
+ <p className="text-content-tertiary text-xs sm:text-sm mt-1">그룹을 추가, 수정, 삭제합니다.</p>
  </div>
  <button
  onClick={() => setShowGroupSettingsModal(false)}
- className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 rounded-lg transition-colors"
+ className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center text-content-tertiary hover:text-content-primary hover:bg-surface-raised rounded-lg transition-colors"
  >
  <FiX className="w-5 h-5" />
  </button>
@@ -747,7 +766,7 @@ export default function MembersPage() {
  setShowGroupModal(true);
  setShowGroupSettingsModal(false);
  }}
- className="w-full mb-4 px-4 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 dark:text-slate-400 hover:border-indigo-300 hover:text-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all flex items-center justify-center gap-2 font-medium"
+ className="w-full mb-4 px-4 py-3 border-2 border-dashed border-line rounded-xl text-content-tertiary hover:border-indigo-300 hover:text-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all flex items-center justify-center gap-2 font-medium"
  >
  <FiPlus className="w-5 h-5" />
  새 그룹 추가
@@ -759,29 +778,29 @@ export default function MembersPage() {
  {groups.map(group => (
  <div
  key={group.id}
- className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
+ className="flex items-center justify-between p-4 bg-surface-raised rounded-xl hover:bg-surface-sunken transition-colors"
  >
  <div className="flex items-center gap-3">
  <div
  className="w-4 h-4 rounded-full"
  style={{ backgroundColor: group.color_code }}
  />
- <span className="font-medium text-slate-700 dark:text-slate-200">{group.name}</span>
- <span className="text-sm text-slate-400 dark:text-slate-500">
+ <span className="font-medium text-content-primary">{group.name}</span>
+ <span className="text-sm text-content-tertiary">
  {getGroupMemberCount(group.id)}명
  </span>
  </div>
  <div className="flex items-center gap-1">
  <button
  onClick={() => openEditGroupModal(group)}
- className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-surface rounded-lg transition-colors"
+ className="p-2 text-content-tertiary hover:text-indigo-500 hover:bg-surface rounded-lg transition-colors"
  title="수정"
  >
  <FiEdit2 className="w-4 h-4" />
  </button>
  <button
  onClick={() => deleteGroup(group.id)}
- className="p-2 text-slate-400 hover:text-red-500 dark:text-red-400 hover:bg-surface rounded-lg transition-colors"
+ className="p-2 text-content-tertiary hover:text-red-500 hover:bg-surface rounded-lg transition-colors"
  title="삭제"
  >
  <FiTrash2 className="w-4 h-4" />
@@ -792,8 +811,8 @@ export default function MembersPage() {
  </div>
  ) : (
  <div className="py-8 text-center">
- <FiUsers className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
- <p className="text-slate-500 dark:text-slate-400">생성된 그룹이 없습니다.</p>
+ <FiUsers className="w-12 h-12 text-content-tertiary mx-auto mb-3" />
+ <p className="text-content-tertiary">생성된 그룹이 없습니다.</p>
  </div>
  )}
  </div>
@@ -821,29 +840,29 @@ export default function MembersPage() {
  <div className="sm:hidden flex justify-center pt-3 pb-1">
  <div className="w-10 h-1 bg-neutral-300 rounded-full" />
  </div>
- <div className="p-4 sm:p-6 border-b border-slate-100">
- <h3 className="text-lg sm:text-xl font-bold text-slate-800">
+ <div className="p-4 sm:p-6 border-b border-line">
+ <h3 className="text-lg sm:text-xl font-bold text-content-primary">
  {editingGroup ? '그룹 수정' : '새 그룹 만들기'}
  </h3>
- <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1">
+ <p className="text-content-tertiary text-xs sm:text-sm mt-1">
  그룹을 만들어 멤버를 효율적으로 관리하세요.
  </p>
  </div>
 
  <div className="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1">
  <div>
- <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">그룹명</label>
+ <label className="block text-sm font-medium text-content-primary mb-2">그룹명</label>
  <input
  type="text"
  value={groupForm.name}
  onChange={(e) => setGroupForm({ ...groupForm, name: e.target.value })}
- className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-surface"
+ className="w-full px-4 py-3 rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-surface"
  placeholder="예: 1조, Gold, A팀..."
  />
  </div>
 
  <div>
- <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">색상</label>
+ <label className="block text-sm font-medium text-content-primary mb-2">색상</label>
  <div className="flex flex-wrap gap-2 mb-3">
  {presetColors.map(color => (
  <button
@@ -869,25 +888,25 @@ export default function MembersPage() {
  type="text"
  value={groupForm.color_code}
  onChange={(e) => setGroupForm({ ...groupForm, color_code: e.target.value })}
- className="flex-1 px-4 py-2 rounded-lg border border-slate-200 font-mono text-sm uppercase bg-surface"
+ className="flex-1 px-4 py-2 rounded-lg border border-line font-mono text-sm uppercase bg-surface"
  />
  </div>
  </div>
 
  <div>
- <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">정렬 순서</label>
+ <label className="block text-sm font-medium text-content-primary mb-2">정렬 순서</label>
  <input
  type="number"
  value={groupForm.sort_order}
  onChange={(e) => setGroupForm({ ...groupForm, sort_order: Number(e.target.value) })}
- className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-surface"
+ className="w-full px-4 py-3 rounded-xl border border-line focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-surface"
  placeholder="낮을수록 앞에 표시"
  />
  </div>
 
  {/* Preview */}
- <div className="p-4 bg-slate-50 rounded-xl">
- <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 font-medium">미리보기</p>
+ <div className="p-4 bg-surface-raised rounded-xl">
+ <p className="text-xs text-content-tertiary mb-2 font-medium">미리보기</p>
  <div
  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium"
  style={{
@@ -904,14 +923,14 @@ export default function MembersPage() {
  </div>
  </div>
 
- <div className="p-4 sm:p-6 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 safe-area-inset-bottom">
+ <div className="p-4 sm:p-6 border-t border-line flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 safe-area-inset-bottom">
  <button
  onClick={() => {
  setShowGroupModal(false);
  setEditingGroup(null);
  setGroupForm({ name: '', color_code: '#6366f1', sort_order: 0 });
  }}
- className="w-full sm:w-auto px-5 py-3 sm:py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors font-medium min-h-[48px] sm:min-h-0"
+ className="w-full sm:w-auto px-5 py-3 sm:py-2.5 text-content-secondary hover:bg-surface-raised rounded-xl transition-colors font-medium min-h-[48px] sm:min-h-0"
  >
  취소
  </button>
