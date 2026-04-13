@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import GoogleButton from '@/components/buttons/googleButton';
+import AppleButton from '@/components/buttons/appleButton';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -58,6 +59,17 @@ export default function Login() {
  }
  };
 
+ const handleAppleSignIn = async () => {
+ try {
+ await signIn('apple', {
+ callbackUrl: '/user',
+ redirect: true,
+ });
+ } catch (error) {
+// console.error('❌ Apple sign in error:', error);
+ }
+ };
+
  if (status === 'loading') {
  return (
  <div className="flex items-center justify-center h-screen">
@@ -79,8 +91,9 @@ export default function Login() {
  className="w-24 sm:w-[8rem]"
  />
  </div>
- <div className="w-full max-w-xs sm:max-w-none">
+ <div className="w-full max-w-xs sm:max-w-none flex flex-col gap-3">
  <GoogleButton onClick={handleGoogleSignIn} />
+ <AppleButton onClick={handleAppleSignIn} />
  </div>
  </div>
  );

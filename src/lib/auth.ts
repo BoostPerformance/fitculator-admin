@@ -1,6 +1,8 @@
 import type { NextAuthConfig } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import AppleProvider from 'next-auth/providers/apple';
 import { createClient } from '@supabase/supabase-js';
+import { generateAppleClientSecret } from './apple';
 
 const supabase = createClient(
  process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,6 +14,10 @@ export const authOptions: NextAuthConfig = {
  GoogleProvider({
  clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
  clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET!,
+ }),
+ AppleProvider({
+ clientId: process.env.APPLE_SERVICE_ID!,
+ clientSecret: generateAppleClientSecret(),
  }),
  ],
  pages: {
