@@ -42,6 +42,7 @@ export async function GET(request: Request) {
  let query = supabase.from('challenge_participants').select(
  `
  id,
+ nickname,
  coach_memo,
  memo_updated_at,
  service_user_id,
@@ -52,7 +53,8 @@ export async function GET(request: Request) {
  username,
  name,
  email,
- birth
+ birth,
+ profile_image_url
  ),
  challenges: challenge_id (
  id,
