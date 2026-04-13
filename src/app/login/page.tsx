@@ -14,9 +14,8 @@ export default function Login() {
  const router = useRouter();
 
  useEffect(() => {
- // console.log('🔄 Login Page useEffect - Theme');
- const logoTheme = localStorage.getItem('theme') || 'light';
- setTheme(logoTheme);
+ const savedTheme = localStorage.getItem('theme');
+ setTheme(savedTheme || 'system');
  }, [setTheme]);
 
  useEffect(() => {
@@ -82,14 +81,24 @@ export default function Login() {
  <div
  className="flex flex-col justify-center items-center min-h-screen py-12 sm:py-[12rem] px-4"
  >
- <div className="flex justify-center items-center h-32 sm:h-[10rem] mb-6 sm:mb-0">
- <Image
- src={`/image/${resolvedTheme === 'light' ? 'logo' : 'logo-dark'}.png`}
- alt="logo"
- width={100}
- height={100}
- className="w-24 sm:w-[8rem]"
- />
+ <div className="flex flex-col items-center h-32 sm:h-[10rem] mb-6 sm:mb-0 justify-center">
+ <div className="flex items-center gap-3">
+  <Image
+  src={`/svg/logo_${resolvedTheme === 'dark' ? 'dark' : 'light'}.svg`}
+  alt="logo icon"
+  width={32}
+  height={32}
+  className="w-8 sm:w-10"
+  />
+  <Image
+  src={`/svg/logo_text_${resolvedTheme === 'dark' ? 'dark' : 'light'}.svg`}
+  alt="logo"
+  width={200}
+  height={24}
+  className="w-48 sm:w-[14rem]"
+  />
+ </div>
+ <span className="text-xs font-light tracking-[0.3em] uppercase text-content-secondary mt-4" style={{ fontFamily: 'system-ui, sans-serif' }}>admin</span>
  </div>
  <div className="w-full max-w-xs sm:max-w-none flex flex-col gap-3">
  <GoogleButton onClick={handleGoogleSignIn} />

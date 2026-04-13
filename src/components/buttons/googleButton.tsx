@@ -12,7 +12,7 @@ export default function GoogleButton({ onClick }: GoogleLoginProps) {
 
  return (
  <button
- className="flex gap-[0.5rem] items-center border-line border-[0.12rem] rounded-[0.3rem] p-[0.4rem] text-label font-medium text-content-primary"
+ className="flex gap-[0.5rem] items-center justify-center border-line border-[0.12rem] rounded-[0.3rem] py-3 px-4 text-base font-medium text-content-primary"
  onClick={handleClick}
  >
  <Image

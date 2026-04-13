@@ -10,7 +10,7 @@ export default function Loading({ ismessage }: LoadingProps) {
  alt="로딩중 로고"
  width={100}
  height={100}
- className="animate-spin"
+ className="animate-pulse"
  />
  {ismessage && (
  <div className="py-[2rem] text-headline-lg">잠시만 기다려주세요</div>
