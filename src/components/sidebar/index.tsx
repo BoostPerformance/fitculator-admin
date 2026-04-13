@@ -65,10 +65,10 @@ export default function Sidebar({
 
  // Sync internal state with controlled value so useSidebarState persists correctly
  useEffect(() => {
-  if (isControlled && controlledSidebarOpen !== undefined) {
+  if (!isMobile && isControlled && controlledSidebarOpen !== undefined) {
    setInternalSidebarOpen(controlledSidebarOpen);
   }
- }, [isControlled, controlledSidebarOpen, setInternalSidebarOpen]);
+ }, [isMobile, isControlled, controlledSidebarOpen, setInternalSidebarOpen]);
 
  // Use controlled state for desktop when props are provided, otherwise internal state
  const isSidebarOpen = (!isMobile && isControlled) ? controlledSidebarOpen : internalSidebarOpen;
