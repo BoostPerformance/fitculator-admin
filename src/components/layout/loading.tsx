@@ -8,12 +8,12 @@ export default function Loading({ ismessage }: LoadingProps) {
  <Image
  src="/image/logo-2.png"
  alt="로딩중 로고"
- width={100}
- height={100}
+ width={50}
+ height={50}
  className="animate-pulse"
  />
  {ismessage && (
- <div className="py-[2rem] text-headline-lg">잠시만 기다려주세요</div>
+ <div className="py-[2rem] text-headline-lg">Loading</div>
  )}
  </div>
  );
