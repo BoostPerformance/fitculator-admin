@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import GoogleButton from '@/components/buttons/googleButton';
 import AppleButton from '@/components/buttons/appleButton';
+import Loading from '@/components/layout/loading';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -70,11 +71,7 @@ export default function Login() {
  };
 
  if (status === 'loading') {
- return (
- <div className="flex items-center justify-center h-screen">
- <div className="text-lg">Loading...</div>
- </div>
- );
+ return <Loading ismessage={true} />;
  }
 
  return (

@@ -1,5 +1,5 @@
 "use client";
-import Image from 'next/image';
+import Loading from '@/components/layout/loading';
 
 interface SkeletonProps {
  className?: string;
@@ -41,24 +41,7 @@ export const DietTableSkeleton = () => {
 };
 
 export const LoadingSkeleton = () => {
- return (
- <div className="flex flex-col items-center justify-center h-screen space-y-8">
- {/* 로고 */}
- <Image src="/image/logo.png" alt="Fitculator Logo" width={192} height={64} className="mb-8" loading="lazy" />
-
- {/* 로딩 인디케이터 */}
- <div className="flex space-x-3">
- <Skeleton className="h-3 w-3 rounded-full" />
- <Skeleton className="h-3 w-3 rounded-full" />
- <Skeleton className="h-3 w-3 rounded-full" />
- </div>
-
- {/* 로딩 텍스트 */}
- <div className="text-content-secondary">
- 잠시만 기다려주세요...
- </div>
- </div>
- );
+ return <Loading ismessage={true} />;
 };
 
 export const ChallengeDashboardSkeleton = () => {
