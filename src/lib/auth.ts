@@ -11,6 +11,17 @@ const supabase = createClient(
 
 export const authOptions: NextAuthConfig = {
  debug: true,
+ cookies: {
+ state: {
+ name: '__Secure-next-auth.state',
+ options: {
+ httpOnly: true,
+ sameSite: 'none',
+ path: '/',
+ secure: true,
+ },
+ },
+ },
  providers: [
  GoogleProvider({
  clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
