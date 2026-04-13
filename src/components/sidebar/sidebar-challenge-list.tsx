@@ -36,11 +36,11 @@ function ChallengeItem({
   <li id={`challenge-${mobile ? 'mobile-' : ''}${ended ? 'ended-' : ''}${id}`} className={ended ? 'opacity-60' : ''}>
    <div
     className={cn(
-     'font-medium py-2 rounded-lg flex justify-between items-center transition-colors cursor-pointer',
+     'font-medium py-2 flex justify-between items-center transition-colors cursor-pointer',
      ended ? 'pl-2' : 'px-3 min-h-[48px]',
      mobile && 'active:scale-[0.98]',
      isSelected
-      ? 'bg-accent-subtle'
+      ? 'bg-surface-raised'
       : 'hover:bg-surface-raised active:bg-neutral-200 dark:active:bg-neutral-800',
      isSelected && ended && 'opacity-100'
     )}
@@ -50,7 +50,7 @@ function ChallengeItem({
     <span
      className={cn(
       'text-body font-medium flex-1 py-1',
-      isSelected ? 'text-accent' : 'text-content-primary'
+      isSelected ? 'text-content-primary font-semibold' : 'text-content-primary'
      )}
     >
      {challenge.challenges.title || '제목 없음'}
@@ -100,7 +100,7 @@ export function RecentChallengesSection({ challenges, selectedChallengeId, onSel
        className={cn(
         'cursor-pointer text-body flex-1',
         challenge.challenges.id === selectedChallengeId
-         ? 'text-accent'
+         ? 'text-content-primary font-semibold'
          : 'text-content-primary'
        )}
        onClick={() => onSelect(challenge)}

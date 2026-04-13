@@ -18,9 +18,9 @@ export function SidebarNavItem({ label, isActive, onClick, compact }: SidebarNav
  'cursor-pointer text-body transition-colors duration-200 flex items-center',
  compact
  ? 'py-2 px-8 rounded'
- : 'py-3 px-4 ml-2 rounded-lg min-h-[44px]',
+ : 'py-3 pl-6 pr-4 min-h-[44px]',
  isActive
- ? 'bg-accent-subtle text-accent font-medium'
+ ? 'bg-surface-raised text-content-primary font-semibold'
  : 'text-content-secondary hover:bg-surface-raised active:bg-neutral-200 dark:active:bg-neutral-800'
  )}
  onClick={onClick}

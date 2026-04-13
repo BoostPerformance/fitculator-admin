@@ -184,7 +184,7 @@ export function MobileSidebarOverlay({
 
    {/* Drawer panel */}
    <aside
-    className={`absolute inset-y-0 left-0 w-4/5 max-w-[320px] flex flex-col bg-surface shadow-2xl rounded-r-2xl transition-transform duration-300 ease-in-out ${
+    className={`absolute inset-y-0 left-0 w-4/5 max-w-[320px] flex flex-col bg-surface shadow-2xl transition-transform duration-300 ease-in-out ${
      visible ? 'translate-x-0' : '-translate-x-full'
     }`}
     onTransitionEnd={(e) => {
