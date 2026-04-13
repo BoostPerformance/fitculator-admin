@@ -19,6 +19,7 @@ export const authOptions: NextAuthConfig = {
  AppleProvider({
  clientId: process.env.APPLE_SERVICE_ID!,
  clientSecret: generateAppleClientSecret(),
+ checks: ['state'],
  }),
  ],
  pages: {
