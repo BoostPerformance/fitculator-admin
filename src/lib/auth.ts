@@ -10,6 +10,7 @@ const supabase = createClient(
 );
 
 export const authOptions: NextAuthConfig = {
+ debug: true,
  providers: [
  GoogleProvider({
  clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
