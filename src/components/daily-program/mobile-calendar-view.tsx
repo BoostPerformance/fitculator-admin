@@ -83,10 +83,10 @@ export function MobileCalendarView({
                 <span
                   className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors ${
                     isSelected
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-accent text-white'
                       : today
-                        ? 'text-blue-500 font-bold'
-                        : 'text-content-primary dark:text-white'
+                        ? 'text-accent font-bold'
+                        : 'text-content-primary'
                   }`}
                 >
                   {format(day, 'd')}
@@ -94,7 +94,7 @@ export function MobileCalendarView({
                 {/* Dot indicator */}
                 <div className="h-1.5 flex items-center justify-center mt-0.5">
                   {hasPrograms && !isSelected && (
-                    <span className="w-1 h-1 rounded-full bg-blue-500" />
+                    <span className="w-1 h-1 rounded-full bg-accent" />
                   )}
                   {hasPrograms && isSelected && (
                     <span className="w-1 h-1 rounded-full bg-white" />
@@ -110,12 +110,12 @@ export function MobileCalendarView({
       <div className="flex-1 mt-3 overflow-y-auto">
         {/* Date header + add button */}
         <div className="flex items-center justify-between mb-2 px-1">
-          <h3 className="text-sm font-semibold text-content-primary dark:text-white">
+          <h3 className="text-sm font-semibold text-content-primary">
             {format(selectedDay, 'M월 d일 (EEEEE)', { locale: ko })}
           </h3>
           <button
             onClick={() => onAddProgram(selectedDateStr)}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-accent bg-accent-subtle rounded-full hover:bg-accent-subtle/80 transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

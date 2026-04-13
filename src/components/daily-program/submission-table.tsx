@@ -3,14 +3,8 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import type { DailyProgramCompletion, VerificationStatus } from '@/types/daily-program';
-
-const statusConfig: Record<VerificationStatus, { label: string; className: string }> = {
- pending: { label: '대기', className: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-300' },
- approved: { label: '승인', className: 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 dark:bg-green-900/30 dark:text-green-300' },
- rejected: { label: '거부', className: 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300 dark:bg-red-900/30 dark:text-red-300' },
- auto_approved: { label: '자동승인', className: 'bg-blue-100 text-blue-800 dark:text-blue-300 dark:bg-blue-900/30 dark:text-blue-300' },
-};
+import type { DailyProgramCompletion } from '@/types/daily-program';
+import { verificationStatusConfig as statusConfig } from './constants';
 
 interface SubmissionTableProps {
  completions: DailyProgramCompletion[];
@@ -51,7 +45,7 @@ export function SubmissionTable({ completions, onReview, mobile = false }: Submi
  className="w-6 h-6 rounded-full"
  />
  )}
- <span className="text-sm font-medium text-content-primary dark:text-white">
+ <span className="text-sm font-medium text-content-primary">
  {user?.name || '알 수 없음'}
  </span>
  </div>
@@ -77,7 +71,7 @@ export function SubmissionTable({ completions, onReview, mobile = false }: Submi
  {completion.verification_status === 'pending' && (
  <button
  onClick={() => onReview(completion)}
- className="px-2.5 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+ className="px-2.5 py-1 text-xs bg-accent text-white rounded hover:bg-accent-hover transition-colors"
  >
  검토
  </button>
@@ -124,7 +118,7 @@ export function SubmissionTable({ completions, onReview, mobile = false }: Submi
  className="w-6 h-6 rounded-full"
  />
  )}
- <span className="text-content-primary dark:text-white font-medium">
+ <span className="text-content-primary font-medium">
  {user?.name || '알 수 없음'}
  </span>
  </div>
@@ -148,7 +142,7 @@ export function SubmissionTable({ completions, onReview, mobile = false }: Submi
  {completion.verification_status === 'pending' && (
  <button
  onClick={() => onReview(completion)}
- className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+ className="px-2 py-1 text-xs bg-accent text-white rounded hover:bg-accent-hover transition-colors"
  >
  검토
  </button>

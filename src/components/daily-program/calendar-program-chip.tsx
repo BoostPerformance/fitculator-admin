@@ -8,9 +8,9 @@ import type { DailyProgram, ProgramStatus } from '@/types/daily-program';
 import { CalendarCardPreview } from './calendar-card-preview';
 
 const statusIndicator: Record<ProgramStatus, string> = {
- draft: 'bg-yellow-400',
- published: 'bg-green-400',
- archived: 'bg-neutral-400',
+ draft: 'bg-status-warning',
+ published: 'bg-status-success',
+ archived: 'bg-content-disabled',
 };
 
 const statusLabel: Record<ProgramStatus, string> = {

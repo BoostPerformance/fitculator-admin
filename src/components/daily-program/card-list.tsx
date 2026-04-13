@@ -98,7 +98,7 @@ export function CardList({ programId, cards, onCardsChanged, onCardsReordered, d
     {!addingCard && (
      <button
       onClick={() => setAddingCard(true)}
-      className="px-2.5 py-1 text-body bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+      className="px-2.5 py-1 text-body bg-accent text-white rounded-md hover:bg-accent-hover transition-colors font-medium"
      >
       + 카드 추가
      </button>

@@ -14,14 +14,7 @@ import { ProgramSubmissionsDetail, SubmissionDetailPanel, MemberSubmissionsPanel
 import { useResponsive } from '@/components/hooks/useResponsive';
 import { WorkoutIcon } from '@/components/icons/WorkoutIcon';
 import { formatTime } from '@/utils/formatTime';
-
-
-const verificationStatusConfig: Record<VerificationStatus, { label: string; className: string }> = {
- pending: { label: '대기', className: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' },
- approved: { label: '승인', className: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' },
- rejected: { label: '거부', className: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' },
- auto_approved: { label: '자동승인', className: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' },
-};
+import { verificationStatusConfig } from './constants';
 
 export type StatusFilter = VerificationStatus | 'all';
 
@@ -184,7 +177,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
  // ── Shared: loading spinner ──
  const LoadingSpinner = () => (
  <div className="flex items-center justify-center h-32">
-  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
  </div>
  );
 
@@ -222,7 +215,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
    </span>
    <ProgramStatusBadge status={g.program_status} />
    {totalProgramScore > 0 && (
-    <span className="text-[11px] font-medium text-blue-500 dark:text-blue-400">
+    <span className="text-[11px] font-medium text-accent">
     {totalProgramScore} score
     </span>
    )}
@@ -248,7 +241,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
   <div className="flex items-center justify-between">
    <div className="flex items-center gap-3 text-[14px] text-content-tertiary">
    <span className="inline-flex items-center gap-1">
-    <span className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full bg-green-500 text-white">
+    <span className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full bg-status-success text-white">
     <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
     </svg>
@@ -322,7 +315,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
    onClick ? 'cursor-pointer' : ''
   } ${
    isSelected
-   ? 'bg-blue-50 dark:bg-blue-900/20'
+   ? 'bg-accent-subtle'
    : 'hover:bg-surface-raised'
   }`}
   onClick={onClick}
@@ -349,7 +342,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
    </span>
    {completion.verification_status === 'approved' || completion.verification_status === 'auto_approved' ? (
    <span
-    className="w-4.5 h-4.5 flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-green-500 dark:bg-green-600 text-white"
+    className="w-4.5 h-4.5 flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-status-success text-white"
     title={vStatus.label}
    >
     <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
@@ -362,7 +355,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
    </span>
    )}
    {hasWorkout && (
-   <span className="text-blue-500 dark:text-blue-400 flex-shrink-0" title="운동 연결됨">
+   <span className="text-accent flex-shrink-0" title="운동 연결됨">
     <WorkoutIcon />
    </span>
    )}
@@ -377,7 +370,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
    <button
     onClick={(e) => { e.stopPropagation(); handleReview(completion.id, 'approved'); }}
     disabled={reviewing === completion.id}
-    className="w-6 h-6 rounded-full bg-green-500 dark:bg-green-600 text-white flex items-center justify-center hover:bg-green-600 dark:hover:bg-green-500 transition-colors disabled:opacity-50"
+    className="w-6 h-6 rounded-full bg-status-success text-white flex items-center justify-center hover:bg-status-success/80 transition-colors disabled:opacity-50"
     title="승인"
    >
     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -387,7 +380,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
    <button
     onClick={(e) => { e.stopPropagation(); handleReview(completion.id, 'rejected'); }}
     disabled={reviewing === completion.id}
-    className="w-6 h-6 rounded-full bg-red-500 dark:bg-red-600 text-white flex items-center justify-center hover:bg-red-600 dark:hover:bg-red-500 transition-colors disabled:opacity-50"
+    className="w-6 h-6 rounded-full bg-status-error text-white flex items-center justify-center hover:bg-status-error/80 transition-colors disabled:opacity-50"
     title="거부"
    >
     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -455,7 +448,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
      onClick={() => handleSelectGroup(g.program_id)}
      className={`w-full text-left px-4 py-3 border-b border-line transition-colors ${
       selectedGroupId === g.program_id
-      ? 'bg-blue-50 dark:bg-blue-900/20'
+      ? 'bg-accent-subtle'
       : 'hover:bg-surface-raised'
      }`}
      >
@@ -529,7 +522,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
       key={cardGroup.cardId}
       onClick={() => { setSelectedCardId(cardGroup.cardId); setSelectedCompletion(null); }}
       className={`py-3 px-2 cursor-pointer transition-colors ${
-      selectedCardId === cardGroup.cardId ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-surface-raised'
+      selectedCardId === cardGroup.cardId ? 'bg-accent-subtle' : 'hover:bg-surface-raised'
       }`}
      >
       <div className="flex items-center gap-2 mb-2">
@@ -538,7 +531,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
        {cardGroup.cardTitle}
       </span>
       {cardGroup.scoreValue > 0 && (
-       <span className="text-[11px] font-medium text-blue-500 dark:text-blue-400">
+       <span className="text-[11px] font-medium text-accent">
        {cardGroup.scoreValue} score
        </span>
       )}
@@ -568,7 +561,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
       key={memberGroup.userId}
       onClick={() => { setSelectedMemberId(memberGroup.userId); setSelectedCompletion(null); }}
       className={`py-3 px-2 cursor-pointer transition-colors ${
-      isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-surface-raised'
+      isSelected ? 'bg-accent-subtle' : 'hover:bg-surface-raised'
       }`}
      >
       <div className="flex items-center gap-2 mb-2">
@@ -582,7 +575,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
       <span className="text-xs font-medium text-content-primary">{memberGroup.userName}</span>
       <span className="text-[10px] text-content-disabled">{memberGroup.completions.length}건</span>
       {totalScore > 0 && (
-       <span className="text-[11px] font-medium text-blue-500 dark:text-blue-400">
+       <span className="text-[11px] font-medium text-accent">
        {totalScore} score
        </span>
       )}
@@ -598,7 +591,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
         {card?.title || '카드'}
         </span>
         {completion.verification_status === 'approved' || completion.verification_status === 'auto_approved' ? (
-        <span className="flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-green-500 dark:bg-green-600 text-white" title={vStatus.label}>
+        <span className="flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-status-success text-white" title={vStatus.label}>
          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
          </svg>
@@ -609,7 +602,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
         </span>
         )}
         {!!completion.workout_id && (
-        <span className="text-blue-500 dark:text-blue-400 flex-shrink-0" title="운동 연결됨">
+        <span className="text-accent flex-shrink-0" title="운동 연결됨">
          <WorkoutIcon />
         </span>
         )}
@@ -618,7 +611,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
          <button
          onClick={(e) => { e.stopPropagation(); handleReview(completion.id, 'approved'); }}
          disabled={reviewing === completion.id}
-         className="w-6 h-6 rounded-full bg-green-500 dark:bg-green-600 text-white flex items-center justify-center hover:bg-green-600 dark:hover:bg-green-500 transition-colors disabled:opacity-50"
+         className="w-6 h-6 rounded-full bg-status-success text-white flex items-center justify-center hover:bg-status-success/80 transition-colors disabled:opacity-50"
          title="승인"
          >
          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -628,7 +621,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
          <button
          onClick={(e) => { e.stopPropagation(); handleReview(completion.id, 'rejected'); }}
          disabled={reviewing === completion.id}
-         className="w-6 h-6 rounded-full bg-red-500 dark:bg-red-600 text-white flex items-center justify-center hover:bg-red-600 dark:hover:bg-red-500 transition-colors disabled:opacity-50"
+         className="w-6 h-6 rounded-full bg-status-error text-white flex items-center justify-center hover:bg-status-error/80 transition-colors disabled:opacity-50"
          title="거부"
          >
          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -729,8 +722,8 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
      key={group.program_id}
      className={`rounded-xl border transition-all ${
      isExpanded
-      ? 'border-blue-300 dark:border-blue-700 bg-surface'
-      : 'border-line hover:border-blue-200 dark:hover:border-blue-800'
+      ? 'border-accent bg-surface'
+      : 'border-line hover:border-accent/40'
      }`}
     >
      {/* Program header - always visible */}
@@ -772,7 +765,7 @@ export function SubmissionsView({ challengeId, statusFilter }: SubmissionsViewPr
       <div className="border-t border-line px-4 py-2">
        <button
        onClick={() => handleDetailOpen(group)}
-       className="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 font-medium transition-colors"
+       className="text-xs text-accent hover:text-accent-hover font-medium transition-colors"
        >
        운동 상세 + 코멘트 보기 →
        </button>

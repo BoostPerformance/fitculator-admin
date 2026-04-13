@@ -202,9 +202,9 @@ export function ProgramModal({
  const hasChanges = isNew ? true : formDirty || statusDirty || cardsDirty;
 
  const statusColorMap: Record<ProgramStatus, string> = {
-  draft: 'bg-yellow-400',
-  published: 'bg-green-500',
-  archived: 'bg-gray-400',
+  draft: 'bg-status-warning',
+  published: 'bg-status-success',
+  archived: 'bg-content-disabled',
  };
 
  if (!open) return null;
@@ -273,7 +273,7 @@ export function ProgramModal({
          <select
           value={localStatus}
           onChange={(e) => handleStatusChange(e.target.value)}
-          className="flex-1 px-2.5 py-1.5 border border-line rounded-md bg-surface text-content-primary dark:text-white text-body focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="flex-1 px-2.5 py-1.5 border border-line rounded-md bg-surface text-content-primary text-body focus:ring-2 focus:ring-line-focus focus:border-transparent"
          >
           <option value="draft">초안</option>
           <option value="published">발행됨</option>
@@ -303,7 +303,7 @@ export function ProgramModal({
            <button
             type="button"
             onClick={() => setAddingPendingCard(true)}
-            className="px-2 py-0.5 text-label-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+            className="px-2 py-0.5 text-label-xs bg-accent text-white rounded-md hover:bg-accent-hover transition-colors font-medium"
            >
             + 카드 추가
            </button>
@@ -317,11 +317,11 @@ export function ProgramModal({
            className="flex items-center gap-2 px-2.5 py-2 border border-line rounded-lg bg-surface hover:bg-surface-raised/50 transition-colors group"
           >
            <CardTypeBadge type={pc.card_type} />
-           <span className="flex-1 text-body font-medium text-content-primary dark:text-white truncate">
+           <span className="flex-1 text-body font-medium text-content-primary truncate">
             {pc.title}
            </span>
            {pc.score_value > 0 && (
-            <span className="text-label-xs text-blue-600 dark:text-blue-400 font-medium">
+            <span className="text-label-xs text-accent font-medium">
              {pc.score_value}점
             </span>
            )}
@@ -407,12 +407,12 @@ export function ProgramModal({
          type="button"
          onClick={handleSubmitClick}
          disabled={saving || !hasChanges}
-         className={`px-4 py-1.5 text-body font-semibold rounded-lg transition-colors ${saving || !hasChanges ? 'bg-surface-raised text-content-disabled pointer-events-none' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+         className={`px-4 py-1.5 text-body font-semibold rounded-lg transition-colors ${saving || !hasChanges ? 'bg-surface-raised text-content-disabled pointer-events-none' : 'bg-accent text-white hover:bg-accent-hover'}`}
         >
          {saving ? '저장 중...' : currentProgram ? '저장' : '프로그램 생성'}
         </button>
         {!hasChanges && (
-         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 text-[11px] text-white bg-neutral-900 dark:bg-neutral-200 dark:text-neutral-900 rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 text-[11px] text-white bg-neutral-900 dark:bg-neutral-700 rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
           변경사항이 없습니다
          </div>
         )}

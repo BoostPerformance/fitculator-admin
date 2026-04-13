@@ -39,7 +39,7 @@ export function CalendarDayCell({
     expanded ? 'min-h-[200px] md:min-h-[150px]' : 'min-h-[120px] md:min-h-[100px]'
    } ${!isCurrentMonth ? 'bg-surface-raised/50/30' : ''} ${
     isOver
-     ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
+     ? 'bg-accent-subtle border-accent'
      : ''
    }`}
   >
@@ -48,7 +48,7 @@ export function CalendarDayCell({
      <div
       className={`text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full ${
        today
-        ? 'bg-blue-500 text-white'
+        ? 'bg-accent text-white'
         : isCurrentMonth
         ? 'text-content-secondary'
         : 'text-content-disabled'
@@ -61,7 +61,7 @@ export function CalendarDayCell({
        e.stopPropagation();
        onAddProgram(dateStr);
       }}
-      className={`w-5 h-5 flex items-center justify-center rounded border border-line text-content-disabled hover:border-blue-400 hover:text-blue-500 dark:hover:border-blue-500 dark:hover:text-blue-400 transition-all ${
+      className={`w-5 h-5 flex items-center justify-center rounded border border-line text-content-disabled hover:border-accent hover:text-accent transition-all ${
        expanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
       }`}
       title="프로그램 추가"

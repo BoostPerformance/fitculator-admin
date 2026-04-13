@@ -103,7 +103,7 @@ export function CardEditDialog({
  value={title}
  onChange={(e) => setTitle(e.target.value)}
  placeholder="일별 타이틀 (선택)"
- className="flex-1 px-3 py-1.5 sm:py-2 text-sm border border-line rounded-md bg-surface text-content-primary dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+ className="flex-1 px-3 py-1.5 sm:py-2 text-sm border border-line rounded-md bg-surface text-content-primary focus:ring-2 focus:ring-line-focus focus:border-transparent"
  />
  <select
  value={status}

@@ -646,6 +646,10 @@ body {
   color: #9ca3af;
 }
 
+.dark .ProseMirror a {
+  color: #58A6FF;
+}
+
 /* Tiptap Content Preview Styles (상세 페이지) */
 .tiptap-content p {
   margin-bottom: 1em;
@@ -717,6 +721,10 @@ body {
   text-decoration: underline;
 }
 
+.dark .tiptap-content a {
+  color: #58A6FF;
+}
+
 .tiptap-content ul,
 .tiptap-content ol {
   padding-left: 24px;
@@ -735,12 +743,21 @@ body {
   font-style: italic;
 }
 
+.dark .tiptap-content blockquote {
+  color: #9ca3af;
+}
+
 .tiptap-content code {
   background: #f3f4f6;
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
   font-size: 0.875em;
+}
+
+.dark .tiptap-content code {
+  background: #374151;
+  color: #e5e7eb;
 }
 
 .tiptap-content pre {

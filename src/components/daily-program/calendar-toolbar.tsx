@@ -36,7 +36,7 @@ export function CalendarToolbar({
  {/* Row 1: Page title (only when not hidden) */}
  {!hideTitle && (
  <div className="flex items-center justify-between">
- <h1 className="text-headline font-semibold text-content-primary dark:text-white sm:text-title-lg">
+ <h1 className="text-headline font-semibold text-content-primary sm:text-title-lg">
  데일리 프로그램
  </h1>
  {onAdd && (
@@ -90,7 +90,7 @@ export function CalendarToolbar({
  onClick={() => onViewModeChange('month')}
  className={`px-2.5 py-1 text-sm font-medium rounded-md transition-colors ${
  viewMode === 'month'
- ? 'bg-surface text-content-primary dark:text-white shadow-sm'
+ ? 'bg-surface text-content-primary shadow-sm'
  : 'text-content-tertiary hover:text-content-secondary'
  }`}
  >
@@ -100,7 +100,7 @@ export function CalendarToolbar({
  onClick={() => onViewModeChange('week')}
  className={`px-2.5 py-1 text-sm font-medium rounded-md transition-colors ${
  viewMode === 'week'
- ? 'bg-surface text-content-primary dark:text-white shadow-sm'
+ ? 'bg-surface text-content-primary shadow-sm'
  : 'text-content-tertiary hover:text-content-secondary'
  }`}
  >

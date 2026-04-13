@@ -4,15 +4,7 @@ import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { DailyProgramCard, CardType, TiptapNode } from '@/types/daily-program';
-
-const cardTypeLabels: Record<CardType, string> = {
- workout: 'WOD',
- warmup: 'Warm-up',
- cooldown: 'Cool-down',
- strength: 'Strength',
- skill: 'Skill',
- custom: 'Custom',
-};
+import { CardTypeBadge } from './card-type-badge';
 
 /** Extract plain text from Tiptap JSON */
 function extractText(nodes: TiptapNode[] | undefined): string {
@@ -69,7 +61,7 @@ export function CalendarCardPreview({ card, expanded = false, onClick, sortDisab
  style={style}
  {...attributes}
  {...listeners}
- className={`rounded-xl bg-neutral-900 border border-line-strong/50 overflow-hidden min-w-0 break-words transition-colors hover:bg-neutral-800 ${
+ className={`rounded-xl bg-white dark:bg-surface-raised border border-line overflow-hidden min-w-0 break-words transition-colors hover:bg-neutral-50 dark:hover:bg-surface-raised/80 ${
   onClick ? 'cursor-pointer' : ''
  }`}
  onClick={(e) => {
@@ -82,18 +74,14 @@ export function CalendarCardPreview({ card, expanded = false, onClick, sortDisab
  {/* Header: type badge + score + title */}
  <div className={expanded ? 'px-3 pt-2.5 pb-1.5' : 'px-2 pt-1.5 pb-1'}>
  <div className="flex items-center justify-between mb-1">
- <span className={`inline-flex items-center px-1.5 py-0.5 font-medium rounded bg-surface/10 text-content-disabled ${
- expanded ? 'text-[11px]' : 'text-[9px]'
- }`}>
- {cardTypeLabels[card.card_type]}
- </span>
+ <CardTypeBadge type={card.card_type} />
  {card.score_value > 0 && (
- <span className={`text-content-tertiary ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>
+ <span className={`text-accent ${expanded ? 'text-[11px]' : 'text-[9px]'}`}>
  {card.score_value} score
  </span>
  )}
  </div>
- <div className={`font-semibold text-white leading-tight ${
+ <div className={`font-semibold text-content-primary leading-tight ${
  expanded ? 'text-[15px]' : 'text-[12px]'
  }`}>
  {card.title}
@@ -103,7 +91,7 @@ export function CalendarCardPreview({ card, expanded = false, onClick, sortDisab
  {/* Body text preview */}
  {expanded && hasBody && (
  <div className="px-3 pb-1.5">
- <p className="text-[13px] text-content-disabled leading-relaxed whitespace-pre-line line-clamp-4">
+ <p className="text-[13px] text-content-tertiary leading-relaxed whitespace-pre-line line-clamp-4">
  {bodyText}
  </p>
  </div>
@@ -111,14 +99,14 @@ export function CalendarCardPreview({ card, expanded = false, onClick, sortDisab
 
  {/* Coaching tips */}
  {expanded && hasCoachingTips && (
- <div className="border-t border-line-strong/40">
+ <div className="border-t border-line">
  <button
  type="button"
  onClick={(e) => {
  e.stopPropagation();
  setTipsOpen(!tipsOpen);
  }}
- className="w-full flex items-center gap-1.5 px-3 py-1.5 text-content-tertiary hover:text-content-disabled transition-colors"
+ className="w-full flex items-center gap-1.5 px-3 py-1.5 text-content-tertiary hover:text-content-secondary transition-colors"
  >
  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -130,7 +118,7 @@ export function CalendarCardPreview({ card, expanded = false, onClick, sortDisab
  </button>
  {tipsOpen && (
  <div className="px-3 pb-2">
- <div className="bg-surface/[0.03] rounded-md p-2">
+ <div className="bg-surface-sunken rounded-md p-2">
  <p className="text-[12px] text-content-tertiary leading-relaxed whitespace-pre-line">
  {card.coaching_tips}
  </p>

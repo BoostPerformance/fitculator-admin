@@ -204,7 +204,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  onChange={(e) => setTitle(e.target.value)}
  placeholder="카드 타이틀 *"
  required
- className="flex-1 px-3 py-1.5 sm:py-2 text-body border border-line rounded-md bg-surface text-content-primary dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+ className="flex-1 px-3 py-1.5 sm:py-2 text-body border border-line rounded-md bg-surface text-content-primary focus:ring-2 focus:ring-line-focus focus:border-transparent"
  />
  <select
  value={cardType}
@@ -238,7 +238,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  onChange={(e) => setCoachingTips(e.target.value)}
  placeholder="코칭 팁 (선택)"
  rows={2}
- className="w-full px-3 py-1.5 text-body border border-line rounded-md bg-surface text-content-primary dark:text-white resize-none"
+ className="w-full px-3 py-1.5 text-body border border-line rounded-md bg-surface text-content-primary resize-none"
  />
  </div>
 
@@ -249,7 +249,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  type="checkbox"
  checked={hasCheck}
  onChange={(e) => setHasCheck(e.target.checked)}
- className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px] rounded border-line text-blue-600"
+ className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px] rounded border-line text-accent"
  />
  멤버가 완료시 직접 체크
  </label>
@@ -259,7 +259,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  checked={requiresApproval}
  onChange={(e) => setRequiresApproval(e.target.checked)}
  disabled={!hasCheck}
- className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px] rounded border-line text-blue-600 disabled:opacity-50"
+ className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px] rounded border-line text-accent disabled:opacity-50"
  />
  승인 필요
  </label>
@@ -271,7 +271,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  onChange={(e) => setScoreValue(parseInt(e.target.value) || 0)}
  min={0}
  disabled={!hasCheck}
- className="w-16 px-2 py-1 sm:py-1.5 text-body border border-line rounded-md bg-surface text-content-primary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+ className="w-16 px-2 py-1 sm:py-1.5 text-body border border-line rounded-md bg-surface text-content-primary disabled:opacity-50 disabled:cursor-not-allowed"
  />
  </div>
  </div>
@@ -300,7 +300,7 @@ export function CardForm({ card, programId, programTitle, programStatus, challen
  <button
  type="submit"
  disabled={saving || !hasChanges}
- className="px-3 py-1.5 sm:py-2 sm:px-4 sm:flex-1 text-body bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+ className="px-3 py-1.5 sm:py-2 sm:px-4 sm:flex-1 text-body bg-accent text-white rounded-md hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
  >
  {saving ? '저장 중...' : '저장'}
  </button>

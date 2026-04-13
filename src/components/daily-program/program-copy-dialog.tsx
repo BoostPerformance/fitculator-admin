@@ -127,7 +127,7 @@ export function ProgramCopyDialog({
  name="copy-mode"
  checked={mode === 'single'}
  onChange={() => setMode('single')}
- className="h-4 w-4 text-blue-600"
+ className="h-4 w-4 text-accent"
  />
  <span className="text-sm text-content-secondary">단일 날짜</span>
  </label>
@@ -137,7 +137,7 @@ export function ProgramCopyDialog({
  name="copy-mode"
  checked={mode === 'week'}
  onChange={() => setMode('week')}
- className="h-4 w-4 text-blue-600"
+ className="h-4 w-4 text-accent"
  />
  <span className="text-sm text-content-secondary">주간 복제 (7일)</span>
  </label>
@@ -152,7 +152,7 @@ export function ProgramCopyDialog({
  type="date"
  value={targetDate}
  onChange={(e) => setTargetDate(e.target.value)}
- className="w-full px-3 py-2 border border-line rounded-md bg-surface text-content-primary dark:text-white text-sm"
+ className="w-full px-3 py-2 border border-line rounded-md bg-surface text-content-primary text-sm"
  />
  </div>
  ) : (
@@ -164,7 +164,7 @@ export function ProgramCopyDialog({
  type="date"
  value={weekStartDate}
  onChange={(e) => setWeekStartDate(e.target.value)}
- className="w-full px-3 py-2 border border-line rounded-md bg-surface text-content-primary dark:text-white text-sm"
+ className="w-full px-3 py-2 border border-line rounded-md bg-surface text-content-primary text-sm"
  />
  <p className="text-xs text-content-tertiary mt-1">
  선택한 날짜부터 7일간 동일한 프로그램이 생성됩니다.
@@ -184,7 +184,7 @@ export function ProgramCopyDialog({
  <button
  onClick={handleCopy}
  disabled={copying}
- className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium"
+ className="px-4 py-2 text-sm bg-accent text-white rounded-md hover:bg-accent-hover disabled:opacity-50 transition-colors font-medium"
  >
  {copying ? '복제 중...' : mode === 'single' ? '복제' : '주간 복제'}
  </button>

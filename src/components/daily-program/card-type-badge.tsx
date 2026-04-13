@@ -26,7 +26,7 @@ const cardTypeConfig: Record<CardType, { label: string; className: string }> = {
  },
  custom: {
  label: 'Custom',
- className: 'bg-surface-raised text-content-secondary',
+ className: 'bg-transparent border border-neutral-400 text-neutral-600 dark:border-neutral-500 dark:text-white',
  },
 };
 

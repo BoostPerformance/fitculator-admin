@@ -130,7 +130,7 @@ export function ProgramForm({ program, initialDate, onSubmit, saving, groups, on
  value={date}
  onChange={(e) => setDate(e.target.value)}
  required
- className="w-full px-2.5 py-1.5 border border-line rounded-md bg-surface text-content-primary dark:text-white text-body focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+ className="w-full px-2.5 py-1.5 border border-line rounded-md bg-surface text-content-primary text-body focus:ring-2 focus:ring-line-focus focus:border-transparent"
  />
  </div>
 
@@ -143,7 +143,7 @@ export function ProgramForm({ program, initialDate, onSubmit, saving, groups, on
  value={title}
  onChange={(e) => setTitle(e.target.value)}
  placeholder="프로그램 제목 (선택)"
- className="w-full px-2.5 py-1.5 border border-line rounded-md bg-surface text-content-primary dark:text-white text-body focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+ className="w-full px-2.5 py-1.5 border border-line rounded-md bg-surface text-content-primary text-body focus:ring-2 focus:ring-line-focus focus:border-transparent"
  />
  </div>
 
@@ -156,7 +156,7 @@ export function ProgramForm({ program, initialDate, onSubmit, saving, groups, on
  onChange={(e) => setDescription(e.target.value)}
  placeholder="프로그램 설명 (선택)"
  rows={2}
- className="w-full px-2.5 py-1.5 border border-line rounded-md bg-surface text-content-primary dark:text-white text-body focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+ className="w-full px-2.5 py-1.5 border border-line rounded-md bg-surface text-content-primary text-body focus:ring-2 focus:ring-line-focus focus:border-transparent resize-none"
  />
  </div>
 
@@ -167,7 +167,7 @@ export function ProgramForm({ program, initialDate, onSubmit, saving, groups, on
  id="show_on_main"
  checked={showOnMain}
  onChange={(e) => setShowOnMain(e.target.checked)}
- className="h-3.5 w-3.5 rounded border-line text-blue-600 focus:ring-blue-500"
+ className="h-3.5 w-3.5 rounded border-line text-accent focus:ring-line-focus"
  />
  <label htmlFor="show_on_main" className="text-body text-content-secondary">
  메인에 표시
@@ -188,7 +188,7 @@ export function ProgramForm({ program, initialDate, onSubmit, saving, groups, on
  name="group-mode"
  checked={groupMode === 'all'}
  onChange={() => handleGroupModeChange('all')}
- className="h-3.5 w-3.5 text-blue-600"
+ className="h-3.5 w-3.5 text-accent"
  />
  <span className="text-body text-content-secondary">전체</span>
  </label>
@@ -198,7 +198,7 @@ export function ProgramForm({ program, initialDate, onSubmit, saving, groups, on
  name="group-mode"
  checked={groupMode === 'specific'}
  onChange={() => handleGroupModeChange('specific')}
- className="h-3.5 w-3.5 text-blue-600"
+ className="h-3.5 w-3.5 text-accent"
  />
  <span className="text-body text-content-secondary">특정 그룹</span>
  </label>
@@ -213,7 +213,7 @@ export function ProgramForm({ program, initialDate, onSubmit, saving, groups, on
  onClick={() => handleToggleGroup(group.id)}
  className={`px-2.5 py-1 text-body rounded-full border transition-colors ${
  selectedGroupIds.includes(group.id)
- ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+ ? 'border-accent bg-accent-subtle text-accent'
  : 'border-line text-content-tertiary hover:border-line hover:text-content-secondary'
  }`}
  style={
@@ -238,7 +238,7 @@ export function ProgramForm({ program, initialDate, onSubmit, saving, groups, on
  <button
  type="submit"
  disabled={saving || !date}
- className="w-full px-4 py-1.5 bg-blue-600 text-white text-body font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+ className="w-full px-4 py-1.5 bg-accent text-white text-body font-medium rounded-md hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
  >
  {saving ? '저장 중...' : program ? '수정' : '생성'}
  </button>

@@ -49,7 +49,7 @@ export function GroupSelector({ groups, selectedGroupIds, onSave }: GroupSelecto
  name="group-mode"
  checked={mode === 'all'}
  onChange={() => handleModeChange('all')}
- className="h-4 w-4 text-blue-600"
+ className="h-4 w-4 text-accent"
  />
  <span className="text-sm text-content-secondary">전체</span>
  </label>
@@ -59,7 +59,7 @@ export function GroupSelector({ groups, selectedGroupIds, onSave }: GroupSelecto
  name="group-mode"
  checked={mode === 'specific'}
  onChange={() => handleModeChange('specific')}
- className="h-4 w-4 text-blue-600"
+ className="h-4 w-4 text-accent"
  />
  <span className="text-sm text-content-secondary">특정 그룹</span>
  </label>
@@ -74,7 +74,7 @@ export function GroupSelector({ groups, selectedGroupIds, onSave }: GroupSelecto
  onClick={() => handleToggleGroup(group.id)}
  className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
  selected.includes(group.id)
- ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+ ? 'border-accent bg-accent-subtle text-accent'
  : 'border-line text-content-secondary hover:border-line'
  }`}
  style={

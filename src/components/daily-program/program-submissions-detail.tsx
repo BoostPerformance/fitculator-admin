@@ -12,13 +12,7 @@ import { ProgramStatusBadge } from './program-status-badge';
 import { CardTypeBadge } from './card-type-badge';
 import WorkoutCommentSection from '@/components/runningDashboard/WorkoutCommentSection';
 import WorkoutReactionBar from '@/components/workout/WorkoutReactionBar';
-
-const verificationStatusConfig: Record<VerificationStatus, { label: string; className: string }> = {
- pending: { label: '대기', className: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' },
- approved: { label: '승인', className: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' },
- rejected: { label: '거부', className: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' },
- auto_approved: { label: '자동승인', className: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' },
-};
+import { verificationStatusConfig } from './constants';
 
 interface CoachInfo {
  userId: string;
@@ -115,7 +109,7 @@ export function SubmissionDetailPanel({ completion, challengeId }: SubmissionDet
    <div className="flex items-center gap-2">
    <span className="text-sm font-medium text-content-primary truncate">{user?.name || '알 수 없음'}</span>
    {completion.verification_status === 'approved' || completion.verification_status === 'auto_approved' ? (
-    <span className="flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-green-500 dark:bg-green-600 text-white" title={vStatus.label}>
+    <span className="flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-status-success text-white" title={vStatus.label}>
     <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
     </svg>
@@ -132,14 +126,14 @@ export function SubmissionDetailPanel({ completion, challengeId }: SubmissionDet
   <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4">
   {!completion.workout_id ? (
    <div className="flex items-center gap-1.5 text-sm text-content-tertiary">
-   <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+   <svg className="w-5 h-5 text-status-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
    </svg>
    체크 완료
    </div>
   ) : loadingWorkout ? (
    <div className="flex items-center justify-center py-8">
-   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
+   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
    </div>
   ) : (
    <>
@@ -226,7 +220,7 @@ export function MemberSubmissionsPanel({ completions, challengeId }: MemberSubmi
    <div className="flex items-center gap-2 text-xs text-content-tertiary">
    <span>{completions.length}건 제출</span>
    {totalScore > 0 && (
-    <span className="font-medium text-blue-500 dark:text-blue-400">{totalScore} score</span>
+    <span className="font-medium text-accent">{totalScore} score</span>
    )}
    </div>
   </div>
@@ -247,7 +241,7 @@ export function MemberSubmissionsPanel({ completions, challengeId }: MemberSubmi
     {card && <CardTypeBadge type={card.card_type} />}
     <span className="text-[13px] font-medium text-content-primary">{card?.title || '카드'}</span>
     {completion.verification_status === 'approved' || completion.verification_status === 'auto_approved' ? (
-     <span className="flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-green-500 dark:bg-green-600 text-white" title={vStatus.label}>
+     <span className="flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-status-success text-white" title={vStatus.label}>
      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
      </svg>
@@ -261,14 +255,14 @@ export function MemberSubmissionsPanel({ completions, challengeId }: MemberSubmi
     {/* Workout detail or check-only */}
     {!completion.workout_id ? (
     <div className="flex items-center gap-1.5 text-sm text-content-tertiary">
-     <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+     <svg className="w-5 h-5 text-status-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
      </svg>
      체크 완료
     </div>
     ) : isLoadingWorkout ? (
     <div className="flex items-center justify-center py-4">
-     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
+     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
     </div>
     ) : (
     <>
@@ -347,7 +341,7 @@ export function CardSubmissionsPanel({ cardTitle, cardType, scoreValue, completi
    <div className="flex items-center gap-2 text-xs text-content-tertiary">
    <span>{completions.length}명 제출</span>
    {scoreValue > 0 && (
-    <span className="font-medium text-blue-500 dark:text-blue-400">{scoreValue} score</span>
+    <span className="font-medium text-accent">{scoreValue} score</span>
    )}
    </div>
   </div>
@@ -374,7 +368,7 @@ export function CardSubmissionsPanel({ cardTitle, cardType, scoreValue, completi
     )}
     <span className="text-[13px] font-medium text-content-primary">{user?.name || '알 수 없음'}</span>
     {completion.verification_status === 'approved' || completion.verification_status === 'auto_approved' ? (
-     <span className="flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-green-500 dark:bg-green-600 text-white" title={vStatus.label}>
+     <span className="flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-status-success text-white" title={vStatus.label}>
      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
      </svg>
@@ -388,14 +382,14 @@ export function CardSubmissionsPanel({ cardTitle, cardType, scoreValue, completi
     {/* Workout detail or check-only */}
     {!completion.workout_id ? (
     <div className="flex items-center gap-1.5 text-sm text-content-tertiary">
-     <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+     <svg className="w-5 h-5 text-status-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
      </svg>
      체크 완료
     </div>
     ) : isLoadingWorkout ? (
     <div className="flex items-center justify-center py-4">
-     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
+     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
     </div>
     ) : (
     <>
@@ -574,7 +568,7 @@ export function ProgramSubmissionsDetail({
    <div className="flex items-center gap-3 px-5 sm:px-4 py-2.5 border-b border-line text-xs text-content-tertiary">
    <span className="inline-flex items-center gap-1">
     제출
-    <span className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full bg-green-500 text-white">
+    <span className="inline-flex items-center justify-center w-[14px] h-[14px] rounded-full bg-status-success text-white">
     <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
     </svg>
@@ -644,7 +638,7 @@ export function ProgramSubmissionsDetail({
         </span>
         {completion.verification_status === 'approved' || completion.verification_status === 'auto_approved' ? (
          <span
-         className="flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-green-500 dark:bg-green-600 text-white"
+         className="flex-shrink-0 inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-status-success text-white"
          title={status.label}
          >
          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
@@ -668,7 +662,7 @@ export function ProgramSubmissionsDetail({
         <button
          onClick={() => handleReview(completion.id, 'approved')}
          disabled={reviewing === completion.id}
-         className="w-7 h-7 rounded-full bg-green-500 dark:bg-green-600 text-white flex items-center justify-center hover:bg-green-600 dark:hover:bg-green-500 transition-colors disabled:opacity-50"
+         className="w-7 h-7 rounded-full bg-status-success text-white flex items-center justify-center hover:bg-status-success/80 transition-colors disabled:opacity-50"
          title="승인"
         >
          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -678,7 +672,7 @@ export function ProgramSubmissionsDetail({
         <button
          onClick={() => handleReview(completion.id, 'rejected')}
          disabled={reviewing === completion.id}
-         className="w-7 h-7 rounded-full bg-red-500 dark:bg-red-600 text-white flex items-center justify-center hover:bg-red-600 dark:hover:bg-red-500 transition-colors disabled:opacity-50"
+         className="w-7 h-7 rounded-full bg-status-error text-white flex items-center justify-center hover:bg-status-error/80 transition-colors disabled:opacity-50"
          title="거부"
         >
          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -715,7 +709,7 @@ export function ProgramSubmissionsDetail({
        {/* No workout - just check mark */}
        {!completion.workout_id && (
        <div className="mt-2 flex items-center gap-1.5 text-xs text-content-tertiary">
-        <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-4 h-4 text-status-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
         체크 완료

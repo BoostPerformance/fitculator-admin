@@ -80,7 +80,7 @@ export function CardItem({ card, programId, onCardsChanged, dragHandleProps }: C
 
  <CardTypeBadge type={card.card_type} />
 
- <span className="flex-1 text-body font-medium text-content-primary dark:text-white truncate">
+ <span className="flex-1 text-body font-medium text-content-primary truncate">
  {card.title}
  </span>
 
@@ -88,7 +88,7 @@ export function CardItem({ card, programId, onCardsChanged, dragHandleProps }: C
  <span className="text-label-xs text-content-tertiary">제출 필요</span>
  )}
  {card.score_value > 0 && (
- <span className="text-label-xs text-blue-600 dark:text-blue-400">{card.score_value}점</span>
+ <span className="text-label-xs text-accent">{card.score_value}점</span>
  )}
 
  {/* Expand/collapse */}
@@ -131,7 +131,7 @@ export function CardItem({ card, programId, onCardsChanged, dragHandleProps }: C
  </button>
  <button
  onClick={handleDelete}
- className="px-2 py-1 text-body border border-red-300 dark:border-red-800 rounded hover:bg-red-50 dark:bg-red-900/20 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors"
+ className="px-2 py-1 text-body border border-status-error/30 rounded hover:bg-status-error-subtle text-status-error-text transition-colors"
  >
  삭제
  </button>

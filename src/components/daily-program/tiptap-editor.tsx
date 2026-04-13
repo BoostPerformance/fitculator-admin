@@ -236,9 +236,9 @@ export function TiptapEditor({ content, onChange, cardId }: TiptapEditorProps) {
         <div className="flex items-center justify-between text-caption text-content-secondary mb-1">
          <span>업로드 중... {uploadProgress}%</span>
         </div>
-        <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-surface-raised rounded-full overflow-hidden">
          <div
-          className="h-full bg-blue-500 rounded-full transition-all duration-300"
+          className="h-full bg-accent rounded-full transition-all duration-300"
           style={{ width: `${uploadProgress}%` }}
          />
         </div>
@@ -252,7 +252,7 @@ export function TiptapEditor({ content, onChange, cardId }: TiptapEditorProps) {
         <button
          type="button"
          onClick={retryUpload}
-         className="px-2 py-0.5 text-caption bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+         className="px-2 py-0.5 text-caption bg-accent text-white rounded hover:bg-accent-hover transition-colors"
         >
          재시도
         </button>
@@ -304,7 +304,7 @@ function ToolbarButton({
     disabled
      ? 'text-content-disabled cursor-not-allowed opacity-50'
      : active
-      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+      ? 'bg-accent-subtle text-accent'
       : 'text-content-secondary hover:bg-surface-sunken'
    }`}
   >
