@@ -99,7 +99,7 @@ export default function DesktopWorkout({
  currentWeekData.totalSessions
  )}
  </div>
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-2 gap-2">
  <div>
  <TextBox
  title="AI 분석 결과"
@@ -107,6 +107,7 @@ export default function DesktopWorkout({
  placeholder="AI 피드백이 아직 생성되지 않았습니다."
  readOnly
  copyIcon
+ className="p-[1rem] lg:h-[28rem]"
  />
  </div>
  <div>

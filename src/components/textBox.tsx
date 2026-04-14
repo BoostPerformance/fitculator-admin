@@ -119,7 +119,20 @@ const TextBox = ({
  onChange={handleChange}
  />
 
+ {!title && copyIcon && (
+ <button className="mt-1 self-end" onClick={handleCopy}>
+ <Image
+ src="/svg/copyIcon-gray.svg"
+ alt="copy icon"
+ width={17}
+ height={17}
+ className="w-4 h-4"
+ />
+ </button>
+ )}
+
  <div className="flex gap-[0.625rem] mt-[0.75rem] sm:w-full">
+ {button1 && (
  <button
  className={`${disabled ? 'bg-neutral-300 text-content-tertiary cursor-not-allowed' : Btn1className} flex flex-row gap-1 justify-center items-center rounded-md text-body w-[9.3125rem] p-[0.375rem] sm:w-full`}
  onClick={handleButtonClick}
@@ -136,6 +149,7 @@ const TextBox = ({
  )}
  {button1}
  </button>
+ )}
 
  {button2 && (
  <button

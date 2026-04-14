@@ -1158,7 +1158,7 @@ export default function MobileWorkoutDetail() {
  </div>
 
  {/* 요일별 그래프 */}
- <div className="flex-1 flex items-end">
+ <div className="flex items-end">
  {isLoadingWeekData ? (
  <BarChartSkeleton />
  ) : (
@@ -1171,14 +1171,15 @@ export default function MobileWorkoutDetail() {
  </div>
 
  {/* 2컬럼: 운동 기록 */}
- <div className="sm:w-full lg:col-span-1 flex flex-col">
+ <div className="sm:w-full lg:col-span-1 lg:relative">
+ <div className="lg:absolute lg:inset-0 flex flex-col">
  <div className="text-xs font-semibold text-content-secondary mb-2 flex justify-between items-center">
  <span>운동 기록</span>
  {weekWorkouts.length > 0 && (
  <span className="text-content-disabled text-[10px]">총 {weekWorkouts.length}개</span>
  )}
  </div>
- <div className="flex-1 overflow-y-auto max-h-[450px] workout-scroll">
+ <div className="flex-1 overflow-y-auto min-h-0 workout-scroll">
  {isLoadingWeekData ? (
  <WorkoutListSkeleton />
  ) : weekWorkouts.length > 0 ? (
@@ -1379,14 +1380,25 @@ export default function MobileWorkoutDetail() {
  )}
  </div>
  </div>
+ </div>
 
  {/* 3컬럼: AI 분석 + 코치 피드백 */}
  <div className="sm:w-full lg:col-span-1 flex flex-col sm:min-h-[600px] lg:min-h-0">
  <div className="grid grid-cols-1 gap-4 flex-1">
  {aiFeedback && (
  <div className="flex flex-col">
- <div className="text-xs font-semibold text-content-secondary mb-2">
+ <div className="flex justify-between items-center mb-2">
+ <div className="text-xs font-semibold text-content-secondary">
  AI 분석 결과
+ </div>
+ <button
+ className="text-content-tertiary hover:text-content-secondary"
+ onClick={() => {
+ navigator.clipboard.writeText(aiFeedback);
+ }}
+ >
+ <img src="/svg/copyIcon-gray.svg" alt="copy" className="w-4 h-4" />
+ </button>
  </div>
  <div>
  <TextBox
@@ -1394,7 +1406,7 @@ export default function MobileWorkoutDetail() {
  value={aiFeedback}
  placeholder=""
  readOnly
- copyIcon
+ className="mt-0"
  />
  </div>
  </div>
