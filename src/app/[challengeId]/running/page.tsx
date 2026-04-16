@@ -96,7 +96,7 @@ export default function RunningPage() {
  return <div className="p-4 text-red-500">{challengeError}</div>;
  }
 
- if (challengesLoading || runningLoading) {
+ if (challengesLoading) {
  return <WorkoutPageSkeleton />;
  }
 
@@ -178,7 +178,7 @@ export default function RunningPage() {
  pagination={pagination}
  currentPage={currentPage}
  onPageChange={handlePageChange}
- isLoading={runningLoading}
+ isLoading={(!weeklyChart || !leaderboard || !todayCount) && !runningError}
  error={runningError}
  />
  </div>

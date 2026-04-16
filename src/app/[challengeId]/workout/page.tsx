@@ -105,7 +105,7 @@ export default function WorkoutPage() {
  return <div className="p-4 text-red-500">{challengeError}</div>;
  }
 
- if (challengesLoading || workoutLoading) {
+ if (challengesLoading) {
  return <WorkoutPageSkeleton />;
  }
 
@@ -185,7 +185,7 @@ export default function WorkoutPage() {
  leaderboard={leaderboard}
  todayCount={todayCount}
  batchUserData={batchUserData}
- isLoading={workoutLoading}
+ isLoading={(!weeklyChart || !leaderboard || !todayCount) && !workoutError}
  error={workoutError}
  />
  </div>

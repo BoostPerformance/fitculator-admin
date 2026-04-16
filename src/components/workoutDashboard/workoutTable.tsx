@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { WorkoutPageSkeleton } from '../layout/skeleton';
+import { WorkoutTableSkeleton } from '../layout/skeleton';
 import {
  WeeklyChartData,
  LeaderboardEntry,
@@ -467,7 +467,7 @@ const WorkoutTable: React.FC<
  }, [handleObserver, sortedWorkoutItems]);
 
  if (isLoading) {
- return <WorkoutPageSkeleton />;
+ return <WorkoutTableSkeleton />;
  }
 
  if (error) {

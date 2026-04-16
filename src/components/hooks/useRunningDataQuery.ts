@@ -13,7 +13,7 @@ export interface RunningDataResponse {
 // API 호출 함수들
 const fetchWeeklyChart = async (challengeId: string) => {
  try {
- const url = `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
+ const url = `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}`;
 
  const response = await fetch(url, {
  method: 'GET',
@@ -39,7 +39,7 @@ const fetchWeeklyChart = async (challengeId: string) => {
 
 const fetchLeaderboard = async (challengeId: string) => {
  try {
- const url = `/api/workouts/user-detail?type=leaderboard&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
+ const url = `/api/workouts/user-detail?type=leaderboard&challengeId=${challengeId}`;
 
  const response = await fetch(url, {
  method: 'GET',
@@ -65,7 +65,7 @@ const fetchLeaderboard = async (challengeId: string) => {
 
 const fetchTodayCount = async (challengeId: string) => {
  try {
- const url = `/api/workouts/user-detail?type=today-count&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
+ const url = `/api/workouts/user-detail?type=today-count&challengeId=${challengeId}`;
 
  const response = await fetch(url, {
  method: 'GET',
@@ -154,7 +154,7 @@ export const useRunningDataQuery = (challengeId: string, refreshParam?: string |
  return [];
  }
 
- const url = `/api/workouts/user-detail?type=batch-user-data&userIds=${userIds.join(',')}&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
+ const url = `/api/workouts/user-detail?type=batch-user-data&userIds=${userIds.join(',')}&challengeId=${challengeId}`;
 
  const response = await fetch(url, {
  method: 'GET',
@@ -268,7 +268,7 @@ export interface PaginationInfo {
 
 // 페이지네이션된 사용자 데이터 가져오기
 const fetchPaginatedUserData = async (challengeId: string, page: number, limit: number) => {
- const url = `/api/workouts/user-detail?type=paginated-user-data&challengeId=${challengeId}&page=${page}&limit=${limit}&t=${Date.now()}`;
+ const url = `/api/workouts/user-detail?type=paginated-user-data&challengeId=${challengeId}&page=${page}&limit=${limit}`;
 
  const response = await fetch(url, {
  method: 'GET',

@@ -13,7 +13,7 @@ export interface WorkoutDataResponse {
 // API 호출 함수들
 const fetchWeeklyChart = async (challengeId: string) => {
  try {
- const url = `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
+ const url = `/api/workouts/user-detail?type=weekly-chart&challengeId=${challengeId}`;
 // console.log('🔗 Weekly chart API 호출:', url);
  
  const response = await fetch(url, {
@@ -56,7 +56,7 @@ const fetchWeeklyChart = async (challengeId: string) => {
 
 const fetchLeaderboard = async (challengeId: string) => {
  try {
- const url = `/api/workouts/user-detail?type=leaderboard&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
+ const url = `/api/workouts/user-detail?type=leaderboard&challengeId=${challengeId}`;
 // console.log('🔗 Leaderboard API 호출:', url);
  
  const response = await fetch(url, {
@@ -97,7 +97,7 @@ const fetchLeaderboard = async (challengeId: string) => {
 
 const fetchTodayCount = async (challengeId: string) => {
  try {
- const url = `/api/workouts/user-detail?type=today-count&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
+ const url = `/api/workouts/user-detail?type=today-count&challengeId=${challengeId}`;
 // console.log('🔗 Today count API 호출:', url);
  
  const response = await fetch(url, {
@@ -221,7 +221,7 @@ export const useWorkoutDataQuery = (challengeId: string, refreshParam?: string |
  return [];
  }
  
- const url = `/api/workouts/user-detail?type=batch-user-data&userIds=${userIds.join(',')}&challengeId=${challengeId}&t=${Date.now()}&r=${Math.random()}`;
+ const url = `/api/workouts/user-detail?type=batch-user-data&userIds=${userIds.join(',')}&challengeId=${challengeId}`;
 // console.log('🔗 Batch user data API 호출:', url, `(${userIds.length}명)`);
  
  const response = await fetch(url, {

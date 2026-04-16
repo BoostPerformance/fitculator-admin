@@ -374,6 +374,14 @@ export const WorkoutPageSkeleton = () => {
  </div>
  </div>
 
+ <WorkoutTableSkeleton />
+ </div>
+ );
+};
+
+export const WorkoutTableSkeleton = () => {
+ return (
+ <>
  {/* PC 테이블 스켈레톤 */}
  <div className="mt-6 px-8 overflow-x-auto w-full sm:hidden">
  <div className="w-full overflow-x-auto bg-surface shadow rounded-lg border border-line">
@@ -430,7 +438,7 @@ export const WorkoutPageSkeleton = () => {
  ))}
  </div>
  </div>
- </div>
+ </>
  );
 };
 
