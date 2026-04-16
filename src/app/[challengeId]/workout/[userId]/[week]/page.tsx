@@ -624,8 +624,8 @@ export default function MobileWorkoutDetail() {
  setIsDisable(false);
  }, 3000);
  } catch (e) {
-// console.error('저장 중 에러:', e);
- alert('피드백 저장에 실패했습니다.');
+ const msg = e instanceof Error ? e.message : '알 수 없는 오류';
+ alert(`피드백 저장에 실패했습니다.\n(${msg})`);
  setShowAlert(false);
  setIsDisable(false);
  } finally {
