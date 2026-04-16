@@ -35,6 +35,9 @@ yarn-error.log*
 .env.development
 .env.production
 
+# feedback configs & execution log
+scripts/feedback-configs/
+
 # vercel
 .vercel
 
