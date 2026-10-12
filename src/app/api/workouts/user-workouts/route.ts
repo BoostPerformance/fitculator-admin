@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import supabase from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
  try {
+ // Service-role read: only a signed-in coach/admin may ask for someone's workouts.
+ const session = await getServerSession(authOptions);
+ if (!session?.user?.email) {
+ return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+ }
  const url = new URL(request.url);
  const userId = url.searchParams.get('userId');
  const startDate = url.searchParams.get('startDate');
